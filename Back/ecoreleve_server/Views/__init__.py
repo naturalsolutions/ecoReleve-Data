@@ -45,6 +45,7 @@ class CustomView(SecurityRoot):
         if ref in self.actions:
             self.retrieve = self.actions.get(ref)
             self.create = self.actions.get(ref)
+            self.update = self.actions.get(ref)
             return self
         return self.item(ref, self)
 

@@ -78,7 +78,8 @@ define([
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
       'click i#createStationBtn': 'createStation',
       'click i#deleteStationBtn': 'removeStation',
-      'click i#editStationBtn': 'editStation'
+      'click i#editStationBtn': 'editStation',
+      'click img' : 'handleFocus'
     },
 
     ui: {
@@ -108,8 +109,90 @@ define([
       'rgToolsBarTop': '#rgToolsBarTop',
       'rgImageDetails': '#imageDetails',
     },
+
+    findIndexOfElemImg : function(elem) {
+      var index 
+      var curElem
+      for( var i =0 ; i < this.tabView.length ; i ++ ) {//loop on elm to find index img clicked
+        curElem = this.tabView[i].el.getElementsByTagName('img');
+        //TODO be sure that's work in any case
+        if(curElem && (curElem[0] === elem) ) {
+          index = i;
+          break;
+        }
+        curElem = undefined;
+      }
+      return index;
+    },
+
+    handleFocus : function(e) {
+      var _this = this;
+      var indexFind = this.findIndexOfElemImg( e.currentTarget )
+      var newTab = [];
+      if( e.ctrlKey ) { //ctrl + click add/remove item selected
+        var oldTab = this.model.get('newSelected');
+        var detected = -1;
+        newTab = _.clone(oldTab); //hack to handle change not fired 
+
+        for( var i = 0 ; i < oldTab.length ; i++) {
+          if( indexFind == oldTab[i] ) {
+            detected = i;
+          }
+        }
+       
+        if( detected  > -1 ) { //remove item selected
+          if( oldTab.length === 1 ) {
+            return;
+          }
+          else {
+           newTab.splice(detected,1);
+          }
+        }
+        else { // add item selected
+          newTab.push(indexFind);
+        }
+      }
+      else { // click => focus if new img
+        if ( typeof(indexFind) !== 'undefined') {
+          newTab = [indexFind]
+          // this.model.set('newSelected',[indexFind]);
+        }
+      }
+      _this.model.set('newSelected', newTab);
+ 
+
+    },
+
+    setoldSelectedInactive: function(tab) {
+      console.log("on va mettre a inactif", tab)
+      if( !tab )
+        return;
+      var index;
+      for( var i = 0 ; i < tab.length ; i++) {
+        index = tab[i];
+        if( index < this.tabView.length ) {
+          this.tabView[index].removeActive();
+        }
+      }
+
+    },
+
+    setAllSelectedActive: function(tab) {
+      console.log("on va mettre a active " , tab)
+      if( !tab )
+       return;
+      var index;  
+      for( var i = 0 ; i < tab.length ; i++) {
+        index = tab[i];
+        if( index < this.tabView.length ) {
+          this.tabView[index].setActive();
+        }
+      }
+    },
+
     
     initialize: function (options) {
+      var _this = this;
       this.equipmentId = parseInt(this.checkUrl(location.hash));
 
       if (this.equipLine < 0) {
@@ -119,7 +202,7 @@ define([
 
       this.translater = Translater.getTranslater();
       this.type = options.type;
-      this.model = options.model;
+      this.model = options.model || new Backbone.Model();
       this.lastImageActive = null;
       this.currentViewImg = null;
       this.currentPosition = null;
@@ -137,29 +220,514 @@ define([
 
       this.globalGrid = options.globalGrid;
 
+
+      this.newSelected = [];
+      this.listenTo(this.model, 'change', function (e) { 
+        // trigger on init or on change page
+        // trigger when selection change so we update ui here
+
+        if( !e ) {
+          return;
+        }
+
+        var newTab = e.attributes.newSelected;
+        var oldTab = e._previousAttributes.newSelected;
+
+        if ( newTab.length === 1 ) {
+          _this.currentPosition = newTab[0];
+        }
+
+        var diff = _.difference(oldTab,newTab);
+
+        _this.setoldSelectedInactive(oldTab);
+        _this.setAllSelectedActive(newTab);
+        
+        var tabSelected = this.model.get('newSelected');
+
+        _this.updateUIWhenSelectionChange(tabSelected);
+
+        /*update control ui here */
+
+        // if( tabSelected.length == 1) {
+        //   //updateui
+        // }
+        // if(tabSelected.length > 1 ) {
+        //   console.log("change from multi select ")
+        //   console.log(this.model.get('newSelected'))
+        // }
+      });
+
       this.fetchSessionInfos();
       this.initCollection();
-      // this.getThesau();
+      // this.model.set('newSelected',[1,2,12]);
+    },
+    updateUIWhenSelectionChange : function(tabSelected) {
+      var _this = this;
+      if( !tabSelected ) {
+        console.log("désactive tout");
+        
+      } 
+      var collection = new Backbone.Collection();
+      var index,tmpModel;
 
+      for( var i = 0 ; i < tabSelected.length ; i++ ) {
+        index = tabSelected[i];
+        tmpModel = this.tabView[index].model;
+        collection.push(tmpModel)
+        index = undefined
+        tmpModel = undefined
+      }
+
+      $.when(_this.dataTags)
+      .then(function(resp) {
+        _this.toolsBar.fillElemTags(collection);
+        if (collection.length == 1 ) {
+          _this.toolsBar.displaySingleSelect()
+        }
+        if( collection.length > 1 ) {
+          _this.toolsBar.displayMultiselect()
+        }
+        
+      })
+
+
+      // if( tabSelected.length == 1 ) {
+      //   console.log("control pour une photo")
+      // }
+      // if ( tabSelected.length > 1) {
+      //   console.log("multicontrol (le plus simple)")
+      // }
 
     },
 
-    getThesau: function() {
+
+    fetchSessionInfos: function () {
+      var _this = this;
       $.ajax({
-        type: 'POST',
-        url: config.thesaurusUrl + '/fastInitForCompleteTree/',
-        contentType:"application/json; charset=utf-8",
-        dataType:"json",
-        data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
-      })
-      .done(function (resp) {
-        console.log(resp);
-      })
-      .fail(function (err) {
-        console.log(err);
+          url: config.coreUrl + 'sensorDatas/' + _this.type + '/' + _this.equipmentId,
+        })
+        .done(function (resp) {
+          _this.sensorId = resp.FK_Sensor;
+          _this.siteId = resp.FK_MonitoredSite;
+          _this.displaySensorForm();
+          _this.displaySiteForm();
+        })
+        .fail(function () {
+          console.log("pas bon");
+        });
+
+    },
+
+    displaySensorForm: function () {
+      this.sensorForm = new NsForm({
+        name: 'sensorForm',
+        buttonRegion: [this.ui.btn],
+        modelurl: config.coreUrl + 'sensors',
+        formRegion: this.ui.sensorForm,
+        displayMode: 'display',
+        id: this.sensorId,
+        reloadAfterSave: false,
+      });
+    },
+
+    displaySiteForm: function () {
+      this.monitoredSiteForm = new NsForm({
+        name: 'siteForm',
+        buttonRegion: [this.ui.btn],
+        modelurl: config.coreUrl + 'monitoredSites',
+        formRegion: this.ui.siteForm,
+        displayMode: 'display',
+        id: this.siteId,
+        reloadAfterSave: false,
+      });
+    },
+
+
+    initCollection: function () {
+      var _this = this;
+      var ImageCollection = PageColl.extend({
+        model: CamTrapImageModel,
+        mode: 'client',
+        state: {
+          pageSize: 24
+        },
+        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
+        patch: function () {}
+      });
+
+      this.myImageCollection = new ImageCollection();
+      this.myImageCollection.sync('patch', this.myImageCollection, {
+        error: function () {
+          console.log(this.myImageCollection);
+          console.log("sync impossible");
+        }
+      });
+
+      this.paginator = new Backgrid.Extension.Paginator({
+        collection: this.myImageCollection
+      });
+
+      this.myImageCollection.on('sync', function () {
+        _this.refreshCounter();
+      });
+
+      this.myImageCollection.fetch();
+
+      this.paginator.collection.on('reset', function (e) {
+        console.log("reset du paginator");
       });
 
     },
+
+    refreshCounter: function () {
+      this.nbPhotos = this.myImageCollection.fullCollection.length;
+      this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({
+        validated: 2
+      }).length;
+      this.nbPhotosRefused = this.myImageCollection.fullCollection.where({
+        validated: 4
+      }).length;
+      this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
+        validated: null
+      }).length;
+      this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function (model) {
+        return (model.get('stationId') !== null && model.get('validated') === 2);
+      }).length;
+
+      if (this.toolsBarTop) {
+        this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
+        this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
+        this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
+        this.toolsBarTop.$el.find("#nbphotosNotChecked").text(this.nbPhotosNotChecked);
+        this.toolsBarTop.$el.find("#nbphotosStationed").text(this.nbPhotosStationed);
+      }
+    },
+
+    onRender: function () {
+      this.$el.i18n();
+    },
+
+    onShow: function () {
+      var _this = this;
+      this.ui.imageFullScreen.hide()
+      this.display();
+    },
+
+    display: function () {
+      var _this = this;
+      this.listenTo(this.myImageCollection, 'reset', function (e) { // trigger on init or on change page
+        _this.displayImages(_this.myImageCollection);
+        _this.rgToolsBarTop.show(this.toolsBarTop);
+        this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
+      });
+      this.currentCollection = this.myImageCollection;
+      this.displayPaginator(this.paginator)
+      this.displayToolsBar();
+      this.displayToolsBarTop();
+    },
+
+    displayImages: function (myCollectionToDisplay) {
+      var _this = this;
+      this.currentCollection = myCollectionToDisplay;
+      var ImageModel = new CamTrapImageModel();
+      
+
+      //TODO detruit les view a la main sinon pb avec les models
+      if (typeof (_this.tabView) !== "undefined") {
+        this.destroyViews(_this.tabView);
+      }
+
+      this.tabView = [];
+      myCollectionToDisplay.each(function (model) {
+        var newImg = new CamTrapItemView({
+          model: model,
+          parent: _this,
+        });
+        _this.tabView.push(newImg);
+        _this.ui.gallery.append(newImg.render().el);
+
+      });
+      if (this.tabView.length > 0) {
+        var newPosition = 0;
+        switch (this.pageChange) {
+          case 'N':
+            { //next page
+              this.pageChange = '';
+              break;
+            } 
+          case 'P':
+            { //previous page
+              this.pageChange = '';
+              newPosition = this.tabView.length - 1; //position to focus
+              break;
+            }
+          default:
+            {
+              // this.tabSelected = [];
+              break;
+            }
+        }
+        if (this.currentPosition == newPosition ) {
+          this.model.trigger('change', this.model, [newPosition]);
+          // this.model.set('newSelected' , [newPosition]);
+          // this.model.trigger("change:{newSelected}");
+        }
+        else {
+          this.model.set('newSelected' , [newPosition]);
+        }
+
+        // this.tabSelected = [];
+
+        
+        if (this.rgFullScreen.currentView !== undefined && this.stopSpace) { //si le modal existe on change
+          this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+        }
+
+        var tabOldUiSelected = [];
+        var tabNewSelected = [];
+ 
+        $('#gallery').selectable({
+          filter: '.imageCamTrap',
+          distance: 10,
+
+          start: function (e) { // for all elem
+            console.log("start selection")
+            var tabSelected = $('#gallery .ui-selected');
+            tabOldUiSelected = []
+            for ( var i = 0 ; i < tabSelected.length ; i++) {
+              tabOldUiSelected.push(tabSelected[i]);
+              // if (tabSelected[i].className.indexOf('ui-selected') > -1 ) {
+              //   tabSelected[i].className += ' ui-oldSelected';
+              // }
+            }
+
+           // console.log("tab on start",this.tabOldUiSelected);
+            
+            
+            // if (_this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active')) {
+            //   _this.tabView[_this.current]
+            //   _this.tabView[_this.currentPosition].$el.find('.vignette').removeClass('active');
+            // }
+
+            // if (typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0) {
+            //   for (var i of _this.tabSelected) {
+            //     if (_this.currentPosition != i) {
+            //       if (_this.tabView[i].$el.find('.vignette').hasClass('active')) {
+            //         _this.tabView[i].$el.find('.vignette').removeClass('active');
+            //       }
+            //     }
+            //   }
+            // }
+          },
+
+          selected: function (e, ui) { // for one elem
+            var elem = ui.selected;
+            tabNewSelected.push(elem)
+          },
+
+          unselected: function (e, ui) { //for one elem
+            var elem = ui.unselected;
+          },
+
+          stop: function (e) { //for all elem
+              if( e.ctrlKey ) {
+                for ( var i = 0 ; i < tabNewSelected.length ; i++ ) {
+                  for (var j = 0 ; j < tabOldUiSelected.length ; j++ ) {
+                    if(tabNewSelected[i] === tabOldUiSelected[j] ) {
+                      tabNewSelected[i].className = tabNewSelected[i].className.replace(' ui-selected','')
+                      break;
+                    }
+                    else {
+                      //find index
+                      console.log("on test")
+                    }
+                  }
+    
+                }
+              }
+              tabOldUiSelected = [];
+              tabNewSelected = [];
+
+              // from here we have all selected 
+              var indexItemSelected = []
+              $(".ui-selected", this).each(function () {
+                var index = $(".imageCamTrap").index(this);
+                indexItemSelected.push(index);
+              });
+              _this.model.set('newSelected',indexItemSelected);// change selected item
+
+            console.log("stop selection ")
+            // this.tabOldUiSelected = [];
+            // this.tabNewSelected = [];
+            // this.tabNewUnSelected = [];
+
+            // $('#gallery .tmp-selected').addClass('already-selected').removeClass('tmp-selected').addClass('ui-selected');
+            // $('#gallery .tmp-selectedctrl').addClass('already-selected').removeClass('tmp-selectedctrl').addClass('ui-selected');
+
+            // var result = "";
+            // _this.tabSelected = [];
+
+            // var tmpSelected = [];
+
+            // $(".ui-selected", this).each(function () {
+            //   var index = $(".imageCamTrap").index(this);
+            //   _this.tabSelected.push(index);
+            //   tmpSelected.push(index);
+            //   // if (!(_this.tabView[index].$el.find('.vignette').hasClass('active'))) {
+            //   //   _this.tabView[index].$el.find('.vignette').toggleClass('active');
+            //   // }
+            // });
+            // _this.model.set('newSelected',tmpSelected);
+
+            // console.log("test tags");
+            // var nbPhotos = _this.tabSelected.length
+            // var nbphotosValidated = 0;
+            // if (nbPhotos > 0) {
+            //   var tagsInAllPhotos = []
+            //   var stringTagTmp ='';
+            //   var uniqTagsAndOccurence = []
+            //   for( var i = 0 ; i < nbPhotos ; i++) {
+            //     if(_this.tabView[_this.tabSelected[i]].model.get('validated') === 2 ) {
+            //       nbphotosValidated += 1;
+            //     }
+            //     stringTagTmp += _this.tabView[_this.tabSelected[i]].model.get('tags');
+            //     if( i+1 < nbPhotos) {
+            //       stringTagTmp += ',';
+            //     }
+            //   }
+            //   var allTagsTab = stringTagTmp.split(',');
+            //   uniqTagsAndOccurence = _.countBy(allTagsTab);
+            //   for( var item in uniqTagsAndOccurence) {
+            //     if(uniqTagsAndOccurence[item] === nbphotosValidated) {
+            //       tagsInAllPhotos.push(item);
+            //     }
+            //   }
+            //   console.log("bim");
+            //   _this.toolsBar.render();
+            //   _this.toolsBar.$elemTags.val(null).trigger('change');
+            //   _this.toolsBar.$elemTags.val(tagsInAllPhotos).trigger('change');
+            // }
+            
+           
+            /*  keep it : algo for all edit all tags in all photos
+
+            if (_this.tabSelected.length > 0) {
+              var allTagsTabs = [];
+              for( var i = 0 ; i < _this.tabSelected.length ; i++) {
+                var tagTmp = _this.tabView[_this.tabSelected[i]].model.get('tags');
+                var tagTmpTab = []
+                if(tagTmp) {
+                  tagTmpTab = tagTmp.split(',');
+                }
+                if(!allTagsTabs.length) {
+                  allTagsTabs = tagTmpTab;
+                }
+                else {
+                  allTagsTabs = _.union(allTagsTabs,tagTmpTab)
+                }
+              }
+              _this.toolsBar.$elemTags.val(null).trigger('change');
+              _this.toolsBar.$elemTags.val(allTagsTabs).trigger('change');
+              console.log("all tags in selection : ",allTagsTabs);
+              // var $inputTags = _this.toolsBar.$el.find("#tagsInput");
+              // var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
+              // var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
+              // if (!$inputTags.prop("disabled")) {
+              //   $inputTag.prop("disabled", true);
+              //   $inputTags.prop("disabled", true);
+              //   $bootstrapTag.css("visibility", "hidden");
+              // }
+            }*/
+          }
+        });
+      }
+    },
+
+    
+
+    displayImageDetails: function (model) {
+      var _this = this;
+      //imageDetails
+      this.imageDetails = new imageDetailsView({
+        parent: _this,
+        model: model
+      });
+
+      this.rgImageDetails.show(this.imageDetails)
+
+    },
+
+    displayPaginator: function (pagin) {
+      this.currentPaginator = pagin;
+      this.ui.paginator.html('');
+      this.ui.paginator.append(pagin.render().el);
+    },
+
+    parseJsonRecur: function(obj) {
+			var jsonString = ''
+			var _this = this;
+			if( Array.isArray(obj) ) {
+				var tab = obj;
+				for( var i = 0 ; i < tab.length ; i++ ) {
+					jsonString += ' { "id" : "' + tab[i].value + '", "text" : "'+ tab[i].value +'" } ';
+					if( i+1 < tab.length ) {
+						jsonString += ' , ';
+					}
+				}
+			}
+			for( var item in obj) {
+				if( item ==='children' && typeof obj[item] == 'object' ) {
+					jsonString += ' , "children" : [ ';
+					jsonString += _this.parseJsonRecur(obj[item]);
+					jsonString += ' ] ';
+				}
+				if( item ==='value' ) {
+					jsonString += '{"text" : "'+ obj[item]+'"';
+				}
+				
+			}
+			if( !Array.isArray(obj) ) {
+				jsonString += ' } ';
+			}
+			return jsonString;		
+		},
+
+    displayToolsBar: function () {
+      var _this = this;
+      this.dataTags = $.ajax({
+				type: 'POST',
+				url: config.thesaurusUrl + '/fastInitForCompleteTree/',
+				contentType:"application/json; charset=utf-8",
+				dataType:"json",
+				data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
+        });
+
+      $.when(_this.dataTags)
+      .then(function(resp) {
+        if(!_this.jsonParsed) {
+          _this.jsonParsed = _this.parseJsonRecur(resp);
+        }
+        _this.toolsBar = new ToolsBar({
+          parent: _this,
+          model : null,
+          jsonParsed : _this.jsonParsed
+        });
+        _this.rgToolsBar.show(_this.toolsBar);
+      })
+        
+
+    },
+
+    displayToolsBarTop: function (nbPhotos) {
+      var _this = this;
+      this.toolsBarTop = new ToolsBarTop({
+        parent: _this
+      });
+      this.rgToolsBarTop.show(this.toolsBarTop);
+      this.refreshCounter();
+    },
+
+
 
     populateDataForCreatingStation: function (imageModel) {
       var monitoredSiteModel = this.monitoredSiteForm.model;
@@ -274,29 +842,32 @@ define([
 
     removeStation: function (event) {
       
+      var tabSelected = this.model.get('newSelected') || [];
+
       var tabOfIds = [];
       var tabOfItem = [];
-      if (this.tabSelected.length == 0) {
-        if( event.currentTarget.className.indexOf('disabled') > -1 ) {
-          return;
-        }
-        if (this.currentPosition !== null) {
-          if (this.tabView[this.currentPosition].model.get('stationId') !== null) {
-            tabOfIds.push(this.tabView[this.currentPosition].model.get('stationId'));
-            tabOfItem.push(this.tabView[this.currentPosition]);
-          }
-        }
-      } else {
-        for (var i of this.tabSelected) {
-          if (this.tabView[i].model.get('stationId') !== null) {
-            tabOfIds.push(this.tabView[i].model.get('stationId'));
-            tabOfItem.push(this.tabView[i]);
-          }
+
+      for ( var i = 0 ; i < tabSelected.length ; i++ ){
+        var index = tabSelected[i];
+        if (this.tabView[index].model.get('stationId') !== null) {
+          tabOfIds.push(this.tabView[index].model.get('stationId'));
+          tabOfItem.push(this.tabView[index]);
         }
       }
-      if (tabOfIds.length === 0 || tabOfItem.length === 0)
+      if (tabOfIds.length === 0 || tabOfItem.length === 0) {
+        Swal({
+          title: 'Error',
+          text: 'No stations to remove',
+          type: 'error',
+          confirmButtonColor: 'rgb(218, 146, 15)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+          closeOnCancel: true
+        });
         return;
+      }
       this.callDeleteStationAPI(tabOfIds, tabOfItem);
+      this.refreshCounter();
     },
 
     callPostStationAPI: function (elem, data) {
@@ -322,30 +893,41 @@ define([
     createStation: function (event) {
  
       var _this = this;
+      var tabSelected = this.model.get('newSelected') || [];
       var listOfElem = []
-      if (this.tabSelected.length == 0) {
-        if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+      
+
+      if( !tabSelected ) {
+        return;
+      }
+      
+      var tabStationPending = []
+        for( var item in tabSelected ) {
+          var elem = tabSelected[item];
+          if (this.tabView[elem].model.get('validated') === 2 && this.tabView[elem].model.get('stationId') === null  ) {
+            tabStationPending.push(elem);
+          }
+        }
+
+        if (tabStationPending.length == 0 ) {
+          Swal({
+            title: 'Error',
+            text: 'You can\'t create stations on rejected photo(s)',
+            type: 'error',
+            confirmButtonColor: 'rgb(218, 146, 15)',
+            confirmButtonText: 'Ok',
+            closeOnConfirm: true,
+            closeOnCancel: true
+          });
           return;
         }
-        if (this.currentPosition !== null) {
-          if (this.tabView[this.currentPosition].model.get('stationId') === null)
-            listOfElem.push(this.tabView[this.currentPosition])
-        }
-      } else {
-        for (var i of this.tabSelected) {
-          if (this.tabView[i].model.get('validated') === 2 && this.tabView[i].model.get('stationId') === null  )
-            listOfElem.push(this.tabView[i]);
-        }
-      }
-
-      if (listOfElem.length === 0)
-        return;
       //TODO will fail if same position , same name
-      for (var i = 0; i < listOfElem.length; i++) {
-        var elem = listOfElem[i];
-        var data = this.populateDataForCreatingStation(elem);
-        this.callPostStationAPI(elem, data);
+      for (var i = 0; i < tabStationPending.length; i++) {
+        var elem = tabStationPending[i];
+        var data = this.populateDataForCreatingStation(this.tabView[elem]);
+        this.callPostStationAPI(this.tabView[elem], data);
       }
+      _this.refreshCounter();
     },
 
 
@@ -362,15 +944,6 @@ define([
       var sidenav = this.$el.find("#mySidenav");
       sidenav.css('width', "0");
     },
-    // setStars: function (e) {
-    //   this.tabView[this.currentPosition].setStars(e.key)
-    // },
-    // addStars: function (e) {
-    //   this.tabView[this.currentPosition].increaseStar();
-    // },
-    // decreaseStars: function (e) {
-    //   this.tabView[this.currentPosition].decreaseStar();
-    // },
     clickOnIconeView: function (e) {
       var _this = this;
       e.preventDefault();
@@ -409,318 +982,11 @@ define([
           console.log("pas bon");
         });
     },
-
-    fetchSessionInfos: function () {
-      var _this = this;
-      $.ajax({
-          url: config.coreUrl + 'sensorDatas/' + _this.type + '/' + _this.equipmentId,
-        })
-        .done(function (resp) {
-          _this.sensorId = resp.FK_Sensor;
-          _this.siteId = resp.FK_MonitoredSite;
-          _this.displaySensorForm();
-          _this.displaySiteForm();
-        })
-        .fail(function () {
-          console.log("pas bon");
-        });
-
-    },
-
-    initCollection: function () {
-      var _this = this;
-      var ImageCollection = PageColl.extend({
-        model: CamTrapImageModel,
-        mode: 'client',
-        state: {
-          pageSize: 24
-        },
-        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
-        patch: function () {}
-      });
-
-      this.myImageCollection = new ImageCollection();
-      this.myImageCollection.sync('patch', this.myImageCollection, {
-        error: function () {
-          console.log(this.myImageCollection);
-          console.log("sync impossible");
-        }
-      });
-
-      this.paginator = new Backgrid.Extension.Paginator({
-        collection: this.myImageCollection
-      });
-
-      this.myImageCollection.on('sync', function () {
-        _this.refreshCounter();
-
-
-      });
-
-      this.myImageCollection.fetch();
-
-      this.paginator.collection.on('reset', function (e) {
-        console.log("reset du paginator");
-      });
-
-    },
-
-    onRender: function () {
-      this.$el.i18n();
-    },
-
-    onShow: function () {
-      var _this = this;
-      this.ui.imageFullScreen.hide()
-      this.display();
-    },
-
-    display: function () {
-      var _this = this;
-      this.listenTo(this.myImageCollection, 'reset', function (e) { // trigger on init or on change page
-        _this.displayImages(_this.myImageCollection);
-        _this.rgToolsBarTop.show(this.toolsBarTop);
-        this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
-      });
-      this.currentCollection = this.myImageCollection;
-      this.displayPaginator(this.paginator)
-      this.displayToolsBar();
-      this.displayToolsBarTop();
-    },
-
-    displayImages: function (myCollectionToDisplay) {
-      var _this = this;
-      this.currentCollection = myCollectionToDisplay;
-      var ImageModel = new CamTrapImageModel();
-      //TODO detruit les view a la main sinon pb avec les models
-      if (typeof (_this.tabView) !== "undefined") {
-        this.destroyViews(_this.tabView);
-      }
-      this.currentPosition = null;
-      this.tabView = [];
-      myCollectionToDisplay.each(function (model) {
-        var newImg = new CamTrapItemView({
-          model: model,
-          parent: _this,
-        });
-        _this.tabView.push(newImg);
-        _this.ui.gallery.append(newImg.render().el);
-
-      });
-      if (this.tabView.length > 0) {
-        switch (this.pageChange) {
-          case 'N':
-            { //next page
-              this.pageChange = '';
-              this.currentPosition = 0; //position to focus
-              this.tabSelected = [];
-              break;
-            } //- re
-          case 'P':
-            { //previous page
-              this.pageChange = '';
-              this.currentPosition = this.tabView.length - 1; //position to focus
-              this.tabSelected = [];
-              break;
-            }
-          default:
-            {
-              //console.log("bim default");
-              this.currentPosition = 0;
-              this.tabSelected = [];
-              break;
-            }
-        }
-        this.focusImg();
-        if (this.rgFullScreen.currentView !== undefined && this.stopSpace) { //si le modal existe on change
-          this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-        }
-        $('#gallery').selectable({
-          filter: '.imageCamTrap',
-          distance: 10,
-          start: function (e, ui) {
-            if (_this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active')) {
-              _this.tabView[_this.current]
-              _this.tabView[_this.currentPosition].$el.find('.vignette').removeClass('active');
-            }
-
-            if (typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0) {
-              for (var i of _this.tabSelected) {
-                if (_this.currentPosition != i) {
-                  if (_this.tabView[i].$el.find('.vignette').hasClass('active')) {
-                    _this.tabView[i].$el.find('.vignette').removeClass('active');
-                  }
-                }
-              }
-            }
-          },
-          selected: function (e, ui) {
-            if (e.ctrlKey) {
-              if ($(ui.selected).hasClass('already-selected')) {
-                $(ui.selected).removeClass('already-selected')
-                $(ui.selected).removeClass('ui-selected');
-              } else {
-                $(ui.selected).addClass('tmp-selectedctrl');
-              }
-            } else {
-              $(ui.selected).addClass('tmp-selected');
-              $(ui.selected).removeClass('ui-selected');
-            }
-          },
-          unselected: function (e, ui) {
-            $('#gallery .already-selected').removeClass('already-selected');
-          },
-          stop: function (e, ui) {
-
-            $('#gallery .tmp-selected').addClass('already-selected').removeClass('tmp-selected').addClass('ui-selected');
-            $('#gallery .tmp-selectedctrl').addClass('already-selected').removeClass('tmp-selectedctrl').addClass('ui-selected');
-
-            var result = "";
-            _this.tabSelected = [];
-
-            $(".ui-selected", this).each(function () {
-              var index = $(".imageCamTrap").index(this);
-              _this.tabSelected.push(index);
-              if (!(_this.tabView[index].$el.find('.vignette').hasClass('active'))) {
-                _this.tabView[index].$el.find('.vignette').toggleClass('active');
-              }
-
-            });
-
-            console.log("test tags");
-            var nbPhotos = _this.tabSelected.length
-            var nbphotosValidated = 0;
-            if (nbPhotos > 0) {
-              var tagsInAllPhotos = []
-              var stringTagTmp ='';
-              var uniqTagsAndOccurence = []
-              for( var i = 0 ; i < nbPhotos ; i++) {
-                if(_this.tabView[_this.tabSelected[i]].model.get('validated') === 2 ) {
-                  nbphotosValidated += 1;
-                }
-                stringTagTmp += _this.tabView[_this.tabSelected[i]].model.get('tags');
-                if( i+1 < nbPhotos) {
-                  stringTagTmp += ',';
-                }
-              }
-              var allTagsTab = stringTagTmp.split(',');
-              uniqTagsAndOccurence = _.countBy(allTagsTab);
-              for( var item in uniqTagsAndOccurence) {
-                if(uniqTagsAndOccurence[item] === nbphotosValidated) {
-                  tagsInAllPhotos.push(item);
-                }
-              }
-              console.log("bim");
-              _this.toolsBar.render();
-              _this.toolsBar.$elemTags.val(null).trigger('change');
-              _this.toolsBar.$elemTags.val(tagsInAllPhotos).trigger('change');
-            }
-            
-           
-            /*  keep it : algo for all edit all tags in all photos
-
-            if (_this.tabSelected.length > 0) {
-              var allTagsTabs = [];
-              for( var i = 0 ; i < _this.tabSelected.length ; i++) {
-                var tagTmp = _this.tabView[_this.tabSelected[i]].model.get('tags');
-                var tagTmpTab = []
-                if(tagTmp) {
-                  tagTmpTab = tagTmp.split(',');
-                }
-                if(!allTagsTabs.length) {
-                  allTagsTabs = tagTmpTab;
-                }
-                else {
-                  allTagsTabs = _.union(allTagsTabs,tagTmpTab)
-                }
-              }
-              _this.toolsBar.$elemTags.val(null).trigger('change');
-              _this.toolsBar.$elemTags.val(allTagsTabs).trigger('change');
-              console.log("all tags in selection : ",allTagsTabs);
-              // var $inputTags = _this.toolsBar.$el.find("#tagsInput");
-              // var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
-              // var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
-              // if (!$inputTags.prop("disabled")) {
-              //   $inputTag.prop("disabled", true);
-              //   $inputTags.prop("disabled", true);
-              //   $bootstrapTag.css("visibility", "hidden");
-              // }
-            }*/
-          }
-        });
-      }
-    },
-
     destroyViews: function (tabView) {
       for (var i = 0; i < tabView.length; i++) {
         tabView[i].destroy();
       }
     },
-
-    displaySensorForm: function () {
-      this.sensorForm = new NsForm({
-        name: 'sensorForm',
-        buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'sensors',
-        formRegion: this.ui.sensorForm,
-        displayMode: 'display',
-        id: this.sensorId,
-        reloadAfterSave: false,
-      });
-    },
-
-    displaySiteForm: function () {
-      this.monitoredSiteForm = new NsForm({
-        name: 'siteForm',
-        buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'monitoredSites',
-        formRegion: this.ui.siteForm,
-        displayMode: 'display',
-        id: this.siteId,
-        reloadAfterSave: false,
-      });
-    },
-
-    displayImageDetails: function (model) {
-      var _this = this;
-      //imageDetails
-      this.imageDetails = new imageDetailsView({
-        parent: _this,
-        model: model
-      });
-
-      this.rgImageDetails.show(this.imageDetails)
-
-    },
-
-    // displayImageFullScreen: function (model) {
-
-    // },
-
-    displayPaginator: function (pagin) {
-      this.currentPaginator = pagin;
-      this.ui.paginator.html('');
-      this.ui.paginator.append(pagin.render().el);
-    },
-
-    displayToolsBar: function () {
-      var _this = this;
-      this.toolsBar = new ToolsBar({
-        parent: _this,
-        model : null
-      });
-      this.rgToolsBar.show(this.toolsBar);
-    },
-
-    displayToolsBarTop: function (nbPhotos) {
-      var _this = this;
-      this.toolsBarTop = new ToolsBarTop({
-        parent: _this
-      });
-      this.rgToolsBarTop.show(this.toolsBarTop);
-      this.refreshCounter();
-    },
-
     reloadFromNavbar: function (model) {
       this.model = model;
       this.sensorId = this.model.get('fk_sensor');
@@ -743,14 +1009,58 @@ define([
         if( e.currentTarget.className.indexOf('disabled') > -1 ) {
           return;
         }
-        if (this.currentPosition !== null) {
-          this.tabView[this.currentPosition].setModelValidated(2);
+        var tabPhotoAccepted = this.model.get('newSelected') || [];
+        if( tabPhotoAccepted.length ==1 ) {
+          var elem = tabPhotoAccepted[0];
+          this.tabView[elem].setModelValidated(2);
         }
-      } else {
-        for (var i of this.tabSelected) {
-          this.tabView[i].setModelValidated(2);
+        else {
+          this.acceptAllPhoto();
         }
+     }
+     this.refreshCounter();
+    },
+
+    acceptAllPhoto : function() {
+      var _this = this;
+      var tabPhotoAccepted = this.model.get('newSelected') || [];
+      var collectionPhotoAccepted = new Backbone.Collection();
+      var tabItemAccepted = [];
+      var index;
+      var tmpModel
+      
+      for( var i = 0 ; i < tabPhotoAccepted.length ; i++ ) {
+        index = tabPhotoAccepted[i];
+        tmpModel = this.tabView[index].model;
+        if( tmpModel.validated !== 2 ) {
+          collectionPhotoAccepted.push(tmpModel);
+          tabItemAccepted.push(index)
+        }
+        index = undefined;
+        tmpModel = undefined;
       }
+
+      $.ajax({
+        type: 'PUT',
+        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        contentType: 'application/json',
+        data: JSON.stringify(collectionPhotoAccepted)
+      })
+      .done(function (resp) {
+        var item
+        for( var i = 0 ; i < tabItemAccepted.length ; i++ ) {
+          index = tabItemAccepted[i]
+          item = _this.tabView[index];
+
+          item.setModelValidatedSilent(2);
+          item = undefined;
+        }
+      })
+      .fail(function (err) {
+        console.log(err);
+        alert("someting goes wrong")
+      })
+
     },
 
     nextPage: function (e) {
@@ -787,6 +1097,42 @@ define([
       this.currentCollection.getLastPage();
     },
 
+    removeStationsBdd : function() {
+      var _this = this ;
+      var tabStationIdRejected = [];
+      var tabPhotoRejected = this.model.get('newSelected') || [];
+
+      for( var i = 0 ; i < tabPhotoRejected.length ; i++ ) {
+        var index = tabPhotoRejected[i];
+        var stationId = _this.tabView[index].model.get('stationId')
+        if( stationId ) {
+          tabStationIdRejected.push(stationId);
+        }
+      }
+      $.ajax({
+        type: 'POST',
+        url: config.coreUrl + 'stations/deleteMany',
+        contentType: 'application/json',
+        data: JSON.stringify(tabStationIdRejected)
+      })
+      .done(function (resp) {
+        //ok so all stations are deleted 
+
+        for( var item in tabPhotoRejected ) {
+          var elem = tabPhotoRejected[item]
+          _this.tabView[elem].removeStationAndReject();        
+        }
+
+      })
+      .fail(function (err) {
+        console.log(err);
+      })
+        
+      //call delete 
+      //resp ok 
+      //for each model set stations null validated = 2
+    },
+
     canIRefused : function(tab) {
       var listPhotos = [];
       var index ;
@@ -814,9 +1160,12 @@ define([
           
         },function (isConfirm) {
           if (isConfirm) {
-            for(var i = 0 ; i < tab.length ; i++ ) {
-              _this.tabView[tab[i]].setModelValidated(4);
-            }
+            _this.removeStationsBdd();
+            // var tabToRefuse = []
+            // for(var i = 0 ; i < tab.length ; i++ ) {
+            //   _this.tabView[tab[i]].setModelValidated(4);
+            //   tabToRefuse.push(tab[i]);
+            // }
           } 
         });
       }
@@ -828,17 +1177,22 @@ define([
     },
 
     rejectPhoto: function (e) {
+
+
       if (this.tabSelected.length == 0) {
         if( e.currentTarget.className.indexOf('disabled') > -1 ) {
           return;
         }
+        this.canIRefused(this.model.get('newSelected'));
+        this.refreshCounter();
         
-        if (this.currentPosition !== null ) {
-          this.canIRefused([this.currentPosition]);
+      //   if (this.currentPosition !== null ) {
+      //     this.canIRefused([this.currentPosition]);
          
-        }
-      } else {
-        this.canIRefused(this.tabSelected);
+      //   }
+      // } else {
+      //   this.canIRefused(this.tabSelected);
+
         // for (var i of this.tabSelected) {
         //   // this.tabView[i].setModelValidated(4);
         // }
@@ -909,51 +1263,33 @@ define([
       }
     },
 
-    focusLastImg() {
-      if (this.currentPosition === null) { //si aucune position
-        if (this.tabView != null) {
-          this.currentPosition = this.tabView.length - 1; //et on se place sur 0
-          this.tabView[this.currentPosition].doFocus(); // focus la premiere image
-          this.tabView[this.currentPosition].$el.find('.vignette').toggleClass('active');
-        }
-      }
-
-    },
-
-    focusImg() {
-      if (this.currentPosition === null) { //si aucune position
-        this.currentPosition = 0;
-      }
-      if (this.tabView != null) {
-        this.tabView[this.currentPosition].handleFocus(); // focus la premiere image
-      }
-
-    },
-
     mouvement: function (e) {
       /** this.stopSpace handle up and down for the fullscreen **/
-      if (this.currentPosition !== null) {
-        var lastPosition = this.currentPosition; //stock la position avant changement pour savoir si on a bougé
 
+      var tabSelected = this.model.get('newSelected');
+      var lastPosition = this.currentPosition;
+      var newPosition = this.currentPosition;
+      
         switch (e.keyCode) {
           case 38:
             { // up
               if (this.currentPosition - 6 >= 0 && !this.stopSpace) {
-                this.currentPosition -= 6;
+                newPosition -= 6
               }
               break;
             }
           case 40:
             { //down
               if (this.currentPosition + 6 <= this.tabView.length - 1 && !this.stopSpace) {
-                this.currentPosition += 6;
+                newPosition +=6;
               }
               break;
             }
           case 37:
             { //left
               if (this.currentPosition - 1 >= 0) {
-                this.currentPosition -= 1;
+                newPosition -= 1;
+               
               } else {
                 this.prevPage();
                 return;
@@ -964,7 +1300,7 @@ define([
           case 39:
             { //right
               if (this.currentPosition + 1 <= this.tabView.length - 1) {
-                this.currentPosition += 1;
+                newPosition += 1;
               } else {
                 this.nextPage();
                 return;
@@ -973,32 +1309,91 @@ define([
             }
         }
 
-        if (lastPosition !== this.currentPosition) { // si on a bougé
-          if (this.tabSelected.length > 0 ) {
-            this.tabSelected = [];
-            this.tabView[this.currentPosition].$el.find('img').click()
-            //dirty hack
-          }
-
-          if (this.tabSelected.length === 0) {
-            this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
-            this.tabView[this.currentPosition].handleFocus();
-            this.rgToolsBar.currentView.changeModel(this.tabView[this.currentPosition].model);
-          }
+        if (lastPosition !== newPosition) { // si on a bougé
+          this.model.set('newSelected',[newPosition]);
+          // this.rgToolsBar.currentView.changeModel(this.tabView[newPosition].model);
 
           if (this.rgImageDetails.currentView != undefined) {
-            this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
+            this.rgImageDetails.currentView.changeDetails(this.tabView[newPosition].model)
           }
 
           if (this.rgFullScreen.currentView !== undefined && this.stopSpace) {
-            this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+            this.rgFullScreen.currentView.changeModel(this.tabView[newPosition].model);
           }
 
         }
-
-      }
-
     },
+
+    // mouvement: function (e) {
+    //   /** this.stopSpace handle up and down for the fullscreen **/
+    //   if (this.currentPosition !== null) {
+    //     var lastPosition = this.currentPosition; //stock la position avant changement pour savoir si on a bougé
+
+    //     switch (e.keyCode) {
+    //       case 38:
+    //         { // up
+    //           if (this.currentPosition - 6 >= 0 && !this.stopSpace) {
+    //             this.currentPosition -= 6;
+    //           }
+    //           break;
+    //         }
+    //       case 40:
+    //         { //down
+    //           if (this.currentPosition + 6 <= this.tabView.length - 1 && !this.stopSpace) {
+    //             this.currentPosition += 6;
+    //           }
+    //           break;
+    //         }
+    //       case 37:
+    //         { //left
+    //           if (this.currentPosition - 1 >= 0) {
+    //             this.currentPosition -= 1;
+    //           } else {
+    //             this.prevPage();
+    //             return;
+    //           }
+    //           break;
+    //         }
+    //         //right
+    //       case 39:
+    //         { //right
+    //           if (this.currentPosition + 1 <= this.tabView.length - 1) {
+    //             this.currentPosition += 1;
+    //           } else {
+    //             this.nextPage();
+    //             return;
+    //           }
+    //           break;
+    //         }
+    //     }
+
+    //     if (lastPosition !== this.currentPosition) { // si on a bougé
+    //       // if (this.tabSelected.length > 0 ) {
+    //       //   this.tabSelected = [];
+    //       //   this.tabView[this.currentPosition].$el.find('img').click()
+    //       //   //dirty hack
+    //       // }
+    //       this.model.set('newSelected',[this.currentPosition]);
+
+    //       if (this.tabSelected.length === 0) {
+    //         // this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
+    //         // this.tabView[this.currentPosition].handleFocus();
+    //         this.rgToolsBar.currentView.changeModel(this.tabView[this.currentPosition].model);
+    //       }
+
+    //       if (this.rgImageDetails.currentView != undefined) {
+    //         this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
+    //       }
+
+    //       if (this.rgFullScreen.currentView !== undefined && this.stopSpace) {
+    //         this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+    //       }
+
+    //     }
+
+    //   }
+
+    // },
 
     rightMouvement: function () {
       var simE = {
@@ -1079,29 +1474,7 @@ define([
 
     },
 
-    refreshCounter: function () {
-      this.nbPhotos = this.myImageCollection.fullCollection.length;
-      this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({
-        validated: 2
-      }).length;
-      this.nbPhotosRefused = this.myImageCollection.fullCollection.where({
-        validated: 4
-      }).length;
-      this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
-        validated: null
-      }).length;
-      this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function (model) {
-        return (model.get('stationId') !== null && model.get('validated') === 2);
-      }).length;
 
-      if (this.toolsBarTop) {
-        this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
-        this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
-        this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
-        this.toolsBarTop.$el.find("#nbphotosNotChecked").text(this.nbPhotosNotChecked);
-        this.toolsBarTop.$el.find("#nbphotosStationed").text(this.nbPhotosStationed);
-      }
-    },
 
     filterCollectionCtrl: function (e) {
 

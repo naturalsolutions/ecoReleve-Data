@@ -22,7 +22,8 @@ from .Models import (
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
-
+import exiftool
+import pytesseract
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -62,31 +63,24 @@ def includeme(config):
     config.set_default_permission('read')
     config.add_forbidden_view(authn_policy.challenge)
 
-
-def main(global_config, **settings):
-    """ This function initialze DB conection and returns a Pyramid WSGI application. """
-
-    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.Export.url'])
-    engineExport = engine_from_config(
-        settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
-
-    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.default.url'])
-    engine = engine_from_config(
-        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+# print("create sub")
+mySubExif = exiftool.ExifTool()
+mySubExif.start()
+# print("running ?",mySubExif.running)
+# print("create tesseract")
+# pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract'
+# mySubTesseract = pytesseract
+# # mySubTesseract = pytesseract
+# print("end")
 
 
-
-    dbConfig['url'] = settings['sqlalchemy.default.url']
-    dbConfig['wsThesaurus'] = {}
-    dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
-    dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
-    dbConfig['data_schema'] = settings['data_schema']
+def addCamTrapModule(settings):
     dbConfig['camTrap'] = {}
-    dbConfig['camTrap']['path'] = settings['camTrap.path']
-    dbConfig['mediasFiles'] = {}
-    dbConfig['mediasFiles']['path'] = settings['mediasFiles.path']
+    if 'camTrap.path' in settings:
+        dbConfig['camTrap']['path'] = settings['camTrap.path']
+    else :
+        print("camera trap module not activated")    
+        return
 
     if(os.path.exists(dbConfig['camTrap']['path']) ):
         try :
@@ -124,6 +118,13 @@ def main(global_config, **settings):
             if exception.errno != errno.EEXIST:
                 raise
 
+def addMediaFileModule(settings):
+    dbConfig['mediasFiles'] = {}
+    dbConfig['mediasFiles']['path'] = settings['mediasFiles.path']   
+    if dbConfig['mediasFiles'] == {}:
+        print("media files protocole not activated")
+        raise SystemExit
+        return
     if(os.path.exists(dbConfig['mediasFiles']['path']) ):
         try :
             os.access( dbConfig['mediasFiles']['path'], os.W_OK)
@@ -140,6 +141,90 @@ def main(global_config, **settings):
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
+
+
+def main(global_config, **settings):
+    """ This function initialze DB conection and returns a Pyramid WSGI application. """
+
+    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
+        quote_plus(settings['sqlalchemy.Export.url'])
+    engineExport = engine_from_config(
+        settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+
+    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
+        quote_plus(settings['sqlalchemy.default.url'])
+    engine = engine_from_config(
+        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+
+
+
+    dbConfig['url'] = settings['sqlalchemy.default.url']
+    dbConfig['wsThesaurus'] = {}
+    dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
+    dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
+    dbConfig['data_schema'] = settings['data_schema']
+
+    addCamTrapModule(settings)
+
+
+
+    # dbConfig['camTrap'] = {}
+    # dbConfig['camTrap']['path'] = settings['camTrap.path']
+    # dbConfig['mediasFiles'] = {}
+    # dbConfig['mediasFiles']['path'] = settings['mediasFiles.path']
+
+    # if(os.path.exists(dbConfig['camTrap']['path']) ):
+    #     try :
+    #         os.access( dbConfig['camTrap']['path'], os.W_OK)
+    #         print("folder : %s exist" %(dbConfig['camTrap']['path']))
+    #     except :
+    #         print("app cant write in this directory ask your admin %s" %(dbConfig['camTrap']['path']) )
+    #         raise
+    #         #declenché erreur
+    # else:
+    #     print ("folder %s doesn't exist we gonna try to create it" %(dbConfig['camTrap']['path']))
+    #     try:
+    #         os.makedirs(dbConfig['camTrap']['path'])
+    #         print("folder created : %s" %(dbConfig['camTrap']['path']))
+    #         os.makedirs(os.path.join(dbConfig['camTrap']['path'],'export'))
+    #         print("folder created : %s" %(os.path.join(dbConfig['camTrap']['path'],'export')))
+    #     except OSError as exception:
+    #         if exception.errno != errno.EEXIST:
+    #             raise
+    
+    # if(os.path.exists(os.path.join(dbConfig['camTrap']['path'],'export')) ):
+    #     try :
+    #         os.access( os.path.join(dbConfig['camTrap']['path'],'export'), os.W_OK)
+    #         print("folder : %s exist" %(os.path.join(dbConfig['camTrap']['path'],'export')))
+    #     except :
+    #         print("app cant write in this directory ask your admin %s" %(os.path.join(dbConfig['camTrap']['path'],'export')) )
+    #         raise
+    #         #declenché erreur
+    # else:
+    #     print ("folder %s doesn't exist we gonna try to create it" %(os.path.join(dbConfig['camTrap']['path'],'export')))
+    #     try:
+    #         os.makedirs(os.path.join(dbConfig['camTrap']['path'],'export'))
+    #         print("folder created : %s" %(os.path.join(dbConfig['camTrap']['path'],'export')))
+    #     except OSError as exception:
+    #         if exception.errno != errno.EEXIST:
+    #             raise
+
+    # if(os.path.exists(dbConfig['mediasFiles']['path']) ):
+    #     try :
+    #         os.access( dbConfig['mediasFiles']['path'], os.W_OK)
+    #         print("folder : %s exist" %(dbConfig['mediasFiles']['path']))
+    #     except :
+    #         print("app cant write in this directory ask your admin %s" %(dbConfig['mediasFiles']['path']) )
+    #         raise
+    #         #declenché erreur
+    # else:
+    #     print ("folder %s doesn't exist we gonna try to create it" %(dbConfig['mediasFiles']['path']))
+    #     try:
+    #         os.makedirs(dbConfig['mediasFiles']['path'])
+    #         print("folder created : %s" %(dbConfig['mediasFiles']['path']))
+    #     except OSError as exception:
+    #         if exception.errno != errno.EEXIST:
+    #             raise
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')

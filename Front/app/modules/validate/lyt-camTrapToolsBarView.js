@@ -47,13 +47,15 @@ define([
 			this.model = options.model;// || new CamTrapImageModel();
 			this.unSelectedTagsTab = [];
 			this.selectedTagsTab = [];
-			this.dataTags = $.ajax({
-				type: 'POST',
-				url: config.thesaurusUrl + '/fastInitForCompleteTree/',
-				contentType:"application/json; charset=utf-8",
-				dataType:"json",
-				data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
-			  })
+			this.jsonParsed = options.jsonParsed; 
+			this.$elemTags = undefined;
+			// this.dataTags = $.ajax({
+			// 	type: 'POST',
+			// 	url: config.thesaurusUrl + '/fastInitForCompleteTree/',
+			// 	contentType:"application/json; charset=utf-8",
+			// 	dataType:"json",
+			// 	data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
+			//   })
 			//   .done(function (resp) {
 				  
 			// 	console.log(resp);
@@ -65,33 +67,104 @@ define([
 
 		},
 
-		parseJsonRecur: function(obj) {
-			var jsonString = ''
+		// parseJsonRecur: function(obj) {
+		// 	var jsonString = ''
+		// 	var _this = this;
+		// 	if( Array.isArray(obj) ) {
+		// 		var tab = obj;
+		// 		for( var i = 0 ; i < tab.length ; i++ ) {
+		// 			jsonString += ' { "id" : "' + tab[i].value + '", "text" : "'+ tab[i].value +'" } ';
+		// 			if( i+1 < tab.length ) {
+		// 				jsonString += ' , ';
+		// 			}
+		// 		}
+		// 	}
+		// 	for( var item in obj) {
+		// 		if( item ==='children' && typeof obj[item] == 'object' ) {
+		// 			jsonString += ' , "children" : [ ';
+		// 			jsonString += _this.parseJsonRecur(obj[item]);
+		// 			jsonString += ' ] ';
+		// 		}
+		// 		if( item ==='value' ) {
+		// 			jsonString += '{"text" : "'+ obj[item]+'"';
+		// 		}
+				
+		// 	}
+		// 	if( !Array.isArray(obj) ) {
+		// 		jsonString += ' } ';
+		// 	}
+		// 	return jsonString;		
+		// },
+
+		instantiateElemTags : function() {
 			var _this = this;
-			if( Array.isArray(obj) ) {
-				var tab = obj;
-				for( var i = 0 ; i < tab.length ; i++ ) {
-					jsonString += ' { "id" : "' + tab[i].value + '", "text" : "'+ tab[i].value +'" } ';
-					if( i+1 < tab.length ) {
-						jsonString += ' , ';
+			_this.$elemTags = _this.$el.find('.js-data-tags').select2({
+				data :  new Array( JSON.parse(_this.jsonParsed) ),
+				maximumSelectionLength: 8,
+				closeOnSelect : false,
+				placeholder: 'Add a tag',
+				tokenSeparators: [",", " "],
+				separator : ',',
+				tags: false, // prohib value not in thesau
+				width : '100%',
+				dropdownAutoWidth: true,
+				// allowClear: true
+			  });
+
+			  //TODO maybe a better event to listen
+			  _this.$elemTags.on('select2:closing', function(e) {
+				console.log("event select2:closing fired ")
+				//on close we save
+				_this.saveTags();
+			  });
+			  _this.$elemTags.on('select2:select', function(e) {
+					for( var i =0 ; i < _this.unSelectedTagsTab.length ; i ++ ) {
+						if( _this.unSelectedTagsTab[i] === e.params.data.id) {
+							_this.unSelectedTagsTab.splice(i,1);
+						}
+					}
+					_this.selectedTagsTab = _.union(_this.selectedTagsTab , [e.params.data.id])
+			  });
+
+			  _this.$elemTags.on('select2:unselect', function(e) {
+				for( var i =0 ; i < _this.selectedTagsTab.length ; i ++ ) {
+					if( _this.selectedTagsTab[i] === e.params.data.id) {
+						_this.selectedTagsTab.splice(i,1);
 					}
 				}
+				_this.unSelectedTagsTab = _.union(_this.unSelectedTagsTab , [e.params.data.id])
+			  });
+
+		},
+
+		fillElemTags : function(aCollection) {
+			var _this = this;
+			if( !_this.$elemTags) {
+				_this.instantiateElemTags()
 			}
-			for( var item in obj) {
-				if( item ==='children' && typeof obj[item] == 'object' ) {
-					jsonString += ' , "children" : [ ';
-					jsonString += _this.parseJsonRecur(obj[item]);
-					jsonString += ' ] ';
-				}
-				if( item ==='value' ) {
-					jsonString += '{"text" : "'+ obj[item]+'"';
-				}
+			if ( !aCollection )
+				return;
+			if (aCollection.length == 1 ) {
+				var tagsTab = [];
+				var tagsStr = aCollection.at(0).get('tags');
 				
+				if(tagsStr) {
+				   tagsTab = tagsStr.split(',') ;
+				}
+
+				 if( tagsTab.length > 0 ) {
+				   _this.$elemTags.val(tagsTab).trigger('change');
+				 }
+				 else {
+					_this.$elemTags.val(null).trigger('change');
+				 }
+
 			}
-			if( !Array.isArray(obj) ) {
-				jsonString += ' } ';
+
+			if (aCollection.length > 1 ) {
+				console.log("on va fill avec une collection multiple youhouuu")
 			}
-			return jsonString;		
+
 		},
 		
 
@@ -100,201 +173,58 @@ define([
 
 		onRender: function(){
 			var _this = this;
-				$.when(this.dataTags)
-				.then(function(resp) {
-					if(!_this.jsonParsed) {
-						// var jsonParsed = '';
-						_this.jsonParsed = _this.parseJsonRecur(resp);
+			console.log("on render la toolbar bottom")
+				// $.when(this.dataTags)
+				// .then(function(resp) {
+				// 	if(!_this.jsonParsed) {
+				// 		_this.jsonParsed = _this.parseJsonRecur(resp);
+				// 	}
 
-					}
-				//	console.log(jsonParsed);
-					_this.$elemTags = $('.js-data-tags').select2({
-						data :  new Array( JSON.parse(_this.jsonParsed) ),
-						maximumSelectionLength: 8,
-						closeOnSelect : false,
-						placeholder: 'Add a tag',
-						tokenSeparators: [",", " "],
-						separator : ',',
-						tags: false, // prohib value not in thesau
-						width : '100%',
-						dropdownAutoWidth: true,
-						// allowClear: true
-					  });
+				// 	_this.instantiateElemTags()
+				// 	_this.fillElemTags();
 
-					  //TODO maybe a better event to listen
-					  _this.$elemTags.on('select2:closing', function(e) {
-						console.log("event select2:closing fired ")
-						//on close we save
-						_this.saveTags();
-					  });
-					  _this.$elemTags.on('select2:select', function(e) {
-						//   if( _this.selectedTagsTab.length ) {
-						// 	  _this.selectedTagsTab = _.union(_this.selectedTagsTab , [e.params.data.id]);
-						// 	}
-						// 	else {
-						// 		_this.selectedTagsTab = [e.params.data.id];
-						// 	}
-							for( var i =0 ; i < _this.unSelectedTagsTab.length ; i ++ ) {
-								if( _this.unSelectedTagsTab[i] === e.params.data.id) {
-									_this.unSelectedTagsTab.splice(i,1);
-								}
-							}
-							_this.selectedTagsTab = _.union(_this.selectedTagsTab , [e.params.data.id])
-							console.log("bim select : ",_this.selectedTagsTab , e.params.data.id);
-					  });
-
-					  _this.$elemTags.on('select2:unselect', function(e) {
-						for( var i =0 ; i < _this.selectedTagsTab.length ; i ++ ) {
-							if( _this.selectedTagsTab[i] === e.params.data.id) {
-								_this.selectedTagsTab.splice(i,1);
-							}
-						}
-						_this.unSelectedTagsTab = _.union(_this.unSelectedTagsTab , [e.params.data.id])
-						//   if( _this.unSelectedTagsTab.length ) {
-						// 	  _this.unSelectedTagsTab = _.union(_this.unSelectedTagsTab , [e.params.data.id]);
-						// 	}
-						// 	else {
-						// 		_this.unSelectedTagsTab = [e.params.data.id];
-						// 	}
-							console.log("bim unselected : ",_this.unSelectedTagsTab , e.params.data.id);
-						
-						// console.log(_this.unSelectedTagsTab);
-					  });
-					 var tagsTab = [];
-					 var tagsStr = _this.model.get('tags');
-					 if(tagsStr) {
-						tagsTab = tagsStr.split(',') ;
-					 }
-
-					  if( tagsTab.length > 0 ) {
-						_this.$elemTags.val(tagsTab).trigger('change');
-					  }
-					  
-					  console.log("on entre")
-					//   $('.js-data-tags').select2().val(['1','2']).trigger('change');
-				}) 
-
-			if(this.parent.tabSelected.length ) {
-				var statusPhoto = this.model.get('validated');
-				var stationId = this.model.get('stationId');
+				// 	//   $('.js-data-tags').select2().val(['1','2']).trigger('change');
+				// }) 
+				if( !_this.$elemTags) {
+					_this.instantiateElemTags()
+				}
+				_this.fillElemTags();
+				var tabSelected = this.parent.model.get('newSelected')
+			if( tabSelected && tabSelected.length > 1 ) {
 				this.displayMultiselect();
-				// this.displayBtnsActions(statusPhoto);
-				// this.displayBtnsStation(statusPhoto,stationId);
-				// this.displayTagsInput(statusPhoto);
-				// this.displayValidateSession();
-				// this.displayTagsSelect(statusPhoto);
-
 			}
-			else {
-
-				if( this.model ) {
-	
-					var statusPhoto = this.model.get('validated');
-					var stationId = this.model.get('stationId');
-					this.displayBtnsActions(statusPhoto);
-					this.displayBtnsStation(statusPhoto,stationId);
-					this.displayTagsInput(statusPhoto);
-					this.displayValidateSession();
-					this.displayTagsSelect(statusPhoto);
-					
-				}
-				else {
-	
-					// $.ajax({
-					// 	type: 'POST',
-					// 	url: config.thesaurusUrl + '/fastInitForCompleteTree/',
-					// 	contentType:"application/json; charset=utf-8",
-					// 	dataType:"json",
-					// 	data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
-					//   })
-					//   .done(function (resp) {
-	
-					// 	console.log(resp);
-					// 	$('.js-data-example-ajax').select2({
-					// 		data : [
-					// 			{
-					// 				id: 0,
-					// 				text: 'enhancement'
-					// 			},
-					// 			{
-					// 				id: 1,
-					// 				text: 'bug'
-					// 			},
-					// 			{
-					// 				id: 2,
-					// 				text: 'duplicate'
-					// 			},
-					// 			{
-					// 				id: 3,
-					// 				text: 'invalid'
-					// 			},
-					// 			{
-					// 				id: 4,
-					// 				text: 'wontfix'
-					// 			}
-					// 		],
-					// 		maximumSelectionLength: 8,
-					// 		placeholder: 'Add a tag',
-					// 		tokenSeparators: [",", " "],
-					// 		tags: true
-	
-					// 		// allowClear: true
-					// 	  });
-					//   })
-					//   .fail(function (err) {
-					// 	console.log(err);
-					//   });
-					console.log("on render la toolbar")
-	
-					
-				/*	
-	
-						type: 'POST',
-			url: config.thesaurusUrl + '/fastInitForCompleteTree/',
-			contentType:"application/json; charset=utf-8",
-			dataType:"json",
-			data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
-				
-				var citynames = new TypeAHead.Bloodhound({
-						datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-						queryTokenizer: Bloodhound.tokenizers.whitespace,
-						prefetch: {
-							url: './citynames.json',
-							filter: function(list) {
-							return $.map(list, function(cityname) {
-								return { name: cityname }; });
-							}
-						}
-						});
-						citynames.initialize();*/
-						this.ui.tagsInput.tagsinput({
-			/*	typeaheadjs: {
-					name: 'citynames',
-					displayKey: 'name',
-					valueKey: 'name',
-					source: citynames.ttAdapter()
-					},*/
-							 maxTags: 5,
-							trimValue: true,
-					});
-				}
+			if( tabSelected && tabSelected.length == 1 ) {
+				this.displaySingleSelect();
 			}
 			
 		},
 
+		displaySingleSelect: function() {
+			var tabSelected =  this.parent.model.get('newSelected');
+			var modelTmp = this.parent.tabView[tabSelected[0]].model;
+			var statusPhoto = modelTmp.get('validated');
+			var stationId = modelTmp.get('stationId');
+			this.displayBtnsActions(statusPhoto);
+			this.displayBtnsStation(statusPhoto,stationId);
+			this.displayTagsInput(statusPhoto);
+			this.displayValidateSession();
+			this.displayTagsSelect(statusPhoto);
+		},
+
 		displayMultiselect : function() {
+			
 			var btnAccepted = this.ui.acceptedBtn[0];
 			var btnRefused = this.ui.refusedBtn[0];
-			btnAccepted.className.replace(' disabled ','');
-			btnRefused.className.replace(' disabled ','');
+			btnAccepted.className = btnAccepted.className.replace(' disabled ','');
+			btnRefused.className = btnRefused.className.replace(' disabled ','');
 
 			var btnStation = this.ui.stationBtn[0];
 			var btnCreateStation = this.ui.createStationBtn[0];
 			var btnEditStation = this.ui.editStationBtn[0];
 			var btnDeleteStation = this.ui.deleteStationBtn[0];
-			btnStation.className.replace(' disabled ','');
-			btnCreateStation.className.replace(' disabled ','');
-			btnDeleteStation.className.replace(' disabled ','');
+			btnStation.className = btnStation.className.replace(' disabled ','');
+			btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
+			btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
 			if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
 				btnEditStation.className+= ' disabled ';
 			}
@@ -315,7 +245,7 @@ define([
 			}
 			else {
 			if(btnValidate.className.indexOf(' disabled ') > -1 ) {
-					btnValidate.className.replace(' disabled ','');
+				btnValidate.className = btnValidate.className.replace(' disabled ','');
 				}
 			}
 
@@ -326,10 +256,10 @@ define([
 			switch(status) {
 				case 1: {//undeterminate
 					if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-						btnAccepted.className.replace(' disabled ','');
+						btnAccepted.className = btnAccepted.className.replace(' disabled ','');
 					}
 					if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-						btnRefused.className.replace(' disabled ','');
+						btnRefused.className = btnRefused.className.replace(' disabled ','');
 					}
 					break;
 				}
@@ -337,20 +267,26 @@ define([
 					if( btnAccepted.className.indexOf(' disabled ') === -1 ) {
 						btnAccepted.className +=' disabled ';
 					}
+					if( btnRefused.className.indexOf(' disabled ') > -1 ) {
+						btnRefused.className = btnRefused.className.replace(' disabled ','');
+					}
 					break;
 				}
 				case 4: { //refused
 					if( btnRefused.className.indexOf(' disabled ') === -1 ) {
 						btnRefused.className+=' disabled ';
 					}
+					if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
+						btnAccepted.className = btnAccepted.className.replace(' disabled ','');
+					}
 					break;
 				}
 				default: { //unknown
 					if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-						btnAccepted.className.replace(' disabled ','');
+						btnAccepted.className = btnAccepted.className.replace(' disabled ','');
 					}
 					if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-						btnRefused.className.replace(' disabled ','');
+						btnRefused.className = btnRefused.className.replace(' disabled ','');
 					}
 					break;
 				}
@@ -369,10 +305,10 @@ define([
 						case undefined :
 						case null: {
 							if( btnStation.className.indexOf(' disabled ') > -1 ) {
-								btnStation.className.replace(' disabled ','');
+								btnStation.className = btnStation.className.replace(' disabled ','');
 							}
 							if( btnCreateStation.className.indexOf(' disabled ') > -1 ) {
-								btnCreateStation.className.replace(' disabled ','');
+								btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
 							}
 							if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
 								btnEditStation.className+= ' disabled ';
@@ -384,16 +320,16 @@ define([
 						}
 						default: {
 							if( btnStation.className.indexOf(' disabled ') > -1 ) {
-								btnStation.className.replace(' disabled ','');
+								btnStation.className = btnStation.className.replace(' disabled ','');
 							}
 							if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
 								btnCreateStation.className += ' disabled ';
 							}
 							if( btnEditStation.className.indexOf(' disabled ') > -1 ) {
-								btnEditStation.className.replace(' disabled ','');
+								btnEditStation.className = btnEditStation.className.replace(' disabled ','');
 							}
 							if( btnDeleteStation.className.indexOf(' disabled ') > -1 ) {
-								btnDeleteStation.className.replace(' disabled ','');
+								btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
 							}
 							break;
 						}
@@ -511,8 +447,10 @@ define([
 							console.log("origial",newTagsTab);
 							console.log("unselected",this.unSelectedTagsTab);
 							console.log("selected",this.selectedTagsTab);
+
 							newTagsTab = _.difference(newTagsTab,this.unSelectedTagsTab);
 							console.log("diff",newTagsTab);
+
 							if( newTagsTab.length) {
 								newTagsTab = _.union(newTagsTab,this.selectedTagsTab);
 							}

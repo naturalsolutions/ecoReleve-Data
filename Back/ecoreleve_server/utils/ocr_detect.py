@@ -5,6 +5,7 @@ import pytesseract
 from PIL import Image
 import re
 import pandas as pd
+# from ..__init__ import mySubTesseract
 
 IMG_File = 'C:/Users/jean-vitus/Desktop/PP163_09N02P/13N016D.JPG'
 pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract'

@@ -276,16 +276,16 @@ def buildCmdMetaDatasAtImport(self, metaData) :
     #XMP-DC END
 
     #XMP-PRISM START 
-    generatedCmd.append('-XMP-PRISM:creationDate='+metaData['image']['dateTimeOriginalPhoto']) #LangAlt
-    generatedCmd.append('-XMP-PRISM:DateReceived='+metaData['image']['dateInsertSQL'])
-    generatedCmd.append('-XMP-PRISM:modificationDate='+metaData['image']['lastTransformationDate'])
+    # generatedCmd.append('-XMP-PRISM:creationDate='+metaData['image']['dateTimeOriginalPhoto']) #LangAlt
+    # generatedCmd.append('-XMP-PRISM:DateReceived='+metaData['image']['dateInsertSQL'])
+    # generatedCmd.append('-XMP-PRISM:modificationDate='+metaData['image']['lastTransformationDate'])
     #XMP-PRISM END
 
     #XMP-PMI START
     generatedCmd.append('-XMP-pmi:sequenceName=Monitored site'+metaData['monitoredSite']['Name']+'from'+metaData['session']['startDate']+'to'+metaData['session']['endDate']) #XmpText
     generatedCmd.append('-XMP-pmi:shootID='+str(metaData['image']['shootId'])) #XmpText
     generatedCmd.append('-XMP-pmi:contactInfo=contact@reneco-hq.org') #XmpText
-    generatedCmd.append('-XMP-pmi:location='+metaData['misc']['regionAnPlaceMonitoredSite']) #XmpText
+    # generatedCmd.append('-XMP-pmi:location='+metaData['misc']['regionAnPlaceMonitoredSite']) #XmpText
     #XMP-PMI END
 
     #EXIF-GPS START
@@ -299,7 +299,7 @@ def buildCmdMetaDatasAtImport(self, metaData) :
     #EXIF-GPS END
 
     #XMP-IPTC START
-    generatedCmd.append('-XMP-iptcCore:Location='+metaData['misc']['regionAnPlaceMonitoredSite']) #XmpTexst
+    # generatedCmd.append('-XMP-iptcCore:Location='+metaData['misc']['regionAnPlaceMonitoredSite']) #XmpTexst
     #XMP-IPTC END
 
     #XMP-PHOTOSHOP START
@@ -309,8 +309,8 @@ def buildCmdMetaDatasAtImport(self, metaData) :
     #XMP-PHOTOSHOP END
 
     #XMP-XMP START
-    generatedCmd.append('-XMP-XMP:CreateDate='+metaData['image']['dateTimeCreationPhoto']) #XmpText
-    generatedCmd.append('-XMP-XMP:MetadataDate='+metaData['image']['lastDateWriteInPhoto']) #XmpText
+    # generatedCmd.append('-XMP-XMP:CreateDate='+metaData['image']['dateTimeCreationPhoto']) #XmpText
+    # generatedCmd.append('-XMP-XMP:MetadataDate='+metaData['image']['lastDateWriteInPhoto']) #XmpText
     generatedCmd.append('-XMP-XMPRights:UsageTerms-x-default=Non commercial use only') #LangAlt
     #XMP-XMP END
     # res = subprocess.run( [ pathCmd, generatedCmd] + listFiles )
