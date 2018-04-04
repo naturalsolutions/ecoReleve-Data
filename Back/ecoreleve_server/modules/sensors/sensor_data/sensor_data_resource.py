@@ -494,7 +494,16 @@ class SensorDatasByType(CustomResource):
                 #     print('type :',type(testfile))
                 # print("before ocr :",time.time() - start )
 
-                toto = OCR_parser(uri + '\\' + str(self.request.POST['resumableFilename']))
+                resOCR = OCR_parser(uri + '\\' + str(self.request.POST['resumableFilename']))
+
+                # add ocr in metadata
+                temp = resOCR['temp'] or ''
+                hygro = resOCR['hygro'] or ''
+                cmdMetaDataInfo.append('')
+                cmdMetaDataInfo.append('')
+
+
+
 
                 # print("after ocr :",time.time() - start )
 
