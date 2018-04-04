@@ -21,8 +21,8 @@ from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 
-mySubExif = exiftool.ExifTool()
-mySubExif.start()
+# mySubExif = exiftool.ExifTool()
+# mySubExif.start()
 
 
 def datetime_adapter(obj, request):
@@ -89,6 +89,7 @@ def main(global_config, **settings):
     include_jwt_policy(config)
     config.set_root_factory(SecurityRoot)
 
+    dbConfig['init_exiftool'] = settings.get('init_exiftool', None)
     if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
         print('Exiftool not initialized')
         pass
