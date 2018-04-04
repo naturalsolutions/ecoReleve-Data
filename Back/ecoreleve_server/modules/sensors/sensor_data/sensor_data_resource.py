@@ -27,7 +27,14 @@ from ecoreleve_server.modules.observations import Equipment
 from ecoreleve_server.modules.users import User
 
 from . import CamTrap, ArgosGps, Gsm, Rfid, MetaData
-from ecoreleve_server.__init__ import mySubExif
+# from ecoreleve_server.__init__ import mySubExif
+
+import exiftool
+mySubExif = None
+
+if dbConfig.get('init_exiftool', 'True') == 'True':
+    mySubExif = exiftool.ExifTool()
+    mySubExif.start()
 
 
 ArgosDatasWithIndiv = Table(
