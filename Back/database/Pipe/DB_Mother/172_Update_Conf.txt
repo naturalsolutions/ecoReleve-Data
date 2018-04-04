@@ -1,0 +1,69 @@
+UPDATE ModuleGrids SET Name = 'SensorType@Name', QueryName = NULL
+WHERE Module_ID = 14 
+AND label = 'Type'
+
+UPDATE ModuleGrids SET Name = 'fieldActivity@Name', QueryName = NULL
+WHERE Module_ID = 3
+AND label = 'Field Activity'
+
+
+UPDATE ModuleGrids SET Name = 'FieldworkArea@Name', QueryName = NULL, IsSearchable = 0
+WHERE Module_ID = 3
+AND label like 'Fieldwork%Area'
+
+UPDATE ModuleGrids SET Name = 'MonitoredSite@Name', QueryName = NULL
+WHERE Module_ID = 3
+AND label = 'Monitored Site'
+
+
+
+INSERT INTO ModuleGrids(
+      [Module_ID]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status]
+      ,[ColumnParams])
+Select [Module_ID]
+      ,[TypeObj]
+      ,'FieldworkArea@fullpath'
+      ,[Label]
+      ,0
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,1
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status]
+      ,[ColumnParams]
+FROM ModuleGrids
+WHERE Module_ID = 3
+AND label like 'Fieldwork%Area'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('172_Update_Conf',GETDATE(),(SELECT db_name()))
+
+
+GO
