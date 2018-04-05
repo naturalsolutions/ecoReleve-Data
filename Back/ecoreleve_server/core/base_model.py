@@ -318,6 +318,7 @@ class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
     @values.setter
     def values(self, dict_):
         for prop, value in dict_.items():
+            print(prop, value)
             self.setValue(prop, value)
 
     def setValue(self, propertyName, value):
@@ -328,12 +329,15 @@ class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
         #check if propertyName corresponding to a column
         if not hasattr(self, propertyName):
             if propertyName in self.__table__.c:
+                print(propertyName)
+                print(self.__table__.c)
                 propertyName = class_mapper(inspect(self).class_
                                             ).get_property_by_column(
                                                 self.__table__.c[propertyName]
                 ).key
             else:
                 return
+
         setattr(self, propertyName, parser(value))
         self.__values__[propertyName] = value
 

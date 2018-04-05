@@ -62,7 +62,8 @@ class Individual (HasDynamicProperties, Base):
     Observations = relationship('Observation')
 
     Status_ = association_proxy('_Status_', 'Status_')
-    FK_Sensor = association_proxy('Equipments', 'FK_Sensor')
+    # FK_Sensor = association_proxy('Equipments', 'FK_Sensor')
+
     # @hybrid_property
     # def Status_(self):
     #     if self._Status_:

@@ -20,6 +20,8 @@ from ecoreleve_server.utils.parseValue import isNumeric, formatThesaurus
 from ecoreleve_server.core import RootCore
 from ..permissions import context_permissions
 from ..observations import Observation
+from ..individuals import Individual
+from ..stations import Station
 from ..observations.equipment_model import checkEquip, set_equipment
 from ..individuals.individual_resource import IndividualsResource
 
@@ -158,10 +160,8 @@ class ReleaseIndividualsResource(IndividualsResource):
         try:
             errorEquipment = None
             binList = []
-            # allProps = Individual().GetAllProp()
             for indiv in indivList:
                 curIndiv = session.query(Individual).get(indiv['ID'])
-                # curIndiv.LoadNowValues()
                 if not taxon:
                     taxon = curIndiv.Species
                 try:
@@ -171,12 +171,13 @@ class ReleaseIndividualsResource(IndividualsResource):
                     indiv['taxon'] = curIndiv.Species
                     del indiv['Species']
                     pass
+
                 indiv['__useDate__'] = curStation.StationDate
                 self.updateAllStartDate(
                     curIndiv, curStation.StationDate, curIndiv.properties)
                 curIndiv.values = indiv
 
-                binList.append(MoF_AoJ(indiv))
+                binList.append(MoF_AoJ(indiv))  
                 for k in indiv.keys():
                     v = indiv.pop(k)
                     k = k.lower()
@@ -212,7 +213,7 @@ class ReleaseIndividualsResource(IndividualsResource):
                 sensor_id = indiv.get(
                     'FK_Sensor', None) or indiv.get('fk_sensor', None)
 
-                if sensor_id is not None:
+                if sensor_id:
                     try:
                         curEquipmentInd = getnewObs(equipmentIndID)
                         equipInfo = {
@@ -319,6 +320,7 @@ class ReleaseResource(CustomResource):
 
     model = None
     __acl__ = context_permissions['release']
+    children = [('individuals',ReleaseIndividualsResource)]
 
     def getReleaseMethod(self):
         userLng = self.request.authenticated_userid['userlanguage'].lower()
