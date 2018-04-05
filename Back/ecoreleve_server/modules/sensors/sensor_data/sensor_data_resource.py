@@ -14,6 +14,7 @@ from ecoreleve_server.core import RootCore, Base, dbConfig
 from ecoreleve_server.utils.distance import haversine
 from ecoreleve_server.utils.data_toXML import data_to_XML
 from ecoreleve_server.utils.ocr_detect import OCR_parser
+from ecoreleve_server.utils.quality_detect import imgProcess
 from ecoreleve_server.utils.parseValue import parser
 
 from ecoreleve_server.modules.permissions import context_permissions
@@ -486,6 +487,10 @@ class SensorDatasByType(CustomResource):
             dateDecall = dateOrigine + datetime.timedelta(hours = operator*int(jetLagArray[0]) , minutes = operator*int(jetLagArray[1]), seconds = operator*int(jetLagArray[2]) )
             datePhoto = dateDecall
             user = self.request.authenticated_userid['iss']
+            resultProcessing = imgProcess(self.request.POST['file'].file)
+            defaultTags = 'Poor quality'
+            if resultProcessing == 1 :
+                defaultTags = 'Standard quality'
             if(checkDate(datePhoto,jetLag, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
                 # print("brancher ocr et script histogramme ici")
                 # import cv2
@@ -504,14 +509,9 @@ class SensorDatasByType(CustomResource):
                 resOCR = OCR_parser(uri + '\\' + str(self.request.POST['resumableFilename']))
 
                 # add ocr in metadata
-                temp = resOCR['temp'] or ''
-                hygro = resOCR['hygro'] or ''
-                cmdMetaDataInfo.append('')
-                cmdMetaDataInfo.append('')
-
-
-
-
+                temp = resOCR['temp'] or 'N/A'
+                hygro = resOCR['hygro'] or 'N/A'
+                cmdMetaDataInfo.append('-XMP-dc:Subject= { "temperature" : '+str(temp)+', "hygrometry" : '+str(hygro)+ '}')
                 # print("after ocr :",time.time() - start )
 
                     
@@ -519,13 +519,15 @@ class SensorDatasByType(CustomResource):
                 try:
                     # print("before insert photo sql :",time.time() - start )
                     AddPhotoOnSQL(
-                        fk_sensor, str(uri),
+                        fk_sensor,
+                        str(uri),
                         str(self.request.POST['resumableFilename']),
                         str(extType[len(extType) - 1]),
                         datePhoto,str(self.request.POST['startDate']),
                         str(self.request.POST['endDate']),
                         user,
-                        cmdMetaDataInfo
+                        cmdMetaDataInfo,
+                        defaultTags
                     )
                     # print("after insert photo sql :",time.time() - start )
                     # print("before insert call exif :",time.time() - start )
@@ -546,6 +548,7 @@ class SensorDatasByType(CustomResource):
                         # test.append(sourceFile)
 
                         cmdMetaDataInfo.append(sourceFile)
+                        cmdMetaDataInfo.append('-overwrite_original')
                         # pCmd = test
                         # print('cmd',pCmd)
                         # print('%s' %sour)
@@ -574,8 +577,8 @@ class SensorDatasByType(CustomResource):
 
                     # print("res Exif for"+str(self.request.POST['resumableFilename'])+"",resExif)
                     # print("after call exif :",time.time() - start )
-                    if os.path.exists(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original')):
-                        os.remove(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original'))
+                    # if os.path.exists(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original')):
+                    #     os.remove(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original'))
                     resizePhoto(str(uri) + "\\" +
                                 str(self.request.POST['resumableFilename']))
                     messageDate = "ok"

@@ -155,7 +155,7 @@ def unzip(zipFilePath, destFolder, fk_sensor, startDate, endDate, objMetaData):
     return messageErrorFiles, nbFilesTotal, nbFilesInserted
 
 
-def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endDate,user,cmdMetaData):
+def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endDate,user,cmdMetaData, defaultTags):
     # raise
     session = threadlocal.get_current_request().dbsession
 
@@ -170,7 +170,7 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
                 nbRows = 1,
                 nbInserted = 0,
                 maxDate = datetime.datetime.strptime(endDate,"%Y-%m-%d %H:%M:%S"),
-                minDate = datetime.datetime.strptime(startDate,"%Y-%m-%d %H:%M:%S") 
+                minDate = datetime.datetime.strptime(startDate,"%Y-%m-%d %H:%M:%S")                
                 )
         session.add(currentImport)
         session.flush()
@@ -182,7 +182,8 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
                 extension='.jpg', 
                 date_creation=date_creation, 
                 note=5,
-                FK_Import = currentImport.ID
+                FK_Import = currentImport.ID,
+                tags = '<TAGS><TAG>'+defaultTags+'</TAG></TAGS>' 
                 )
             session.add(currentPhoto)
             session.flush()
@@ -197,8 +198,8 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
                 session.add(currentImport)
                 session.flush()
                 return currentPhoto.pk_id,currentImport.ID,currentPhoto.pk_id
-    except:
-        raise
+    except Exception as e:
+        raise e
     return 
 
 
