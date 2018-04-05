@@ -38,6 +38,11 @@ class StationsResource(DynamicObjectCollectionResource):
         DynamicObjectCollectionResource.__init__(self, ref, parent)
         self.__acl__ = context_permissions[ref]
 
+    def handleDataBeforeInsert(self, data):
+        user_id = self.request.authenticated_userid['iss']
+        data['creator'] = user_id
+        return data
+
     def updateMonitoredSite(self):
         session = self.request.dbsession
         data = self.request.params.mixed()

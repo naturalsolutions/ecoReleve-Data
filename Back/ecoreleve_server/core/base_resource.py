@@ -1,6 +1,8 @@
 import json
 import io
 import sqlalchemy as sa
+from sqlalchemy.inspection import inspect
+
 import pandas as pd
 from datetime import datetime
 from collections import OrderedDict
@@ -258,6 +260,8 @@ class DynamicObjectCollectionResource(CustomResource):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
+        
+        self.handleDataBeforeInsert(data)
         self.objectDB.values = data
         self.session.add(self.objectDB)
         self.session.flush()
@@ -265,6 +269,9 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def insertMany(self):
         pass
+
+    def handleDataBeforeInsert(self, data):
+        return data
 
     def handleCriteria(self, criteria):
         return criteria
@@ -341,8 +348,12 @@ class DynamicObjectCollectionResource(CustomResource):
 
         return count
 
+    @timing
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
+        if params.get('offset', 0) > 0:
+            if not params.get('order_by', []):
+                params['order_by'] = [inspect(self.item.model).primary_key[0].name+':asc']
 
         conf_grid = self.getGrid()
         cols = list(map(lambda x: x['field'],conf_grid))

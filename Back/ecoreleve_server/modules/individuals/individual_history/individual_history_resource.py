@@ -15,3 +15,5 @@ class IndividualValueResource(DynamicValueResource):
 class IndividualValuesResource(DynamicValuesResource):
     model = IndividualDynPropValue
     item = IndividualValueResource
+
+    children = [('{int}', IndividualValueResource)]

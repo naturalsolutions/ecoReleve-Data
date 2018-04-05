@@ -44,7 +44,7 @@ class ObservationResource(DynamicObjectResource):
     def delete(self):
         if self.objectDB:
             id_ = self.objectDB.ID
-            DynamicObjectView.delete(self)
+            DynamicObjectResource.delete(self)
         else:
             id_ = None
         response = {'id': id_}
