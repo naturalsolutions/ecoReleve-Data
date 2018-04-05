@@ -1,37 +1,35 @@
-from ..Models import (
-    Individual,
-    Station,
-    Observation,
-    # ProtocoleType,
-    invertedThesaurusDict,
-    thesaurusDictTraduction
-)
+# from ..Models import (
+#     Individual,
+#     Station,
+#     Observation,
+#     # ProtocoleType,
+#     invertedThesaurusDict,
+#     thesaurusDictTraduction
+# )
 import json
 from datetime import datetime
 import pandas as pd
 from sqlalchemy import select, text
+import operator
 from traceback import print_exc
 from collections import Counter
-from ..controllers.security import RootCore, context_permissions
-from ..Models.Equipment import checkEquip
-from .individual import IndividualsView
-from . import CustomView
-from ..utils.parseValue import isNumeric, formatThesaurus
-import operator
-from ..Models.Equipment import set_equipment
+
+
+from ecoreleve_server.core.base_resource import CustomResource
+from ecoreleve_server.utils.parseValue import isNumeric, formatThesaurus
+from ecoreleve_server.core import RootCore
 from ..permissions import context_permissions
+from ..observations import Observation
+from ..observations.equipment_model import checkEquip, set_equipment
+from ..individuals.individual_resource import IndividualsResource
 
 ProtocoleType = Observation.TypeClass
 
 
-class ReleaseIndividualsView(IndividualsView):
+class ReleaseIndividualsResource(IndividualsResource):
 
     moduleGridName = 'IndivReleaseGrid'
     __acl__ = context_permissions['release']
-
-    def __init__(self, ref, parent):
-        IndividualsView.__init__(self, ref, parent)
-        self.__acl__ = context_permissions['release']
 
     def getFilter(self, type_=None, moduleName=None):
         return []
@@ -317,15 +315,10 @@ class ReleaseIndividualsView(IndividualsView):
         return message
 
 
-class ReleaseView(CustomView):
+class ReleaseResource(CustomResource):
 
-    item = ReleaseIndividualsView
-
-    def __init__(self, ref, parent):
-        CustomView.__init__(self, ref, parent)
-        self.__actions__ = {'getReleaseMethod': self.getReleaseMethod,
-                            }
-        self.__acl__ = context_permissions['release']
+    model = None
+    __acl__ = context_permissions['release']
 
     def getReleaseMethod(self):
         userLng = self.request.authenticated_userid['userlanguage'].lower()
@@ -343,7 +336,7 @@ class ReleaseView(CustomView):
         return result
 
 
-RootCore.listChildren.append(('release', ReleaseView))
+RootCore.children.append(('release', ReleaseResource))
 
 
 def isavailableSensor(request, data):

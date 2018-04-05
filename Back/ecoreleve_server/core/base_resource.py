@@ -226,7 +226,7 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
-        self.objectDB = self.item.model()
+        self.objectDB = self.model()
         if not hasattr(self.objectDB, 'session') or not self.objectDB.session:
             self.objectDB.session = self.session
 
@@ -238,7 +238,7 @@ class DynamicObjectCollectionResource(CustomResource):
             self.typeObj = None
 
     @property
-    def item(self):
+    def model(self):
         raise NotImplementedError()
 
     @property
@@ -353,7 +353,7 @@ class DynamicObjectCollectionResource(CustomResource):
         params, history, startDate = self.formatParams(params, paging)
         if params.get('offset', 0) > 0:
             if not params.get('order_by', []):
-                params['order_by'] = [inspect(self.item.model).primary_key[0].name+':asc']
+                params['order_by'] = [inspect(self.model).primary_key[0].name+':asc']
 
         conf_grid = self.getGrid()
         cols = list(map(lambda x: x['field'],conf_grid))

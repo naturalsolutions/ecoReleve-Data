@@ -657,7 +657,6 @@ class HasDynamicProperties(HasStaticProperties):
             del dict_['ID']
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
             raise Exception('object type not exists')
-
         if 'type_name' in dict_:
             self.type_name = dict_.get('type_name')
         else:

@@ -57,7 +57,7 @@ class SensorResource(DynamicObjectResource):
 class SensorsResource(DynamicObjectCollectionResource):
 
     Collection = SensorCollection
-    item = SensorResource
+    model = Sensor
     moduleFormName = 'SensorForm'
     moduleGridName = 'SensorFilter'
 

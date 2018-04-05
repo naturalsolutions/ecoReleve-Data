@@ -7,13 +7,10 @@ IndividualDynPropValue = Individual.DynamicValuesClass
 
 class IndividualValueResource(DynamicValueResource):
     model = IndividualDynPropValue
-    item = None
 
     def retrieve(self):
         pass
 
 class IndividualValuesResource(DynamicValuesResource):
     model = IndividualDynPropValue
-    item = IndividualValueResource
-
     children = [('{int}', IndividualValueResource)]

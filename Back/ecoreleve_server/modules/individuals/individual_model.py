@@ -48,7 +48,7 @@ class Individual (HasDynamicProperties, Base):
     Age = Column(String(250))
     Birth_date = Column(Date)
     Death_date = Column(Date)
-    Original_ID = Column(String(250))
+    Original_ID = Column(String(250), default='0')
 
     Locations = relationship('Individual_Location',
                              cascade="all, delete-orphan")

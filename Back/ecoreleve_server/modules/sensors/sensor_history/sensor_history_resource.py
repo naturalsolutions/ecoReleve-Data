@@ -7,7 +7,6 @@ SensorDynPropValue = Sensor.DynamicValuesClass
 
 class SensorValueResource(DynamicValueResource):
     model = SensorDynPropValue
-    item = None
 
     def retrieve(self):
         pass
@@ -15,4 +14,3 @@ class SensorValueResource(DynamicValueResource):
 
 class SensorValuesResource(DynamicValuesResource):
     model = SensorDynPropValue
-    item = SensorValueResource

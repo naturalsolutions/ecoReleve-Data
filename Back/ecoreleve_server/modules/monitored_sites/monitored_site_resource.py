@@ -93,7 +93,7 @@ class MonitoredSiteResource(DynamicObjectResource):
 class MonitoredSitesResource(DynamicObjectCollectionResource):
 
     Collection = MonitoredSiteCollection
-    item = MonitoredSiteResource
+    model = MonitoredSite
     moduleFormName = 'MonitoredSiteForm'
     moduleGridName = 'MonitoredSiteGrid'
 
