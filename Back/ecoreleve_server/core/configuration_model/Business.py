@@ -78,7 +78,12 @@ class BusinessRules(Base):
         params_stmt = ' :' + ', :'.join(paramsJSON) + ', @result OUTPUT; \n'
         bindparams = [bindparam(param, entityDTO.get(param, None))
                       for param in paramsJSON]
-
+        # print('exec buisiness rule on {target}, type={type} executing: {executing} \n with data : {data}'.format(data=bindparams,
+        #                                                                                                          executing=self.executing,
+        #                                                                                                          target=self.target,
+        #                                                                                                          type=self.targetType
+        #                                                                                                          )
+        #                                                                                                          )
         stmt = text(declare_stmt + ' EXEC ' + self.executing +
                     params_stmt + '\n SELECT @result;', bindparams=bindparams)
         return stmt

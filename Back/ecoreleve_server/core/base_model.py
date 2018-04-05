@@ -193,6 +193,8 @@ class EventRuler(object):
     trig by the model during the commit of the session.
     Bindings of stored prodecedures is configured in the BusinessRules Table
     '''
+    enable_business_ruler = True
+
     @classmethod
     def getBuisnessRules(cls):
         return dbConfig['dbSession']().query(BusinessRules
@@ -223,36 +225,35 @@ class EventRuler(object):
 
         @event.listens_for(cls, 'before_update')
         def before_update(mapper, connection, target):
-            cls.executeBusinessRules(target, 'before_update')
+            target.executeBusinessRules(target, 'before_update')
 
         @event.listens_for(cls, 'after_update')
         def after_update(mapper, connection, target):
-            cls.executeBusinessRules(target, 'after_update')
+            target.executeBusinessRules(target, 'after_update')
 
         @event.listens_for(cls, 'before_insert')
         def before_insert(mapper, connection, target):
-            cls.executeBusinessRules(target, 'before_insert')
+            target.executeBusinessRules(target, 'before_insert')
 
         @event.listens_for(cls, 'after_insert')
         def after_insert(mapper, connection, target):
-            cls.executeBusinessRules(target, 'after_insert')
+            target.executeBusinessRules(target, 'after_insert')
 
         @event.listens_for(cls, 'before_delete')
         def before_delete(mapper, connection, target):
-            cls.executeBusinessRules(target, 'before_delete')
+            target.executeBusinessRules(target, 'before_delete')
 
         @event.listens_for(cls, 'after_delete')
         def after_delete(mapper, connection, target):
-            cls.executeBusinessRules(target, 'after_delete')
+            target.executeBusinessRules(target, 'after_delete')
 
-    @classmethod
-    def executeBusinessRules(cls, target, event):
+    # @classmethod
+    def executeBusinessRules(self, target, event):
         '''
         '''
-
-        if cls.__constraintRules__[event]:
+        if self.__constraintRules__[event] and self.enable_business_ruler:
             entityDTO = target.values
-            for rule in cls.__constraintRules__[event]:
+            for rule in self.__constraintRules__[event]:
                 if (not rule.targetTypes
                         or (hasattr(target, 'type_id') and target.type_id in rule.targetTypes)):
                     result = rule.execute(entityDTO)

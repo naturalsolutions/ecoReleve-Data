@@ -92,7 +92,6 @@ class ReleaseIndividualsResource(IndividualsResource):
             newObs = Observation()
             newObs.type_id = typeID
             newObs.FK_Station = sta_id
-            # newObs.__init__()
             return newObs
 
         protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(
@@ -177,6 +176,7 @@ class ReleaseIndividualsResource(IndividualsResource):
                     curIndiv, curStation.StationDate, curIndiv.properties)
                 curIndiv.values = indiv
 
+                curIndiv.enable_business_ruler = False
                 binList.append(MoF_AoJ(indiv))  
                 for k in indiv.keys():
                     v = indiv.pop(k)
@@ -312,7 +312,9 @@ class ReleaseIndividualsResource(IndividualsResource):
             self.request.response.status_code = 500
             session.rollback()
             message = str(type(e))
-
+        finally:
+            Individual.enable_business_ruler = True
+            
         return message
 
 
