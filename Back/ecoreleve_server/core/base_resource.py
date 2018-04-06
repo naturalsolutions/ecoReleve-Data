@@ -486,7 +486,10 @@ class DynamicObjectCollectionResource(CustomResource):
         return response
 
     def export(self):
-        dataResult = self.search(paging=False, noCount=True)
+        # dataResult = self.search(paging=False, noCount=True)
+        params, history, startDate = self.formatParams({}, False)
+        collection = self.getCollection()
+        dataResult = collection.search(filters=params.get('criteria'))
         df = pd.DataFrame.from_records(dataResult,
                                        columns=dataResult[0].keys(),
                                        coerce_float=True)
@@ -500,5 +503,5 @@ class DynamicObjectCollectionResource(CustomResource):
         dt = datetime.now().strftime('%d-%m-%Y')
         return Response(
             file,
-            content_disposition="attachment; filename=individuals_export_" + dt + ".xlsx",
+            content_disposition="attachment; filename=" + self.__name__ + "_export_" + dt + ".xlsx",
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
