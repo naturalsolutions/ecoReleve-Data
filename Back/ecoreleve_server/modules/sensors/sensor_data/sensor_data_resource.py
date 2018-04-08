@@ -184,6 +184,8 @@ class SensorDatasBySession(CustomResource):
                         else:
                             bddItem.tags = None
                         bddItem.validated = elemRequest['validated']
+                        if elemRequest['stationId']:
+                            bddItem.stationId = elemRequest['stationId']
                         
                         break
             # self.bulk_save_objects(allItems)

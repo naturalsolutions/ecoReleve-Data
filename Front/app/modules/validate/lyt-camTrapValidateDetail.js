@@ -882,7 +882,7 @@ define([
 
     callPostAllStationsAPI: function(tabElem,tabData) {
 
-
+      var _this = this;
       $.ajax({
         type: 'POST',
         url: config.coreUrl + 'stations/insertAll',
@@ -891,7 +891,44 @@ define([
         dataType: 'json'
       })
       .done(function (resp) {
-        elem.attachStation(resp.ID);
+        var namePhoto,model;
+        var tabModel = new Backbone.Collection();
+        for( var i = 0 ; i < resp.length ; i++ ) {
+          namePhoto = Object.keys(resp[i])[0];
+          model = _this.myImageCollection.fullCollection.where({
+            name: namePhoto
+          });
+          if (model[0]) {
+            model[0].set({ stationId : resp[i][namePhoto]},{silent:true} )
+            tabModel.add(model)
+          }
+          model=undefined;
+        }
+
+        $.ajax({
+          type: 'PUT',
+          url: config.coreUrl + 'sensorDatas/camtrap/'+_this.equipmentId+'/updateMany',
+          contentType: 'application/json',
+          data: JSON.stringify(tabModel)
+        })
+        .done(function (resp) {
+          var index,model
+          var tabSelected = _this.model.get('newSelected');
+
+          for( var i = 0; i < tabSelected.length ; i ++ ) {
+            index = tabSelected[i]
+            model = _this.tabView[index].model
+            if ( model.get('stationId') ){
+              _this.tabView[index].setVisualStationAttached(true);
+            }
+          }
+
+        })
+        .fail(function (err) {
+          console.log(err);
+          alert("someting goes wrong")
+        })
+
       })
       .fail(function (err) {
         console.log(err)

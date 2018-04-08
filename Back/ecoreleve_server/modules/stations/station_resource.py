@@ -65,39 +65,22 @@ class StationsResource(DynamicObjectCollectionResource):
         session = self.request.dbsession
         data = self.request.json_body
         result = []
+        collectionItem = []
         for row in data:
-            self.objectDB.values = row
-            self.session.add(self.objectDB)
-            self.session.flush()
-            # curSta = Station(
-            #     LAT=row['LAT'],
-            #     LON=row['LON'],
-            #     FK_MonitoredSite=row['FK_MonitoredSite'],
-            #     Name=row['Name'],
-            #     FK_StationType=row['FK_StationType'],
-            #     StationDate=row['StationDate'],
-            #     ELE=row['ELE'],
-            #     precision=row['precision'],
-            #     Comments=row['Comments'],
-            #     creator=row['creator'],
-            #     fieldActivityId=row['fieldActivityId'] 
-            # )
-            # session.add(curSta)
-            if self.objectDB.ID:
-                result.append({ self.objectDB.ID : 'created'})
+            self.newobjectDB = Station()
+            collectionItem.append(self.newobjectDB)
+            row = self.handleDataBeforeInsert(row)
+            self.newobjectDB.values = row
+            self.session.add(self.newobjectDB)
+        self.session.flush()
+        for item in collectionItem:
+            if item.ID :
+                result.append({ ''+str(item.Name)+'' :  item.ID})
             else :
-                result.append({'null': 'refused'})
-            self.objectDB.ID = None
+                result.append({ ''+str(item.Name)+'' : None})
 
-
-            
-            
-        # self.insertMany()
-        # data = {}
-        # print("hello ")
-        # print(self.request.json_body)
         return result
-        
+
     def handleDataBeforeInsert(self, data):
         user_id = self.request.authenticated_userid['iss']
         data['creator'] = user_id
