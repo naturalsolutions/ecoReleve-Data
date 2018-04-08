@@ -49,7 +49,7 @@ class RegionResource(CustomResource):
 
 class RegionsResource(CustomResource):
 
-    item = RegionResource
+    model = FieldworkArea
     colorByTypes = {
         'country': {'fillColor': '#e6e6e6',
                     'color': '#808080',

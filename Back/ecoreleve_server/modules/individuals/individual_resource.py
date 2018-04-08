@@ -56,7 +56,7 @@ class IndividualResource(DynamicObjectResource):
 class IndividualsResource(DynamicObjectCollectionResource):
 
     Collection = IndividualCollection
-    item = IndividualResource
+    model = Individual
     moduleFormName = 'IndivForm'
     moduleGridName = 'IndivFilter'
 
@@ -75,20 +75,18 @@ class IndividualsResource(DynamicObjectCollectionResource):
         data = {}
         startDate = None
 
-        for items, value in self.request._body.items():
+        for items, value in self.request.json_body.items():
             data[items] = value
         existingIndivID = None
 
         if 'stationID' in data:
             curSta = self.session.query(Station).get(data['stationID'])
             startDate = curSta.StationDate
-        self.typeObj = data['FK_IndividualType']
-        newIndiv = self.item.model(FK_IndividualType=self.typeObj,
-                                   creationDate=datetime.now(),
-                                   Original_ID='0')
-        newIndiv.init_on_load()
+
+        newIndiv = self.model()
         try:
-            newIndiv.updateFrom(data, startDate=startDate)
+            data['__useDate__'] = startDate
+            newIndiv.values = data
 
             if self.typeObj == 2:
                 existingIndivID = self.checkExisting(newIndiv)

@@ -15,7 +15,7 @@ class ImportResource(object):
 
 class ImportHistoryResource(DynamicObjectCollectionResource):
     Collection = ImportCollection
-    item = ImportResource
+    model = Import
     moduleGridName = 'ImportHistoryFilter'
 
     __acl__ = context_permissions['import']

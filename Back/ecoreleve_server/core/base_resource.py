@@ -1,6 +1,8 @@
 import json
 import io
 import sqlalchemy as sa
+from sqlalchemy.inspection import inspect
+
 import pandas as pd
 from datetime import datetime
 from collections import OrderedDict
@@ -224,7 +226,7 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
-        self.objectDB = self.item.model()
+        self.objectDB = self.model()
         if not hasattr(self.objectDB, 'session') or not self.objectDB.session:
             self.objectDB.session = self.session
 
@@ -236,7 +238,7 @@ class DynamicObjectCollectionResource(CustomResource):
             self.typeObj = None
 
     @property
-    def item(self):
+    def model(self):
         raise NotImplementedError()
 
     @property
@@ -258,6 +260,8 @@ class DynamicObjectCollectionResource(CustomResource):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
+        
+        self.handleDataBeforeInsert(data)
         self.objectDB.values = data
         self.session.add(self.objectDB)
         self.session.flush()
@@ -265,6 +269,9 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def insertMany(self):
         pass
+
+    def handleDataBeforeInsert(self, data):
+        return data
 
     def handleCriteria(self, criteria):
         return criteria
@@ -341,8 +348,12 @@ class DynamicObjectCollectionResource(CustomResource):
 
         return count
 
+    @timing
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
+        if params.get('offset', 0) > 0:
+            if not params.get('order_by', []):
+                params['order_by'] = [inspect(self.model).primary_key[0].name+':asc']
 
         conf_grid = self.getGrid()
         cols = list(map(lambda x: x['field'],conf_grid))
@@ -475,7 +486,10 @@ class DynamicObjectCollectionResource(CustomResource):
         return response
 
     def export(self):
-        dataResult = self.search(paging=False, noCount=True)
+        # dataResult = self.search(paging=False, noCount=True)
+        params, history, startDate = self.formatParams({}, False)
+        collection = self.getCollection()
+        dataResult = collection.search(filters=params.get('criteria'))
         df = pd.DataFrame.from_records(dataResult,
                                        columns=dataResult[0].keys(),
                                        coerce_float=True)
@@ -489,5 +503,5 @@ class DynamicObjectCollectionResource(CustomResource):
         dt = datetime.now().strftime('%d-%m-%Y')
         return Response(
             file,
-            content_disposition="attachment; filename=individuals_export_" + dt + ".xlsx",
+            content_disposition="attachment; filename=" + self.__name__ + "_export_" + dt + ".xlsx",
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

@@ -8,7 +8,7 @@ from ecoreleve_server.core.base_resource import *
 from ..individual_model import Individual, Individual_Location
 from .inidividual_locations_collection import IndividualLocationsCollection
 
-#TODO get geoJSON
+
 class IndividualLocationsResource(CustomResource):
 
     def retrieve(self):

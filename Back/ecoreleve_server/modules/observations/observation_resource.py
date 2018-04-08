@@ -13,7 +13,6 @@ from ..permissions import context_permissions
 class ObservationResource(DynamicObjectResource):
 
     model = Observation
-
     __acl__ = context_permissions['observations']
 
     def update(self, json_body=None):
@@ -67,11 +66,12 @@ class ObservationResource(DynamicObjectResource):
 class ObservationsResource(DynamicObjectCollectionResource):
 
     Collection = None
-    item = ObservationResource
+    model = Observation
     moduleFormName = 'ObservationForm'
     moduleGridName = 'ObservationFilter'
     children = [('{int}', ObservationResource)]
-    
+    item = ObservationResource
+
     __acl__ = context_permissions['observations']
 
     def __init__(self, ref, parent):
@@ -102,7 +102,7 @@ class ObservationsResource(DynamicObjectCollectionResource):
             data[items] = value
 
         sta = self.parent.objectDB
-        curObs = self.item.model(
+        curObs = self.model(
             type_id=data['FK_ProtocoleType'], FK_Station=sta.ID)
         listOfSubProtocols = []
 
@@ -151,6 +151,7 @@ class ObservationsResource(DynamicObjectCollectionResource):
         return responseBody
 
     def getObservationsWithType(self):
+        print('in get observation grid')
         sta_id = self.parent.objectDB.ID
         listObs = list(self.session.query(Observation
                                           ).filter(Observation.type_id == self.typeObj
@@ -158,7 +159,7 @@ class ObservationsResource(DynamicObjectCollectionResource):
         values = []
         for i in range(len(listObs)):
             curObs = listObs[i]
-            values.append(curObs.values)
+            values.append(curObs.getDataWithSchema()['data'])
         return values
 
     def getProtocolsofStation(self):

@@ -328,10 +328,6 @@ class ExportCoreResource(CustomExportResource):
     item = ExportCollectionThemeResource
     children = [('views', ExportCollectionQueryResource),
                 ('themes', ExportCollectionThemeResource)]
-    # def __getitem__(self, ref):
-    #     if ref == 'views':
-    #         return ExportCollectionQueryView(ref, self)
-    #     return self.item(ref, self)
 
     def retrieve(self):
         return {'next items': {'views': {},

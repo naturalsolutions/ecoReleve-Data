@@ -35,7 +35,7 @@ class StationResource(DynamicObjectResource):
 class StationsResource(DynamicObjectCollectionResource):
 
     Collection = StationCollection
-    item = StationResource
+    model = Station
     moduleFormName = 'StationForm'
     moduleGridName = 'StationGrid'
 
@@ -97,6 +97,11 @@ class StationsResource(DynamicObjectCollectionResource):
         # print("hello ")
         # print(self.request.json_body)
         return result
+        
+    def handleDataBeforeInsert(self, data):
+        user_id = self.request.authenticated_userid['iss']
+        data['creator'] = user_id
+        return data
 
     def updateMonitoredSite(self):
         session = self.request.dbsession
@@ -269,7 +274,7 @@ class StationsResource(DynamicObjectCollectionResource):
         data_to_insert = []
         format_dt = '%d/%m/%Y %H:%M'
         dateNow = datetime.now()
-        model = self.item.model
+        model = self.model
 
         # Rename field and convert date
         # TODO
