@@ -95,21 +95,6 @@ define([
 			}
 		},
 
-		handleFocus: function (e) {
-			if (this.parent.tabSelected.length > 0) {
-				$('#gallery .ui-selected').removeClass('ui-selected');
-				$('#gallery').trigger('unselected')
-				for (var i of this.parent.tabSelected) {
-					this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
-				}
-			}
-			this.$el.find('.vignette').toggleClass('active');
-			this.$el.find('img').focus();
-			this.parent.tabSelected = [];
-			this.parent.fillTagsInput();
-			this.parent.rgToolsBar.currentView.changeModel(this.model);
-		},
-
 		initialize: function (options) {
 			this.parent = options.parent;
 			this.lastzoom = null;
@@ -178,6 +163,14 @@ define([
 			})  
 		},
 
+		setSilentTags : function(strTags) {
+			this.model.set({
+				tags : strTags
+			}, {
+				silent: true
+			})
+		},
+
 		setModelValidatedSilent: function(val) {
 			this.model.set({
 				validated: val
@@ -198,7 +191,7 @@ define([
 					.done(function(resp) {
 						_this.model.set({
 							validated: val,
-							tags : null,
+							// tags : null,
 							stationId : null 
 						});
 						_this.parent.toolsBar.$elemTags.val(null).trigger('change');
@@ -212,7 +205,7 @@ define([
 				else {
 					_this.model.set({
 						validated: val,
-						tags : null
+						// tags : null
 					});
 					_this.parent.toolsBar.$elemTags.val(null).trigger('change');
 					_this.setVisualValidated(val);

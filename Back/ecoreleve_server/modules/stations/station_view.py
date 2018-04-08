@@ -22,3 +22,7 @@ class StationsView(RestCollectionView):
     @view_config(name='deleteMany', request_method='POST', renderer='json')
     def deleteMany(self):
         return self.context.deleteMany()
+
+    @view_config(name='insertAll', request_method='POST', renderer='json')
+    def insertAll(self):
+        return self.context.insertAll()

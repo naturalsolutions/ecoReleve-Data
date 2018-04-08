@@ -109,6 +109,9 @@ define([
       'rgToolsBarTop': '#rgToolsBarTop',
       'rgImageDetails': '#imageDetails',
     },
+    /*
+    TODO refact: change selection by a backbone.collection 
+    */
 
     findIndexOfElemImg : function(elem) {
       var index 
@@ -242,9 +245,9 @@ define([
         _this.setoldSelectedInactive(oldTab);
         _this.setAllSelectedActive(newTab);
         
-        var tabSelected = this.model.get('newSelected');
+        
 
-        _this.updateUIWhenSelectionChange(tabSelected);
+        _this.updateUIWhenSelectionChange();
 
         /*update control ui here */
 
@@ -261,8 +264,9 @@ define([
       this.initCollection();
       // this.model.set('newSelected',[1,2,12]);
     },
-    updateUIWhenSelectionChange : function(tabSelected) {
+    updateUIWhenSelectionChange : function() {
       var _this = this;
+      var tabSelected = this.model.get('newSelected');
       if( !tabSelected ) {
         console.log("désactive tout");
         
@@ -280,6 +284,7 @@ define([
 
       $.when(_this.dataTags)
       .then(function(resp) {
+
         _this.toolsBar.fillElemTags(collection);
         if (collection.length == 1 ) {
           _this.toolsBar.displaySingleSelect()
@@ -704,9 +709,12 @@ define([
 
       $.when(_this.dataTags)
       .then(function(resp) {
+        resp.children.push({ title:"Standard quality",value : "Standard quality", children: []})
+        resp.children.push({ title:"Poor quality", value:"Poor quality", children: []})
         if(!_this.jsonParsed) {
           _this.jsonParsed = _this.parseJsonRecur(resp);
         }
+        // _this.jsonParsed.push({})
         _this.toolsBar = new ToolsBar({
           parent: _this,
           model : null,
@@ -757,6 +765,7 @@ define([
       data.precision = monitoredSiteModel.get('precision') || null;
       data.Comments = "created from camera trap validation" || null;
       data.NbFieldWorker = 1;
+      data.creator = window.app.user.get('PK_id');
       data.fieldActivityId = 39 // Id from BDD for fieldactivity : camera trapping
       return data;
     },
@@ -868,6 +877,27 @@ define([
       }
       this.callDeleteStationAPI(tabOfIds, tabOfItem);
       this.refreshCounter();
+      this.updateUIWhenSelectionChange()
+    },
+
+    callPostAllStationsAPI: function(tabElem,tabData) {
+
+
+      $.ajax({
+        type: 'POST',
+        url: config.coreUrl + 'stations/insertAll',
+        data: JSON.stringify(tabData),
+        contentType: 'application/json',
+        dataType: 'json'
+      })
+      .done(function (resp) {
+        elem.attachStation(resp.ID);
+      })
+      .fail(function (err) {
+        console.log(err)
+        throw new Error("error create station");
+      });
+
     },
 
     callPostStationAPI: function (elem, data) {
@@ -922,12 +952,23 @@ define([
           return;
         }
       //TODO will fail if same position , same name
-      for (var i = 0; i < tabStationPending.length; i++) {
-        var elem = tabStationPending[i];
+      if( tabStationPending.length == 1 ) {
         var data = this.populateDataForCreatingStation(this.tabView[elem]);
         this.callPostStationAPI(this.tabView[elem], data);
       }
+      if (tabStationPending.length > 1 ) {
+        var allData = []
+        for (var i = 0; i < tabStationPending.length; i++) {
+          var elem = tabStationPending[i];
+          var data = this.populateDataForCreatingStation(this.tabView[elem]);
+          allData.push(data)
+          // this.callPostStationAPI(this.tabView[elem], data);
+        }
+        this.callPostAllStationsAPI(tabStationPending,allData)
+      }
+
       _this.refreshCounter();
+      _this.updateUIWhenSelectionChange()
     },
 
 
@@ -1013,12 +1054,14 @@ define([
         if( tabPhotoAccepted.length ==1 ) {
           var elem = tabPhotoAccepted[0];
           this.tabView[elem].setModelValidated(2);
+          this.refreshCounter();
+          this.updateUIWhenSelectionChange();
         }
         else {
           this.acceptAllPhoto();
         }
      }
-     this.refreshCounter();
+
     },
 
     acceptAllPhoto : function() {
@@ -1055,6 +1098,8 @@ define([
           item.setModelValidatedSilent(2);
           item = undefined;
         }
+        _this.refreshCounter();
+        _this.updateUIWhenSelectionChange();
       })
       .fail(function (err) {
         console.log(err);
@@ -1122,6 +1167,8 @@ define([
           var elem = tabPhotoRejected[item]
           _this.tabView[elem].removeStationAndReject();        
         }
+        _this.refreshCounter();
+        _this.updateUIWhenSelectionChange();
 
       })
       .fail(function (err) {
@@ -1133,6 +1180,39 @@ define([
       //for each model set stations null validated = 2
     },
 
+    rejectAll: function() {
+      var _this = this;
+      var tabSelected = this.model.get('newSelected');
+      var tabRejected = [];
+
+      var index,item,model;
+      for( var i = 0 ; i < tabSelected.length ; i ++ ) {
+        index = tabSelected[i]
+        model = _this.tabView[index].model;
+        tabRejected.push(model.toJSON())
+      }
+
+      $.ajax({
+        type: 'PUT',
+        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        contentType: 'application/json',
+        data: JSON.stringify(tabRejected)
+      })
+      .done(function (resp) {
+        var item
+        for( var i = 0 ; i < tabSelected.length ; i++ ) {
+          index = tabSelected[i]
+          _this.tabView[index].setModelValidatedSilent(4);
+        }
+        _this.refreshCounter();
+        _this.updateUIWhenSelectionChange();
+      })
+      .fail(function (err) {
+        console.log(err);
+        alert("someting goes wrong")
+      })
+    },
+
     canIRefused : function(tab) {
       var listPhotos = [];
       var index ;
@@ -1140,7 +1220,10 @@ define([
       var _this = this
       for(var i= 0 ; i< tab.length ; i++ ) {
         index = tab[i]
-        if(this.tabView[index].model.get('tags') || this.tabView[index].model.get('stationId') ) {
+        // if(this.tabView[index].model.get('tags') || this.tabView[index].model.get('stationId') ) {
+        //   listPhotos.push(index+1)
+        // }
+        if(this.tabView[index].model.get('stationId') ) {
           listPhotos.push(index+1)
         }
       }
@@ -1148,7 +1231,7 @@ define([
         Swal({
           title: 'Care',
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-          text: 'you will erase tags and stations for photos :\n'+listPhotos.join(','),
+          text: 'you will destroy stations for photos :\n'+listPhotos.join(','),
           type: 'error',
           showCancelButton: true,
           confirmButtonColor: 'rgb(218, 146, 15)',
@@ -1170,9 +1253,10 @@ define([
         });
       }
       else {
-        for(var i = 0 ; i < tab.length ; i++ ) {
-          _this.tabView[tab[i]].setModelValidated(4);
-        }
+        _this.rejectAll();
+        // for(var i = 0 ; i < tab.length ; i++ ) {
+        //   _this.tabView[tab[i]].setModelValidated(4);
+        // }
       }
     },
 
@@ -1185,6 +1269,7 @@ define([
         }
         this.canIRefused(this.model.get('newSelected'));
         this.refreshCounter();
+        this.updateUIWhenSelectionChange()
         
       //   if (this.currentPosition !== null ) {
       //     this.canIRefused([this.currentPosition]);
@@ -1452,20 +1537,6 @@ define([
 
     },
 
-    fillTagsInput: function () {
-      var $inputTags = this.toolsBar.$el.find("#tagsinput");
-      this.toolsBar.removeAll(); //vide les tags
-
-      var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
-      if (tabTagsTmp !== null) {
-        tabTagsTmp = tabTagsTmp.split(","); //charge les nouveaux
-        for (var i = 0; i < tabTagsTmp.length; i++) {
-          this.toolsBar.addTag(tabTagsTmp[i]);
-        }
-      }
-
-    },
-
     displayAll: function (e) {
       this.currentCollection = this.myImageCollection;
       this.ui.paginator.html('');
@@ -1591,7 +1662,7 @@ define([
       });
     },
 
-    displaySwalValidate: function (compteur) {
+    displaySwalValidate: function () {
       var _this = this;
       var text = "";
       if (_this.nbPhotosAccepted == 0) {
@@ -1606,13 +1677,13 @@ define([
           title: 'Validation',
           text: 'you have finish this sessions\nOn ' + _this.nbPhotos + ' photos ' + text,
           type: 'success',
-          showCancelButton: false,
+          showCancelButton: true,
           confirmButtonColor: 'rgb(218, 146, 15)',
 
           confirmButtonText: 'Ok !',
           cancelButtonText: 'No ! i want to return to session\'s validation',
-          closeOnConfirm: false,
-          closeOnCancel: false
+          closeOnConfirm: true,
+          closeOnCancel: true
         },
         function (isConfirm) {
           if (isConfirm) {
@@ -1667,6 +1738,9 @@ define([
 
               });
             //TODO mettre le status validated a 8 pour sauvegarder la validation de force
+          }
+          else {
+            return;
           }
 
         }

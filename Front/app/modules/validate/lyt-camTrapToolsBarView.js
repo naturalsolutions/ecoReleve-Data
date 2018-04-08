@@ -44,57 +44,13 @@ define([
 			console.log("on init la toolBar youhouuuuuuuu")
 			this.parent = options.parent;
 			this.dataTags = null;
-			this.model = options.model;// || new CamTrapImageModel();
+			this.model = options.model;
 			this.unSelectedTagsTab = [];
 			this.selectedTagsTab = [];
 			this.jsonParsed = options.jsonParsed; 
 			this.$elemTags = undefined;
-			// this.dataTags = $.ajax({
-			// 	type: 'POST',
-			// 	url: config.thesaurusUrl + '/fastInitForCompleteTree/',
-			// 	contentType:"application/json; charset=utf-8",
-			// 	dataType:"json",
-			// 	data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
-			//   })
-			//   .done(function (resp) {
-				  
-			// 	console.log(resp);
-			//   })
-			//   .fail(function (err) {
-			// 	console.log(err);
-			//   });
-		
-
 		},
 
-		// parseJsonRecur: function(obj) {
-		// 	var jsonString = ''
-		// 	var _this = this;
-		// 	if( Array.isArray(obj) ) {
-		// 		var tab = obj;
-		// 		for( var i = 0 ; i < tab.length ; i++ ) {
-		// 			jsonString += ' { "id" : "' + tab[i].value + '", "text" : "'+ tab[i].value +'" } ';
-		// 			if( i+1 < tab.length ) {
-		// 				jsonString += ' , ';
-		// 			}
-		// 		}
-		// 	}
-		// 	for( var item in obj) {
-		// 		if( item ==='children' && typeof obj[item] == 'object' ) {
-		// 			jsonString += ' , "children" : [ ';
-		// 			jsonString += _this.parseJsonRecur(obj[item]);
-		// 			jsonString += ' ] ';
-		// 		}
-		// 		if( item ==='value' ) {
-		// 			jsonString += '{"text" : "'+ obj[item]+'"';
-		// 		}
-				
-		// 	}
-		// 	if( !Array.isArray(obj) ) {
-		// 		jsonString += ' } ';
-		// 	}
-		// 	return jsonString;		
-		// },
 
 		instantiateElemTags : function() {
 			var _this = this;
@@ -113,7 +69,6 @@ define([
 
 			  //TODO maybe a better event to listen
 			  _this.$elemTags.on('select2:closing', function(e) {
-				console.log("event select2:closing fired ")
 				//on close we save
 				_this.saveTags();
 			  });
@@ -144,7 +99,7 @@ define([
 			}
 			if ( !aCollection )
 				return;
-			if (aCollection.length == 1 ) {
+			if (aCollection.length == 1 /**&& aCollection.at(0).get('validated') == 4 */) {
 				var tagsTab = [];
 				var tagsStr = aCollection.at(0).get('tags');
 				
@@ -158,11 +113,46 @@ define([
 				 else {
 					_this.$elemTags.val(null).trigger('change');
 				 }
-
 			}
 
 			if (aCollection.length > 1 ) {
-				console.log("on va fill avec une collection multiple youhouuu")
+				var model;
+				var allTags=[];
+				var tagsAndOccurences
+				var allTagsStr =''
+				var tmpTagsStr = '';
+				var finalTagsTab = []
+
+				//filter collection only accepted photos
+				var filteredCol = aCollection.where({validated:2})
+
+
+				for( var i = 0 ; i < filteredCol.length ; i ++ ) {
+					model = filteredCol[i];
+					if ( model.get('validated') == 2 ) {
+						tmpTagsStr = model.get('tags');
+						 if(tmpTagsStr) {
+							if(allTagsStr) {
+								allTagsStr+=',';
+							}
+							allTagsStr+=tmpTagsStr;
+						 }
+					}
+				}
+				allTags = allTagsStr.split(',')
+				tagsAndOccurences = _.countBy(allTags)
+				for( var  tag in tagsAndOccurences ) {
+					var occurence = tagsAndOccurences[tag];
+					if ( occurence == filteredCol.length) {
+						finalTagsTab.push(tag);
+					}
+				}
+				if( finalTagsTab.length > 0 ) {
+					_this.$elemTags.val(finalTagsTab).trigger('change');
+				  }
+				  else {
+					 _this.$elemTags.val(null).trigger('change');
+				  }
 			}
 
 		},
@@ -173,19 +163,7 @@ define([
 
 		onRender: function(){
 			var _this = this;
-			console.log("on render la toolbar bottom")
-				// $.when(this.dataTags)
-				// .then(function(resp) {
-				// 	if(!_this.jsonParsed) {
-				// 		_this.jsonParsed = _this.parseJsonRecur(resp);
-				// 	}
-
-				// 	_this.instantiateElemTags()
-				// 	_this.fillElemTags();
-
-				// 	//   $('.js-data-tags').select2().val(['1','2']).trigger('change');
-				// }) 
-				if( !_this.$elemTags) {
+			if( !_this.$elemTags) {
 					_this.instantiateElemTags()
 				}
 				_this.fillElemTags();
@@ -206,9 +184,9 @@ define([
 			var stationId = modelTmp.get('stationId');
 			this.displayBtnsActions(statusPhoto);
 			this.displayBtnsStation(statusPhoto,stationId);
-			this.displayTagsInput(statusPhoto);
+			// this.displayTagsInput(statusPhoto);
 			this.displayValidateSession();
-			this.displayTagsSelect(statusPhoto);
+			this.displayTagsSelect();
 		},
 
 		displayMultiselect : function() {
@@ -228,11 +206,7 @@ define([
 			if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
 				btnEditStation.className+= ' disabled ';
 			}
-
-			
-
-
-
+			this.displayTagsSelect();
 			this.displayValidateSession();
 		},
 
@@ -250,6 +224,7 @@ define([
 			}
 
 		},
+
 		displayBtnsActions : function(status) {
 			var btnAccepted = this.ui.acceptedBtn[0];
 			var btnRefused = this.ui.refusedBtn[0];
@@ -355,76 +330,68 @@ define([
 
 		},
 
-		displayTagsSelect : function(status) {
+		displayTagsSelect : function() {
 			var _this = this;
-			if( status === 4 ) {
-				setTimeout(() => {
-					_this.$elemTags.prop('disabled' , true);
-					
-				}, 100);
+			var tabSelected =  this.parent.model.get('newSelected');
+			var disabled = true;
+			var index
+			for( var i = 0; i < tabSelected.length ; i ++ ) {
+				index = tabSelected[i];
+				if ( this.parent.tabView[index].model.get("validated") == 2 ) {
+					disabled = false;
+					break;
+				}
 			}
-
+			this.$elemTags.prop('disabled' , disabled);
 		},
 
-		displayTagsInput: function(status) {
-			// var tagsInput = this.ui.tagsInput[0];
-
-			// switch(status) {
-			// 	case 2: { // accepted
-			// 		tagsInput.style.display = "";
-			// 		break;
-			// 	}
-			// 	default: { //unknown
-			// 		tagsInput.style.display = "None";
-			// 		break;
-			// 	}
-			// }
-			// this.ui.tagsInput.tagsinput({
-			// 	/*	typeaheadjs: {
-			// 			name: 'citynames',
-			// 			displayKey: 'name',
-			// 			valueKey: 'name',
-			// 			source: citynames.ttAdapter()
-			// 			},*/
-			// 					 maxTags: 5,
-			// 					trimValue: true,
-			// 			});
-		},
-		
-		changeModel : function (model) {
-			if( this.model !== model) {
-				var _this = this 
-				this.stopListening(this.model);
-				this.model = model;
-				this.listenTo(this.model, "change" , function(event) {
-					if( 'tags' in event.changed ) {
-						return;
+		updateManyTags: function(tab) {
+			var _this = this;
+			var tabSelected = this.parent.model.get('newSelected');
+			
+			$.ajax({
+				type: 'PUT',
+				url: config.coreUrl + 'sensorDatas/camtrap/'+_this.parent.equipmentId+'/updateMany',
+				contentType: 'application/json',
+				data: JSON.stringify(tab)
+			  })
+			  .done(function (resp) {
+				  console.log(resp)
+				  var index,item,id,strTags;
+				  for ( var i = 0 ; i < tabSelected.length ; i ++ ) {
+					index = tabSelected[i]
+					item = _this.parent.tabView[index];
+					if ( item.model.get('validated') == 2 ) {
+						id = item.model.get('pk_id');
+						  for(var j = 0 ; j < tab.length ; j++ ) {
+							  if( tab[j].pk_id == id ) {
+								strTags = tab[j].tags;
+								break;
+							  }
+						  }
+						  item.setSilentTags(strTags);
 					}
-					_this.render()
-				});
-				this.render();
-			}
+					  index = item = id = strTags = undefined
+					//   strTags = item.model.get('tags');
+				  }
+				// var item
+				// for( var i = 0 ; i < tabItemAccepted.length ; i++ ) {
+				//   index = tabItemAccepted[i]
+				//   item = _this.tabView[index];
+		
+				//   item.setModelValidatedSilent(2);
+				//   item = undefined;
+				// }
+				// _this.refreshCounter();
+				// _this.updateUIWhenSelectionChange();
+				// debugger;
+			  })
+			  .fail(function (err) {
+				console.log(err);
+				alert("someting goes wrong")
+			  })
+
 		},
-
-		addTag: function(tag){
-			this.ui.tagsInput.tagsinput('add',tag);
-			//console.log(e);
-		},
-
-		// verifTag: function(e){//avant d'ajouter un tag
-		// 	var capitalise = e.item.substr(0, 1);
-		// 	if(e.item.length > 1 ) {
-		// 		 capitalise = capitalise.toUpperCase() + e.item.substr(1).toLowerCase();
-		// 	}
-		// 	else {
-		// 		capitalise = capitalise.toUpperCase();
-		// 	}
-		// 	if ( e.item !== capitalise) {
-		// 		e.cancel = true;
-		// 		this.ui.tagsInput.tagsinput('add',capitalise);
-		// 	}
-		// },
-
 		saveTags : function(e){
 			var _this = this;
 			var strTags = ''
@@ -435,13 +402,24 @@ define([
 					strTags+=',';
 				}
 			}
+			var tabSelected = this.parent.model.get('newSelected');
 
-			if( this.parent.tabSelected.length > 0) {
-				for (var i = 0 ; i < this.parent.tabSelected.length ; i++ ) {
-					var status = this.parent.tabView[this.parent.tabSelected[i]].model.get('validated');
+			
+			if(tabSelected.length == 1 ){
+				// this.parent.tabView[this.parent.currentPosition].addModelTags(strTags);
+				this.parent.tabView[tabSelected[0]].setModelTags(strTags);
+			}
+			if( tabSelected.length > 1) {
+				var modelsToUpdate = [];
+				var status,model,tagsStr;
+				var newTagsTab = [];
+				for (var i = 0 ; i < tabSelected.length ; i++ ) {
+					model = this.parent.tabView[tabSelected[i]].model
+					status = model.get('validated');
 					if( status === 2) { // tag only for validated img
-						var newTagsTab = [];
-						var tagsStr = this.parent.tabView[this.parent.tabSelected[i]].model.get('tags');
+						// model = this.parent.tabView[tabSelected[i]].model
+						tagsStr = model.get('tags');
+						modelsToUpdate.push(model.toJSON())
 						if( tagsStr ) {
 							newTagsTab = tagsStr.split(',');
 							console.log("origial",newTagsTab);
@@ -459,24 +437,69 @@ define([
 							newTagsTab = this.selectedTagsTab;
 						}
 						console.log("finaly",newTagsTab)
+						
 						if(newTagsTab.length) {
-							this.parent.tabView[this.parent.tabSelected[i]].setModelTags(newTagsTab.join(','));
+							modelsToUpdate[modelsToUpdate.length - 1].tags = newTagsTab.join(',');
+							// this.parent.tabView[tabSelected[i]].setModelTags(newTagsTab.join(','));
 						}
 						else {
-							this.parent.tabView[this.parent.tabSelected[i]].setModelTags(null);
+							modelsToUpdate[modelsToUpdate.length - 1].tags = null;
+							// this.parent.tabView[tabSelected[i]].setModelTags(null);
 						}
 					}
+					status = tagsStr = model = undefined
+					newTagsTab = []
 				}
+				this.updateManyTags(modelsToUpdate);
 				this.unSelectedTagsTab = [];
 				this.selectTagsTab = [];
 				return;
 			}
-			else if(this.parent.currentPosition !== null ){
-					// this.parent.tabView[this.parent.currentPosition].addModelTags(strTags);
-					this.parent.tabView[this.parent.currentPosition].setModelTags(strTags);
-			}
 			this.unSelectedTagsTab = [];
 			this.selectTagsTab = [];
+
+
+			// if( this.parent.tabSelected.length > 0) {
+			// 	for (var i = 0 ; i < this.parent.tabSelected.length ; i++ ) {
+			// 		var status = this.parent.tabView[this.parent.tabSelected[i]].model.get('validated');
+			// 		if( status === 2) { // tag only for validated img
+			// 			var newTagsTab = [];
+			// 			var tagsStr = this.parent.tabView[this.parent.tabSelected[i]].model.get('tags');
+			// 			if( tagsStr ) {
+			// 				newTagsTab = tagsStr.split(',');
+			// 				console.log("origial",newTagsTab);
+			// 				console.log("unselected",this.unSelectedTagsTab);
+			// 				console.log("selected",this.selectedTagsTab);
+
+			// 				newTagsTab = _.difference(newTagsTab,this.unSelectedTagsTab);
+			// 				console.log("diff",newTagsTab);
+
+			// 				if( newTagsTab.length) {
+			// 					newTagsTab = _.union(newTagsTab,this.selectedTagsTab);
+			// 				}
+			// 			}
+			// 			else {
+			// 				newTagsTab = this.selectedTagsTab;
+			// 			}
+			// 			console.log("finaly",newTagsTab)
+			// 			if(newTagsTab.length) {
+			// 				this.parent.tabView[this.parent.tabSelected[i]].setModelTags(newTagsTab.join(','));
+			// 			}
+			// 			else {
+			// 				this.parent.tabView[this.parent.tabSelected[i]].setModelTags(null);
+			// 			}
+			// 		}
+			// 	}
+			// 	this.unSelectedTagsTab = [];
+			// 	this.selectTagsTab = [];
+			// 	return;
+			// }
+			// else if(this.parent.currentPosition !== null ){
+			// 		// this.parent.tabView[this.parent.currentPosition].addModelTags(strTags);
+			// 		this.parent.tabView[this.parent.currentPosition].setModelTags(strTags);
+			// }
+			// this.unSelectedTagsTab = [];
+			// this.selectTagsTab = [];
 
 
 			// var tabTags = this.ui.tagsInput.val();
@@ -491,9 +514,9 @@ define([
 			// 		}
 			// }
 		},
-		removeAll : function() {
-			this.ui.tagsInput.tagsinput('removeAll');
-		}
+		// removeAll : function() {
+		// 	this.ui.tagsInput.tagsinput('removeAll');
+		// }
 
 
 	});

@@ -17,6 +17,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from ecoreleve_server.core import Base, dbConfig
+from ecoreleve_server.core.base_model import ORMUtils
 
 
 sensor_schema = dbConfig['sensor_schema']
@@ -207,7 +208,7 @@ class Rfid(Base):
     )
 
 
-class CamTrap(Base):
+class CamTrap(Base, ORMUtils):
     __tablename__ = 'TcameraTrap'
     pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key=True)
     fk_sensor = Column(Integer, nullable=False)

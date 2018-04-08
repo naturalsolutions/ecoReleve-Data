@@ -28,6 +28,7 @@ from ecoreleve_server.modules.observations import Equipment
 from ecoreleve_server.modules.users import User
 
 from . import CamTrap, ArgosGps, Gsm, Rfid, MetaData
+from lxml import etree
 # from ecoreleve_server.__init__ import mySubExif
 
 import exiftool
@@ -76,7 +77,8 @@ class SensorDatasBySessionItem(CustomResource):
             self.request.response.status_code = 404
             return self.request.response
         else:
-            return self.item.__json__()
+            #todo fix json
+            return self.item.as_dict()
 
     def patch(self):
         data = self.request.json_body #potentially new props
@@ -123,14 +125,25 @@ class SensorDatasBySessionItem(CustomResource):
         return XMLTags
 
 
+class DATAcacaDatasBySession(CustomResource):
+    children = [('{int}', SensorDatasBySessionItem)]
+
+    def __init__(self, ref, parent):
+        CustomResource.__init__(self, ref, parent)
+        self.type_ = parent.type_
+        self.viewTable = parent.viewTable        
+
+    def retrieve(self):
+        return self.__parent__.getDatas()
+    
+    def patch(self):
+        pass
+
+
 class SensorDatasBySession(CustomResource):
 
     item = SensorDatasBySessionItem
-    children = [('argos', SensorDatasBySessionItem),
-                ('gsm', SensorDatasBySessionItem),
-                ('rfid', SensorDatasBySessionItem),
-                ('camtrap', SensorDatasBySessionItem)
-    ]
+    children = [('datas', DATAcacaDatasBySession)]
 
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
@@ -146,7 +159,7 @@ class SensorDatasBySession(CustomResource):
         #     'updateMany' : self.updateMany
         #     }
 
-    def updateMany(self):
+    def updateMany(self): #update if diff
         if self.type_ == 'camtrap':
             seqIds = []
             datas = self.request.json_body #potentially new props
@@ -156,8 +169,25 @@ class SensorDatasBySession(CustomResource):
                     seqIds.append(idTmp)
             allItems = self.session.query(CamTrap).filter(CamTrap.pk_id.in_(seqIds)).all()
 
-            for item in allItems:
-                item.validated = 2
+            for bddItem in allItems:
+                for elemRequest in datas:
+                    if elemRequest['pk_id'] == bddItem.pk_id :
+                        if elemRequest['tags']:
+                            tabTags = elemRequest['tags'].split(',')
+                            xmlTags = etree.Element('TAGS')
+                            for newTag in tabTags:
+                                tag = etree.SubElement(xmlTags,"TAG")
+                                tag.text = newTag
+                            xmlTagsStr = etree.tostring(xmlTags).decode()
+                            if bddItem.tags != xmlTagsStr:
+                                bddItem.tags = xmlTagsStr
+                        else:
+                            bddItem.tags = None
+                        bddItem.validated = elemRequest['validated']
+                        
+                        break
+            # self.bulk_save_objects(allItems)
+            # s.bulk_save_objects(objects)    
 
         self.request.response.status_code = 204
         return self.request.response
@@ -918,6 +948,10 @@ class SensorDatasByType(CustomResource):
             bindparam('fkEquipmentId', value=fkEquipmentId)
         )
         result = self.session.execute(query).fetchone()
+
+        print(" avant " )
+        print(result)
+        print(" aprés")
 
         # self.session.commit()
 

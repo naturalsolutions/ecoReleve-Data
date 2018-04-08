@@ -63,10 +63,40 @@ class StationsResource(DynamicObjectCollectionResource):
 
     def insertAll(self) :
         session = self.request.dbsession
-        data = {}
-        print("hello ")
-        print(self.request.json_body)
-        pass
+        data = self.request.json_body
+        result = []
+        for row in data:
+            self.objectDB.values = row
+            self.session.add(self.objectDB)
+            self.session.flush()
+            # curSta = Station(
+            #     LAT=row['LAT'],
+            #     LON=row['LON'],
+            #     FK_MonitoredSite=row['FK_MonitoredSite'],
+            #     Name=row['Name'],
+            #     FK_StationType=row['FK_StationType'],
+            #     StationDate=row['StationDate'],
+            #     ELE=row['ELE'],
+            #     precision=row['precision'],
+            #     Comments=row['Comments'],
+            #     creator=row['creator'],
+            #     fieldActivityId=row['fieldActivityId'] 
+            # )
+            # session.add(curSta)
+            if self.objectDB.ID:
+                result.append({ self.objectDB.ID : 'created'})
+            else :
+                result.append({'null': 'refused'})
+            self.objectDB.ID = None
+
+
+            
+            
+        # self.insertMany()
+        # data = {}
+        # print("hello ")
+        # print(self.request.json_body)
+        return result
 
     def updateMonitoredSite(self):
         session = self.request.dbsession

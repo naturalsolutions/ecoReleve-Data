@@ -14,23 +14,33 @@ from ecoreleve_server.utils.distance import haversine
 from ecoreleve_server.utils.data_toXML import data_to_XML
 from ecoreleve_server.modules.permissions import routes_permission
 from ecoreleve_server.modules.statistics import graphDataDate
-from .sensor_data_resource import SensorDatasByType, SensorDatasBySession
+from .sensor_data_resource import SensorDatasByType, SensorDatasBySession,SensorDatasBySessionItem
 
 route_prefix = 'sensors/'
 
 
 
+@view_defaults(context=SensorDatasBySessionItem)
+class SensorDatasBySessionItemView(CRUDCommonView):
+
+    @view_config(renderer='json', request_method='PATCH', permission='update')
+    def getDatasPatch(self):
+        return self.context.patch()
+
 
 @view_defaults(context=SensorDatasBySession)
 class SensorDatasBySessionView(CRUDCommonView):
 
-    @view_config(name='datas', renderer='json', request_method='GET', permission='read')
-    def getDatas(self):
-        return self.context.getDatas()
+    # @view_config(name='datas', renderer='json', request_method='GET', permission='read')
+    # def getDatas(self):
+    #     return self.context.getDatas()
 
-    @view_config(name='datas', renderer='json', request_method='PATCH', permission='read')
-    def getDatasPatch(self):
-        return 'None'
+    # @view_config(name='datas', renderer='json', request_method='PATCH', permission='read')
+    # def getDatasPatch(self):
+    #     return self.context.patch()
+    #     return 'None'
+
+
 
     @view_config(name='updateMany', renderer='json', permission='read')
     def updateMany(self):
