@@ -29,10 +29,10 @@ define([
       var _this = this;
 			this.parent = options.parent;
       this.model = options.model;
-      this.listenTo(this.model, "change", function() {
-        console.log("j'ai changé");
-        _this.onRender();
-      });
+      // this.listenTo(this.model, "change", function() {
+      //   console.log("j'ai changé");
+      //   _this.onRender();
+      // });
       this.flagExif = false;
 
 		//	console.log("init des details");

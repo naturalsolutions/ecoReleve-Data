@@ -238,6 +238,10 @@ define([
 
         if ( newTab.length === 1 ) {
           _this.currentPosition = newTab[0];
+          if( _this.imageDetails) {
+            _this.imageDetails.model = _this.tabView[newTab[0]].model
+            _this.imageDetails.render()
+          }
         }
 
         var diff = _.difference(oldTab,newTab);
@@ -248,6 +252,7 @@ define([
         
 
         _this.updateUIWhenSelectionChange();
+        
 
         /*update control ui here */
 
