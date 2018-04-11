@@ -856,6 +856,9 @@ define([
 
     removeStation: function (event) {
       
+      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
       var tabSelected = this.model.get('newSelected') || [];
 
       var tabOfIds = [];
@@ -927,6 +930,8 @@ define([
               _this.tabView[index].setVisualStationAttached(true);
             }
           }
+          _this.refreshCounter();
+          _this.updateUIWhenSelectionChange()
 
         })
         .fail(function (err) {
@@ -943,7 +948,7 @@ define([
     },
 
     callPostStationAPI: function (elem, data) {
-
+      var _this = this;
       $.ajax({
           type: 'POST',
           url: config.coreUrl + 'stations/',
@@ -953,6 +958,8 @@ define([
         })
         .done(function (resp) {
           elem.attachStation(resp.ID);
+          _this.refreshCounter();
+          _this.updateUIWhenSelectionChange()
         })
         .fail(function (err) {
           console.log(err)
@@ -963,7 +970,9 @@ define([
 
 
     createStation: function (event) {
- 
+      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
       var _this = this;
       var tabSelected = this.model.get('newSelected') || [];
       var listOfElem = []
@@ -1009,8 +1018,6 @@ define([
         this.callPostAllStationsAPI(tabStationPending,allData)
       }
 
-      _this.refreshCounter();
-      _this.updateUIWhenSelectionChange()
     },
 
 
@@ -1118,6 +1125,7 @@ define([
         index = tabPhotoAccepted[i];
         tmpModel = this.tabView[index].model;
         if( tmpModel.validated !== 2 ) {
+          this.tabView[index].setModelValidatedSilent(2);
           collectionPhotoAccepted.push(tmpModel);
           tabItemAccepted.push(index)
         }
@@ -1133,17 +1141,26 @@ define([
       })
       .done(function (resp) {
         var item
-        for( var i = 0 ; i < tabItemAccepted.length ; i++ ) {
-          index = tabItemAccepted[i]
-          item = _this.tabView[index];
+        // for( var i = 0 ; i < tabItemAccepted.length ; i++ ) {
+        //   index = tabItemAccepted[i]
+        //   item = _this.tabView[index];
 
-          item.setModelValidatedSilent(2);
-          item = undefined;
-        }
+        //   item.setModelValidatedSilent(2);
+        //   item = undefined;
+        // }
         _this.refreshCounter();
         _this.updateUIWhenSelectionChange();
       })
       .fail(function (err) {
+        for( var i = 0 ; i < tabItemAccepted.length ; i ++ ) {
+          index = tabItemAccepted[i]
+          item = _this.tabView[index];
+
+          item.setModelValidatedSilent(null);
+          item = undefined;
+        }
+        _this.refreshCounter();
+        _this.updateUIWhenSelectionChange();
         console.log(err);
         alert("someting goes wrong")
       })
@@ -1231,6 +1248,7 @@ define([
       for( var i = 0 ; i < tabSelected.length ; i ++ ) {
         index = tabSelected[i]
         model = _this.tabView[index].model;
+        _this.tabView[index].setModelValidatedSilent(4);
         tabRejected.push(model.toJSON())
       }
 
@@ -1241,11 +1259,11 @@ define([
         data: JSON.stringify(tabRejected)
       })
       .done(function (resp) {
-        var item
-        for( var i = 0 ; i < tabSelected.length ; i++ ) {
-          index = tabSelected[i]
-          _this.tabView[index].setModelValidatedSilent(4);
-        }
+        // var item
+        // for( var i = 0 ; i < tabSelected.length ; i++ ) {
+        //   index = tabSelected[i]
+          
+        // }
         _this.refreshCounter();
         _this.updateUIWhenSelectionChange();
       })
@@ -1270,18 +1288,27 @@ define([
         }
       }
       if (listPhotos.length) {
+        var text = '';
+        if( listPhotos.length == 1 )  {
+          text = 'you will destroy station for photo N°:<BR>'+listPhotos.join(',');
+        }
+        else {
+          text =  'you will destroy stations for photos N°:<BR>'+listPhotos.join(',');
+        }
+
         Swal({
-          title: 'Care',
+          title: 'Warning',
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-          text: 'you will destroy stations for photos :\n'+listPhotos.join(','),
-          type: 'error',
+          text: text,
+          type: 'warning',
           showCancelButton: true,
           confirmButtonColor: 'rgb(218, 146, 15)',
   
           confirmButtonText: 'Ok',
           cancelButtonText: 'Cancel',
           closeOnConfirm: true,
-          closeOnCancel: true
+          closeOnCancel: true,
+          html : true
           
         },function (isConfirm) {
           if (isConfirm) {
@@ -1304,8 +1331,9 @@ define([
 
     rejectPhoto: function (e) {
 
+      // var tabSelected = this.model.get('newSelected');
 
-      if (this.tabSelected.length == 0) {
+      // if (tabSelected.length == 0) {
         if( e.currentTarget.className.indexOf('disabled') > -1 ) {
           return;
         }
@@ -1323,7 +1351,7 @@ define([
         // for (var i of this.tabSelected) {
         //   // this.tabView[i].setModelValidated(4);
         // }
-      }
+      // }
     },
     undeterminatePhoto: function (e) {
       if (this.tabSelected.length == 0) {
@@ -1708,24 +1736,32 @@ define([
       var _this = this;
       var text = "";
       if (_this.nbPhotosAccepted == 0) {
-        text += _this.nbPhotosRefused + ' will be refused';
+        text += _this.nbPhotosRefused + ' will be refused<BR>';
       } else if (_this.nbPhotosRefused == 0) {
-        text += _this.nbPhotosAccepted + ' will be accepted';
+        text += _this.nbPhotosAccepted + ' will be accepted<BR>';
       } else {
-        text += _this.nbPhotosAccepted + ' will be accepted and ' + _this.nbPhotosRefused + ' refused';
+        text += _this.nbPhotosAccepted + ' will be accepted<BR>' + _this.nbPhotosRefused + ' will be refused<BR>';
       }
+      if( _this.nbPhotosStationed == 1) {
+          text +=  _this.nbPhotosStationed+' station will be created <BR>'
+      }
+
+      if( _this.nbPhotosStationed > 1 ) {
+         text +=  _this.nbPhotosStationed+' stations will be created<BR>'
+        }
 
       Swal({
           title: 'Validation',
-          text: 'you have finish this sessions\nOn ' + _this.nbPhotos + ' photos ' + text,
+          text: 'You have finish this session on ' + _this.nbPhotos + ' photos :<BR>' + text,
           type: 'success',
           showCancelButton: true,
-          confirmButtonColor: 'rgb(218, 146, 15)',
-
+          confirmButtonColor: '#5cb85c',
+          cancelButtonColor:'red',
           confirmButtonText: 'Ok !',
-          cancelButtonText: 'No ! i want to return to session\'s validation',
+          cancelButtonText: 'No !',
           closeOnConfirm: true,
-          closeOnCancel: true
+          closeOnCancel: true,
+          html : true
         },
         function (isConfirm) {
           if (isConfirm) {
@@ -1740,9 +1776,15 @@ define([
                 context: _this,
               })
               .done(function (response, status, jqXHR) {
+                  //todo handle stored procedre return
+                var newText = '';
+                newText += _this.nbPhotosAccepted + ' photos validated <BR>'
+                newText += _this.nbPhotosRefused + ' photos refused <BR>'
+                newText += _this.nbPhotosStationed + ' stations created <BR>'
+
                 Swal({
-                  title: 'Upload finished',
-                  text: 'you have finish this sessions\nOn ' + _this.nbPhotos + ' photos ' + text,
+                  title: 'Session validated',
+                  text: 'On ' + _this.nbPhotos + ' photos <BR>' + text,
                   type: 'success',
                   showCancelButton: true,
                   confirmButtonColor: 'rgb(218, 146, 15)',
@@ -1750,7 +1792,8 @@ define([
                   confirmButtonText: 'Go to monitored sites',
                   cancelButtonText: 'Return to validation',
                   closeOnConfirm: true,
-                  closeOnCancel: true
+                  closeOnCancel: true,
+                  html : true
 
                 }, function () {
                   if (isConfirm) {
@@ -1767,15 +1810,15 @@ define([
               .fail(function (jqXHR, textStatus, errorThrown) {
                 Swal({
                   title: 'Error',
-                  text: 'Something goes wrong',
+                  text: 'Something goes wrong<BR>Please contact an admin<BR>',
                   type: 'error',
-                  showCancelButton: true,
-                  confirmButtonColor: 'rgb(218, 146, 15)',
-
-                  confirmButtonText: 'Go to monitored sites',
-                  cancelButtonText: 'Return to validation',
+                  // showCancelButton: true,
+                  confirmButtonColor: '#5cb85c',
+                  confirmButtonText: 'Ok!',
+                  // cancelButtonText: 'Return to validation',
                   closeOnConfirm: true,
-                  closeOnCancel: true
+                  closeOnCancel: true,
+                  html : true
                 });
 
               });

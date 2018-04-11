@@ -78,6 +78,11 @@ define([
          });*/
 
       this.deferredSize = this.getAvailableSpace();
+      this.tabRefusedFilesForDate = [];
+      this.tabRefusedFilesForExist = [];
+      this.tabRefusedFilesForUnknow = [];
+      this.tabFilesCancelled = [];
+      this.tabFilesAccepted = [];
     },
 
     evalSizeOfPhotos: function (arrayOfResumableFile) {
@@ -109,6 +114,7 @@ define([
 
           if (diffMin <= -24 || diffMax <= -24) {
             _this.nbDateOutOfLimit += 1;
+            _this.tabFilesCancelled.push(element.fileName);
             element.outOfRange = true;
           } else if ((-24 < diffMin && diffMin < 0) || (-24 < diffMax && diffMax < 0)) {
             _this.nbDateInLimit += 1;
@@ -280,25 +286,25 @@ define([
         var textWarningSwal =''
         if (_this.nbDateOutOfLimit > 0 || _this.nbDateInLimit > 0 ) {
           if(_this.nbPhotos === 1 ) {
-            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photo out of session and will not be uploaded\n'
+            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photo out of session range limit (+- 24h) and will not be uploaded<BR>'
           }
           else {
-            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photos out of session and will not be uploaded\n'
+            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photos out of session range limit (+- 24h) and will not be uploaded<BR>'
           }
          
         }
         if(_this.nbDateInLimit > 0) {
           if(_this.nbPhotos === 1 ) {
-            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded\n'
+            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded<BR>'
           }
           else {
-            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded\n'
+            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded<BR>'
           }
           
         }
         if(_this.availableSpace.usedPercentage > 70) {
-          textWarningSwal+='Care disk usage: '+_this.availableSpace.usedPercentage+'% \n'
-          textWarningSwal+='Please contact an admin to inform'
+          textWarningSwal+='Disk usage: '+_this.availableSpace.usedPercentage+'% <BR>'
+          textWarningSwal+='Please contact an admin<BR>'
         }
 
         if(textWarningSwal && textInfosSwal) {
@@ -310,6 +316,7 @@ define([
             confirmButtonText: 'OK',
             closeOnCancel: false,
             closeOnConfirm: false,
+            html : true
 
           },function(isconfirm) {
             Swal({
@@ -318,7 +325,8 @@ define([
               type: 'warning',
               showCancelButton: false,
               confirmButtonText: 'OK',
-              closeOnCancel: true
+              closeOnCancel: true,
+              html : true
             });
           })
         }
@@ -330,7 +338,8 @@ define([
             type: 'warning',
             showCancelButton: false,
             confirmButtonText: 'OK',
-            closeOnCancel: true
+            closeOnCancel: true,
+            html : true
           });
         }
       
@@ -383,72 +392,84 @@ define([
 
     configResumable: function () {
       var _this = this;
+
       //TODO extend error (date , present on server etc)
       this.r.on('fileError', function (file, message) {
         _this.uploadInfos.nbFilesRefused+=1;
         switch(message){
           case 'Date not valid' : {
             _this.reasonRefused.date += 1;
+            _this.tabRefusedFilesForDate.push(file.fileName)
             break;
           }
           case 'exist' : {
             _this.reasonRefused.exist += 1;
+            _this.tabRefusedFilesForExist.push(file.fileName)
             break;
           }
           default : {
             _this.reasonRefused.unknown += 1;
+            _this.tabRefusedFilesForUnknow.push(file.fileName)
             break;
           }
         }
       });
+      
       this.r.on('fileSuccess', function(file,message) {
         if(message === "ok") {
           _this.uploadInfos.nbFilesAccepted += 1;
+          _this.tabFilesAccepted.push(file.fileName);
         }
         else {
+          _this.reasonRefused.exist += 1;
+          _this.tabRefusedFilesForExist.push(file.fileName)
           _this.uploadInfos.nbFilesExistOnServer += 1;
+          _this.uploadInfos.nbFilesRefused+=1;
         }
       });
       this.r.on('complete', function() {
         $('#myPleaseWait').modal('hide');
         var text = '';
         if(_this.nbDateOutOfLimit) {
-          text+= 'You try to upload '+_this.nbPhotos+' photos\n';
+          text+= 'You try to upload '+_this.nbPhotos+' photos<BR>';
           if(_this.nbDateOutOfLimit === 1 ) {
-            text += _this.nbDateOutOfLimit + ' photo cancelled before upload, because out of range session\n'
+            text += _this.nbDateOutOfLimit + ' photo cancelled before upload, because out of range session<BR>'
           }
           else {
-            text += _this.nbDateOutOfLimit + ' photos cancelled before upload, because out of range session\n'
+            text += _this.nbDateOutOfLimit + ' photos cancelled before upload, because out of range session<BR>'
           }
-          text+= 'So on '+(_this.nbPhotos - _this.nbDateOutOfLimit)+' photos you sent : \n'
+          text+= 'So on '+(_this.nbPhotos - _this.nbDateOutOfLimit)+' photos you sent : <BR>'
         }
         else {
-          text+='You sent '+_this.nbPhotos+' photos : \n';
+          text+='You sent '+_this.nbPhotos+' photos : <BR>';
         }
         if(_this.uploadInfos.nbFilesExistOnServer) {
           if(_this.uploadInfos.nbFilesExistOnServer === 1 ) {
-            text += _this.uploadInfos.nbFilesExistOnServer + ' photo already exists on the server\n'
+            text += _this.uploadInfos.nbFilesExistOnServer + ' photo already exists on the server<BR>'
           }
           else {
-            text += _this.uploadInfos.nbFilesExistOnServer + ' photos already exist on the server\n'
+            text += _this.uploadInfos.nbFilesExistOnServer + ' photos already exist on the server<BR>'
           }
         }
         if(_this.uploadInfos.nbFilesRefused ) {
           if(_this.uploadInfos.nbFilesRefused === 1 ) {
-            text += _this.uploadInfos.nbFilesRefused + ' photo has been refused\n'
+            text += _this.uploadInfos.nbFilesRefused + ' photo has been refused<BR>'
           }
           else {
-            text += _this.uploadInfos.nbFilesRefused + ' photos have been refused\n'
+            text += _this.uploadInfos.nbFilesRefused + ' photos have been refused<BR>'
           }
         }
         if(_this.uploadInfos.nbFilesAccepted) {
           if(_this.uploadInfos.nbFilesAccepted === 1 ) {
-            text += _this.uploadInfos.nbFilesAccepted + ' photo has been accepted\n'
+            text += _this.uploadInfos.nbFilesAccepted + ' photo has been accepted<BR>'
           }
           else {
-            text += _this.uploadInfos.nbFilesAccepted + ' photos have been accepted\n'
+            text += _this.uploadInfos.nbFilesAccepted + ' photos have been accepted<BR>'
           }
         }
+        text+='<BR>';
+        text+= _this.addTemplateCollapse().innerHTML;
+        console.log(text)
         Swal({
           title: 'Upload complete',
           text: text,
@@ -457,7 +478,8 @@ define([
           confirmButtonColor: 'green',
           confirmButtonText: 'Go to Validate',
           cancelButtonText: 'Import new camera trap photo',
-          closeOnCancel: true
+          closeOnCancel: true,
+          html : true,
         },
         function(isConfirm){
           if(isConfirm) {
@@ -785,6 +807,88 @@ define([
           suppressRowClickSelection: true,
         }
       }));
+    },
+
+    addTemplateCollapse: function() {
+      var divRoot = document.createElement('div');
+      
+      var templateSwal = '<div class="panel-group" id="accordion1" role="tablist" aria-multiselectable="true">\
+                          <div class="panel panel-default">\
+                              <div class="panel-heading" role="tab" id="headingPhotosCancelled">\
+                                  <h4 class="panel-title">\
+                                      <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosCancelled" aria-expanded="true" aria-controls="collapsePhotosCancelled">\ Cancelled : '+ this.tabFilesCancelled.length +'/'+this.nbPhotos+
+                                      '</a>\
+                                  </h4>\
+                              </div>\
+                              <div id="collapsePhotosCancelled" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingPhotosCancelled">\
+                                  <div class="panel-body">' +this.tabFilesCancelled.join('<BR>')+
+                                  '</div>\
+                              </div>\
+                          </div>\
+                          <div class="panel panel-default">\
+                              <div class="panel-heading" role="tab" id="headingPhotosAccepted">\
+                                  <h4 class="panel-title">\
+                                      <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosAccepted" aria-expanded="true" aria-controls="collapsePhotosAccepted">\ Accepted : '+ this.tabFilesAccepted.length +'/'+this.nbPhotos+
+                                      '</a>\
+                                  </h4>\
+                              </div>\
+                              <div id="collapsePhotosAccepted" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingPhotosAccepted">\
+                                  <div class="panel-body">' +this.tabFilesAccepted.join('<BR>')+
+                                  '</div>\
+                              </div>\
+                          </div>\
+                          <div class="panel panel-default">\
+                              <div class="panel-heading" role="tab" id="headingPhotosRefused">\
+                                  <h4 class="panel-title">\
+                                      <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosRefused" aria-expanded="true" aria-controls="collapsePhotosRefused">\ Refused : '+ this.uploadInfos.nbFilesRefused +'/'+this.nbPhotos+
+                                      '</a>\
+                                  </h4>\
+                              </div>\
+                              <div id="collapsePhotosRefused" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingPhotosRefused">\
+                                  <div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">\
+                                      <div class="panel panel-default">\
+                                          <div class="panel-heading" role="tab" id="headingPhotosRefusedForExist">\
+                                              <h4 class="panel-title">\
+                                                  <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForExist" aria-expanded="true" aria-controls="collapsePhotosRefusedForExist">\ Existing on server : '+ this.tabRefusedFilesForExist.length +'/'+this.nbPhotos+
+                                                  '</a>\
+                                              </h4>\
+                                          </div>\
+                                          <div id="collapsePhotosRefusedForExist" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingPhotosRefusedForExist">\
+                                              <div class="panel-body">' +this.tabRefusedFilesForExist.join('<BR>')+ 
+                                              '</div>\
+                                          </div>\
+                                      </div>\
+                                      <div class="panel panel-default">\
+                                          <div class="panel-heading" role="tab" id="headingPhotosRefusedForDate">\
+                                              <h4 class="panel-title">\
+                                                  <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForDate" aria-expanded="true" aria-controls="collapsePhotosRefusedForDate">\ Date not valid : '+ this.tabRefusedFilesForDate.length +'/'+this.nbPhotos+
+                                                  '</a>\
+                                              </h4>\
+                                          </div>\
+                                          <div id="collapsePhotosRefusedForDate" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingPhotosRefusedForDate">\
+                                              <div class="panel-body">' +this.tabRefusedFilesForDate.join('<BR>')+
+                                              '</div>\
+                                          </div>\
+                                      </div>\
+                                      <div class="panel panel-default">\
+                                          <div class="panel-heading" role="tab" id="headingPhotosRefusedForUnknown">\
+                                              <h4 class="panel-title">\
+                                                  <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForUnknow" aria-expanded="true" aria-controls="collapsePhotosRefusedForUnknow">\ Critical error : '+ this.tabRefusedFilesForUnknow.length +'/'+this.nbPhotos+
+                                                  '</a>\
+                                              </h4>\
+                                          </div>\
+                                          <div id="collapsePhotosRefusedForUnknow" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingPhotosRefusedForUnknown">\
+                                              <div class="panel-body">' +this.tabRefusedFilesForUnknow.join('<BR>')+
+                                              '</div>\
+                                          </div>\
+                                      </div>\
+                                  </div>\
+                              </div>\
+                          </div>\
+                      </div>'
+
+      divRoot.innerHTML = templateSwal
+      return divRoot;
     },
 
     validate: function () {

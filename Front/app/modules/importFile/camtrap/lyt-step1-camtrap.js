@@ -152,16 +152,18 @@ define([
       var title = '';
       var listFiles = '';
       var nbFiles = filesErrorList.length;
-
+      title += 'No date in metadata<BR>'
       text += 'Please contact an admin<BR>'
       if(nbFiles > 0) {
         if(nbFiles === 1 ){
-          title += 'Error on '+nbFiles+' file reading'
-          text += 'Something goes wrong when we try to get the exif date of this file (it was removed from the files selection) :<BR>'
+          // title += 'Error on '+nbFiles+' file while reading (no date in metadata, we removed it from files selection) <BR>'   
+          text += 'And send this file below :<BR>'
+          // text += 'Something goes wrong when we try to get the exif date of this file (it was removed from the files selection) :<BR>'
         }
         else {
-          title += 'Error on '+nbFiles+' files reading'
-          text += 'Something goes wrong when we try to get the exif date of this files (they were removed from the files selection) :<BR>'
+          // title += 'Error on '+nbFiles+' files while reading (no date in metadata, we removed them from files selection)<BR>'
+          text += 'And send these '+nbFiles+' files below :<BR>'
+          // text += 'Something goes wrong when we try to get the exif date of this files (they were removed from the files selection) :<BR>'
         }
       }
      
@@ -352,11 +354,12 @@ define([
       } else {
         Swal({
           title: 'Warning',
-          text: 'You need to add some files for going on the next step',
+          text: 'You need to add some files for going on the next step<BR>',
           type: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',
-          closeOnCancel: true
+          closeOnCancel: true,
+          html : true
         })
       }
     },
