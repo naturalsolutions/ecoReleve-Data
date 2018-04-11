@@ -261,8 +261,13 @@ define([
                 new_station: {
                   text: 'Release on new station',
                   value: 'new_station',
+                  className: 'btn-success'
                 },
-                view_station: 'View station'
+                view_station: {
+                  text: 'View station',
+                  value: 'view_station',
+                  className:'btn-success'
+                }
               },
             }).then((value) => {
               switch (value) {
