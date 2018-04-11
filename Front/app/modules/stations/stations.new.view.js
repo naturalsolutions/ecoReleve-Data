@@ -196,10 +196,22 @@ define([
           confirmButtonColor: 'rgb(147, 14, 14)',
           confirmButtonText: 'OK',
           closeOnConfirm: true,
-        },
-        function(isConfirm) {
+        }).then( (result) => {
           $(e.target).val('');
         });
+
+        // Swal({
+        //   title: 'Fieldworker name error',
+        //   text: 'Already selected ! ',
+        //   type: 'error',
+        //   showCancelButton: false,
+        //   confirmButtonColor: 'rgb(147, 14, 14)',
+        //   confirmButtonText: 'OK',
+        //   closeOnConfirm: true,
+        // },
+        // function(isConfirm) {
+        //   $(e.target).val('');
+        // });
       }
     },
 

@@ -70,8 +70,7 @@ define([
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
       };
       this.nsForm = new NsForm(formConfig);
@@ -271,13 +270,27 @@ define([
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        //could be better
-        if (isConfirm && callback) {
+      }).then( (result) => { 
+        if( 'value' in result && callback) {
           callback();
         }
       });
+
+      // Swal({
+      //   title: opt.title,
+      //   text: opt.text || '',
+      //   type: type,
+      //   showCancelButton: true,
+      //   confirmButtonColor: btnColor,
+      //   confirmButtonText: 'OK',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   //could be better
+      //   if (isConfirm && callback) {
+      //     callback();
+      //   }
+      // });
     },
   });
 });

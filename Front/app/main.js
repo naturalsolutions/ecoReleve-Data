@@ -38,7 +38,7 @@ require.config({
     'radio': '../bower_components/backbone.radio/build/backbone.radio',
     'bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
     'sha1': '../bower_components/sha1/sha1',
-    'sweetAlert': '../bower_components/sweetalert/lib/sweet-alert.min',
+    'sweetAlert': '../bower_components/sweetalert2/dist/sweetalert2.min',
     'moment': '../bower_components/moment/min/moment.min',
     'moment-timezone-with-data': '../bower_components/moment-timezone/builds/moment-timezone-with-data-2012-2022',
     'dateTimePicker': '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
