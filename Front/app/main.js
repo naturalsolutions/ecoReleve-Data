@@ -58,7 +58,9 @@ require.config({
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
     'ag-grid': '../bower_components/ag-grid/dist/ag-grid',
 
-
+    /*========== node modules ============ */
+    'sweetAlert2': '../node_modules/sweetalert/dist/sweetalert.min',
+    
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
 
@@ -109,6 +111,9 @@ require.config({
     },
     sweetAlert: {
       exports: 'Swal'
+    },
+    sweetAlert2: {
+      exports: 'Swal2'
     },
     moment: {
       exports: 'moment'
