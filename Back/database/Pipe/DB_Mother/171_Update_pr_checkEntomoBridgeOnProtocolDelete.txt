@@ -1,0 +1,36 @@
+ALTER PROCEDURE [dbo].[pr_checkEntomoBridgeOnProtocolDelete]
+ @obsID int,
+ @result int OUTPUT
+   AS
+   BEGIN
+
+   SET NOCOUNT ON
+	DECLARE
+	@nbChild int
+
+
+	SELECT @nbChild = count(*)
+	FROM Observation o
+	WHERE ID = @obsID
+	AND original_id like '%ecollection%'
+
+	IF @nbChild > 0
+		SELECT @result=1
+	
+	END
+
+
+GO 
+
+
+  UPDATE BusinessRules SET targetType = '[231]'
+  WHERE name= 'Disable_Delete_Protocole_ArthropodSurvey'
+
+  GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('171_Update_pr_checkEntomoBridgeOnProtocolDelete',GETDATE(),(SELECT db_name()))
+
+
+GO
