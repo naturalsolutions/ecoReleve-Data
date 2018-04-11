@@ -85,22 +85,40 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         return;
         break;
     }
-
     Swal({
       title: opt.title,
       text: opt.text || '',
       type: type,
       showCancelButton: showCancelBtn,
       confirmButtonColor: btnColor,
-      confirmButtonText: 'OK',
-      closeOnConfirm: true,
-    },
-    function(isConfirm) {
-      //could be better
-      if (isConfirm && callback) {
+      confirmButtonText: 'OK'
+    }).then(result => {
+      if( result.value && callback ) {
         callback();
       }
     });
+    // function(isConfirm) {
+    //   //could be better
+    //   if (isConfirm && callback) {
+    //     callback();
+    //   }
+    // });
+
+    // Swal({
+    //   title: opt.title,
+    //   text: opt.text || '',
+    //   type: type,
+    //   showCancelButton: showCancelBtn,
+    //   confirmButtonColor: btnColor,
+    //   confirmButtonText: 'OK',
+    //   closeOnConfirm: true,
+    // },
+    // function(isConfirm) {
+    //   //could be better
+    //   if (isConfirm && callback) {
+    //     callback();
+    //   }
+    // });
   };
 
   window.thesaurus = {};
@@ -164,8 +182,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           type: 'warning',
           showCancelButton: false,
           confirmButtonColor: 'rgb(240, 173, 78)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
       }
       if(jqxhr.status == 409){
@@ -175,8 +192,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           type: 'warning',
           showCancelButton: false,
           confirmButtonColor: 'rgb(240, 173, 78)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
       }
     }
@@ -222,6 +238,35 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       window.onExitForm = $.Deferred();
       //var cancelMsg = i18n.translate('button.cancel');
 
+      // Swal({
+      //   title: title,
+      //   text: savingFormContent,
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: 'rgb(221, 107, 85)',
+      //   confirmButtonText: 'Quit',
+      //   customClass: 'swal-cancel-btn-green',
+      //   cancelButtonText: 'Continue edition',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   if (!isConfirm) {
+      //     if (cancelCallback) {
+      //       window.onExitForm.reject();
+      //       cancelCallback();
+      //     }
+      //     return false;
+      //   } else {
+      //     if (confirmCallback) {
+      //         if(indexMax-urlChangeMax<=0){
+      //           window.formInEdition = {};
+      //         }
+      //         window.onExitForm.resolve();
+      //         confirmCallback();
+      //       // });
+      //     }
+      //   }
+      // });
       Swal({
         title: title,
         text: savingFormContent,
@@ -230,49 +275,30 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         confirmButtonColor: 'rgb(221, 107, 85)',
         confirmButtonText: 'Quit',
         customClass: 'swal-cancel-btn-green',
-        cancelButtonText: 'Continue edition',
-        closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        if (!isConfirm) {
-          if (cancelCallback) {
-            window.onExitForm.reject();
-            cancelCallback();
-          }
-          return false;
-        } else {
-          if (confirmCallback) {
-            // Swal({
-            //   title: 'Saving form',
-            //   text: 'save it ?',
-            //   type: 'warning',
-            //   showCancelButton: true,
-            //   confirmButtonColor: 'green',
-            //   confirmButtonText: 'Yes',
-            //   cancelButtonColor: 'grey',
-            //   cancelButtonText: 'No',
-            //   closeOnConfirm: true,
-            // }, 
-            // function(isConfirm){
-            //   if (isConfirm) {
-            //     var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
-            //         if(window.formInEdition.form[key2].formChange){
-            //           window.formInEdition.form[key2].reloadingAfterSave = function(){};
-            //           window.formInEdition.form[key2].afterSaveSuccess = function(response){};
-            //           window.formInEdition.form[key2].butClickSave(null);
-            //         }
-            //     });
-          // }
-              if(indexMax-urlChangeMax<=0){
-                window.formInEdition = {};
-              }
-              window.onExitForm.resolve();
-              confirmCallback();
-            // });
-          }
+        cancelButtonText: 'Continue edition'
+      }).then((result) => {
+        /*
+          result.value   equals confirmButton
+          result.dismiss equals cancelButton
+        */
+       if( 'dismiss' in result ) {
+        if(cancelCallback) {
+          window.onExitForm.reject();
+          cancelCallback();
         }
-      });
-    } else {
+      }
+      else if( 'value' in result ) {
+        if(confirmCallback) {
+          if(indexMax-urlChangeMax<=0){
+            window.formInEdition = {};
+          }
+          window.onExitForm.resolve();
+          confirmCallback();
+        }
+      }
+      });   
+    } 
+    else {
       if (confirmCallback){
         if(indexMax-urlChangeMax<=0){
           window.formInEdition = {};

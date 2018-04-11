@@ -71,7 +71,6 @@ define([
               showCancelButton: false,
               confirmButtonColor: 'rgb(218, 146, 15)',
               confirmButtonText: 'OK',
-              closeOnConfirm: true,
             });
             return true;
           }
@@ -91,8 +90,7 @@ define([
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         }
         );
         return true;
@@ -122,8 +120,7 @@ define([
           type: 'warning',
           showCancelButton: false,
           confirmButtonColor: 'rgb(218, 146, 15)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
       });
 
@@ -219,26 +216,48 @@ define([
     endingMessage: function(sumObjreturned){
       var _this = this;
       if (!_this.errors && !_this.timeout) {
-          Swal({
-              title: 'Well done',
-              text: 'File(s) have been correctly imported\n\n' +
-                JSON.stringify(sumObjreturned).replace(',',',\n'),
-              showCancelButton: true,
-              confirmButtonColor: '#DD6B55',
-              confirmButtonText: 'Validate '+_this.acronymType,
-              cancelButtonText: 'Import new '+_this.acronymType,
-              closeOnConfirm: true,
-              closeOnCancel: true
-            },
-            function (isConfirm) {
-              if (isConfirm) {
-                Backbone.history.navigate('validate/'+_this.acronymType.toLowerCase(), {
-                  trigger: true
-                });
-              } else {
-                _this.cancelAll();
-              }
+        Swal({
+          title: 'Well done',
+          text: 'File(s) have been correctly imported\n\n' +
+            JSON.stringify(sumObjreturned).replace(',',',\n'),
+          showCancelButton: true,
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Validate '+_this.acronymType,
+          cancelButtonText: 'Import new '+_this.acronymType,
+          closeOnConfirm: true,
+          closeOnCancel: true
+        }).then( (result) => {
+          if('value' in result) {
+            Backbone.history.navigate('validate/'+_this.acronymType.toLowerCase(), {
+              trigger: true
             });
+          }
+          else {
+            _this.cancelAll();
+          }
+        });
+
+
+          // Swal({
+          //     title: 'Well done',
+          //     text: 'File(s) have been correctly imported\n\n' +
+          //       JSON.stringify(sumObjreturned).replace(',',',\n'),
+          //     showCancelButton: true,
+          //     confirmButtonColor: '#DD6B55',
+          //     confirmButtonText: 'Validate '+_this.acronymType,
+          //     cancelButtonText: 'Import new '+_this.acronymType,
+          //     closeOnConfirm: true,
+          //     closeOnCancel: true
+          //   },
+          //   function (isConfirm) {
+          //     if (isConfirm) {
+          //       Backbone.history.navigate('validate/'+_this.acronymType.toLowerCase(), {
+          //         trigger: true
+          //       });
+          //     } else {
+          //       _this.cancelAll();
+          //     }
+          //   });
         } 
         if(_this.errors) {
           Swal({
@@ -247,8 +266,7 @@ define([
             type: 'error',
             showCancelButton: false,
             confirmButtonText: 'OK',
-            confirmButtonColor: 'rgb(147, 14, 14)',
-            closeOnConfirm: true,
+            confirmButtonColor: 'rgb(147, 14, 14)'
           });
         }
 
@@ -259,8 +277,7 @@ define([
           type: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          closeOnConfirm: true,
+          confirmButtonColor: 'rgb(147, 14, 14)'
         });
       }
         _this.errors = false;

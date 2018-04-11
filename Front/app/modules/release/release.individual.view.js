@@ -299,7 +299,6 @@ define([
           return;
           break;
       }
-
       Swal({
         title: opt.title || opt.responseText || 'error',
         text: opt.text || '',
@@ -310,14 +309,30 @@ define([
         cancelButtonColor: 'grey',
         cancelButtonText: 'New Release',
         closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        if (isConfirm && callback) {
+      }).then( (result) => {
+        if( 'value' in result && callback) {
           callback();
-        }else {
-          //Backbone.history.loadUrl(Backbone.history.fragment);
         }
       });
+
+      // Swal({
+      //   title: opt.title || opt.responseText || 'error',
+      //   text: opt.text || '',
+      //   type: type,
+      //   showCancelButton: showCancel,
+      //   confirmButtonColor: btnColor,
+      //   confirmButtonText: confirmText,
+      //   cancelButtonColor: 'grey',
+      //   cancelButtonText: 'New Release',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   if (isConfirm && callback) {
+      //     callback();
+      //   }else {
+      //     //Backbone.history.loadUrl(Backbone.history.fragment);
+      //   }
+      // });
     },
 
     showLoading: function(){

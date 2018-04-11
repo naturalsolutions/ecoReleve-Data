@@ -150,20 +150,35 @@ define([
     swalError: function (title, content) {
       var _this = this;
       Swal({
-          title: title,
-          text: content,
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        },
-        function (isConfirm) {
+        title: title,
+        text: content,
+        type: 'error',
+        showCancelButton: false,
+        confirmButtonColor: 'rgb(147, 14, 14)',
+        confirmButtonText: 'OK'
+      }).then( (result) => {
+        if( 'value' in result ) {
           $('form')[0].reset();
           $('#fileNameSelected').text('No file selected');
           $('.fieldactivity').addClass('hidden');
           $(_this.fieldworkers).addClass('hidden');
-        });
+        }
+      });
+      // Swal({
+      //     title: title,
+      //     text: content,
+      //     type: 'error',
+      //     showCancelButton: false,
+      //     confirmButtonColor: 'rgb(147, 14, 14)',
+      //     confirmButtonText: 'OK',
+      //     closeOnConfirm: true,
+      //   },
+      //   function (isConfirm) {
+      //     $('form')[0].reset();
+      //     $('#fileNameSelected').text('No file selected');
+      //     $('.fieldactivity').addClass('hidden');
+      //     $(_this.fieldworkers).addClass('hidden');
+      //   });
     },
 
     onDestroy: function () {},
