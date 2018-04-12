@@ -12,7 +12,7 @@ from ..Models import (
 )
 import json
 from datetime import datetime
-from sqlalchemy import select, join, desc
+from sqlalchemy import select, join, desc, not_
 from collections import OrderedDict
 from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
@@ -29,6 +29,50 @@ class IndividualValueView(DynamicObjectValue):
 class IndividualValuesView(DynamicObjectValues):
     model = IndividualDynPropValue
     item = IndividualValueView
+
+    def retrieve(self):
+        from ..utils.parseValue import formatThesaurus
+
+        propertiesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropTable()]
+        dynamicValuesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropValuesTable()]
+        FK_name = self.parent.objectDB.GetSelfFKNameInValueTable()
+        FK_property_name = self.parent.objectDB.GetDynPropFKName()
+
+        tableJoin = join(dynamicValuesTable, propertiesTable,
+                         dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
+        query = select([dynamicValuesTable, propertiesTable.c['Name']]
+                       ).select_from(tableJoin).where(
+                                            dynamicValuesTable.c[FK_name] == self.parent.objectDB.ID
+                                                        )
+        
+        query = query.where(not_(propertiesTable.c['Name'].in_(['Release_Comments',
+                                                                'Breeding ring kept after release',
+                                                                'Box_ID',
+                                                                'Date_Sortie',
+                                                                'Poids']))
+                            ).order_by(desc(dynamicValuesTable.c['StartDate']))
+
+        result = self.session.execute(query).fetchall()
+        response = []
+
+        for row in result:
+            curRow = OrderedDict(row)
+            dictRow = {}
+            for key in curRow:
+                if curRow[key] is not None:
+                    if key == 'ValueString' in key and curRow[key] is not None:
+                        try:
+                            thesauralValueObj = formatThesaurus(curRow[key])
+                            dictRow['value'] = thesauralValueObj['displayValue']
+                        except:
+                            dictRow['value'] = curRow[key]
+                    elif 'FK' not in key:
+                        dictRow[key] = curRow[key]
+            dictRow['StartDate'] = curRow[
+                'StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+            response.append(dictRow)
+
+        return response
 
 
 class IndividualView(DynamicObjectView):
