@@ -13,39 +13,107 @@ ALTER PROCEDURE [dbo].[pr_checkValidatedLocationOnEquipmentProtocol]
 	DECLARE	@StartDate datetime;
 	DECLARE @EndDate datetime;
 	DECLARE @stationDate datetime;
+	DECLARE @FK_MonitoredSite int;
 	--DECLARE @FK_Sensor int;
 	--DECLARE @FK_Individual int;
 
-	select @stationDate=StationDate
+	select @stationDate=StationDate, @FK_MonitoredSite=FK_MonitoredSite
 	FROM Station s
 	WHERE EXISTS (SELECT * 
 					FROM Observation o where o.FK_Station = s.ID AND o.ID = @obsID)
 
-	--IF @FK_Sensor IS NULL
-	--BEGIN
-	--	SELECT @FK_Sensor = ValueInt	
-	--	FROM ObservationDynPropValuesNow
-	--	WHERE FK_Observation = @obsID 
-	--	AND Name = 'FK_Sensor'
-	--END
+	IF @FK_Sensor IS NULL
+	BEGIN
+		SELECT @FK_Sensor = ValueInt	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'FK_Sensor'
+	END
 
-	--SELECT @FK_Individual = FK_Individual
-	--FROM Observation o where o.ID = @obsID
-		--select @StartDate = StartDate , @EndDate = EndDate 
-		--from SensorEquipment
-		--where FK_Sensor =  @FK_sensor
-		--and  (@stationDate >= StartDate and (EndDate is null or  @stationDate <=  EndDate ) )
+	SELECT @FK_Individual = FK_Individual
+	FROM Observation o where o.ID = @obsID
+
+	select @StartDate = StartDate , @EndDate = EndDate 
+	from SensorEquipment
+	where FK_Sensor =  @FK_sensor
+	and  (@stationDate >= StartDate and (EndDate is null or  @stationDate <=  EndDate ) )
 
 
 	SELECT @result = 1 WHERE EXISTS (SELECT * FROM Individual_Location 
 									WHERE date >= @stationDate
-									--and (@EndDate is null or date <=  @EndDate )
-									AND FK_Individual = @FK_Individual
+									and (@EndDate is null or date <=  @EndDate )
+									--AND ISNULL(FK_Individual, '') = IS@FK_Individual
 									AND FK_sensor = @FK_sensor )
+
+
 
 
 GO
 
+
+ALTER PROCEDURE [dbo].[pr_checkValidatedLocationOnEquipmentProtocolUpdate]
+ @obsID int,
+ @newFk_Sensor int,
+ @newFK_Indiv int,
+ @result int OUTPUT
+   AS
+   BEGIN
+
+	SET NOCOUNT ON
+	DECLARE
+	@StartDate datetime,
+	@EndDate datetime,
+	@stationDate datetime,
+	@FK_Sensor int,
+	@Fk_Individual int,
+	@FK_MonitoredSite int
+
+
+	SELECT @FK_Sensor = ValueInt	
+	FROM ObservationDynPropValuesNow
+	WHERE FK_Observation = @obsID 
+	AND Name = 'FK_Sensor'
+
+	SELECT @Fk_Individual = FK_Individual
+	FROM Observation 
+	WHERE ID = @obsID
+
+	IF @Fk_Individual IS NULL
+	SET @Fk_Individual = 0
+
+	IF @newFK_Indiv IS NULL
+	SET @newFK_Indiv = 0
+
+	IF (@FK_Individual != @newFK_Indiv OR @FK_Sensor != @newFk_Sensor)
+	BEGIN
+
+		select @stationDate=StationDate, @FK_MonitoredSite=FK_MonitoredSite
+		FROM Station s
+		WHERE EXISTS (SELECT * 
+						FROM Observation o where o.FK_Station = s.ID AND o.ID = @obsID)
+
+		select @StartDate = StartDate , @EndDate = EndDate 
+		from SensorEquipment
+		where FK_Sensor =  @FK_sensor
+		and  (@stationDate >= StartDate and (EndDate is null or  @stationDate <=  EndDate ) )
+
+
+		SELECT @result = 1 WHERE EXISTS (select *from Individual_Location where
+			date >= @StartDate
+			and (@EndDate is null or date <=  @EndDate )
+			and FK_sensor = @FK_sensor )
+	END
+
+	--SELECT @result
+
+END
+
+GO
+
+  UPDATE [BusinessRules] set params = '["ID","FK_Sensor","FK_Individual"]'
+  WHERE name = 'Disable_Delete_Protocole_Equipment'
+
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('172_ALTER_pr_checkValidatedLocationOnEquipmentProtocol',GETDATE(),(SELECT db_name()))
 
