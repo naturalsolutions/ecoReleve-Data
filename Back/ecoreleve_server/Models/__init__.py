@@ -137,6 +137,7 @@ def db(request):
                 request.response.status_code = 409
                 request.response.text = e.value
             except Exception as e:
+                print_exc()
                 session.rollback()
                 request.response.status_code = 500
             finally:
@@ -147,7 +148,7 @@ def db(request):
     return session
 
 
-from ..GenericObjets.ObjectWithDynProp import LinkedTables
+# from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
 from .Protocoles import *
@@ -164,9 +165,13 @@ from .SensorData import *
 from .List import *
 from .Log import sendLog
 
+# from sqlalchemy.inspection import inspect
 
-LinkedTables['Individual'] = Individual
-LinkedTables['Station'] = Station
-LinkedTables['Protocoles'] = Protocoles
-LinkedTables['Sensor'] = Sensor
-LinkedTables['MonitoredSite'] = MonitoredSite
+# print(type(inspect(Individual).primary_key[0]))
+
+# print(Individual.Equipments.__dict__)
+# # LinkedTables['Individual'] = Individual
+# # LinkedTables['Station'] = Station
+# # LinkedTables['Protocoles'] = Protocoles
+# # LinkedTables['Sensor'] = Sensor
+# # LinkedTables['MonitoredSite'] = MonitoredSite

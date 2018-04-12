@@ -10,7 +10,7 @@ from sqlalchemy import (
     DATE,
     outerjoin)
 from sqlalchemy.orm import aliased
-from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
+from ..GenericObjets.ListObjectWithDynProp import CollectionEngine
 from ..Models import (
     Observation,
     Station,
@@ -20,7 +20,7 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    SensorType,
+    # SensorType,
     MonitoredSite,
     Import,
     ArgosEngineering,
@@ -37,13 +37,74 @@ from datetime import datetime
 from ..utils.datetime import parse
 from ..utils.generator import Generator
 from sqlalchemy.sql.expression import union_all
-
-
+from ..GenericObjets.SearchEngine import Query_engine
+SensorType = Sensor.TypeClass
 eval_ = Eval()
 
+#TODO Remove this file and replace all collection with extended module QueryEngine
+@Query_engine(Station)
+class StationList2():
+    pass
 
-class StationList(ListObjectWithDynProp):
-    ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
+@Query_engine.add_filter(StationList2, 'FK_ProtocoleType')
+def protocoleType_filter(self, query, criteria):
+    o = aliased(Observation)
+    subSelect = select([o.ID]
+                        ).where(
+        and_(Station.ID == o.FK_Station,
+                eval_.eval_binary_expr(o._type_id, criteria['Operator'],
+                                    criteria['Value'])))
+    query = query.where(exists(subSelect))
+    return query
+
+@Query_engine.add_filter(StationList2, 'LastImported')
+def last_imported_filter(self, query, criteria):
+    st = aliased(Station)
+    subSelect2 = select([st]).where(
+        cast(st.creationDate, DATE) > cast(Station.creationDate, DATE))
+    query = query.where(~exists(subSelect2))
+
+    return query
+
+@Query_engine.add_filter(StationList2, 'Species')
+def species_filter(self, query, criteria):
+    obsValTable = Base.metadata.tables['ObservationDynPropValuesNow']
+    o2 = aliased(Observation)
+    s2 = aliased(Station)
+
+    joinStaObs = join(s2, o2, s2.ID == o2.FK_Station)
+
+    operator = criteria['Operator']
+    if 'not' in criteria['Operator']:
+        operator = operator.replace('not ', '').replace(' not', '')
+
+    existInd = select([Individual.ID]
+                        ).where(and_(o2.FK_Individual == Individual.ID,
+                                    eval_.eval_binary_expr(Individual.Species, operator, criteria['Value']))
+                                )
+
+    existObs = select([obsValTable.c['ID']]
+                        ).where(and_(obsValTable.c['FK_Observation'] == o2.ID,
+                                    and_(or_(obsValTable.c['Name'].like('%taxon'), obsValTable.c['Name'].like('%species%')),
+                                        eval_.eval_binary_expr(obsValTable.c['ValueString'], operator, criteria['Value']))
+                                    )
+                                )
+
+    selectCommon = select([s2.ID]).select_from(joinStaObs)
+
+    selectInd = selectCommon.where(exists(existInd))
+    selectObs = selectCommon.where(exists(existObs))
+
+    unionQuery = union_all(selectInd, selectObs)
+    if 'not' in criteria['Operator']:
+        query = query.where(~Station.ID.in_(unionQuery))
+    else:
+        query = query.where(Station.ID.in_(unionQuery))
+    return query
+
+
+class StationList(CollectionEngine):
+    ''' this class extend CollectionEngine, it's used to filter stations '''
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -76,7 +137,7 @@ class StationList(ListObjectWithDynProp):
             subSelect = select([o.ID]
                                ).where(
                 and_(Station.ID == o.FK_Station,
-                     eval_.eval_binary_expr(o.FK_ProtocoleType, criteriaObj['Operator'],
+                     eval_.eval_binary_expr(o._type_id, criteriaObj['Operator'],
                                             criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
@@ -176,7 +237,7 @@ class StationList(ListObjectWithDynProp):
         return query
 
 
-class IndividualList(ListObjectWithDynProp):
+class IndividualList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -212,7 +273,7 @@ class IndividualList(ListObjectWithDynProp):
         joinTable = outerjoin(joinTable, Sensor,
                               Sensor.ID == EquipmentTable.c['FK_Sensor'])
         joinTable = outerjoin(joinTable, SensorType,
-                              Sensor.FK_SensorType == SensorType.ID)
+                              Sensor.type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))
@@ -241,7 +302,7 @@ class IndividualList(ListObjectWithDynProp):
                 query = self.whereInEquipement(query, [criteriaObj])
             else:
                 query = query.where(eval_.eval_binary_expr(
-                    Sensor.FK_SensorType, criteriaObj['Operator'], criteriaObj['Value']))
+                    Sensor._type_id, criteriaObj['Operator'], criteriaObj['Value']))
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
@@ -315,7 +376,7 @@ class IndividualList(ListObjectWithDynProp):
             fullQueryExist = select([Equipment.FK_Individual]).select_from(
                 joinTableExist).where(Equipment.FK_Individual == Individual.ID)
             fullQueryExist = fullQueryExist.where(
-                and_(vs.c['FK_SensorDynProp'] == 9, Sensor.FK_SensorType == 4))
+                and_(vs.c['FK_SensorDynProp'] == 9, Sensor.type_id == 4))
 
         else:
             queryExist = select([e2]).where(
@@ -326,7 +387,7 @@ class IndividualList(ListObjectWithDynProp):
                 [Equipment.FK_Individual]).select_from(joinTableExist)
             fullQueryExist = fullQueryExist.where(and_(
                 ~exists(queryExist), and_(vs.c['FK_SensorDynProp'] == 9,
-                                          and_(Sensor.FK_SensorType == 4,
+                                          and_(Sensor.type_id == 4,
                                                and_(Equipment.Deploy == 1,
                                                     and_(Equipment.StartDate < startDate,
                                                          Equipment.FK_Individual == Individual.ID)
@@ -350,11 +411,10 @@ class IndividualList(ListObjectWithDynProp):
         if criteria_column == 'FK_Sensor':
             criteria_column = Sensor.UnicIdentifier
         if criteria_column == 'FK_SensorType':
-            criteria_column = Sensor.FK_SensorType
+            criteria_column = Sensor._type_id
 
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = outerjoin(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
-        joinTable = outerjoin(joinTable, SensorType, Sensor.FK_SensorType == SensorType.ID)
         startDate = datetime.now()
 
         if self.startDate:
@@ -403,7 +463,7 @@ class IndivLocationList(Generator):
         super().__init__(IndivLoc, SessionMaker)
 
 
-class SensorList(ListObjectWithDynProp):
+class SensorList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -539,7 +599,7 @@ class SensorList(ListObjectWithDynProp):
         return query
 
 
-class MonitoredSiteList(ListObjectWithDynProp):
+class MonitoredSiteList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None,
                  View=None, startDate=None, history=False):
@@ -566,7 +626,7 @@ class MonitoredSiteList(ListObjectWithDynProp):
         joinTable = outerjoin(
             joinTable,
             SensorType,
-            Sensor.FK_SensorType == SensorType.ID)
+            Sensor._type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))

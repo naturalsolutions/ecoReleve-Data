@@ -88,7 +88,7 @@ define([
         url: 'release/individuals/',
         com: this.com,
         filterContainer: this.ui.filter,
-        objectType: 'individus',
+        objectType: 1,
         filtersValues: this.defaultFilters,
       });
     },
