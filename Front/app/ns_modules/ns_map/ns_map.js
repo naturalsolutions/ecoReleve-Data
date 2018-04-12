@@ -141,7 +141,6 @@ define([
         position:'topright'
       }).addTo(this.map);
 
-      L.control.scale().addTo(this.map);
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
@@ -500,7 +499,7 @@ define([
 
     getMarkerIconClassName: function(feature){
       var className = 'marker';
-      switch(feature.properties.type_) {
+      switch(feature.properties.type_.toLowerCase()) {
         case 'station':
           className += ' marker-station';
           break;
@@ -762,6 +761,9 @@ define([
       if(this.selection){
       var marker;
         marker=this.dict[id];
+        if( !marker ) { //litle hack
+          return;
+        }
         marker.selected=!marker.selected;
         if(this.selectedMarkers){
           this.selectedMarkers[id]=marker;
@@ -1186,6 +1188,7 @@ define([
           <div class="js-player-scale scale"></div>\
           <div class="js-timeline-total timeline-total">\
             <div class="js-timeline-current timeline-current"></div>\
+            <span class="js-timeline-currentDate timeline-currentDate"></span>\
           </div>\
         </div>\
         <div class="col-xs-12 custom-row">\
@@ -1197,11 +1200,11 @@ define([
           <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
           <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
           <button title="next location" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
-          <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+          <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Location by location </button> \
         </div>\
         <div class="col-xs-4 no-padding">\
           <div class="pull-left">\
-            <label for="track" title="follow positions on the map"> Track </label>\
+            <label for="track" title="follow positions on the map"> Map centered </label>\
             <input id="track" title="follow positions on the map" type="checkbox" class="js-player-track form-control pull-left" /> \
           </div>\
           <div class="pull-left">\
@@ -1233,6 +1236,11 @@ define([
       this.index = 0;
       this.time = 0;
       this.p_markers = [];
+      // for the last 3 points
+      this.lines = {
+        0 : null,
+        1: null
+      };
 
        //usefull for position presicion & perf: is actually a framerate.
        // and to be on real quartz time because setInterval is multithread.
@@ -1244,6 +1252,14 @@ define([
       this.map.addLayer(this.playerLayer);
       
       this.computeInitialData(geoJson);
+    },
+
+    clearLines : function() {
+     for( var line in this.lines ) {
+       if( this.lines[line] ) {
+         this.playerLayer.removeLayer(this.lines[line])
+       }
+     }
     },
 
     degraded: function(){
@@ -1264,6 +1280,7 @@ define([
 
       var relDayInMs = ( x || 1000)
       var speed = relDayInMs / dayInMs;
+      this.speedForUi = speed;
 
       var firstDate = geoJson.features[0].properties.Date || geoJson.features[0].properties.date;
       var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date || geoJson.features[geoJson.features.length - 1].properties.date;
@@ -1301,6 +1318,7 @@ define([
       var diff = geoJson.features[10].time / speed;
       
       this.displayScale();
+
 
       $('.js-toggle-ctrl-player').removeClass('hidden');
     },
@@ -1353,6 +1371,7 @@ define([
     play: function(e){
       this.playing = true;
       var _this= this;
+      this.interaction('noFocus');
       $('.js-player-play-pause>i').addClass('reneco-pause').removeClass('reneco-play');
       $('.js-timeline-current').css('transition', 'none');
       clearInterval(this.timer);
@@ -1405,6 +1424,7 @@ define([
         for (var i = 0; i < this.p_markers.length; i++) {
           this.playerLayer.removeLayer(this.p_markers[i])
         }
+        this.p_markers = [];
       }
     },
 
@@ -1412,6 +1432,7 @@ define([
       var rapport =  e.offsetX / e.currentTarget.clientWidth;
 
       this.clearMarkers();
+      this.clearLines();
 
       this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
       this.index = this.findClosestFloorPositionIndex(this.time);
@@ -1441,6 +1462,8 @@ define([
 
     pause: function(){
       this.playing = false;
+      var feature = this.locations[this.index];
+      this.interaction('highlight', feature.properties.ID || feature.id);
       $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
       $('.js-timeline-current').css('transition', 'width .2s');
       clearInterval(this.autoNextTimer);
@@ -1467,13 +1490,31 @@ define([
 
     },
 
+    drawLines : function() {
+      var p1,p2,p3;
+      //get last three points (p1 last )
+      p1 = this.p_markers[0];
+      p2 = this.p_markers[1];
+      p3 = this.p_markers[2];
+
+      if ( p2 && p3 ) {
+        if( this.lines[1])
+          this.playerLayer.removeLayer(this.lines[1]);
+        if (this.lines[0] )
+          this.lines[1] = this.lines[0];
+      }
+      if( p1 && p2  ) {
+        this.lines[0] = L.polyline( [p1.getLatLng(),p2.getLatLng()] , {className : 'polylineTest'}).addTo(this.playerLayer);
+      }
+    },
+
     draw: function(){
       this.updateInfos();
 
       var feature = this.locations[this.index];
       var coords = feature.geometry.coordinates;
-      var className = this.getMarkerIconClassName(feature) + ' focus';
-      var icon = new L.DivIcon({className: className});
+      var className = this.getMarkerIconClassName(feature)+ ' focus';
+      var icon = new L.DivIcon({className: className, iconSize: new L.Point(18,18)});
       var m = new L.marker(coords, {icon: icon});
       var prop = feature.properties;
       var infos = '';
@@ -1485,8 +1526,11 @@ define([
       this.p_markers.unshift(m);
 
       m.addTo(this.playerLayer);
-
-      this.interaction('highlight', feature.properties.ID || feature.id);
+      this.drawLines();
+      
+      if( !this.playing ) {
+        this.interaction('highlight', feature.properties.ID || feature.id);
+      }
 
       if(this.p_markers.length > 20){
         this.playerLayer.removeLayer(this.p_markers.pop());
@@ -1516,6 +1560,11 @@ define([
        this.index++;
        this.draw();
       }
+      // var format = 'DD/MM/YYYY';
+      // var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
+      // firstDate = moment(firstDate);
+      // firstDate.add(this.time/this.speedForUi , 'ms');
+      // $('.timeline-currentDate').html(firstDate.format(format));
       
       this.updateInfos();
 
@@ -1529,6 +1578,7 @@ define([
         return;
       }
       this.clearMarkers();
+      this.clearLines();
 
       this.index--;
       this.time = this.locations[this.index].time;
@@ -1539,6 +1589,7 @@ define([
     next: function(pass){
       if(this.time >= this.p_relDuration || this.index + 1 >= this.locations.length){
         this.clearMarkers();
+        this.clearLines();
         this.time = 0;
         this.index = 0;
       } else {
@@ -1560,6 +1611,7 @@ define([
       this.index = 0;
       this.time = 0;
       this.clearMarkers();
+      this.clearLines();
       this.draw();
     },
 
@@ -1569,6 +1621,7 @@ define([
       this.time = 0;
       this.draw();
       this.clearMarkers();
+      this.clearLines();
       this.hidePlayer();
     },
 

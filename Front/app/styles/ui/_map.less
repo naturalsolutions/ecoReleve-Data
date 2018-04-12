@@ -163,12 +163,47 @@
 	&.marker-station{
 		background: purple;
 		border-radius: 0px;
+		&.focus:after{
+			content: "";
+			position: absolute;
+			width: 8px;
+			height: 8px;
+			background: red;
+			top: 50%;
+			left: 50%;
+			/* margin: -4px -4px; */
+			transform: translate(-50%,-50%);
+		}
 	}
 	&.marker-gps{
 		background: rgba(51, 153, 204, 1);
+		&.focus:after{
+			content: "";
+			position: absolute;
+			border-radius: 50%;
+			width: 8px;
+			height: 8px;
+			background: red;
+			top: 50%;
+			left: 50%;
+			/* margin: -4px -4px; */
+			transform: translate(-50%,-50%);
+		}
 	}
 	&.marker-argos{
 		background: orange;
+		&.focus:after{
+			content: "";
+			position: absolute;
+			border-radius: 50%;
+			width: 8px;
+			height: 8px;
+			background: red;
+			top: 50%;
+			left: 50%;
+			/* margin: -4px -4px; */
+			transform: translate(-50%,-50%);
+		}
 	}
 	&.selected{
 		background: rgba(255, 0, 0 ,1);
@@ -178,6 +213,30 @@
 		z-index: 10000000!important;
 		animation: focus .7s infinite;
 	}
+	// &.focus:after {
+	// 	content: "";
+	// 	position: absolute;
+	// 	width: 8px;
+	// 	height: 8px;
+	// 	background: red;
+	// 	top: 50%;
+	// 	left: 50%;
+	// 	/* margin: -4px -4px; */
+	// 	transform: translate(-50%,-50%);
+	// }
+	
+	/*{
+		z-index: 10000000!important;
+		animation: focus .7s infinite;
+		// background: rgba(255, 0, 0 ,1);
+		// box-shadow: inset 0 0 0 3px #3399cc;
+	}*/
+
+}
+
+.polylineTest {
+	stroke: red;
+	stroke-width: 2;
 }
 
 .info-legend{
@@ -229,7 +288,7 @@
 
 .player{
 	overflow: auto;
-	padding: 15px 0px;
+	 padding: 15px 0px;
 	height: 150px;
 	background: white;
 	border-top: 1px solid rgb(150,150,150);
@@ -246,6 +305,7 @@
 	}
 	.timeline{
 		padding: 5px 15px;
+		// padding: 0 5px 25px 5px;
 		position: relative;
 		overflow: hidden;
 		.scale{
@@ -270,7 +330,10 @@
 		height: 15px;
 		background: rgb(187, 185, 185);
 		border: 1px solid rgb(150,150,150);
-		width: 100%;	
+		width: 100%;
+		.timeline-currentDate {
+		
+		}
 	}
 	.timeline-current{
 		height: 100%;
