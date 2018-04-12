@@ -227,9 +227,9 @@ class DbObject(object):
         def after_insert(mapper, connection, target):
             cls.executeBusinessRules(target, 'after_insert')
 
-        @event.listens_for(cls, 'before_delete')
-        def before_delete(mapper, connection, target):
-            cls.executeBusinessRules(target, 'before_delete')
+        # @event.listens_for(cls, 'before_delete')
+        # def before_delete(mapper, connection, target):
+        #     cls.executeBusinessRules(target, 'before_delete')
 
         @event.listens_for(cls, 'after_delete')
         def after_delete(mapper, connection, target):

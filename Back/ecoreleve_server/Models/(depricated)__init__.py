@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import TimeoutError
 import pandas as pd
 from traceback import print_exc
+from sqlalchemy import event
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
@@ -114,6 +115,13 @@ import json
 def db(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()
+
+    @event.listens_for(session, 'before_flush')
+    def receive_before_flush(session, flush_context, instances):
+        for instance_state, current_instance in session._deleted.items():
+            if hasattr(current_instance, 'executeBusinessRules'):
+                current_instance.LoadNowValues()
+                current_instance.executeBusinessRules(current_instance, 'before_delete')
 
     def cleanup(request):
         if request.exception is not None:
