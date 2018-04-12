@@ -7,7 +7,7 @@ from ..Models import (
     ErrorAvailable,
     sendLog
 )
-from sqlalchemy import select, and_, join
+from sqlalchemy import select, and_, join, func
 from traceback import print_exc
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView
@@ -97,6 +97,16 @@ class ObservationsView(DynamicObjectCollectionView):
             response = self.request.response
             response.text = 'A station ID is needed, try this url */stations/{id}/observations'
             return response
+
+    def count_(self):
+        query = select([func.count(Observation.ID)])
+        if 'protocolTypeId' in self.request.params:
+            print( self.request.params['protocolTypeId'])
+            typeId = self.request.params['protocolTypeId']
+            query = query.where(Observation.FK_ProtocoleType==int(typeId))
+
+        result = self.session.execute(query).scalar()
+        return result
 
     def insert(self, json_body=None):
         if not json_body:
