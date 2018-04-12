@@ -1,9 +1,10 @@
 from pyramid.view import view_config
-from sqlalchemy import select, and_, join
+from sqlalchemy import select, and_, join, func
 from traceback import print_exc
 
 from ecoreleve_server.core import RootCore, DynamicObjectResource, DynamicObjectCollectionResource
 from .observation_model import Observation
+from .observation_collection import ObservationCollection
 from ..field_activities import FieldActivity_ProtocoleType
 from ..permissions import context_permissions
 
@@ -52,7 +53,7 @@ class ObservationResource(DynamicObjectResource):
 
 class ObservationsResource(DynamicObjectCollectionResource):
 
-    Collection = None
+    Collection = ObservationCollection
     model = Observation
     moduleFormName = 'ObservationForm'
     moduleGridName = 'ObservationFilter'
@@ -136,6 +137,15 @@ class ObservationsResource(DynamicObjectCollectionResource):
                 responseBody['createdObservations'].append(self.insert(row))
 
         return responseBody
+
+    def count_(self):
+        query = select([func.count(Observation.ID)])
+        if 'protocolTypeId' in self.request.params:
+            typeId = self.request.params['protocolTypeId']
+            query = query.where(Observation.FK_ProtocoleType==int(typeId))
+
+        result = self.session.execute(query).scalar()
+        return result
 
     def getObservationsWithType(self):
         print('in get observation grid')
