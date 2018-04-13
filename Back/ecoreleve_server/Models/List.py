@@ -65,10 +65,17 @@ class StationList(ListObjectWithDynProp):
         curProp = criteriaObj['Column']
 
         if curProp == 'FieldworkArea_Name':
-            query = query.where(eval_.eval_binary_expr(FieldworkArea.fullpath,
+            s2 = aliased(Station)
+            sub_query = select([FieldworkArea.Name, FieldworkArea.fullpath]).where(eval_.eval_binary_expr(FieldworkArea.fullpath,
                                 criteriaObj['Operator'],
                                 criteriaObj['Value'])
-                                )
+                                ).where(s2.FK_FieldworkArea==FieldworkArea.ID)
+    
+            # query = query.where(eval_.eval_binary_expr(FieldworkArea.fullpath,
+            #                     criteriaObj['Operator'],
+            #                     criteriaObj['Value'])
+            #                     )
+            query = query.where(exists(sub_query))
 
 
         if curProp == 'FK_ProtocoleType':
@@ -159,6 +166,7 @@ class StationList(ListObjectWithDynProp):
         ''' Override parent function to include
         management of Observation/Protocols and fieldWorkers '''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
+        print(fullQueryJoinOrdered)
         result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
@@ -173,6 +181,7 @@ class StationList(ListObjectWithDynProp):
             if obj['Column'] in ['FK_ProtocoleType', 'FK_FieldWorker',
                                  'LastImported', 'FK_Individual', 'Species', 'FieldworkArea_Name']:
                 query = self.WhereInJoinTable(query, obj)
+        print(query)
         return query
 
 
