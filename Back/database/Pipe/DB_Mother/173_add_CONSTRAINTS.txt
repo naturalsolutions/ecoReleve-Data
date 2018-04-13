@@ -1,0 +1,224 @@
+
+ALTER TABLE [dbo].Equipment  WITH CHECK ADD FOREIGN KEY([FK_MonitoredSite])
+REFERENCES [dbo].[MonitoredSite] ([ID])
+GO
+ 
+
+/****************** OBSERVATION ****************/ 	
+	ALTER TABLE [dbo].[Observation]  WITH CHECK ADD FOREIGN KEY([Parent_Observation])
+	REFERENCES [dbo].[Observation] ([ID])
+	GO
+
+	DELETE ObservationDynPropValue 
+	WHERE FK_Observation IS NULL 
+
+	DELETE v
+	FROM ObservationDynPropValue v 
+	WHERE EXISTS (	
+					SELECT * 
+					FROM ObservationDynPropValue v2
+					WHERE ISNULL(v.FK_Observation, '') = ISNULL(v2.FK_Observation, '')
+					AND ISNULL(v.FK_ObservationDynProp, '') = ISNULL(v2.FK_ObservationDynProp,'')
+					AND v.StartDate = v2.StartDate
+					AND v.ID < v2.ID )
+	
+	/***
+
+	SELECT FK_ObservationDynProp, FK_Observation, StartDate
+	FROM ObservationDynPropValue
+	GROUP By FK_ObservationDynProp, FK_Observation, StartDate
+	HAVING Count(*)>1
+
+	**/
+
+	DROP INDEX [IX_ObservationDynPropValue_Fk_Observation_autres] ON [dbo].[ObservationDynPropValue]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [IX_ObservationDynPropValue_Fk_Observation_autres] ON [dbo].[ObservationDynPropValue]
+	(
+		[FK_Observation] ASC,
+		[FK_ObservationDynProp] ASC,
+		[StartDate] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [uqc_ObservationDynProp_Name] ON [dbo].[ObservationDynProp]
+	(
+		[Name] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	GO
+
+
+
+/******************** INDIVIDUAL **********************/
+
+	DELETE IndividualDynPropValue 
+	WHERE FK_Individual IS NULL 
+
+	DELETE v 
+	FROM IndividualDynPropValue v 
+	WHERE EXISTS (	
+					SELECT * 
+					FROM IndividualDynPropValue v2
+					WHERE ISNULL(v.FK_Individual, '') = ISNULL(v2.FK_Individual, '')
+					AND ISNULL(v.FK_IndividualDynProp, '') = ISNULL(v2.FK_IndividualDynProp,'')
+					AND v.StartDate = v2.StartDate
+					AND v.ID < v2.ID )
+	/**
+	SELECT FK_IndividualDynProp, FK_Individual, StartDate
+	FROM IndividualDynPropValue
+	GROUP By FK_IndividualDynProp, FK_Individual, StartDate
+	HAVING Count(*)>1
+
+	**/
+
+	DROP INDEX [IX_IndividualDynPropValue_Fk_Individual_autres] ON [dbo].[IndividualDynPropValue]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [IX_IndividualDynPropValue_Fk_Individual_autres] ON [dbo].[IndividualDynPropValue]
+	(
+		[FK_Individual] ASC,
+		[FK_IndividualDynProp] ASC,
+		[StartDate] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [uqc_IndividualDynProp_Name] ON [dbo].[IndividualDynProp]
+	(
+		[Name] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	GO
+
+
+/******************** SENSOR **********************/
+
+	DELETE SensorDynPropValue 
+	WHERE FK_Sensor IS NULL 
+
+	DELETE v 
+	FROM SensorDynPropValue v 
+	WHERE EXISTS (	
+					SELECT * 
+					FROM SensorDynPropValue v2
+					WHERE ISNULL(v.FK_Sensor, '') = ISNULL(v2.FK_Sensor, '')
+					AND ISNULL(v.FK_SensorDynProp, '') = ISNULL(v2.FK_SensorDynProp,'')
+					AND v.StartDate = v2.StartDate
+					AND v.ID < v2.ID )
+	/**
+	SELECT FK_SensorDynProp, FK_Sensor, StartDate
+	FROM SensorDynPropValue
+	GROUP By FK_SensorDynProp, FK_Sensor, StartDate
+	HAVING Count(*)>1
+
+	**/ 
+
+	IF 1 = (SELECT count(*)
+	FROM sys.indexes 
+	WHERE name='IX_SensorDynPropValue_Fk_Sensor_autres' 
+	AND object_id = OBJECT_ID('dbo.SensorDynPropValue') ) 
+		DROP INDEX [IX_SensorDynPropValue_Fk_Sensor_autres] ON [dbo].[SensorDynPropValue]
+		GO
+
+
+	CREATE UNIQUE NONCLUSTERED INDEX [IX_SensorDynPropValue_Fk_Sensor_autres] ON [dbo].[SensorDynPropValue]
+	(
+		[FK_Sensor] ASC,
+		[FK_SensorDynProp] ASC,
+		[StartDate] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [uqc_SensorDynProp_Name] ON [dbo].[SensorDynProp]
+	(
+		[Name] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	GO
+
+
+
+
+/******************** STATION **********************/
+
+	DELETE StationDynPropValue 
+	WHERE FK_Station IS NULL 
+
+	DELETE v 
+	FROM StationDynPropValue v 
+	WHERE EXISTS (	
+					SELECT * 
+					FROM StationDynPropValue v2
+					WHERE ISNULL(v.FK_Station, '') = ISNULL(v2.FK_Station, '')
+					AND ISNULL(v.FK_StationDynProp, '') = ISNULL(v2.FK_StationDynProp,'')
+					AND v.StartDate = v2.StartDate
+					AND v.ID < v2.ID )
+	/**
+	SELECT FK_StationDynProp, FK_Station, StartDate
+	FROM StationDynPropValue
+	GROUP By FK_StationDynProp, FK_Station, StartDate
+	HAVING Count(*)>1
+
+	**/
+
+	DROP INDEX [IX_StationDynPropValue_Fk_Station_autres] ON [dbo].[StationDynPropValue]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [IX_StationDynPropValue_Fk_Station_autres] ON [dbo].[StationDynPropValue]
+	(
+		[FK_Station] ASC,
+		[FK_StationDynProp] ASC,
+		[StartDate] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [uqc_StationDynProp_Name] ON [dbo].[StationDynProp]
+	(
+		[Name] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	GO
+
+	
+/******************** MONITORED SITE **********************/
+
+	DELETE MonitoredSiteDynPropValue 
+	WHERE FK_MonitoredSite IS NULL 
+
+	DELETE v 
+	FROM MonitoredSiteDynPropValue v 
+	WHERE EXISTS (	
+					SELECT * 
+					FROM MonitoredSiteDynPropValue v2
+					WHERE ISNULL(v.FK_MonitoredSite, '') = ISNULL(v2.FK_MonitoredSite, '')
+					AND ISNULL(v.FK_MonitoredSiteDynProp, '') = ISNULL(v2.FK_MonitoredSiteDynProp,'')
+					AND v.StartDate = v2.StartDate
+					AND v.ID < v2.ID )
+	/**
+	SELECT FK_MonitoredSiteDynProp, FK_MonitoredSite, StartDate
+	FROM MonitoredSiteDynPropValue
+	GROUP By FK_MonitoredSiteDynProp, FK_MonitoredSite, StartDate
+	HAVING Count(*)>1
+
+	**/
+
+	DROP INDEX [IX_MonitoredSiteDynPropValue_Fk_MonitoredSite_autres] ON [dbo].[MonitoredSiteDynPropValue]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [IX_MonitoredSiteDynPropValue_Fk_MonitoredSite_autres] ON [dbo].[MonitoredSiteDynPropValue]
+	(
+		[FK_MonitoredSite] ASC,
+		[FK_MonitoredSiteDynProp] ASC,
+		[StartDate] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+	GO
+
+	CREATE UNIQUE NONCLUSTERED INDEX [uqc_MonitoredSiteDynProp_Name] ON [dbo].[MonitoredSiteDynProp]
+	(
+		[Name] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('173_add_CONSTRAINTS',GETDATE(),(SELECT db_name()))
+
+
+GO
