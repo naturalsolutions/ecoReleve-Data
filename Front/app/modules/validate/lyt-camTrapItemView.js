@@ -289,7 +289,7 @@ define([
 		},
 
 		onDestroy: function () {
-			console.log("bim destroy");
+			// console.log("bim destroy");
 		},
 
 		attachStation: function (id) {

@@ -167,7 +167,7 @@ define([
     },
 
     setoldSelectedInactive: function(tab) {
-      console.log("on va mettre a inactif", tab)
+      // console.log("on va mettre a inactif", tab)
       if( !tab )
         return;
       var index;
@@ -181,7 +181,7 @@ define([
     },
 
     setAllSelectedActive: function(tab) {
-      console.log("on va mettre a active " , tab)
+      // console.log("on va mettre a active " , tab)
       if( !tab )
        return;
       var index;  
@@ -199,7 +199,7 @@ define([
       this.equipmentId = parseInt(this.checkUrl(location.hash));
 
       if (this.equipLine < 0) {
-        console.log("lol pas de session");
+        // console.log("lol pas de session");
         return
       }
 
@@ -273,7 +273,7 @@ define([
       var _this = this;
       var tabSelected = this.model.get('newSelected');
       if( !tabSelected ) {
-        console.log("désactive tout");
+        // console.log("désactive tout");
         
       } 
       var collection = new Backbone.Collection();
@@ -323,7 +323,7 @@ define([
           _this.displaySiteForm();
         })
         .fail(function () {
-          console.log("pas bon");
+          // console.log("pas bon");
         });
 
     },
@@ -368,8 +368,8 @@ define([
       this.myImageCollection = new ImageCollection();
       this.myImageCollection.sync('patch', this.myImageCollection, {
         error: function () {
-          console.log(this.myImageCollection);
-          console.log("sync impossible");
+          // console.log(this.myImageCollection);
+          // console.log("sync impossible");
         }
       });
 
@@ -384,7 +384,7 @@ define([
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function (e) {
-        console.log("reset du paginator");
+        // console.log("reset du paginator");
       });
 
     },
@@ -501,7 +501,7 @@ define([
           distance: 10,
 
           start: function (e) { // for all elem
-            console.log("start selection")
+            // console.log("start selection")
             var tabSelected = $('#gallery .ui-selected');
             tabOldUiSelected = []
             for ( var i = 0 ; i < tabSelected.length ; i++) {
@@ -549,7 +549,7 @@ define([
                     }
                     else {
                       //find index
-                      console.log("on test")
+                      // console.log("on test")
                     }
                   }
     
@@ -566,7 +566,7 @@ define([
               });
               _this.model.set('newSelected',indexItemSelected);// change selected item
 
-            console.log("stop selection ")
+            // console.log("stop selection ")
             // this.tabOldUiSelected = [];
             // this.tabNewSelected = [];
             // this.tabNewUnSelected = [];
@@ -638,7 +638,7 @@ define([
               }
               _this.toolsBar.$elemTags.val(null).trigger('change');
               _this.toolsBar.$elemTags.val(allTagsTabs).trigger('change');
-              console.log("all tags in selection : ",allTagsTabs);
+              // console.log("all tags in selection : ",allTagsTabs);
               // var $inputTags = _this.toolsBar.$el.find("#tagsInput");
               // var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
               // var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
@@ -790,10 +790,10 @@ define([
           })
           .done(function (resp) {
             item.removeStation();
-            console.log("Station" + stationId + " removed ok");
+            // console.log("Station" + stationId + " removed ok");
           })
           .fail(function (err) {
-            console.log(err);
+            // console.log(err);
           });
       } else {
 
@@ -804,7 +804,7 @@ define([
             data: JSON.stringify(tabOfIds)
           })
           .done(function (resp) {
-            console.log(resp);
+            // console.log(resp);
             for (var item in resp) {
               var indexElem = tabOfIds.findIndex(function (elem) {
                 return Number(item) === elem;
@@ -813,7 +813,7 @@ define([
             }
           })
           .fail(function (err) {
-            console.log(err);
+            // console.log(err);
           })
 
       }
@@ -935,13 +935,13 @@ define([
 
         })
         .fail(function (err) {
-          console.log(err);
+          // console.log(err);
           alert("someting goes wrong")
         })
 
       })
       .fail(function (err) {
-        console.log(err)
+        // console.log(err)
         throw new Error("error create station");
       });
 
@@ -962,7 +962,7 @@ define([
           _this.updateUIWhenSelectionChange()
         })
         .fail(function (err) {
-          console.log(err)
+          // console.log(err)
           throw new Error("error create station");
         });
 
@@ -1023,7 +1023,7 @@ define([
 
     filterCollectionCtrl2: function (event) {
 
-      console.log(event);
+      // console.log(event);
     },
 
     filterNavOpen: function () {
@@ -1069,7 +1069,7 @@ define([
           _this.initCollection();
         })
         .fail(function () {
-          console.log("pas bon");
+          // console.log("pas bon");
         });
     },
     destroyViews: function (tabView) {
@@ -1161,7 +1161,7 @@ define([
         }
         _this.refreshCounter();
         _this.updateUIWhenSelectionChange();
-        console.log(err);
+        // console.log(err);
         alert("someting goes wrong")
       })
 
@@ -1231,7 +1231,7 @@ define([
 
       })
       .fail(function (err) {
-        console.log(err);
+        // console.log(err);
       })
         
       //call delete 
@@ -1268,7 +1268,7 @@ define([
         _this.updateUIWhenSelectionChange();
       })
       .fail(function (err) {
-        console.log(err);
+        // console.log(err);
         alert("someting goes wrong")
       })
     },

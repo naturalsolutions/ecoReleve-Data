@@ -360,9 +360,9 @@ define([
 
     rowClicked: function(args) {
       if( this.type_ === "camtrap") {
-        console.log("on a clique sur la row");
-        console.log(args);
-        console.log("on va lancer la vue details pour les camera trap");
+        // console.log("on a clique sur la row");
+        // console.log(args);
+        // console.log("on va lancer la vue details pour les camera trap");
         var row = args.row;
         var evt = args.evt;
 

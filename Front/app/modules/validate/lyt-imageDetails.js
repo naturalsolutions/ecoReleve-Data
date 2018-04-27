@@ -186,7 +186,7 @@ define([
       // this.changeStars();
       this.changeTags();
       /*if(!this.flagExif) {
-        console.log("on va afficher lexif");
+        // console.log("on va afficher lexif");
         this.changeExif();
       }
       else {
@@ -212,7 +212,7 @@ define([
 		},
 
 		onDestroy: function() {
-			console.log("bim destroy");
+			// console.log("bim destroy");
 		}
 
 	});

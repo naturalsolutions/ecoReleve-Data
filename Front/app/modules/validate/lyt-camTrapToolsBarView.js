@@ -41,7 +41,7 @@ define([
 		//template : $('#itemview-image-template').html(),
 
 		initialize : function(options) {
-			console.log("on init la toolBar youhouuuuuuuu")
+			// console.log("on init la toolBar youhouuuuuuuu")
 			this.parent = options.parent;
 			this.dataTags = null;
 			this.model = options.model;
@@ -356,7 +356,7 @@ define([
 				data: JSON.stringify(tab)
 			  })
 			  .done(function (resp) {
-				  console.log(resp)
+				//   console.log(resp)
 				  var index,item,id,strTags;
 				  for ( var i = 0 ; i < tabSelected.length ; i ++ ) {
 					index = tabSelected[i]
@@ -387,7 +387,7 @@ define([
 				// debugger;
 			  })
 			  .fail(function (err) {
-				console.log(err);
+				// console.log(err);
 				alert("someting goes wrong")
 			  })
 
@@ -422,12 +422,12 @@ define([
 						modelsToUpdate.push(model.toJSON())
 						if( tagsStr ) {
 							newTagsTab = tagsStr.split(',');
-							console.log("origial",newTagsTab);
-							console.log("unselected",this.unSelectedTagsTab);
-							console.log("selected",this.selectedTagsTab);
+							// console.log("origial",newTagsTab);
+							// console.log("unselected",this.unSelectedTagsTab);
+							// console.log("selected",this.selectedTagsTab);
 
 							newTagsTab = _.difference(newTagsTab,this.unSelectedTagsTab);
-							console.log("diff",newTagsTab);
+							// console.log("diff",newTagsTab);
 
 							if( newTagsTab.length) {
 								newTagsTab = _.union(newTagsTab,this.selectedTagsTab);
@@ -436,7 +436,7 @@ define([
 						else {
 							newTagsTab = this.selectedTagsTab;
 						}
-						console.log("finaly",newTagsTab)
+						// console.log("finaly",newTagsTab)
 						
 						if(newTagsTab.length) {
 							modelsToUpdate[modelsToUpdate.length - 1].tags = newTagsTab.join(',');
