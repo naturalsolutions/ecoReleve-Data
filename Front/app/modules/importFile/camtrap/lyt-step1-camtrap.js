@@ -174,9 +174,8 @@ define([
       text += listFiles;
       Swal({
         title: title,
-        text: text,
+        html: text,
         type: 'error',
-        html : true,
         showCancelButton: false,
         confirmButtonText: 'OK',
         closeOnCancel: true
@@ -354,12 +353,11 @@ define([
       } else {
         Swal({
           title: 'Warning',
-          text: 'You need to add some files for going on the next step<BR>',
+          html: 'You need to add some files for going on the next step<BR>',
           type: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',
           closeOnCancel: true,
-          html : true
         })
       }
     },

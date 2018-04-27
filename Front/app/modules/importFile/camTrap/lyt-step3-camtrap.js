@@ -310,15 +310,25 @@ define([
         if(textWarningSwal && textInfosSwal) {
           Swal({
             title: 'Infos',
-            text: textInfosSwal,
+            html: textInfosSwal,
             type: 'warning',
             showCancelButton: false,
             confirmButtonText: 'OK',
             closeOnCancel: false,
-            closeOnConfirm: false,
-            html : true
+            closeOnConfirm: false
 
-          },function(isconfirm) {
+          }).then( () => {
+            Swal({
+              title: 'Warning',
+              html: textWarningSwal,
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonText: 'OK',
+              closeOnCancel: true,
+            });
+          });
+          /*
+          ,function(isconfirm) {
             Swal({
               title: 'Warning',
               text: textWarningSwal,
@@ -328,18 +338,17 @@ define([
               closeOnCancel: true,
               html : true
             });
-          })
+          })*/
         }
         else if(textInfosSwal || textWarningSwal) {
           var text = textInfosSwal || textWarningSwal;
           Swal({
             title: 'Warning',
-            text: text,
+            html: text,
             type: 'warning',
             showCancelButton: false,
             confirmButtonText: 'OK',
-            closeOnCancel: true,
-            html : true
+            closeOnCancel: true
           });
         }
       
@@ -472,24 +481,22 @@ define([
         console.log(text)
         Swal({
           title: 'Upload complete',
-          text: text,
+          html: text,
           type: 'warning',
           showCancelButton: true,
           confirmButtonColor: 'green',
           confirmButtonText: 'Go to Validate',
           cancelButtonText: 'Import new camera trap photo',
-          closeOnCancel: true,
-          html : true,
-        },
-        function(isConfirm){
-          if(isConfirm) {
-           Backbone.history.navigate('validate/camtrap',{trigger:true}) ;
-          } else {
+          closeOnCancel: true
+        })
+        .then( (result) => {
+          if( 'value' in result){
+            Backbone.history.navigate('validate/camtrap',{trigger:true}) ;
+          }
+          if( 'dismiss' in result ) {
             Backbone.history.loadUrl(Backbone.history.fragment);
           }
-        }
-      );
-
+        });
       })
 
       this.r.on('progress', function (file, message) {
