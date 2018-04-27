@@ -1,0 +1,13 @@
+UPDATE [ModuleForms] SET Options = '{"protocoleType":222,"nbFixedCol":0,"delFirst":0,"showLines":1}'
+ WHERE Name = 'Clutch_description' AND inputType = 'GridFormEditor'
+
+
+ UPDATE [ModuleForms] SET Options = '{"protocoleType":214,"nbFixedCol":0,"delFirst":0,"showLines":1}'
+ WHERE Name = 'Vertebrate_individual' AND inputType = 'GridFormEditor'
+ GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('164_Update_CONF_GridFormEditor',GETDATE(),(SELECT db_name()))
+
+
+GO

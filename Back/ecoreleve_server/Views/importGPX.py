@@ -3,7 +3,6 @@ from sqlalchemy import select, and_, insert
 from sqlalchemy.exc import IntegrityError
 from ..Models import (
     Station,
-    StationType,
     Station_FieldWorker,
     Import,
     GPX,
@@ -138,11 +137,11 @@ def insertData(session, dataFrame_to_insert, fieldWorkers):
     bulk_station = []
     if len(data_to_insert) != 0:
         # TODO : improve performance
-        Sta = model(FK_StationType=4)
+        Sta = model(type_id=4)
         Sta.init_on_load()
 
         for sta in data_to_insert:
-            curSta = model(FK_StationType=4)
+            curSta = model(type_id=4)
             # curSta.init_on_load()
             curSta.allProp = Sta.allProp
             curDate = datetime.strptime(

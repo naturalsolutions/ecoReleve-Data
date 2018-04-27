@@ -75,16 +75,32 @@ define([
         showCancelButton: true,
         confirmButtonColor: 'green',
         confirmButtonText: 'create another ' + _this.model.get('single'),
-        cancelButtonText: 'cancel',
-        closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        if (!isConfirm) {
+        cancelButtonText: 'cancel'
+      }).then( (result) => { 
+        if ('dismiss' in value) {
           _this.cancel();
         } else {
           _this.nsForm.butClickClear();
         }
       });
+
+      // Swal({
+      //   title: 'Succes',
+      //   text: 'creating new ' + _this.model.get('single'),
+      //   type: 'success',
+      //   showCancelButton: true,
+      //   confirmButtonColor: 'green',
+      //   confirmButtonText: 'create another ' + _this.model.get('single'),
+      //   cancelButtonText: 'cancel',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   if (!isConfirm) {
+      //     _this.cancel();
+      //   } else {
+      //     _this.nsForm.butClickClear();
+      //   }
+      // });
     },
 
     save: function() {

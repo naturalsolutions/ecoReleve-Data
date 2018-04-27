@@ -1,0 +1,16 @@
+<!-- <% if (resumableFile.cid !== null ) { %> -->
+<row>   
+        <div id="js-fileName" class="col-md-4 text-left">
+            <%= resumableFile.fileName %>
+        </div >
+        <div id="js-fileSize" class="col-md-4 text-center">
+            <%= (resumableFile.size / (1024*1024)).toFixed(2) %> Mb
+        </div >
+        <div id="js-fileButton" class="col-md-4 text-right">
+            <button id='js-removeFile' itemCid='<%=resumableFile.cid%>' class="btn btn-warning cancel">
+                <i class="glyphicon glyphicon-ban-circle"></i>
+                <span>Cancel</span>
+            </button>							
+        </div >
+</row>
+<!-- <% }%> -->

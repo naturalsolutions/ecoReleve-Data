@@ -16,9 +16,14 @@ define([
       label: 'individuals',
       single: 'individual',
       type: 'individuals',
-
+      defaultTypeObj: 1,
       icon: 'reneco-bustard',
       subincon: 'reneco-bustard',
+
+      disabledNew: true,
+      authorisationLvl: {
+        create_new: 'js-admin',
+      },
 
       formConfig: {
         modelurl: 'individuals',
@@ -139,8 +144,8 @@ define([
         headerName: 'Precision(m)',
         filter: 'number',
       },{
-        field: 'region',
-        headerName: 'Region',
+        field: 'FieldworkArea',
+        headerName: 'FieldWorkArea',
         filter: 'text',
       },{
         field: 'type_',

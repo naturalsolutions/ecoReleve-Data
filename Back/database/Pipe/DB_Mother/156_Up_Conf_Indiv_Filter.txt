@@ -1,0 +1,21 @@
+  UPDATE [ModuleGrids] set Label = 'Sensor type', IsSearchable=1, FilterRender=4, FilterType='Select',
+							Options='SELECT Distinct Name as label, Name as val FROM SensorType', FilterOrder = 25
+  WHERE Module_ID = 8 AND Name = 'FK_SensorType' and TypeObj = 1 
+
+  UPDATE [ModuleGrids] set Label = 'Sensor Identifier'
+  WHERE Module_ID = 8 AND Name = 'FK_Sensor' and TypeObj = 1 
+
+  
+  UPDATE [ModuleGrids] set Label = 'Sensor model'
+  WHERE Module_ID = 8 AND Name = 'FK_SensorModel' and TypeObj = 1 
+
+    
+  UPDATE [ModuleGrids] set FilterOrder = 22
+  WHERE Module_ID = 8 AND Name = 'frequency' and TypeObj = 1 
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('156_Up_Conf_Indiv_Filter',GETDATE(),(SELECT db_name()))
+
+
+GO

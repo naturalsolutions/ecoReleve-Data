@@ -1,0 +1,1 @@
+from .media_file_model import Photos, MediasFiles

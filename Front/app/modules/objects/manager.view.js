@@ -53,6 +53,11 @@ define([
     initialize: function(options) {
       this.options = options;
       this.model = new this.ModelPrototype();
+
+      if(options.enableNew){
+        this.model.set('disabledNew', undefined)
+      }
+
       this.com = new Com();
       if( window.app.currentData ){
         this.populateCurrentData(window.app.currentData);
@@ -124,7 +129,7 @@ define([
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        objectType: this.model.get('objectType'),
+        objectType: this.model.get('defaultTypeObj'),
         afterGetRows: afterGetRows,
         filters: this.defaultFilters,
         gridOptions: {

@@ -1,8 +1,9 @@
 from ..Models import (
     Individual,
+    # IndividualDynPropValue,
     Individual_Location,
+    IndividualStatus,
     Sensor,
-    SensorType,
     IndividualList,
     Base,
     IndivLocationList,
@@ -11,20 +12,80 @@ from ..Models import (
 )
 import json
 from datetime import datetime
-from sqlalchemy import select, join, desc
+from sqlalchemy import select, join, desc, not_
 from collections import OrderedDict
 from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
 from pyramid.traversal import find_root
+
+SensorType = Sensor.TypeClass
+IndividualDynPropValue = Individual.DynamicValuesClass
+
+
+class IndividualValueView(DynamicObjectValue):
+    model = IndividualDynPropValue
+    item = None
+
+    def retrieve(self):
+        pass
+
+
+class IndividualValuesView(DynamicObjectValues):
+    model = IndividualDynPropValue
+    item = IndividualValueView
+
+    def retrieve(self):
+        from ..utils.parseValue import formatThesaurus
+
+        propertiesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropTable()]
+        dynamicValuesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropValuesTable()]
+        FK_name = self.parent.objectDB.GetSelfFKNameInValueTable()
+        FK_property_name = self.parent.objectDB.GetDynPropFKName()
+
+        tableJoin = join(dynamicValuesTable, propertiesTable,
+                         dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
+        query = select([dynamicValuesTable, propertiesTable.c['Name']]
+                       ).select_from(tableJoin).where(
+                                            dynamicValuesTable.c[FK_name] == self.parent.objectDB.ID
+                                                        )
+        
+        query = query.where(not_(propertiesTable.c['Name'].in_(['Release_Comments',
+                                                                'Breeding ring kept after release',
+                                                                'Box_ID',
+                                                                'Date_Sortie',
+                                                                'Poids']))
+                            ).order_by(desc(dynamicValuesTable.c['StartDate']))
+
+        result = self.session.execute(query).fetchall()
+        response = []
+
+        for row in result:
+            curRow = OrderedDict(row)
+            dictRow = {}
+            for key in curRow:
+                if curRow[key] is not None:
+                    if key == 'ValueString' in key and curRow[key] is not None:
+                        try:
+                            thesauralValueObj = formatThesaurus(curRow[key])
+                            dictRow['value'] = thesauralValueObj['displayValue']
+                        except:
+                            dictRow['value'] = curRow[key]
+                    elif 'FK' not in key:
+                        dictRow[key] = curRow[key]
+            dictRow['StartDate'] = curRow[
+                'StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+            response.append(dictRow)
+
+        return response
 
 
 class IndividualView(DynamicObjectView):
-
     model = Individual
 
     def __init__(self, ref, parent):
         DynamicObjectView.__init__(self, ref, parent)
         self.add_child('locations', IndividualLocationsView)
+        self.add_child('history', IndividualValuesView)
         self.actions = {'equipment': self.getEquipment}
 
     def __getitem__(self, ref):
@@ -33,22 +94,12 @@ class IndividualView(DynamicObjectView):
             return self
         return self.get(ref)
 
-    def update(self):
-        data = self.request.json_body
-        self.objectDB.LoadNowValues()
-        try:
-            self.objectDB.updateFromJSON(data)
-            return {}
-        except ErrorCheckIndividualCodes as e:
-            self.request.response.status_code = 520
-            return str(e)
-
     def getEquipment(self):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,
                          SensorType,
-                         Sensor.FK_SensorType == SensorType.ID)
+                         Sensor.type_id == SensorType.ID)
         query = select([table.c['StartDate'],
                         table.c['EndDate'],
                         Sensor.UnicIdentifier,
@@ -146,6 +197,45 @@ class IndividualsView(DynamicObjectCollectionView):
 
         return existingID
 
+    def retrieve(self):
+        import time
+        from ..GenericObjets.SearchEngine import QueryEngine, DynamicPropertiesQueryEngine
+        from ..Models.Equipment import Equipment
+        table = Base.metadata.tables['IndividualEquipment']
+        collection = DynamicPropertiesQueryEngine(self.session, Individual, from_history=None, object_type=1)  #, object_type=1, from_history='10/01/2012' )
+
+        filters = [
+            # {
+            #     'Column':'ID',
+            #     'Operator':'>',
+            #     'Value': '100000'
+            # },  
+            {
+                'Column':'Sex',
+                'Operator':'is',
+                'Value': 'femelle'
+            },
+            {
+                'Column':'Monitoring_Status',
+                'Operator':'is null',
+                'Value': 'retiré'
+            },
+            # {
+            #     'Column':'Species',
+            #     'Operator':'contains',
+            #     'Value': 'undulata'
+            # },
+            # {
+            #     'Column':'Status_',
+            #     'Operator':'=',
+            #     'Value': 'mort'
+            # }
+        ]
+        result = collection.search(filters, limit=1000) #, order_by=['Sex:desc'])
+        count = collection._count(filters)
+        return [{'total_entries': count}, result]
+
+
 
 class IndividualLocationsView(SecurityRoot):
 
@@ -198,7 +288,10 @@ class IndividualLocationsView(SecurityRoot):
 
         if 'geo' in self.request.params:
             result = gene.get_geoJSON(
-                criteria, ['ID', 'Date', 'type_', 'precision'])
+                criteria, ['ID', 'Date', 'type_', 'precision'], ['Date:asc'])
+            for feature in result['features']:
+                feature['properties']['Date'] = feature['properties']['Date'].strftime('%Y-%m-%d %H:%M:%S')
+            return result
         else:
             result = gene.search(criteria,
                                  offset=offset,
@@ -208,35 +301,8 @@ class IndividualLocationsView(SecurityRoot):
                 row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
                 row['format'] = 'YYYY-MM-DD HH:mm:ss'
 
-        # ************ POC Indiv location PLayer  ****************
-
-        # if 'geoDynamic' in request.params :
-        #     response = None
-        #     geoJson=[]
-        #     joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
-        #     stmt = select([Ind ividual_Location,Sensor.UnicIdentifier]).select_from(joinTable
-        #         ).where(Individual_Location.FK_Individual == id
-        #         ).where(Individual_Location.type_ == 'GSM').order_by(asc(Individual_Location.Date))
-        #     dataResult = session.execute(stmt).fetchall()
-
-        #     df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
-        #     X1 = df.iloc[:-1][['LAT', 'LON']].values
-        #     X2 = df.iloc[1:][['LAT', 'LON']].values
-        #     df['dist'] = np.append(haversine(X1, X2), 0).round(3)
-        #     # Compute the speed
-        #     df['speed'] = (df['dist'] / ((df['Date'] - df['Date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
-        #     df['Date'] = df['Date'].apply(lambda row: np.datetime64(row).astype(datetime))
-
-        #     for i in range(df.shape[0]):
-        #         geoJson.append({'type':'Feature', 'properties':{'type':df.loc[i,'type_']
-        #             , 'sensor':df.loc[i,'UnicIdentifier'],'speed':df.loc[i,'speed'],'date':df.loc[i,'Date']}
-        #             , 'geometry':{'type':'Point', 'coordinates':[df.loc[i,'LAT'],df.loc[i,'LON']]}})
-        #     result = {'type':'FeatureCollection', 'features':geoJson}
-        #     response = result
-        # else :
-        #     response  = curIndiv.getFlatObject()
-
         return result
 
 
 RootCore.listChildren.append(('individuals', IndividualsView))
+RootCore.listChildren.append(('individualsValues', IndividualValuesView))

@@ -106,13 +106,11 @@ define([
                 showCancelButton: false,
                 confirmButtonColor: 'rgb(147, 14, 14)',
                 confirmButtonText: 'OK',
-
-                closeOnConfirm: true,
               }
             );
           return false;
         } else {
-          var url = 'sensors/rfid/datas';
+          var url = 'sensorDatas/rfid';
           var data = new FormData();
           var self = this;
           _this.ui.progress.removeClass('hidden');
@@ -146,6 +144,7 @@ define([
             $('.cancel').removeAttr('disabled');
 
             self.ui.progressBar.css({'background-color': 'green'})
+
             swal(
               {
                 title: 'Succes',
@@ -154,22 +153,45 @@ define([
                 showCancelButton: true,
                 confirmButtonColor: 'green',
                 confirmButtonText: 'Go to Validate',
-                cancelButtonText: 'Import new RFID',
-                closeOnConfirm: true,
-
-              },
-              function(isConfirm) {
+                cancelButtonText: 'Import new RFID'
+              }).then( (result) => {
                 self.ui.progress.hide();
-                if (isConfirm) {
+                if('value' in result ) {
                   Backbone.history.navigate('validate/rfid',{trigger: true});
-                } else {
+                }
+                else {
                   //Backbone.history.navigate('importFile',{trigger: true});
                   _this.options.parent.currentStepIndex--;
                   var index = _this.options.parent.currentStepIndex;
                   _this.options.parent.displayStep(index);
                 }
-              }
-            );
+              });
+
+
+            // swal(
+            //   {
+            //     title: 'Succes',
+            //     text: 'importing RFID file',
+            //     type: 'success',
+            //     showCancelButton: true,
+            //     confirmButtonColor: 'green',
+            //     confirmButtonText: 'Go to Validate',
+            //     cancelButtonText: 'Import new RFID',
+            //     closeOnConfirm: true,
+
+            //   },
+            //   function(isConfirm) {
+            //     self.ui.progress.hide();
+            //     if (isConfirm) {
+            //       Backbone.history.navigate('validate/rfid',{trigger: true});
+            //     } else {
+            //       //Backbone.history.navigate('importFile',{trigger: true});
+            //       _this.options.parent.currentStepIndex--;
+            //       var index = _this.options.parent.currentStepIndex;
+            //       _this.options.parent.displayStep(index);
+            //     }
+            //   }
+            // );
 
           }).fail(function(data) {
             $('#btnNext').attr('disabled');
@@ -196,10 +218,7 @@ define([
                 type: type,
                 showCancelButton: false,
                 confirmButtonColor: color,
-                confirmButtonText: 'OK',
-                closeOnConfirm: true,
-              },
-              function(isConfirm) {
+                confirmButtonText: 'OK'
               }
             );
           });

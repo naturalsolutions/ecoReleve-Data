@@ -1,4 +1,4 @@
-from ..Models import Base, dbConfig
+from ..core import Base
 from sqlalchemy import (
     select,
     Column,
@@ -88,7 +88,6 @@ class BusinessRules(Base):
         stmt = self.buildQuery(entityDTO)
         result = session.execute(stmt).scalar()
 
-        # print('\n -----  EXEC '+self.executing, ' Event: '+self.actionType , ' result: ', result)
-        if result or self.actionType == 'before_delete':
+        if result:
             self.raiseError()
         # return result

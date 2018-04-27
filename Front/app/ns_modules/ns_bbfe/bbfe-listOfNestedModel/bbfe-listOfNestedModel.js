@@ -157,6 +157,7 @@ define([
 
             this.$el.find('#formContainer').append(form.el);
             this.bindChanges(form);
+            form.$el.find('input:enabled,select:enabled,textarea:enabled').first().focus();
         },
 
         render: function() {

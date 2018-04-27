@@ -136,7 +136,10 @@
 		"rfid" : "RFID files",
 		"gsm" : "GSM files",
 		"argos" : "Argos files",
-		"label-selected" :"selected data"
+		"camTrap" : "Camera trap files",
+		"label-selected" :"selected data",
+		"jetlag" : "Jet lag (HH:MM:SS)"
+
 	},
 	"home" : {
 		"hello" : "Hello",

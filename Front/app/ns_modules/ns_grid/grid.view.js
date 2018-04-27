@@ -72,7 +72,7 @@ define([
       var _this = this;
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
-      this.model.set('objectType', options.objectType || 1);
+      this.model.set('objectType', options.objectType);
       if(options.url){
         this.model.set('url', options.url);
       } else {
@@ -95,6 +95,8 @@ define([
       this.goTo = options.goTo || false;
 
       this.name = options.name || false;
+      if(options.gridOptions)
+        this.skipFocus = options.gridOptions.skipFocus || false;
 
       this.gridOptions = {
         enableSorting: true,
@@ -111,7 +113,9 @@ define([
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
               _this.gridOptions.api.firstRenderPassed = true;
-              _this.focusFirstCell();
+              if(!_this.skipFocus) {
+                _this.focusFirstCell();
+              }
               if (!options.noResizeToFit){
                 _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               }
@@ -257,11 +261,21 @@ define([
 
           if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
             //then convert it to timestamp (number)
-            if(valueA) {
+            if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid()) {
               valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
             }
-            if(valueB){
+            if(moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()){
               valueB = moment(valueB ,  "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
+          }else {
+            if( moment(valueA, "DD/MM/YYYY HH:mm", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm", true).isValid()  ) { //detect date
+              //then convert it to timestamp (number)
+              if(moment(valueA, "DD/MM/YYYY HH:mm", true).isValid()) {
+                valueA = moment(valueA , "DD/MM/YYYY HH:mm" ).valueOf();
+              }
+              if(moment(valueB, "DD/MM/YYYY HH:mm", true).isValid()){
+                valueB = moment(valueB ,  "DD/MM/YYYY HH:mm" ).valueOf();
+              }
             }
           }
 
@@ -385,7 +399,7 @@ define([
             break;
           case 'TextArea':
             col.cellEditor = Editors.TextEditor;
-            col.cellRenderer = Renderers.TextRenderer;
+            col.cellRenderer = Renderers.TextAreaRenderer;
             break;
           case 'Select':
             col.cellEditor = Editors.SelectEditor;
@@ -426,7 +440,8 @@ define([
             return;
           }*/
         }
-        col.headerCellTemplate = _this.getHeaderCellTemplate();
+        if(typeof(col.headerCellTemplate) == 'undefined')
+          col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
 
@@ -755,7 +770,7 @@ define([
       if(this[action]){
         this[action](params, from);
       } else {
-        console.warn(this, 'doesn\'t have ' + action + ' action');
+        // console.warn(this, 'doesn\'t have ' + action + ' action');
       }
     },
     interaction: function(action, params){
@@ -765,6 +780,19 @@ define([
     },
 
     focus: function(param){
+      var _this = this;
+      this.gridOptions.api.forEachNode( function (node) {
+          if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
+            _this.gridOptions.api.ensureIndexVisible(node.childIndex);
+            setTimeout(function(){
+               var tmp = _this.idName || (node.data.id)? 'id' : 'ID';
+              _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
+            },0);
+          }
+      });
+    },
+
+    highlight: function(param){
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
@@ -805,6 +833,7 @@ define([
       if(from == this){
         return;
       }
+      
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.ready = false;
@@ -987,13 +1016,27 @@ define([
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        //could be better
-        if (isConfirm && callback) {
+      }).then( (result) => {
+        if( 'value' in result && callback) {
           callback();
         }
       });
+
+      // Swal({
+      //   title: opt.title,
+      //   text: opt.text || '',
+      //   type: type,
+      //   showCancelButton: true,
+      //   confirmButtonColor: btnColor,
+      //   confirmButtonText: 'OK',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   //could be better
+      //   if (isConfirm && callback) {
+      //     callback();
+      //   }
+      // });
     },
 
     deleteSelectedRows: function(callback){

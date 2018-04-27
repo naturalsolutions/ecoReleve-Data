@@ -1,0 +1,16 @@
+INSERT INTO RegionGeom ([Region]
+      ,[SHAPE_Leng]
+      ,[SHAPE_Area]
+      ,[geom]
+      ,[type_])
+
+	  select Mgmt_Unit, SHAPE_Leng, SHAPE_Area, geom, 'management unit'
+	  FROM reneco_sig.dbo.Region 
+	  where [Mgmt_Unit] not in (' ', '')
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('159_ADD_Management_Unit',GETDATE(),(SELECT db_name()))
+
+
+GO

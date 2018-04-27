@@ -39,7 +39,8 @@ GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
 DataRfidWithSite = Table('VRfidData_With_equipSite',
                          Base.metadata, autoload=True)
 DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
-
+DataCamTrapFile = Table('V_dataCamTrap_With_equipSite',
+                        Base.metadata, autoload=True)
 
 @view_config(route_name=route_prefix + 'uncheckedDatas',
              renderer='json',
@@ -143,7 +144,7 @@ def details_unchecked_indiv(request):
             geoJson.append({'type': 'Feature',
                             'id': row['PK_id'],
                             'properties': {'type': row['type'],
-                                           'date': row['date']},
+                                           'date': row['date'].strftime('%Y-%m-%d %H:%M:%S')},
                             'geometry': {'type': 'Point',
                                          'coordinates': [row['lat'], row['lon']]}
                             })

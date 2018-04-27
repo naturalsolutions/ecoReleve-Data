@@ -28,6 +28,7 @@ define([
     events: {
       'click .tab-link': 'displayTab',
       'click button.js-btn-delete-locations': 'warnDeleteLocations',
+      'click button.js-btn-delete-history': 'warnDeleteHistory'
     },
 
     ModelPrototype: IndividualModel,
@@ -53,7 +54,11 @@ define([
            this.bindChanges(_this.ui.form);
          }
        };
-      
+
+      formConfig.afterSaveSuccess = function() {
+        _this.historyGrid.fetchData();
+      };
+
       formConfig.savingError = function(response){
         var msg = 'in updating '+_this.model.get('single');
           if (response.status == 520 && response.responseText){
@@ -65,8 +70,7 @@ define([
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
       };
       this.nsForm = new NsForm(formConfig);
@@ -83,6 +87,7 @@ define([
         popup: true,
         com: this.com,
         selection: true,
+        player: false,
         //bbox: true,
       });
 
@@ -105,6 +110,25 @@ define([
         type: this.model.get('type'),
         url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
         clientSide: true,
+        gridOptions: {
+          onCellFocused: _.bind(function(cell) {
+            if (!cell) {
+              cell = this.historyGrid.gridOptions.api.getFocusedCell();
+            }
+
+            this.historyGrid.focusedRow = this.historyGrid.gridOptions.api.rowModel.getRow(cell.rowIndex);
+            var $deleteBtn = this.$el.find(".js-btn-delete-history");
+            switch (this.historyGrid.focusedRow.data.Name) {
+              case 'Monitoring_Status':
+              case 'Survey_type':
+                $deleteBtn.attr("disabled", null);
+                break;
+              default:
+                $deleteBtn.attr("disabled", true);
+                break;
+            }
+          }, this)
+        }
       }));
       this.gridViews.push(this.historyGrid);
     },
@@ -158,6 +182,16 @@ define([
       this.swal(opt, 'warning', callback);
     },
 
+    warnDeleteHistory: function(e) {
+      if ($(e.delegateTarget).attr("disabled")) {
+        return;
+      }
+      this.swal({
+        title: 'Are you sure?',
+        text: 'selected event will be deleted'
+      }, 'warning', _.bind(this.deleteHistory, this));
+    },
+
     deleteLocations: function(selectedNodes) {
       var _this = this;
       var url = this.model.get('type') + '/' + this.model.get('id')  + '/locations';
@@ -177,6 +211,33 @@ define([
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });
+    },
+
+    deleteHistory: function(row) {
+      if (!row) {
+        row = this.historyGrid.focusedRow;
+        if (!row) {
+          console.error("attempting deleteHistory with no row selected");
+          return;
+        }
+      }
+
+      var url = this.model.get('type') + '/' + this.model.get('id')  + '/history/' + row.data.ID;
+      $.ajax({
+        url: url,
+        method: 'DELETE',
+        context: this
+      }).done(function(resp) {
+        this.historyGrid.gridOptions.api.removeItems([row]);
+        // call onCellFocused to update current focusedRow, event is not called otherwise
+        this.historyGrid.gridOptions.onCellFocused();
+      }).fail(function(resp) {
+        this.swal(resp, 'error');
+      });
+    },
+
+    onDestroy: function(){
+      // console.log('gogogo');
     },
 
     swal: function(opt, type, callback) {
@@ -209,13 +270,27 @@ define([
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        //could be better
-        if (isConfirm && callback) {
+      }).then( (result) => { 
+        if( 'value' in result && callback) {
           callback();
         }
       });
+
+      // Swal({
+      //   title: opt.title,
+      //   text: opt.text || '',
+      //   type: type,
+      //   showCancelButton: true,
+      //   confirmButtonColor: btnColor,
+      //   confirmButtonText: 'OK',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   //could be better
+      //   if (isConfirm && callback) {
+      //     callback();
+      //   }
+      // });
     },
   });
 });

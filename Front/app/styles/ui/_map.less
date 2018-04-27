@@ -22,22 +22,17 @@
 	width: 100%;
 	overflow: hidden !important;
 
-	//quick & dirty
-	.leaflet-top.leaflet-left{
-		right: 0;
-		top: 0;
-		left: inherit;
-		.leaflet-control-zoom.leaflet-bar.leaflet-control{
-			margin: 30px;
-		}
-	}
 
+	.leaflet-control{
+		margin: 30px;
+	}
+	
 	.errorLayer{
 		position: absolute;
 		width: 100%;
 		height: 66px;
 		bottom: 0;
-		z-index: 999;
+		z-index: 10000;
 		text-align: center;
 		border-top: 1px dashed white;
 		background: rgba(0,0,0,0.5);
@@ -190,7 +185,7 @@
 	padding: 10px;
 	transition: all .5s;
 	box-shadow: 0 1px 5px rgba(0,0,0,0.5);
-	background-color: rgba(255,255,255,.9);
+	background-color: rgba(255,255,255,1);
 	border-radius: 3px;
 	border: 1px solid #ccc;
 	line-height: 18px;
@@ -222,3 +217,128 @@
 		text-align: center;
 	}
 }
+
+.leaflet-bottom{
+	margin-bottom: 0px!important;
+	transition: margin-bottom .1s ease;
+}
+
+.leaflet-bottom.active-player{
+	margin-bottom: 150px!important;
+}
+
+.player{
+	overflow: auto;
+	padding: 15px 0px;
+	height: 150px;
+	background: white;
+	border-top: 1px solid rgb(150,150,150);
+	position: absolute;
+	z-index: 1000;
+	bottom: -150px;
+	width: 100%;
+	transition: bottom .1s ease;
+	.custom-row{
+		padding-bottom: 5px;
+	}
+	&.active{
+		bottom: 0px;
+	}
+	.timeline{
+		padding: 5px 15px;
+		position: relative;
+		overflow: hidden;
+		.scale{
+			width: 100%;
+			height: 20px;
+			position: relative;
+			.note{
+				border-left: 1px solid #aaa;
+				font-size: 12px;
+				position: absolute;
+				padding: 2px;
+				&.last{
+					border-left: none;
+					border-right: 1px solid #aaa;
+				}
+			}
+		}
+	}
+	.timeline-total{
+		position: relative;
+		cursor: pointer;
+		height: 15px;
+		background: rgb(187, 185, 185);
+		border: 1px solid rgb(150,150,150);
+		width: 100%;	
+	}
+	.timeline-current{
+		height: 100%;
+		background: red;
+		width: 0%;
+	}
+	label{
+		padding: 5px;
+		padding-right: 15px;
+		cursor: pointer;
+	}
+	.range{
+		padding-left: 0px;
+		padding-top: 6px;
+	}
+
+}
+
+.disabled-draw-control {
+	cursor: default;
+    // background-image: none !important;
+    pointer-events: none;
+    //padding-left: 1px;
+}
+
+a.leaflet-no-background{
+	background-image: none !important;
+	font-size: larger;
+}
+.leaflet-right{
+	.leaflet-draw.leaflet-control{
+		.leaflet-draw-section{
+
+			.leaflet-draw-toolbar-nobottom {
+				.leaflet-draw-toolbar-button-enabled{
+					border-bottom-left-radius: 0;
+					border-bottom-right-radius: inherit;
+				}
+			}
+
+			.leaflet-draw-toolbar-notop {
+				.leaflet-draw-toolbar-button-enabled{
+					border-top-left-radius: 0!important;
+					border-top-right-radius: inherit!important;
+
+				}
+				a:last-child{
+					border-bottom-right-radius: inherit;
+					
+				}
+			}
+		}
+	}
+}
+// input[type="range"]:before {
+//   left: 5px;
+//   content: attr(min);
+//   position: absolute;
+//   top: 20px;
+//   color: rgb(170, 170, 170);
+//   font-weight: 400;
+// }
+
+// input[type="range"]:after {
+// 	right: 5px;
+// 	content: attr(max);
+//   position: absolute;
+//   top: 20px;
+//   color: rgb(170, 170, 170);
+//   font-weight: 400;
+// }

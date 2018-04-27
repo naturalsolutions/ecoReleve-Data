@@ -43,6 +43,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
             }
           }
         }
+        
+        //hack for spatial navigation with tab button
+        //will be solved with upgrading version
+        params.eGridCell.setAttribute("tabindex", "0"); 
   
       };
   
@@ -166,7 +170,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         this.error = true;
         var editable;
         if(typeof params.colDef.editable === 'function'){
-        editable = params.colDef.editable(params);
+          editable = params.colDef.editable(params);
         } else {
           editable = params.colDef.editable;
         }
@@ -245,7 +249,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
          objectValue = params.value;
         if( typeof(params.value) === 'undefined' ) {
           if(params.colDef.schema.defaultValue ) {
-           var splitTab = params.colDef.schema.defaultValue.split('>');
+           var splitTab = String(params.colDef.schema.defaultValue).split('>');
   
             objectValue = {
                       displayValue : splitTab[splitTab.length-1],
@@ -655,9 +659,24 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         }
         $(this.eGui).html(displayValue);
       };
-  
+
+      var TextAreaRenderer = function(params) {
+        var value = params.value;
+        var gui = $(params.eGridCell);
+        if(value){
+          gui.attr('title', value);
+          gui.attr('data-original-title', value);
+          
+          gui.tooltip({trigger:'hover', placement:'auto left', container: '.ag-grid-container'});
+          return value;
+        } else {
+          return '';
+        }
+      };
+
       Renderers.NumberRenderer = NumberRenderer;
       Renderers.TextRenderer = TextRenderer;
+      Renderers.TextAreaRenderer = TextAreaRenderer;
       Renderers.DateTimeRenderer = DateTimeRenderer;
       Renderers.ThesaurusRenderer = ThesaurusRenderer;
       Renderers.ObjectPickerRenderer = ObjectPickerRenderer;

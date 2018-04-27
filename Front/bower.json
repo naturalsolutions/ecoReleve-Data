@@ -7,12 +7,11 @@
     "marionette": "2.4.4",
     "requirejs": "2.1.22",
     "bootstrap": "3.3.6",
-    "leaflet": "~0.7.3",
+    "leaflet": "~1.2.0",
     "sha1": "https://bitbucket.org/keesey/sha1.git",
     "jqueryui": "1.11.4",
-    "leaflet.markercluster": "~0.4.0",
-    "leaflet-plugins": "~1.3.3",
-    "sweetalert": "0.5.0",
+    "leaflet.markercluster": "~1.2.0",
+    "leaflet-plugins": "~3.0.1",
     "backbone.paginator": "2.0.2",
     "moment": "2.10.6",
     "backbone-forms": "https://github.com/powmedia/backbone-forms.git#0.13.0",
@@ -27,13 +26,30 @@
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
+    "resumable.js": "https://github.com/23/resumable.js.git#4199ab8270f764effdb9d1de50bf285df9495367",
+    "ez-plus": "^1.1.20",
+    "bootstrap-tagsinput": "^0.8.0",
+    "noty": "^2.3.8",
+    "jquery.rateit": "^1.0.24",
+    "bootstrap-star-rating": "^4.0.1",
+    "exif-js": "^2.1.1",
+    "imagesloaded": "^4.1.1",
+    "backgrid-paginator": "0.3.5",
+    "backgrid": "https://github.com/wyuenho/backgrid.git#0.3.5",
+    "webui-popover": "2.1.15",
     "NaturalJS_Filter": "1.1.4",
     "moment-timezone": "~0.5.13",
     "tether": "^1.4.0",
-    "popper.js": "https://unpkg.com/popper.js"
+    "popper.js": "https://unpkg.com/popper.js",
+    "select2": "^4.0.5",
+    "leaflet-draw": "~0.4.13",
+    "Leaflet.GridLayer.GoogleMutant": "https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant.git",
+    "sweetalert2": "^7.15.1"
   },
   "resolutions": {
+    "jquery": "2.2.0",
     "underscore": "1.5.2",
-    "backbone": "1.1.2"
+    "backbone": "1.1.2",
+    "leaflet": "1.2.0"
   }
 }

@@ -1,4 +1,4 @@
-from ..Models import Base, dbConfig
+# from ..Models import Base, dbConfig
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -14,16 +14,20 @@ from sqlalchemy.orm import relationship
 import json
 from pyramid import threadlocal
 
+from ..utils.parseValue import isNumeric
+from ..core import Base
 
-FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
+FieldSizeToClass = {0: 'col-md-3', 1: 'col-md-6', 2: 'col-md-12'}
+
 
 def binaryTest(binaryWeight, binaryToTest):
-    binariyCodes = [1,2,4,8,16,32]
+    binariyCodes = [1, 2, 4, 8, 16, 32]
     try:
         pos = binariyCodes.index(binaryToTest)
     except:
         return False
-    return binaryWeight & (1<<pos) > 0
+    return binaryWeight & (1 << pos) > 0
+
 
 def isHidden(int_Render):
     return not (int(int_Render) > 0)
@@ -91,20 +95,26 @@ class ModuleForms(Base):
     def handleSchemaGrid(self):
         if self.dto.get('size', None):
             self.dto['width'] = self.dto['size']
-            self.dto['minWidth'] = self.dto['size']-(self.dto['size']/1.5)
-            self.dto['maxWidth'] = self.dto['size']+(self.dto['size']/1.5)
+            self.dto['minWidth'] = self.dto['size'] - (self.dto['size'] / 1.5)
+            self.dto['maxWidth'] = self.dto['size'] + (self.dto['size'] / 1.5)
         if binaryTest(self.FormRender, 8):
             self.dto['pinned'] = 'left'
         return self.dto
 
     def GetDTOFromConf(self, displayMode, isGrid=False):
         ''' return input field to build form :
-
-            3 display modes : 
-                - "display" : all input non editable, 1
+            3 display modes :
+                - "display"
                 - "create",
                 - "edit"
 
+            Binary weight for input rendering
+                1: rendered,
+                2: editable on create mode,
+                4: editable on edit mode,
+                8: when form as Grid, pinned the column to th left,
+                16: ?? do nothing form the moment,
+                32: at begin line
         '''
         binaryMode = 0
         self.displayMode = displayMode
@@ -119,7 +129,7 @@ class ModuleForms(Base):
         if self.Editable:
 
             isDisabled = True
-            if binaryTest(self.FormRender, 2) :
+            if binaryTest(self.FormRender, 2):
                 # input is inactive only in edit mode
                 if displayMode.lower() == 'edit':
                     isDisabled = True
@@ -137,7 +147,10 @@ class ModuleForms(Base):
             self.fullPath = True
             isDisabled = True
 
-        CssClass = 'col-md-' + str(curSize)
+        if binaryTest(self.FormRender, 32):
+            CssClass = 'col-md-' + str(curSize) + ' js-begin-line'
+        else:
+            CssClass = 'col-md-' + str(curSize)
 
         self.dto = {
             'name': self.Name,
@@ -191,6 +204,8 @@ class ModuleForms(Base):
         # default value
         default = self.DefaultValue
         if default is not None:
+            if isNumeric(default):
+                default = float(default)
             self.dto['defaultValue'] = default
 
         if isGrid:
@@ -209,11 +224,11 @@ class ModuleForms(Base):
                     temp[key] = row[key]
                 self.dto['options'].append(temp)
             sortedSelect = sorted(
-                [x for x in self.dto['options'] if x['val'] not in [-1,0]], key=lambda k: k['label'])
+                [x for x in self.dto['options'] if x['val'] not in [-1, 0]], key=lambda k: k['label'])
 
-            self.dto['options'] = [x for x in self.dto['options'] if x['val'] in [-1,0]]
+            self.dto['options'] = [
+                x for x in self.dto['options'] if x['val'] in [-1, 0]]
             self.dto['options'].extend(sortedSelect)
-
 
     def InputLNM(self):
         ''' build ListOfNestedModel input type :
@@ -238,7 +253,8 @@ class ModuleForms(Base):
             else:
                 if self.InputType == 'GridFormEditor':
                     isGrid = True
-                subschema[conf.Name] = conf.GetDTOFromConf(self.displayMode, isGrid)
+                subschema[conf.Name] = conf.GetDTOFromConf(
+                    self.displayMode, isGrid)
 
         subschema['ID'] = {
             'name': 'ID',
@@ -299,12 +315,20 @@ class ModuleForms(Base):
     def InputThesaurus(self):
         if self.Options is not None and self.Options != '':
             self.dto['options'] = {
-                'startId': self.Options,
                 'wsUrl': dbConfig['wsThesaurus']['wsUrl'],
                 'lng': threadlocal.get_current_request().authenticated_userid['userlanguage'],
-                'displayValueName': 'valueTranslated'}
-            self.dto['options']['startId'] = self.Options
-            self.dto['options']['iconFont'] = 'reneco reneco-thesaurus'
+                'displayValueName': 'valueTranslated',
+                'iconFont': 'reneco reneco-THE-thesaurus'
+            }
+            options = json.loads(self.Options)
+            if isinstance(options, dict):
+                self.dto['options'].update(options)
+
+                # set default startId if missing
+                if 'startId' not in self.dto['options']:
+                    self.dto['options']['startId'] = 0
+            else:
+                self.dto['options']['startId'] = options
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
@@ -351,9 +375,9 @@ class ModuleForms(Base):
                 + CssClass + ' ' + addClass,
                 'order': i,
                 'size': curSize,
-                'width' : curSize,
-                'minWidth' : curSize-(curSize/1.5),
-                'maxWidth' : curSize+(curSize/1.5)
+                'width': curSize,
+                'minWidth': curSize - (curSize / 1.5),
+                'maxWidth': curSize + (curSize / 1.5)
             }
             self.dto['C' + str(i)] = curDTO
 
@@ -478,7 +502,7 @@ class ModuleGrids (Base):
                 'displayValueName': 'valueTranslated'}
             filter_['options']['startId'] = self.Options
             filter_['options']['ValidationRealTime'] = False
-            filter_['options']['iconFont'] = 'reneco reneco-thesaurus'
+            filter_['options']['iconFont'] = 'reneco reneco-THE-thesaurus'
 
         if (self.FilterType == 'AutocompleteEditor'
                 and self.Options is not None and self.Options != ''):

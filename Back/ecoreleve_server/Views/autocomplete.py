@@ -8,7 +8,8 @@ dictObj = {
     'individuals': 'Individual',
     'monitoredSites': 'MonitoredSite',
     'users': 'User',
-    'regions': 'Region'
+    'regions': 'Region',
+    'fieldworkarea': 'FieldworkArea'
 }
 
 

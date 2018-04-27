@@ -41,7 +41,7 @@ define([
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl+'sensors/argos/datas',
+        url: config.coreUrl+'sensorDatas/argos',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
 				autoQueue: false,
@@ -67,8 +67,7 @@ define([
               type: 'error',
               showCancelButton: false,
               confirmButtonColor: 'rgb(147, 14, 14)',
-              confirmButtonText: 'OK',
-              closeOnConfirm: true,
+              confirmButtonText: 'OK'
           });
           return false;
         }
@@ -83,8 +82,7 @@ define([
                 type: 'warning',
                 showCancelButton: false,
                 confirmButtonColor: 'rgb(218, 146, 15)',
-                confirmButtonText: 'OK',
-                closeOnConfirm: true,
+                confirmButtonText: 'OK'
               });
               return false;
             }
@@ -180,17 +178,36 @@ define([
             showCancelButton: true,
             confirmButtonColor: '#DD6B55',
             confirmButtonText: 'Validate Argos',
-            cancelButtonText: 'Import new Argos',
-            closeOnConfirm: true,
-            closeOnCancel: true},
-            function(isConfirm) {
-              if (isConfirm) {
+            cancelButtonText: 'Import new Argos'
+          }).then((result) => {
+            if('value' in result) {
               Backbone.history.navigate('validate/argos',{trigger: true});
-              }
-							else {
-								document.querySelector('#actions .cancel').click();
-							}
-            });
+            }
+            else {
+              document.querySelector('#actions .cancel').click();
+            }
+          });
+          // Swal({
+          //   title: 'Well done',
+          //   text: 'File(s) have been correctly imported\n\n'
+          //   + '\t inserted Argos : ' + totalInsertedArgos + '\t existing Argos : ' + totalExistingArgos+','
+          //   +'\n\t inserted GPS : ' + totalInsertedGPS + '\t existing GPS : ' + totalExistingGPS+','
+          //   +'\n\t inserted Engineering : ' + totalInsertedEng + '\t existing Engineering : ' + totalExistingEng
+          //   ,
+          //   showCancelButton: true,
+          //   confirmButtonColor: '#DD6B55',
+          //   confirmButtonText: 'Validate Argos',
+          //   cancelButtonText: 'Import new Argos',
+          //   closeOnConfirm: true,
+          //   closeOnCancel: true},
+          //   function(isConfirm) {
+          //     if (isConfirm) {
+          //     Backbone.history.navigate('validate/argos',{trigger: true});
+          //     }
+					// 		else {
+					// 			document.querySelector('#actions .cancel').click();
+					// 		}
+          //   });
         } else {
           Swal({
             title: 'An error occured',
@@ -198,8 +215,7 @@ define([
             type: 'error',
             showCancelButton: false,
             confirmButtonText: 'OK',
-            confirmButtonColor: 'rgb(147, 14, 14)',
-            closeOnConfirm: true,
+            confirmButtonColor: 'rgb(147, 14, 14)'
           });
         }
         this.errors = false;

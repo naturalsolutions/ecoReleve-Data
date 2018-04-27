@@ -156,6 +156,9 @@ define([
       if(options.savingError) {
         this.savingError = options.savingError;
       }
+      if(options.savingSuccess) {
+        this.savingSuccess = options.savingSuccess;
+      }
 
       this.data = options.data || {};
       var _this = this;
@@ -408,7 +411,9 @@ define([
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
-        this.formRegion.find('input:enabled:first').focus();
+        if(!this.BBForm.model.get('ID')){
+          this.formRegion.find('input:enabled,select:enabled,textarea:enabled').first().focus();
+        }
       }else{
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
@@ -587,13 +592,25 @@ define([
                 type: 'warning',
                 showCancelButton: false,
                 confirmButtonColor: 'rgb(240, 173, 78)',
-                confirmButtonText: 'OK',
-                closeOnConfirm: true,
+                confirmButtonText: 'OK'
               });
-          } else {
+          }
+          else if( response.status === 500) {
+            var opts = {
+              title : 'Error',
+              html : response.responseText + '.<BR> An error from sqlserver occured. Please contact an administrator.',
+              allowEscapeKey: false,
+              showCancelButton: false,
+              type: 'error',
+              confirmButtonText: 'OK!',
+              confirmButtonColor: '#DD6B55'
+            };
+            setTimeout(  function () {_this.swal(opts);}, 400);
+          }
+           else {
               var opts = {
-                title : 'Error',
-                text : 'An error occured. Please contact an administrator.',
+                title : ' Critical Error',
+                html : response.responseText + '.<BR>Please contact an administrator.',
                 allowEscapeKey: false,
                 showCancelButton: false,
                 type: 'error',
@@ -685,19 +702,31 @@ define([
           type: 'warning',
           showCancelButton: false,
           confirmButtonColor: 'rgb(240, 173, 78)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
-    } else {
-        var opts = {
-          title : 'Error',
-          text : 'An error occured. Please contact an administrator.',
-          allowEscapeKey: false,
-          showCancelButton: false,
-          type: 'error',
-          confirmButtonText: 'OK!',
-          confirmButtonColor: '#DD6B55'
-        };
+    }
+    else if ( response.status === 500) {
+      var opts = {
+        title : 'Critical Error',
+        html : '<span style="color: red;font-weight: bold;">'+response.responseText + '</span>.<BR> An error from <span style="color: red;font-weight: bold;">sqlserver</span> occured. Please contact an administrator.',
+        allowEscapeKey: false,
+        showCancelButton: false,
+        type: 'error',
+        confirmButtonText: 'OK!',
+        confirmButtonColor: '#DD6B55'
+      };
+      setTimeout(  function () {_this.swal(opts);}, 400);
+    }
+     else {
+      var opts = {
+        title : 'Critical Error',
+        html :  'Error type : '+response.status+'.<BR>Status Text : '+response.statusText+'.<BR>Please contact an administrator.',
+        allowEscapeKey: false,
+        showCancelButton: false,
+        type: 'error',
+        confirmButtonText: 'OK!',
+        confirmButtonColor: '#DD6B55'
+      };
         setTimeout(  function () {_this.swal(opts);}, 400);
     }
     },
@@ -773,19 +802,33 @@ define([
     swal: function(opts){
       Swal({
         title: opts.title || opts.responseText || 'error',
-        text: opts.text || '',
+        html: opts.html || opts.text || '',
         type: opts.type,
         showCancelButton: opts.showCancelButton,
         confirmButtonColor: opts.confirmButtonColor,
-        confirmButtonText: opts.confirmButtonText,
-        closeOnConfirm: opts.closeOnConfirm || true,
-      },
-      function(isConfirm){
-        //could be better
-        if(opts.callback && isConfirm){
+        confirmButtonText: opts.confirmButtonText
+      })
+      .then( (result) => {
+        if( opts.callback && 'value' in result  ) {
           opts.callback();
         }
       });
+
+      // Swal({
+      //   title: opts.title || opts.responseText || 'error',
+      //   text: opts.text || '',
+      //   type: opts.type,
+      //   showCancelButton: opts.showCancelButton,
+      //   confirmButtonColor: opts.confirmButtonColor,
+      //   confirmButtonText: opts.confirmButtonText,
+      //   closeOnConfirm: opts.closeOnConfirm || true,
+      // },
+      // function(isConfirm){
+      //   //could be better
+      //   if(opts.callback && isConfirm){
+      //     opts.callback();
+      //   }
+      // });
     },
 
 

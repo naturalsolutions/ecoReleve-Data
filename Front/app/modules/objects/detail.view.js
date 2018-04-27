@@ -12,11 +12,12 @@ define([
   'ns_navbar/navbar.view',
   'ns_grid/grid.view',
   'ns_modules/ns_com',
+  '../monitoredSites/layouts/lyt-camTrapValidateDetail'
 
 ], function(
   $, _, Backbone, Marionette,
   Swal, Translater,
-  NsMap, NsForm, NavbarView, GridView, Com
+  NsMap, NsForm, NavbarView, GridView, Com,camTrapVisualisation
 ){
 
   'use strict';
@@ -33,7 +34,8 @@ define([
     ui: {
       'form': '.js-form',
       'formBtns': '.js-form-btns',
-      'map': '.js-map',
+      'map': '#map',
+      'gallery' :'#camtrapgallery'
     },
 
     regions: {
@@ -63,22 +65,35 @@ define([
       if(this.model.get('uiGridConfs')){
         this.model.get('uiGridConfs').map(function(uiGridConf){
           //uglify hack
-          var tmp =  'rg' + uiGridConf.label + 'Grid';
+          
+          var tmp =  'rg' + uiGridConf.label.replace(' ','') + 'Grid';
           var obj = {};
           obj[tmp] = '.js-rg-' + uiGridConf.name + '-grid';
           _this.addRegions(obj);
         });
       }
+      this.addRegions({
+        'rgGalleryCam' : '.js-rg-gallery-cam'
+      })
     },
 
     reload: function(options) {
+      this.com = new Com();
+
       this.model.set('id', options.id);
 
+      if(this.map.player){
+        this.map.clearPlayer();
+      }
+
       this.com.addModule(this.map);
+
+      this.locationsGrid.com = this.com;
       this.map.com = this.com;
       this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
+
 
       this.displayForm();
       this.displayGrids();
@@ -115,6 +130,22 @@ define([
       });
       var id = $(e.currentTarget).attr('href');
       this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
+      if (id === '#camera_trapTab') {
+        if ( this.ui.map[0].style.display !== "none" ) {
+          this.ui.map[0].style.display = "none";
+        }
+        if ( this.ui.gallery[0].style.display !== "" ) {
+          this.ui.gallery[0].style.display = "";
+        }
+      }
+      else {
+        if(  this.ui.map[0].style.display !== "" ) {
+          this.ui.map[0].style.display = "";
+        }
+        if( this.ui.gallery[0].style.display !== "none" ) {
+          this.ui.gallery[0].style.display = "none";
+        }
+      }
 
       this.gridViews.map(function(gridView){
         gridView.gridOptions.api.sizeColumnsToFit();
@@ -123,6 +154,22 @@ define([
 
     displayGrids: function(){
       
+    },
+
+    displayGallery: function(options) {
+      
+      if(typeof(this.gallery) === 'undefined' || this.gallery === null) {
+        this.rgGalleryCam.show( this.gallery = new camTrapVisualisation ({
+          id : this.model.get('id'),
+          equipId : options.sessionID
+        }));
+      } else {
+        var model = new Backbone.Model({
+          'FK_MonitoredSite' : this.model.get('id'),
+          'equipID' : options.sessionID
+        });
+        this.gallery.reloadFromNavbar(model);
+      }
     },
 
     displayForm: function(){

@@ -1,4 +1,4 @@
-from ..Models import Base, thesaurusDictTraduction
+# from ..Models import Base, thesaurusDictTraduction
 from sqlalchemy import (
     select,
     and_,
@@ -10,17 +10,19 @@ from sqlalchemy import (
     not_)
 from sqlalchemy.sql import elements
 from sqlalchemy.orm import aliased
-from .FrontModules import ModuleGrids
-from ..utils import Eval
 import pandas as pd
 from pyramid import threadlocal
-from ..utils.datetime import parse
 
+
+from .FrontModules import ModuleGrids
+from ..utils.datetime import parse
+from ..utils import Eval
+from ..core import Base
 
 eval_ = Eval()
 
 
-class ListObjectWithDynProp():
+class CollectionEngine():
     ''' This class is used to filter Object
     with dyn props over all properties '''
 
@@ -50,27 +52,18 @@ class ListObjectWithDynProp():
         self.excHist = False
 
     def GetDynPropValueView(self, countHisto=False):
-        ''' WARNING !!! : in order to use this class you have to build
-        View over last DATE of dynamic properties
 
-        According context (stardDate or history parameters),
-        return a view which call by GetJoinTable method
-
-        '''
-        table = Base.metadata.tables[
-            self.ObjWithDynProp.__tablename__ + 'DynPropValuesNow']
+        table = self.ObjWithDynProp.LastDynamicValueViewClass
         if self.history and not self.startDate:
             if self.historyValuetable is None:
                 ''' SET another view to perform filter crieterias over
                 a where clause in exists clause'''
-                dynPropTable = Base.metadata.tables[
-                    self.ObjWithDynProp().GetDynPropTable()]
-                valueTable = Base.metadata.tables[
-                    self.ObjWithDynProp().GetDynPropValuesTable()]
+                dynPropTable = self.ObjWithDynProp.TypeClass.PropertiesClass.__table__
+                valueTable = self.ObjWithDynProp.DynamicValuesClass.__table__
                 joinTable = join(
                     valueTable,
                     dynPropTable,
-                    valueTable.c[self.ObjWithDynProp().GetDynPropFKName()] == dynPropTable.c['ID'])
+                    valueTable.c[self.ObjWithDynProp.fk_table_DynProp_name] == dynPropTable.c['ID'])
                 self.historyValuetable = select([valueTable,
                                                  dynPropTable.c[
                                                      'Name'].label('Name'),
@@ -78,22 +71,19 @@ class ListObjectWithDynProp():
                                                 ).select_from(joinTable).cte()
 
         if self.startDate:
-            dynPropTable = Base.metadata.tables[
-                self.ObjWithDynProp().GetDynPropTable()]
-            valueTable = Base.metadata.tables[
-                self.ObjWithDynProp().GetDynPropValuesTable()]
-            v2 = aliased(Base.metadata.tables[
-                         self.ObjWithDynProp().GetDynPropValuesTable()])
+            dynPropTable = self.ObjWithDynProp.TypeClass.PropertiesClass.__table__
+            valueTable = self.ObjWithDynProp.DynamicValuesClass.__table__
+            v2 = aliased(valueTable)
 
             joinTable = join(
                 valueTable,
                 dynPropTable,
-                valueTable.c[self.ObjWithDynProp().GetDynPropFKName()] == dynPropTable.c['ID'])
+                valueTable.c[self.ObjWithDynProp.fk_table_DynProp_name] == dynPropTable.c['ID'])
 
             queryExists = select(v2.c
                                  ).where(
-                and_(v2.c[self.ObjWithDynProp().GetDynPropFKName()] == valueTable.c[self.ObjWithDynProp().GetDynPropFKName()],
-                     v2.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == valueTable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
+                and_(v2.c[self.ObjWithDynProp.fk_table_DynProp_name] == valueTable.c[self.ObjWithDynProp.fk_table_DynProp_name],
+                     v2.c['FK_'+self.ObjWithDynProp.__tablename__] == valueTable.c['FK_'+self.ObjWithDynProp.__tablename__])
             )
             queryExists = queryExists.where(
                 and_(v2.c['StartDate'] > valueTable.c['StartDate'],
@@ -166,8 +156,8 @@ class ListObjectWithDynProp():
                 if self.history is False or self.firstStartDate is None:  # firstDate depricated ?
                     joinTable = outerjoin(
                         joinTable, v,
-                        and_(self.ObjWithDynProp.ID == v.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()],
-                             v.c[self.ObjWithDynProp().GetDynPropFKName()] == curDynProp['ID'])
+                        and_(self.ObjWithDynProp.ID == v.c['FK_'+self.ObjWithDynProp.__tablename__],
+                             v.c[self.ObjWithDynProp.fk_table_DynProp_name] == curDynProp['ID'])
                     )
                     selectable.append(
                         v.c['Value' + curDynProp['TypeProp']].label(curDynProp['Name']))
@@ -176,10 +166,9 @@ class ListObjectWithDynProp():
                     joinTable = outerjoin(
                         joinTable, v,
                         and_(v.c['StartDate'] == tmpV.c['StartDate'],
-                             and_(self.ObjWithDynProp.ID == v.c[self.ObjWithDynProp(
-                             ).GetSelfFKNameInValueTable()],
-                            v.c[self.ObjWithDynProp().GetDynPropFKName()] == curDynProp['ID']))
-                    )
+                             and_(self.ObjWithDynProp.ID == v.c['FK_'+self.ObjWithDynProp.__tablename__],
+                             v.c[self.ObjWithDynProp.fk_table_DynProp_name] == curDynProp['ID']))
+                        )
                     selectable.append(
                         v.c['Value' + curDynProp['TypeProp']].label(curDynProp['Name']))
 
@@ -199,8 +188,7 @@ class ListObjectWithDynProp():
 
     def GetDynPropList(self):
         ''' Retrieve all dynamic properties of object '''
-        DynPropTable = Base.metadata.tables[
-            self.ObjWithDynProp().GetDynPropTable()]
+        DynPropTable = self.ObjWithDynProp.TypeClass.PropertiesClass.__table__
         query = select([DynPropTable])
         result = self.sessionmaker().execute(query).fetchall()
         if result == []:
@@ -261,7 +249,7 @@ class ListObjectWithDynProp():
     def addObjectTypeParams(self, searchInfo):
 
         if self.typeObj:
-            searchInfo['criteria'].append({'Column': self.ObjWithDynProp().getTypeObjectFKName(),
+            searchInfo['criteria'].append({'Column': self.ObjWithDynProp.type_id.name,
                                            'Operator': '=',
                                            'Value': self.typeObj})
 
@@ -279,6 +267,7 @@ class ListObjectWithDynProp():
 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin, searchInfo)
         self.fullQueryJoinOrdered = fullQueryJoinOrdered
+        print(fullQueryJoinOrdered)
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self, searchInfo=None):
@@ -287,20 +276,13 @@ class ListObjectWithDynProp():
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
-        listWithThes = list(
+        dataConfigWithThesaurus = list(
             filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType, self.Conf))
-        listWithThes = list(map(lambda x: x.Name, listWithThes))
+        # listWithThes = list(map(lambda x: x.Name, listWithThes))
 
         # change thesaural term into laguage user
-        try:
-            userLng = threadlocal.get_current_request().authenticated_userid[
-                'userlanguage']
-        except:
-            userLng = 'fr'
-
         for row in result:
-            row = dict(map(lambda k: tradThesaurusTerm
-                           (k, listWithThes, userLng.lower()), row.items()))
+            row = dict(map(lambda i: tradThesaurusTermV2(i, dataConfigWithThesaurus), row.items()))
             data.append(row)
         return data
 
@@ -441,7 +423,7 @@ class ListObjectWithDynProp():
                     filterCriteria
                 ))
             existQuery = existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView(
-                countHisto=countHisto).c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
+                countHisto=countHisto).c[self.ObjWithDynProp.fk_table_name])
             fullQuery = fullQuery.where(exists(existQuery))
 
         elif 'null' in criteria['Operator'].lower():
@@ -452,7 +434,7 @@ class ListObjectWithDynProp():
                     'Name'] == criteria['Column'],
             )
             existQuery = existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView(
-                countHisto=countHisto).c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
+                countHisto=countHisto).c[self.ObjWithDynProp.fk_table_name])
 
             if 'is null' == criteria['Operator'].lower():
                 fullQuery = fullQuery.where(or_(
@@ -549,3 +531,16 @@ def tradThesaurusTerm(key, listWithThes, userLng='en'):
     except:
         (name, newVal) = splitFullPath(key, listWithThes)
     return (name, newVal)
+
+def tradThesaurusTermV2(item, dataConfigWithThesaurus):
+    from ..utils.parseValue import formatThesaurus
+    key, value = item
+
+    configThesaurus = list(filter(lambda obj: key == obj.Name, dataConfigWithThesaurus))
+
+    if configThesaurus and value:
+        newVal = formatThesaurus(value, nodeID=configThesaurus[0].Options)['displayValue']
+    else:
+        newVal = value
+
+    return (key, newVal)

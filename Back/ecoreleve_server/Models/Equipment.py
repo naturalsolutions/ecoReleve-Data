@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import aliased
 from pyramid import threadlocal
 from datetime import timedelta
+from sqlalchemy.orm import relationship
 
 
 class Equipment(Base):
@@ -29,28 +30,9 @@ class Equipment(Base):
     StartDate = Column(DateTime, default=func.now())
     Deploy = Column(Boolean)
 
-    # def linkProperty(self, StartDate, **kwargs):
-    #     session = threadlocal.get_current_request().dbsession
-    #     curIndiv = session.query(Individual).get(self.FK_Individual)
-    #     curSensor = session.query(Sensor).get(self.FK_Sensor)
-    #     curIndiv.init_on_load()
-    #     curSensor.init_on_load()
-    #     curSensor.updateFromJSON(kwargs, StartDate)
-    #     curIndiv.updateFromJSON(kwargs, StartDate)
+    Individuals = relationship('Individual')
+    MonitoredSites = relationship('MonitoredSite')
 
-    # def checkExistedSensorData(self):
-    #     session = threadlocal.get_current_registry().dbmaker()
-
-    #     query = text('''DECLARE @result int;
-    #     EXEC dbo.[pr_checkIfProtoProtected] :FK_sensor, :date, @result OUTPUT;
-    #     SELECT @result;
-    #     ''').bindparams(bindparam('FK_sensor', self.FK_Sensor),
-    #     bindparam('date', self.StartDate))
-    #     Nb = session.execute(query).scalar()
-    #     if Nb > 0:
-    #         return True
-    #     else:
-    #         return False
 
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
@@ -92,7 +74,7 @@ def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
 
 @event.listens_for(Observation.Station, 'set')
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
-    typeName = target.GetType().Name
+    typeName = target._type.Name
     curSta = value
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station_equipment':
@@ -107,12 +89,12 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         else:
             deploy = 1
 
-        fk_sensor = int(target.getProperty('FK_Sensor'))
+        fk_sensor = int(target.values.get('FK_Sensor', None))
         if 'individual' in typeName.lower():
-            fk_indiv = target.getProperty('FK_Individual')
+            fk_indiv = target.values.get('FK_Individual', None)
             fk_site = None
         elif 'site' in typeName.lower():
-            fk_site = curSta.getProperty('FK_MonitoredSite')
+            fk_site = curSta.values.get('FK_MonitoredSite', None)
             fk_indiv = None
             if fk_site is None:
                 raise ErrorAvailable({'errorSite': True})

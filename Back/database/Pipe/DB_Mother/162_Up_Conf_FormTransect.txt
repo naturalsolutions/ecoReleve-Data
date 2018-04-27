@@ -1,0 +1,12 @@
+UPDATE f SET FormRender = 15
+FROM ModuleForms f
+WHERE module_id =1 and typeObj in (select ID FROM ProtocoleType WHERE NAme in ('SubTransect'))
+AND NAme = 'taxon'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('162_Up_Conf_FormTransect',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -141,6 +141,30 @@ define([
             $('.cancel').removeAttr('disabled');
 
             //self.ui.progressBar.css({'background-color': 'green'})
+            // swal(
+            //   {
+            //     title: 'Succes',
+            //     text: 'importing RFID file',
+            //     type: 'success',
+            //     showCancelButton: true,
+            //     confirmButtonColor: 'green',
+            //     confirmButtonText: 'Go to Validate',
+            //     cancelButtonText: 'Import new RFID',
+            //     closeOnConfirm: true,
+
+            //   },
+            //   function(isConfirm) {
+            //     //self.ui.progress.hide();
+            //     if (isConfirm) {
+            //       Backbone.history.navigate('validate/rfid',{trigger: true});
+            //     } else {
+            //       //Backbone.history.navigate('importFile',{trigger: true});
+            //       _this.options.parent.currentStepIndex = 1;
+            //       var index = _this.options.parent.currentStepIndex;
+            //       _this.options.parent.displayStep(index);
+            //     }
+            //   }
+            // );
             swal(
               {
                 title: 'Succes',
@@ -150,21 +174,19 @@ define([
                 confirmButtonColor: 'green',
                 confirmButtonText: 'Go to Validate',
                 cancelButtonText: 'Import new RFID',
-                closeOnConfirm: true,
 
-              },
-              function(isConfirm) {
-                //self.ui.progress.hide();
-                if (isConfirm) {
+              })
+              .then( (result) => {
+                if( 'value' in result) {
                   Backbone.history.navigate('validate/rfid',{trigger: true});
-                } else {
-                  //Backbone.history.navigate('importFile',{trigger: true});
-                  _this.options.parent.currentStepIndex = 1;
-                  var index = _this.options.parent.currentStepIndex;
-                  _this.options.parent.displayStep(index);
                 }
-              }
-            );
+                else {
+                                    //Backbone.history.navigate('importFile',{trigger: true});
+                                    _this.options.parent.currentStepIndex = 1;
+                                    var index = _this.options.parent.currentStepIndex;
+                                    _this.options.parent.displayStep(index);
+                }
+              });
 
           }).fail(function(data) {
             $('#btnNext').attr('disabled');
@@ -191,10 +213,7 @@ define([
                 type: type,
                 showCancelButton: false,
                 confirmButtonColor: color,
-                confirmButtonText: 'OK',
-                closeOnConfirm: true,
-              },
-              function(isConfirm) {
+                confirmButtonText: 'OK'
               }
             );
           });

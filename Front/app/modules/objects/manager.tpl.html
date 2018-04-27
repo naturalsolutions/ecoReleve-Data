@@ -89,14 +89,14 @@
 			</button>
 
 
-			<% if (typeof(availableOptions) === 'undefined') { %>
-					<a href="#<%= type %>/new" class="js-admin js-link-new btn btn-success pull-right">
+			<% if (typeof(disabledNew)=== 'undefined' && typeof(availableOptions) === 'undefined') { %>
+					<a href="#<%= type %>/new" class="<%=authorisationLvl.create_new %> js-link-new btn btn-success pull-right">
 					<span class="reneco reneco-entrykey"></span>
 					&nbsp;
 					New <%= single %>
 					</a>
-			<% } else { %>
-					<button class="js-admin js-btn-new btn btn-success pull-right">
+			<% } else if(typeof(disabledNew)=== 'undefined'){ %>
+					<button class="<%=authorisationLvl.create_new %> js-btn-new btn btn-success pull-right">
 					<span class="reneco reneco-entrykey"></span>
 					&nbsp;
 					New <%= single %>

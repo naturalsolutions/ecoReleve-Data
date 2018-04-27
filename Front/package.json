@@ -2,6 +2,7 @@
   "name": "app",
   "version": "0.1.0",
   "dependencies": {
+    "sweetalert": "^2.0.8"
   },
   "devDependencies": {
     "grunt-contrib-requirejs": "^1.0.0",

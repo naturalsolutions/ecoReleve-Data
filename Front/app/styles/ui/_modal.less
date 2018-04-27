@@ -39,3 +39,66 @@
     display: block;
   }
 }
+
+.swal-footer {
+  text-align: center;
+  padding-top: 13px;
+  margin-top: 13px;
+  padding: 13px 16px;
+  border-radius: inherit;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.modal-cam-trap{
+  height: ~"calc(100% - @{toolbarHeight})";
+  width: 80%;
+  padding-top: 50px;
+  bottom: @toolbarHeight;
+  .modal-content{
+    height: 100%;
+    width: 100%;
+    .modal-body{
+      height: ~"calc(100% - @{toolbarHeight})";
+      width: 100%;
+      overflow: auto;
+      img{
+        height:100%;
+        width: 100%;
+      }
+      img.accepted:after{
+        font-family: 'reneco' !important;
+        content: "\e62a";
+        display: block;
+        float:right;
+        position:relative;
+        top:-10px;
+        right: -10px;
+        height: 20px;
+        width: 20px;
+        border-radius: 10px;
+        background-color: #39b34a;
+      }
+
+      img.refused:after{
+        font-family: 'reneco' !important;
+        content: "\e65e";
+        display: block;
+        float:right;
+        position:relative;
+        top:-10px;
+        right: -10px;
+        height: 20px;
+        width: 20px;
+        border-radius: 10px;
+        background-color: #f00;
+      }
+    }
+  }
+}
+// .js-camtrapProcessing {
+//   width : 900px;
+// }
+
+// .modal-backdrop{
+//   bottom: 56px;
+// }

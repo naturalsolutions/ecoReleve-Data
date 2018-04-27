@@ -263,7 +263,7 @@ define([
     },
 
     isFilterActive : function () {
-            return this.filterDate && (this.filterDate.dateFrom || this.filterDate.dateTo);
+      return this.filterDate && (this.filterDate.dateFrom || this.filterDate.dateTo);
     },
 
     setupApply : function () {

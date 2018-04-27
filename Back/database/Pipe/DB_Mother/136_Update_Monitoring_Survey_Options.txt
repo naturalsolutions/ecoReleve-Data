@@ -1,0 +1,13 @@
+update ModuleForms
+set Options = '{ "startId":' + Options + ', "date": true, "dateFormat": "DD/MM/YYYY"}'
+where module_id = 9 and (
+  Name = 'Monitoring_status' or
+  Name = 'Survey_type'
+)
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_Update_Monitoring_Survey_Options',GETDATE(),(SELECT db_name()))
+
+
+GO

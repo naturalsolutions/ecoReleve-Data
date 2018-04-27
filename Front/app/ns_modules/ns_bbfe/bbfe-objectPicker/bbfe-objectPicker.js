@@ -42,7 +42,7 @@ define([
 
       var dictCSS = {
         'individuals':'reneco reneco-bustard',
-        'sensors': 'reneco reneco-emitters',
+        'sensors': 'reneco reneco-ECOL-emitters',
         'monitoredSites': 'reneco reneco-site',
       };
       this.model.set('icon',dictCSS[this.objectName]);
@@ -237,7 +237,7 @@ define([
           data['Precision'] = model.precision;
           data['StartDate'] = model.StationDate;
           data['Place'] = model.Place
-          data['FK_Region'] = model.FK_Region
+          data['FK_FieldworkArea'] = model.FK_FieldworkArea
           break;
         case 'sensors':
           break;
@@ -307,38 +307,68 @@ define([
         case 'individuals':
           break;
         case 'monitoredSites':
-          Swal({
-             title: 'Careful, there is no coordinate for this monitored site at this date',
-             text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
-             type: 'warning',
-             showCancelButton: true,
-             confirmButtonColor: 'rgb(147, 14, 14)',
-             confirmButtonText: 'OK',
-             closeOnConfirm: true,
-            },
-            function(isConfirm) {
-              var stationDate = _this.loadData().StartDate;
-              if( isConfirm ) { //update startdate monitored site
-                data.StartDate = stationDate;
-                $.ajax({
-                  context: _this,
-                  url: 'monitoredSites/'+_this.getValue(),
-                  data: JSON.stringify(data),
-                  dataType: "json",
-                  type: "PUT",
-                  contentType: "application/json; charset=utf-8",
-                  success: function (data) {
-                      //_this.nsForm.butClickSave();
-                  },
-                  error: function (data) {
-                    console.error('an error occured');
-                  }
-                });
-              }
-              else {//remove MonitoredSite's stations
-                _this.setValue('','');
+        Swal({
+          title: 'Careful, there is no coordinate for this monitored site at this date',
+          text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'OK'
+         }).then( (result) => {
+           var stationDate = _this.loadData().StartDate;
+           if( 'value' in result ) {
+            data.StartDate = stationDate;
+            $.ajax({
+              context: _this,
+              url: 'monitoredSites/'+_this.getValue(),
+              data: JSON.stringify(data),
+              dataType: "json",
+              type: "PUT",
+              contentType: "application/json; charset=utf-8",
+              success: function (data) {
+                  //_this.nsForm.butClickSave();
+              },
+              error: function (data) {
+                console.error('an error occured');
               }
             });
+           }
+           else {//remove MonitoredSite's stations
+           _this.setValue('','');
+           }
+         });
+          // Swal({
+          //    title: 'Careful, there is no coordinate for this monitored site at this date',
+          //    text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
+          //    type: 'warning',
+          //    showCancelButton: true,
+          //    confirmButtonColor: 'rgb(147, 14, 14)',
+          //    confirmButtonText: 'OK',
+          //    closeOnConfirm: true,
+          //   },
+          //   function(isConfirm) {
+          //     var stationDate = _this.loadData().StartDate;
+          //     if( isConfirm ) { //update startdate monitored site
+          //       data.StartDate = stationDate;
+          //       $.ajax({
+          //         context: _this,
+          //         url: 'monitoredSites/'+_this.getValue(),
+          //         data: JSON.stringify(data),
+          //         dataType: "json",
+          //         type: "PUT",
+          //         contentType: "application/json; charset=utf-8",
+          //         success: function (data) {
+          //             //_this.nsForm.butClickSave();
+          //         },
+          //         error: function (data) {
+          //           console.error('an error occured');
+          //         }
+          //       });
+          //     }
+          //     else {//remove MonitoredSite's stations
+          //       _this.setValue('','');
+          //     }
+          //   });
           break;
         case 'sensors':
           break;
@@ -431,7 +461,7 @@ define([
     },
 
     showPicker: function(){
-      this.regionManager.get('modal').show(this.pickerView = new this.PickerView());
+      this.regionManager.get('modal').show(this.pickerView = new this.PickerView({enableNew:true}));
       $('#modal').fadeIn('fast');
       $('#modal').on('click', $.proxy(this.checkHidePicker, this));
     },

@@ -231,6 +231,11 @@ var Form = Backbone.View.extend({
       });
     });
 
+    var fieldAtBegin = $form.find('.js-begin-line');
+    
+    _.each(fieldAtBegin, function(field){
+      $(field).before('<div class="clearfix"></div>');
+    });
     //Set the main element
     this.setElement($form);
 
@@ -900,6 +905,9 @@ Form.Field = Backbone.View.extend({
       if(!elem.length){
         elem = this.$el.find('select:first');
       }
+      if(!elem.length){
+        elem = this.$el.find('textarea:first');
+      } 
       elem.addClass(this.errorClassName);
 
       //this.$el.addClass(this.errorClassName);
@@ -919,6 +927,9 @@ Form.Field = Backbone.View.extend({
     if(!elem.length){
       elem = this.$el.find('select:first');
     }
+    if(!elem.length){
+      elem = this.$el.find('textarea:first');
+    } 
     elem.removeClass(this.errorClassName);
     //this.$el.removeClass(this.errorClassName);
 

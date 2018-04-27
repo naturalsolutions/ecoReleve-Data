@@ -1,13 +1,14 @@
-from .FrontModules import FrontModules, ModuleForms, ModuleGrids
 from pyramid import threadlocal
 from abc import abstractproperty
 from sqlalchemy import and_, or_, asc, orm, event
-from ..utils.parseValue import parser, formatValue
 from sqlalchemy_utils import get_hybrid_properties
 from sqlalchemy.ext.declarative import declared_attr
-from ..GenericObjets import BusinessRules
-from ..Models import dbConfig, Base
 import json
+
+from ..core import Base
+from ..GenericObjets import BusinessRules
+from .FrontModules import FrontModules, ModuleForms, ModuleGrids
+from ..utils.parseValue import parser, formatValue
 
 
 class ConfiguredDbObjectMapped(object):
@@ -226,9 +227,9 @@ class DbObject(object):
         def after_insert(mapper, connection, target):
             cls.executeBusinessRules(target, 'after_insert')
 
-        @event.listens_for(cls, 'before_delete')
-        def before_delete(mapper, connection, target):
-            cls.executeBusinessRules(target, 'before_delete')
+        # @event.listens_for(cls, 'before_delete')
+        # def before_delete(mapper, connection, target):
+        #     cls.executeBusinessRules(target, 'before_delete')
 
         @event.listens_for(cls, 'after_delete')
         def after_delete(mapper, connection, target):
