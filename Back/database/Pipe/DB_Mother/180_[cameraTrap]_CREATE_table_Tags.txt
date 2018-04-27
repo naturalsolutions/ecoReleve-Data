@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[Tags](
 GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('145_[cameraTrap]_CREATE_table_Tags',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('180_[cameraTrap]_CREATE_table_Tags',GETDATE(),(SELECT db_name()))
 
 
 GO

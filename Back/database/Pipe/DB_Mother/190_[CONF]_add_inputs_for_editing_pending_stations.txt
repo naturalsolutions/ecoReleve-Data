@@ -8,7 +8,7 @@ VALUES
 (2,6,'FK_MonitoredSite','Monitored Site',0,6,6,'ObjectPicker','form-control',7,31,'General Infos','{"usedLabel":"Name"}',NULL,NULL,'site',NULL,1,NULL,NULL,NULL)
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('167_[CONF]_add_inputs_for_editing_pending_stations',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('190_[CONF]_add_inputs_for_editing_pending_stations',GETDATE(),(SELECT db_name()))
 
 
 

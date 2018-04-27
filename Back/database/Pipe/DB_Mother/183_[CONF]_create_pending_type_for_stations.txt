@@ -1,0 +1,10 @@
+INSERT INTO [dbo].[StationType] 
+([Name],[Status])
+VALUES
+('Pending',4)
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('183_[CONF]_create_pending_type_for_stations',GETDATE(),(SELECT db_name()))
+
+
+GO

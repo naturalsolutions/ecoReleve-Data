@@ -7,7 +7,7 @@ INSERT INTO [dbo].[StationType_StationDynProp]
 		   (1,6,24)
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('166_[CONF]_add_dynprops_nbfieldworker_and_distance_to_pending_station',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('189_[CONF]_add_dynprops_nbfieldworker_and_distance_to_pending_station',GETDATE(),(SELECT db_name()))
 
 
 GO

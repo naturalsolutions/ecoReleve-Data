@@ -25,7 +25,7 @@ ALTER TABLE [dbo].[PhotosTags] CHECK CONSTRAINT [FK_PhotosTags_Tags]
 GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('146_[cameraTrap]_CREATE_Table_PhotoTags',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('181_[cameraTrap]_CREATE_Table_PhotoTags',GETDATE(),(SELECT db_name()))
 
 
 GO

@@ -1,8 +1,0 @@
-ALTER TABLE dbo.TcameraTrap 
-ADD	stationId int NULL
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('150_[CONF]sensor_add_col_stationId_TcameraTrap',GETDATE(),(SELECT db_name()))
-
-
-GO
