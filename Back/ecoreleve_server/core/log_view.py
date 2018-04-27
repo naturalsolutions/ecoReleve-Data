@@ -63,4 +63,10 @@ def sendLog(logLevel, domaine, msg_number=500, scope='Pyramid', errorDict=None, 
 @view_config(context=Exception, permission=NO_PERMISSION_REQUIRED)
 def error_view(exc, request):
     sendLog(logLevel=5, domaine=3)
-    return exc
+    if exc and exc.orig and exc.orig.args and '[Microsoft][ODBC SQL Server Driver][SQL Server]' in exc.orig.args[1]:
+        request.response.status_code = 500
+        request.response.text = exc.orig.args[1]
+    else:
+        request.response.status_code = 500
+        request.response.text = 'Something goes wrong in API.<BR>'
+    return request.response

@@ -102,17 +102,20 @@ class QueryEngine(object):
         query = select(self.selectable).select_from(join_table)
         return query
 
-    def init_count_statement(self):
+    def init_count_statement(self, filtered_columns):
         '''
         initialize "SELECT COUNT(*) FROM" statement,
         @returning :: SQLAlchemy Query Object
         '''
-        self.selectable = []
+
+        # Critic ! We have to pass all filtered columns in order to apply automatic jointure on ForeignKeys
+        # if filter is needed to apply on this jointure
+        self.selectable = filtered_columns
+
         self.fk_join_list = []
         from_table = self.extend_from(self.model)
         from_table = self._from_foreign(from_table)
         query = select([func.count()]).select_from(from_table)
-
         return query
 
     def _select_from(self):
@@ -210,10 +213,6 @@ class QueryEngine(object):
         if column is None:
             return query
 
-        # if self.is_foreign_reference(column):
-        #     # TODO Filter on foreign Reference with sub query exists ? 
-        #     print('filters on foreign ref : ',criteria['Column'])
-
         query = query.where(
                 eval_.eval_binary_expr(
                     column, criteria['Operator'], criteria['Value']
@@ -227,10 +226,11 @@ class QueryEngine(object):
         @returning :: interger
         '''
         self.filters = filters
-        query = self.init_count_statement()
+        query = self.init_count_statement([f['Column'] for f in filters])
         query = self.apply_filters(query, filters)
         query = self.apply_custom_filters(query, filters)
         queryResult = self.session.execute(query).scalar()
+
         return queryResult
 
     def _limit(self, query, param):

@@ -225,37 +225,38 @@ class EventRuler(object):
 
         @event.listens_for(cls, 'before_update')
         def before_update(mapper, connection, target):
-            target.executeBusinessRules(target, 'before_update')
+            target.executeBusinessRules('before_update')
 
         @event.listens_for(cls, 'after_update')
         def after_update(mapper, connection, target):
-            target.executeBusinessRules(target, 'after_update')
+            target.executeBusinessRules('after_update')
 
         @event.listens_for(cls, 'before_insert')
         def before_insert(mapper, connection, target):
-            target.executeBusinessRules(target, 'before_insert')
+            target.executeBusinessRules('before_insert')
 
         @event.listens_for(cls, 'after_insert')
         def after_insert(mapper, connection, target):
-            target.executeBusinessRules(target, 'after_insert')
+            target.executeBusinessRules('after_insert')
 
-        @event.listens_for(cls, 'before_delete')
-        def before_delete(mapper, connection, target):
-            target.executeBusinessRules(target, 'before_delete')
+        # @event.listens_for(cls, 'before_delete')
+        # def before_delete(mapper, connection, target):
+        #     target.executeBusinessRules(target, 'before_delete')
+        ''' before delete is moved on session flush found @ utils.callback.seesion_callback'''
 
         @event.listens_for(cls, 'after_delete')
         def after_delete(mapper, connection, target):
-            target.executeBusinessRules(target, 'after_delete')
+            target.executeBusinessRules('after_delete')
 
     # @classmethod
-    def executeBusinessRules(self, target, event):
+    def executeBusinessRules(self, event):
         '''
         '''
         if self.__constraintRules__[event] and self.enable_business_ruler:
-            entityDTO = target.values
+            entityDTO = self.values
             for rule in self.__constraintRules__[event]:
                 if (not rule.targetTypes
-                        or (hasattr(target, 'type_id') and target.type_id in rule.targetTypes)):
+                        or (hasattr(self, 'type_id') and self.type_id in rule.targetTypes)):
                     result = rule.execute(entityDTO)
 
 

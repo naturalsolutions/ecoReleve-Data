@@ -1,5 +1,6 @@
 from ..core.configuration_model.Business import BusinessRuleError
 from traceback import print_exc
+from sqlalchemy import event 
 
 def add_cors_headers_response_callback(event):
     def cors_headers(request, response):
@@ -24,6 +25,12 @@ def cache_callback(request, session):
 def session_callback(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()
+
+    @event.listens_for(session, 'before_flush')
+    def receive_before_flush(session, flush_context, instances):
+        for instance_state, current_instance in session._deleted.items():
+            if hasattr(current_instance, 'executeBusinessRules'):
+                current_instance.executeBusinessRules('before_delete')
 
     def cleanup(request):
         if request.exception is not None:
