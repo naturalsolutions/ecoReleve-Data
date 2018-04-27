@@ -476,8 +476,6 @@ define([
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
-      },
-      function(isConfirm){
       });
     },
 

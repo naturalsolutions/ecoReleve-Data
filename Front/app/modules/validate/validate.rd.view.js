@@ -343,7 +343,7 @@ define([
 
       Swal({
         title: opt.title || opt.responseText || 'error',
-        text: opt.text || '',
+        html: opt.text || '',
         type: type,
         showCancelButton: false,
         confirmButtonColor: btnColor,

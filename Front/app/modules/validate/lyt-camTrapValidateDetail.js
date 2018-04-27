@@ -844,7 +844,7 @@ define([
         Swal({
           title: title,
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-          text: text,
+          html: text,
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(218, 146, 15)',
@@ -874,7 +874,7 @@ define([
       if (tabOfIds.length === 0 || tabOfItem.length === 0) {
         Swal({
           title: 'Error',
-          text: 'No stations to remove',
+          html: 'No stations to remove',
           type: 'error',
           confirmButtonColor: 'rgb(218, 146, 15)',
           confirmButtonText: 'Ok',
@@ -993,7 +993,7 @@ define([
         if (tabStationPending.length == 0 ) {
           Swal({
             title: 'Error',
-            text: 'You can\'t create stations on rejected photo(s)',
+            html: 'You can\'t create stations on rejected photo(s)',
             type: 'error',
             confirmButtonColor: 'rgb(218, 146, 15)',
             confirmButtonText: 'Ok',
@@ -1299,18 +1299,28 @@ define([
         Swal({
           title: 'Warning',
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-          text: text,
+          html: text,
           type: 'warning',
           showCancelButton: true,
           confirmButtonColor: 'rgb(218, 146, 15)',
-  
           confirmButtonText: 'Ok',
           cancelButtonText: 'Cancel',
           closeOnConfirm: true,
           closeOnCancel: true,
-          html : true
           
-        },function (isConfirm) {
+        }).then((result) => {
+          if( 'value' in result ) {
+            _this.removeStationsBdd();
+            var tabToRefuse = []
+            for(var i = 0 ; i < tab.length ; i++ ) {
+              _this.tabView[tab[i]].setModelValidated(4);
+              tabToRefuse.push(tab[i]);
+            }
+          }
+
+        });        
+        /*
+        ,function (isConfirm) {
           if (isConfirm) {
             _this.removeStationsBdd();
             // var tabToRefuse = []
@@ -1320,6 +1330,8 @@ define([
             // }
           } 
         });
+
+        */
       }
       else {
         _this.rejectAll();
@@ -1722,7 +1734,7 @@ define([
       Swal({
         title: 'You can\'t validate this sessions',
         // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-        text: +_this.nbPhotosNotChecked + ' photos still underteminate',
+        html: +_this.nbPhotosNotChecked + ' photos still underteminate',
         type: 'error',
         showCancelButton: false,
         confirmButtonColor: 'rgb(218, 146, 15)',
@@ -1752,7 +1764,7 @@ define([
 
       Swal({
           title: 'Validation',
-          text: 'You have finish this session on ' + _this.nbPhotos + ' photos :<BR>' + text,
+          html: 'You have finish this session on ' + _this.nbPhotos + ' photos :<BR>' + text,
           type: 'success',
           showCancelButton: true,
           confirmButtonColor: '#5cb85c',
@@ -1760,9 +1772,90 @@ define([
           confirmButtonText: 'Ok !',
           cancelButtonText: 'No !',
           closeOnConfirm: true,
-          closeOnCancel: true,
-          html : true
-        },
+          closeOnCancel: true
+        }).then( (result) => {
+
+          if( 'value' in result) {
+            
+            $.ajax({
+              url: config.coreUrl + 'sensorDatas/' + _this.type + '/validate',
+              method: 'POST',
+              data: {
+                fk_Sensor: _this.sensorId,
+                fk_MonitoredSite: _this.siteId,
+                fk_EquipmentId: _this.equipmentId
+              },
+              context: _this,
+            })
+            .done(function (response, status, jqXHR) {
+                //todo handle stored procedre return
+              var newText = '';
+              newText += _this.nbPhotosAccepted + ' photos validated <BR>'
+              newText += _this.nbPhotosRefused + ' photos refused <BR>'
+              newText += _this.nbPhotosStationed + ' stations created <BR>'
+
+              Swal({
+                title: 'Session validated',
+                html: 'On ' + _this.nbPhotos + ' photos <BR>' + text,
+                type: 'success',
+                showCancelButton: true,
+                confirmButtonColor: 'rgb(218, 146, 15)',
+
+                confirmButtonText: 'Go to monitored sites',
+                cancelButtonText: 'Return to validation',
+                closeOnConfirm: true,
+                closeOnCancel: true
+              }).then( (result) => {
+                if( 'value' in result) {
+                  Backbone.history.navigate('monitoredSites/' + _this.siteId, {
+                    trigger: true
+                  });
+                }
+                if( 'dismiss' in result) {
+                  Backbone.history.navigate('validate/camtrap');
+                  window.location.reload();
+                }
+              });            /*
+              , function () {
+                if (isConfirm) {
+                  Backbone.history.navigate('monitoredSites/' + _this.siteId, {
+                    trigger: true
+                  });
+                } else {
+                  Backbone.history.navigate('validate/camtrap');
+                  window.location.reload();
+                }
+
+              })
+
+              */
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+              Swal({
+                title: 'Error',
+                html: 'Something goes wrong<BR>Please contact an admin<BR>',
+                type: 'error',
+                // showCancelButton: true,
+                confirmButtonColor: '#5cb85c',
+                confirmButtonText: 'Ok!',
+                // cancelButtonText: 'Return to validation',
+                closeOnConfirm: true,
+                closeOnCancel: true,
+              });
+
+            });
+          //TODO mettre le status validated a 8 pour sauvegarder la validation de force
+
+
+
+            
+          }
+
+        });
+        
+        
+        /*
+        ,
         function (isConfirm) {
           if (isConfirm) {
             $.ajax({
@@ -1830,6 +1923,8 @@ define([
 
         }
       );
+
+      */
     },
 
 
