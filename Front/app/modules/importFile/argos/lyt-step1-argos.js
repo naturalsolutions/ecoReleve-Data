@@ -41,7 +41,7 @@ define([
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl+'sensors/argos/datas',
+        url: config.coreUrl+'sensorDatas/argos',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
 				autoQueue: false,

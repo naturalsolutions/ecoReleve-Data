@@ -24,6 +24,7 @@ define([
   'ns_modules/ns_bbfe/bbfe-lat',
   'ns_modules/ns_bbfe/bbfe-fieldworkarea-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'ns_modules/ns_bbfe/bbfe-mediaFile',
 
   ],
 

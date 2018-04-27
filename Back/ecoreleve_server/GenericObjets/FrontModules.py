@@ -1,4 +1,4 @@
-from ..Models import Base, dbConfig
+# from ..Models import Base, dbConfig
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -13,8 +13,9 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 import json
 from pyramid import threadlocal
-from ..utils.parseValue import isNumeric
 
+from ..utils.parseValue import isNumeric
+from ..core import Base
 
 FieldSizeToClass = {0: 'col-md-3', 1: 'col-md-6', 2: 'col-md-12'}
 

@@ -1,25 +1,28 @@
 import datetime
 from decimal import Decimal
+import exiftool
 from urllib.parse import quote_plus
 from sqlalchemy import engine_from_config
 from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.authorization import ACLAuthorizationPolicy
-from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
+from pyramid.events import NewRequest
+from sqlalchemy.orm import sessionmaker, scoped_session
+
+from .core import SecurityRoot
+from .core.init_db import Base, BaseExport, initialize_session, initialize_session_export, dbConfig
+from .core.security import include_jwt_policy
+from .utils import loadThesaurusTrad
+from .utils.callback import add_cors_headers_response_callback, session_callback
+from .utils.init_cameratrap_path import initialize_cameratrap_path
+from .modules.url_dispatch import add_routes
+
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
-from .Models import (
-    Base,
-    BaseExport,
-    dbConfig,
-    db,
-    loadThesaurusTrad,
-    groupfinder
-)
-from .Views import add_routes, add_cors_headers_response_callback
-from pyramid.events import NewRequest
-from sqlalchemy.orm import sessionmaker, scoped_session
+
+# mySubExif = exiftool.ExifTool()
+# mySubExif.start()
 
 
 def datetime_adapter(obj, request):
@@ -29,14 +32,12 @@ def datetime_adapter(obj, request):
     except:
         return obj.strftime('%d/%m/%Y')
 
-
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
     try:
         return obj.strftime('%d/%m/%Y')
     except:
         return obj
-
 
 def time_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -45,67 +46,32 @@ def time_adapter(obj, request):
     except:
         return obj.strftime('%H:%M:%S')
 
-
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
 
-
-def includeme(config):
-    authz_policy = ACLAuthorizationPolicy()
-    config.set_authorization_policy(authz_policy)
-
-    settings = config.get_settings()
-    authn_policy = myJWTAuthenticationPolicy.from_settings(settings)
-    authn_policy.find_groups = groupfinder
-    config.set_authentication_policy(authn_policy)
-    config.set_default_permission('read')
-    config.add_forbidden_view(authn_policy.challenge)
+def initialize_exiftool():
+    mySubExif = exiftool.ExifTool()
+    mySubExif.start()
 
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
 
-    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.Export.url'])
-    engineExport = engine_from_config(
-        settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
-
-    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.default.url'])
-    engine = engine_from_config(
-        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
-
-    dbConfig['url'] = settings['sqlalchemy.default.url']
-    dbConfig['wsThesaurus'] = {}
-    dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
-    dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
-    dbConfig['data_schema'] = settings['data_schema']
-
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
 
+    engine = initialize_session(settings)
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
-    dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
-    config.add_request_method(db, name='dbsession', reify=True)
 
-    Base.metadata.bind = engine
-    Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False)
-
-    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False':
-        print('''
-            /!\================================/!\
-            WARNING :
-            Export DataBase NOT loaded, Export Functionality will not working
-            /!\================================/!\ \n''')
-    else:
-        BaseExport.metadata.bind = engineExport
-        BaseExport.metadata.create_all(engineExport)
-        BaseExport.metadata.reflect(views=True, extend_existing=False)
+    engineExport = initialize_session_export(settings)
+    if engineExport is not None:
         config.registry.dbmakerExport = scoped_session(
-            sessionmaker(bind=engineExport))
+                sessionmaker(bind=engineExport))
+
+    config.add_request_method(session_callback, name='dbsession', reify=True)
+
     # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
@@ -120,16 +86,19 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
-    # include security config from jwt __init__.py
-    includeme(config)
+    include_jwt_policy(config)
     config.set_root_factory(SecurityRoot)
 
+    dbConfig['init_exiftool'] = settings.get('init_exiftool', None)
+    if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
+        print('Exiftool not initialized')
+        pass
+    else:
+        initialize_exiftool()
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
-
+    initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
     add_routes(config)
     config.scan()
 
-    # from .Models.Region import getGeomRegion
-    # getGeomRegion(dbConfig['dbSession']())
     return config.make_wsgi_app()

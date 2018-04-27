@@ -1,4 +1,4 @@
-from ..Models import Base, dbConfig
+from ..core import Base
 from sqlalchemy import (
     select,
     Column,

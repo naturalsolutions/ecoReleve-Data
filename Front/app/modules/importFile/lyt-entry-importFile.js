@@ -19,7 +19,13 @@ define([
 
 	'./argos/lyt-step1-argos',
 
-], function($, _, Backbone, Marionette, config, NewStepper, Step0,
+	'./camTrap/lyt-step1-camtrap',
+	'./camTrap/lyt-step2-camtrap',
+	'./camTrap/lyt-step3-camtrap'
+
+
+], function($, _, Backbone, Marionette,config, NewStepper, Step0,
+/*], function($, _, Backbone, Marionette, config, NewStepper, Step0,*/
 	StepSelectFile,
 	Step1GPX,
 	Step2GPX,
@@ -30,7 +36,11 @@ define([
 	Step1GSM,
 	Step2GSM,
 
-	Step1ARGOS
+	Step1ARGOS,
+
+	Step1CAMTRAP,
+	Step2CAMTRAP,
+	Step3CAMTRAP
 ) {
 
   'use strict';
@@ -111,6 +121,9 @@ define([
 						maxFiles:8
 					});
 					var steps = [Step0Argos];
+					break;
+				case 'camTrap' :
+					var steps = [Step1CAMTRAP,Step2CAMTRAP,Step3CAMTRAP];
 					break;
 				default:
 					//not in step0

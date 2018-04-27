@@ -1,6 +1,6 @@
-
 define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
   function($, Marionette, Backbone, config, Swal) {
+
 
   'use strict';
   return Marionette.AppRouter.extend({

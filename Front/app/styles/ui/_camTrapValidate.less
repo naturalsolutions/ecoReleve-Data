@@ -1,0 +1,517 @@
+div.bootstrap-tagsinput{
+    background-color: #373737 !important;
+    border: 0.3px solid #979797 !important;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    color: white;
+    font-size: 20px;
+
+    .label{
+      background-color: #909090 !important;
+      color: white !important;
+    }
+    .tag [data-role="remove"]:hover{
+      color: red;
+    }
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+  float: right;
+  margin-right: 0;
+  margin-left: 5px;
+  &:hover{
+    color :red;
+  }
+}
+
+.detailsimage{
+  .nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
+  #detailstitle{
+    border-bottom : 2px solid #ddd;
+    cursor: pointer;
+  }
+  #detailstitle:hover{
+    background-color: rgb(245,245,245)
+  }
+  .bootstrap-tagsinput {
+    border:0!important;
+    background-color: transparent!important;
+    box-shadow: inset 0 0px 0px #000000 !important;
+  }
+}
+
+
+#imageFullScreen {
+  padding : 0;
+
+  .fullscreenimg {
+    width: 100%;
+    height: 100%;
+    background-color: #434343;
+    .infosonimg {
+      width: 100%;
+      height: 100%;
+    }
+    img {
+      cursor : -webkit-grab;
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      object-fit:contain;
+    }
+    img:active {
+      cursor : -webkit-grabbing;
+    }
+
+
+    div.leftnavicon {
+      height: 100%;
+      position: absolute;
+      cursor: pointer;
+      width: 40px;
+      left : 0;
+    }
+    div.leftnavicon:hover i{
+      opacity: 1;
+    }
+    div.rightnavicon {
+      height: 100%;
+      position: absolute;
+      cursor: pointer;
+      width: 40px;
+      right: 0;
+      top: 0;
+    }
+    div.rightnavicon:hover i.reneco-chevron_left {
+      opacity: 1;
+    }
+    div.rightnavicon:hover i.reneco-chevron_right {
+      opacity: 1;
+    }
+    i.reneco-chevron_left {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      top:~"calc(50% - 35px)";
+      color : white;
+      text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+      transition: opacity 0.8s linear;
+      left: 0;
+    }
+    i.reneco-chevron_right {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      top:~"calc(50% - 35px)";
+      color : white;
+      text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+      transition: opacity 0.8s linear;
+      right: 0;
+    }
+  }
+
+  .infosonimg .rating-container {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top : 0;
+    z-index: 8;
+    transition: opacity 0.8s linear;
+  }
+  .rating-xl {
+    font-size: 4vw !important;
+  }
+  .rating-container:hover{
+    opacity: 1;
+  }
+}
+
+#gallery{
+  background-color: #434343;
+  padding: 20px;
+  user-select: none;
+  .ui-selecting > .vignette {
+    background-color: #39b34a !important;
+
+    img{
+      opacity: 0.7;
+    }
+
+    border: 1.5px solid #39b34a;
+    border-radius: 8px;
+  }
+  .ui-selected > .vignette {
+    border: 1.5px solid #39b34a;
+    border-radius: 8px;
+  }
+  .imageCamTrap{
+    margin: 0;
+    padding: 0;
+    position : relative;
+    height : 25%;
+
+
+    .vignette{
+      border-radius : 8px;
+      background-color: #3d3d3d;
+      height : 96%;
+      width: 96%;
+      .camtrapItemViewHeader{
+        .rating-xs {
+          font-size: 0.8vw;
+        }
+        i.reneco{
+          position:absolute;
+          text-align: center !important;
+          vertical-align: middle !important;
+          font-size: 0.9vw !important;
+          top:0px;
+          left:7px;
+          height: 28px;
+          width: 28px;
+          border-radius: 14px;
+          z-index : 99999;
+          //background-color: white;
+
+        }
+        i.reneco-stations{
+          color: #449d44;
+          border-radius : 0px !important;
+          font-size: xx-large !important;
+          top: 4px !important;
+        }
+        // i.reneco-hidden{
+        //   background-color: white;
+
+        // }
+        // i.reneco-checked{
+        //   background-color: green;
+        //   color: white;
+        // }
+        // i.reneco-close{
+        //   background-color: red;
+        //   color: white;
+        // }
+        // i.reneco-support{
+        //   background-color: white;
+        // }
+        // i.reneco-support::before{
+        //   content: '?';
+        // }
+      }
+      .camtrapItemViewContent{
+        height: 100%;
+        border-radius: 8px;
+        img{
+          height: 100%;
+          width: 100%;
+          cursor : pointer;
+          object-fit: cover;
+          overflow: hidden;
+          border-radius: 8px;
+          -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0%, 100% 0);
+          transition : -webkit-clip-path 0.5s;
+        }
+        img:focus + div.dateexif{
+          animation : blink 2s linear;
+        }
+
+        @keyframes blink {
+          0%,100% { opacity: 0 }
+          50% { opacity: 1 }
+        }
+
+        div.dateexif{
+          opacity: 0;
+          //display : none;
+          position:relative;
+          bottom: 30px;
+          color: white;
+          font-size: 15px;
+          font-weight: 600;
+          font-size: 0.9vw;
+          line-height: 30px;
+          background: rgba(0, 0, 0, 0.5);
+        //  transition: display 1s linear;
+          transition: opacity 0.8s linear;
+        }
+
+
+
+        img.checked{
+          -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 25%, 75% 0);
+        }
+      }
+      .camtrapItemViewContent:hover div.dateexif {
+        //display:block;
+        opacity: 1;
+      }
+      .camtrapItemViewContent:hover div.rating-container {
+        opacity: 1;
+      }
+      .camtrapItemViewContent .rating-xs {
+        font-size : 1.2em ;
+      }
+      .camtrapItemViewContent .rating-container {
+        opacity: 0;
+        position: absolute;
+        top : 0;
+        z-index: 8;
+        transition: opacity 0.8s linear;
+
+      }
+      .camtrapItemViewContent.accepted{
+        background-color : green;
+      }
+      .camtrapItemViewContent.rejected{
+          background-color : red;
+      }
+      .camtrapItemViewFooter{
+        height: 10%;
+        padding: 0;
+
+
+
+        div.dateexif{
+          position:relative;
+          //bottom: 10px;
+          padding-left: 10px;
+          color: white;
+          font-size: 10px;
+          font-weight: 300;
+          line-height: 10px;
+        }
+      }
+    }
+    .active{
+      border: 3px solid #39b34a;
+      border-radius: 8px;
+    }
+
+  }
+  /*.accepted:before{
+    font-family: 'reneco' !important;
+    content: "\e62a";
+    display: block;
+    float:right;
+    position:relative;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    font-size: 80%;
+    line-height: 20px;
+    border-radius: 10px;
+    background-color: #39b34a;
+  }
+
+  .refused:before{
+    font-family: 'reneco' !important;
+    content: "\e65e";
+    display: block;
+    float:right;
+    position:relative;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    font-size: 80%;
+    line-height: 20px;
+    border-radius: 10px;
+    background-color: #f00;
+  }
+  .checked:before{
+    font-family: 'reneco' !important;
+    content: "\e912";
+    display: block;
+    float:right;
+    position:relative;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    //background-color: #f00;
+  }*/
+  #nbphotosnotchecked{
+    color : white;
+  }
+  .notchecked:before{
+    font-family: 'reneco' !important;
+    content: "\e644";
+    display: block;
+    float:right;
+    position:relative;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    border-radius: 10px;
+    //background-color: #f00;
+  }
+}
+
+.camtrapgallery {
+  height: ~"calc(100% - 45px )" !important;
+}
+
+.paginatorCamTrap {
+  max-height: 45px;
+  background-color: #434343;
+  .infosfullscreen{
+    display: flex;
+    justify-content: space-between;
+    font-size: 30px;
+    font-weight: bold;
+    color: #909090;
+    align-content: flex-end;
+    padding-left: 30px;
+    padding-right: 30px;
+    
+    .infosfullscreencontent {
+      // display: flex;
+      // justify-content: space-around;
+
+      .status {
+      padding-right: 20px;
+      display : inline;
+      //flex-grow: 1;
+      // position: absolute;
+      // padding-left: 50px;
+      } 
+    .station{
+      color :#449d44; 
+      line-height: inherit;
+      // flex-grow: 1;   
+      }
+  }
+    .date {
+      // flex-grow: 2;
+      // position: absolute;
+      // padding-left: 50px;
+    }
+    .indexposition {
+      // flex-grow: 1;
+      text-align: right;
+    }
+
+
+    // // position: absolute;
+    // // width: 100%;
+    // // text-align: center;
+    // // opacity: 1;
+    // // color: white;
+    // // font-weight: 600;
+    // // font-size: 1.5vw;
+    // // line-height: 30px;
+    // span{
+    //   // float : right;
+    //   // margin-right: 20px;
+    // }
+
+    // .indexposition {
+    //   // position: absolute;
+    //   // bottom: 0px;
+    //   // width: 100%;
+    //   // text-align: right;
+    //   //  padding-right: 50px;
+    // }
+  }
+    .backgrid-paginator {
+      position: relative;
+      height: 50px;
+      max-height: 45px;
+      ul {
+        color:#666;
+        text-align: center;
+        li {
+          list-style: none;
+          display: inline;
+          padding: 5px 15px;
+          margin: 0px;
+          a {
+            color:#666;
+          }
+          a:hover {
+            background-color: #373737;
+            border-radius: 5px;
+            color:#666;
+          }
+        }
+        li.active {
+          a {
+            background-color: #373737;
+            border-radius: 5px;
+            color: white;
+          }
+        }
+        li.disabled {
+          visibility: hidden;
+        }
+      }
+    }
+}
+
+
+.camTrap.toolbar.top{
+  //border:0;
+  background-color: #3d3d3d;
+  border-bottom-color: #606060;
+  box-shadow: 0px 1px 17px 0px rgba(107, 107, 107, 0.5);
+  border-bottom: 1px solid #ddd;
+}
+*:focus {
+  outline: none;
+}
+
+
+.importCamTrap {
+  .sessionGrid {
+    height: 70px;
+    // .ag-body-viewport {
+    //   height : 80px;
+    // }
+  }
+  .photosGrid {
+    height: 630px;
+    margin-bottom: 20px;
+  }
+  h2 span{
+    padding-left: 50px;
+    border-bottom: 5px solid black;
+  }
+
+  .js-jetlag {
+    width: 200px;
+    min-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+
+  .filesInfos{
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  background-color: lightgray;
+  }
+
+.title-camtrap {
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+  }
+}

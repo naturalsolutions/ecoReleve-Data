@@ -1,9 +1,9 @@
 from ..Models import (
     Individual,
-    IndividualDynPropValue,
+    # IndividualDynPropValue,
     Individual_Location,
+    IndividualStatus,
     Sensor,
-    SensorType,
     IndividualList,
     Base,
     IndivLocationList,
@@ -17,6 +17,10 @@ from collections import OrderedDict
 from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
 from pyramid.traversal import find_root
+
+SensorType = Sensor.TypeClass
+IndividualDynPropValue = Individual.DynamicValuesClass
+
 
 class IndividualValueView(DynamicObjectValue):
     model = IndividualDynPropValue
@@ -90,22 +94,12 @@ class IndividualView(DynamicObjectView):
             return self
         return self.get(ref)
 
-    def update(self):
-        data = self.request.json_body
-        self.objectDB.LoadNowValues()
-        try:
-            self.objectDB.updateFromJSON(data)
-            return {}
-        except ErrorCheckIndividualCodes as e:
-            self.request.response.status_code = 520
-            return str(e)
-
     def getEquipment(self):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,
                          SensorType,
-                         Sensor.FK_SensorType == SensorType.ID)
+                         Sensor.type_id == SensorType.ID)
         query = select([table.c['StartDate'],
                         table.c['EndDate'],
                         Sensor.UnicIdentifier,
@@ -202,6 +196,45 @@ class IndividualsView(DynamicObjectCollectionView):
             existingID = None
 
         return existingID
+
+    def retrieve(self):
+        import time
+        from ..GenericObjets.SearchEngine import QueryEngine, DynamicPropertiesQueryEngine
+        from ..Models.Equipment import Equipment
+        table = Base.metadata.tables['IndividualEquipment']
+        collection = DynamicPropertiesQueryEngine(self.session, Individual, from_history=None, object_type=1)  #, object_type=1, from_history='10/01/2012' )
+
+        filters = [
+            # {
+            #     'Column':'ID',
+            #     'Operator':'>',
+            #     'Value': '100000'
+            # },  
+            {
+                'Column':'Sex',
+                'Operator':'is',
+                'Value': 'femelle'
+            },
+            {
+                'Column':'Monitoring_Status',
+                'Operator':'is null',
+                'Value': 'retiré'
+            },
+            # {
+            #     'Column':'Species',
+            #     'Operator':'contains',
+            #     'Value': 'undulata'
+            # },
+            # {
+            #     'Column':'Status_',
+            #     'Operator':'=',
+            #     'Value': 'mort'
+            # }
+        ]
+        result = collection.search(filters, limit=1000) #, order_by=['Sex:desc'])
+        count = collection._count(filters)
+        return [{'total_entries': count}, result]
+
 
 
 class IndividualLocationsView(SecurityRoot):

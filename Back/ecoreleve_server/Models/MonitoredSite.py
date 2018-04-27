@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Boolean,
     Integer,
     Numeric,
     String,
@@ -17,11 +18,10 @@ from sqlalchemy import (
     bindparam)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
-from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
-from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from datetime import datetime
-from ..utils.parseValue import isEqual, formatValue
+from ..utils.parseValue import isEqual, formatValue, parser
 from ..utils.datetime import parse
+from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
 
 
 class MonitoredSitePosition(Base):
@@ -38,7 +38,7 @@ class MonitoredSitePosition(Base):
     FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
 
 
-class MonitoredSite (Base, ObjectWithDynProp):
+class MonitoredSite (HasDynamicProperties, Base):
 
     __tablename__ = 'MonitoredSite'
     moduleFormName = 'MonitoredSiteForm'
@@ -48,59 +48,16 @@ class MonitoredSite (Base, ObjectWithDynProp):
     Name = Column(String(250), nullable=False)
     Category = Column(String(250), nullable=False)
     Creator = Column(Integer, nullable=False)
-    Active = Column(BIT, nullable=False, default=1)
+    Active = Column(Boolean, nullable=False, default=1)
     creationDate = Column(DateTime, nullable=False, default=func.now())
     Place = Column(String(250))
-
-    FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))
 
     MonitoredSitePositions = relationship(
         'MonitoredSitePosition',
         backref='MonitoredSite',
         cascade="all,delete-orphan")
-    MonitoredSiteDynPropValues = relationship(
-        'MonitoredSiteDynPropValue',
-        backref='MonitoredSite',
-        cascade="all,delete-orphan")
     Stations = relationship('Station')
     Equipments = relationship('Equipment')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        ObjectWithDynProp.__init__(self)
-
-    # @orm.reconstructor
-    # def init_on_load(self):
-    #     ''' init_on_load is called on the fetch of object '''
-    #     self.__init__()
-
-    def GetNewValue(self, nameProp):
-        ReturnedValue = MonitoredSiteDynPropValue()
-        ReturnedValue.MonitoredSiteDynProp = self.session.query(
-            MonitoredSiteDynProp
-        ).filter(MonitoredSiteDynProp.Name == nameProp
-                 ).first()
-        return ReturnedValue
-
-    def GetDynPropValues(self):
-        return self.MonitoredSiteDynPropValues
-
-    def GetDynProps(self, nameProp):
-        return self.session.query(MonitoredSiteDynProp
-                                  ).filter(MonitoredSiteDynProp.Name == nameProp).one()
-
-    def GetType(self):
-        if self.MonitoredSiteType != None:
-            return self.MonitoredSiteType
-        else:
-            return self.session.query(MonitoredSiteType
-                                      ).get(self.FK_MonitoredSiteType)
-
-    def GetAllProp(self):
-        props = super(MonitoredSite, self).GetAllProp()
-        props.extend([{'name': statProp.key, 'type': statProp.type}
-                      for statProp in MonitoredSitePosition.__table__.columns])
-        return props
 
     def GetLastPositionWithDate(self, date_):
         query = select([MonitoredSitePosition]
@@ -112,91 +69,57 @@ class MonitoredSite (Base, ObjectWithDynProp):
         curPos = dict(self.session.execute(query).fetchone())
         return curPos
 
-    def LoadNowValues(self):
-        super(MonitoredSite, self).LoadNowValues()
+    def getValues(self):
+        values = HasDynamicProperties.getValues(self)
         lastPos = self.GetLastPositionWithDate(func.now())
         if lastPos is not None:
             for key in lastPos:
-                self.__properties__[key] = lastPos[key]
+                if key != 'ID':
+                    values[key] = lastPos[key]
+        self.__values__.update(values)
+        return values
 
-    def GetSchemaFromStaticProps(self, FrontModules, DisplayMode):
-        Editable = (DisplayMode.lower() == 'edit')
-        resultat = {}
-        type_ = self.GetType().ID
-        Fields = self.session.query(ModuleForms).filter(
-            ModuleForms.Module_ID == FrontModules.ID
-        ).order_by(ModuleForms.FormOrder).all()
-        SiteProps = dict(self.__table__.columns)
-        PoseProps = dict(MonitoredSitePosition.__table__.columns)
-        del PoseProps['ID']
-        SiteProps.update(PoseProps)
-
-        for curStatProp in SiteProps:
-            CurModuleForms = list(filter(lambda x: x.Name == curStatProp and (
-                x.TypeObj == str(type_) or x.TypeObj == None), Fields))
-
-            if (len(CurModuleForms) > 0):
-                CurModuleForms = CurModuleForms[0]
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(
-                    DisplayMode.lower())
-        return resultat
-
-    def getFlatObject(self, schema=None):
-        ''' return flat object with static properties and
-        last existing value of dyn props '''
-        resultat = {}
-        if self.ID is not None:
-            max_iter = max(len(self.__table__.columns),
-                           len(self.__properties__))
-            for i in range(max_iter):
-                try:
-                    curStatProp = list(self.__table__.columns)[i]
-                    resultat[curStatProp.key] = self.getProperty(
-                        curStatProp.key)
-                except:
-                    pass
-                try:
-                    curDynPropName = list(self.__properties__)[i]
-                    resultat[curDynPropName] = self.getProperty(curDynPropName)
-                except Exception as e:
-                    # print_exc()
-                    pass
-        else:
-            max_iter = len(self.__table__.columns)
-            for i in range(max_iter):
-                try:
-                    curStatProp = list(self.__table__.columns)[i]
-                    curVal = self.getProperty(curStatProp.key)
-                    if curVal is not None:
-                        resultat[curStatProp.key] = self.getProperty(
-                            curStatProp.key)
-                except:
-                    pass
-        if not schema and hasattr(self, 'getForm'):
-            schema = self.getForm()['schema']
-        if schema:
-            resultat = formatValue(resultat, schema)
-        return resultat
-
-    def setProperty(self, nameProp, valeur, useDate=None):
-        super().setProperty(nameProp, valeur)
-        if hasattr(self.newPosition, nameProp):
+    def setValue(self, propertyName, value, useDate=None):
+        super().setValue(propertyName, value)
+        if hasattr(self.newPosition, propertyName):
             curTypeAttr = str(self.newPosition.__table__.c[
-                              nameProp].type).split('(')[0]
+                              propertyName].type).split('(')[0]
 
             if 'date'.lower() in curTypeAttr.lower():
-                valeur = parse(valeur.replace(' ', ''))
-                setattr(self.newPosition, nameProp, valeur)
+                value = parse(value.replace(' ', ''))
+                setattr(self.newPosition, propertyName, value)
             else:
-                setattr(self.newPosition, nameProp, valeur)
-            if ((nameProp not in self.__properties__)
-                    or (isEqual(self.__properties__[nameProp], valeur) is False)):
+                setattr(self.newPosition, propertyName, value)
+            if ((propertyName not in self.values)
+                    or (isEqual(self.values[propertyName], value) is False)):
                 self.positionChanged = True
 
-    def updateFromJSON(self, DTOObject):
+    @HasDynamicProperties.values.setter
+    def values(self, dict_):
+        '''parameters:
+            - data (dict)
+        set object properties (static and dynamic), 
+        it's possible to set all dynamic properties with date string with __useDate__ key'''
         self.newPosition = MonitoredSitePosition()
         self.positionChanged = False
-        super(MonitoredSite, self).updateFromJSON(DTOObject)
+        self.previousState = self.values
+        if dict_.get('ID', None):
+            del dict_['ID']
+        if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
+            raise Exception('object type not exists')
+        else:
+            type_id = dict_.get(self.fk_table_type_name, None) or dict_.get(
+                'type_id', None) or self.type_id
+            self._type = self.session.query(self.TypeClass).get(type_id)
+            useDate = parser(dict_.get('__useDate__', None)
+                             ) or self.linkedFieldDate()
+            for prop, value in dict_.items():
+                self.setValue(prop, value, useDate)
+
+            self.setPosition(dict_)
+            self.updateLinkedField(dict_, useDate=useDate)
+
+    def setPosition(self, DTOObject):
         if self.positionChanged:
             sameDatePosition = list(filter(lambda x: x.StartDate == datetime.strptime(
                 DTOObject['StartDate'], '%d/%m/%Y %H:%M:%S'), self.MonitoredSitePositions))
@@ -208,62 +131,3 @@ class MonitoredSite (Base, ObjectWithDynProp):
                 sameDatePosition[0].Comments = DTOObject['Comments']
             else:
                 self.MonitoredSitePositions.append(self.newPosition)
-
-
-class MonitoredSiteDynProp (Base):
-
-    __tablename__ = 'MonitoredSiteDynProp'
-    ID = Column(Integer, Sequence(
-        'MonitoredSiteDynProp__id_seq'), primary_key=True)
-    Name = Column(String(250), nullable=False)
-    TypeProp = Column(String(100), nullable=False)
-
-    MonitoredSiteType_MonitoredSiteDynProps = relationship(
-        'MonitoredSiteType_MonitoredSiteDynProp', backref='MonitoredSiteDynProp')
-    MonitoredSiteDynPropValues = relationship(
-        'MonitoredSiteDynPropValue', backref='MonitoredSiteDynProp')
-
-
-class MonitoredSiteDynPropValue(Base):
-
-    __tablename__ = 'MonitoredSiteDynPropValue'
-
-    ID = Column(Integer, Sequence(
-        'MonitoredSiteDynPropValue__id_seq'), primary_key=True)
-    StartDate = Column(DateTime, nullable=False)
-    ValueInt = Column(Integer)
-    ValueString = Column(String(250))
-    ValueDate = Column(DateTime)
-    ValueFloat = Column(Numeric(12, 5))
-    FK_MonitoredSiteDynProp = Column(
-        Integer, ForeignKey('MonitoredSiteDynProp.ID'))
-    FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
-
-
-class MonitoredSiteType_MonitoredSiteDynProp(Base):
-
-    __tablename__ = 'MonitoredSiteType_MonitoredSiteDynProp'
-
-    ID = Column(Integer, Sequence(
-        'MonitoredSiteType_MonitoredSiteDynProp__id_seq'), primary_key=True)
-    Required = Column(Integer, nullable=False)
-    FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))
-    FK_MonitoredSiteDynProp = Column(
-        Integer, ForeignKey('MonitoredSiteDynProp.ID'))
-
-
-class MonitoredSiteType (Base, ObjectTypeWithDynProp):
-
-    __tablename__ = 'MonitoredSiteType'
-    ID = Column(Integer, Sequence(
-        'MonitoredSiteType__id_seq'), primary_key=True)
-    Name = Column(String(250))
-    Status = Column(Integer)
-
-    MonitoredSiteType_MonitoredSiteDynProp = relationship(
-        'MonitoredSiteType_MonitoredSiteDynProp', backref='MonitoredSiteType')
-    MonitoredSites = relationship('MonitoredSite', backref='MonitoredSiteType')
-
-    @orm.reconstructor
-    def init_on_load(self):
-        ObjectTypeWithDynProp.__init__(self)

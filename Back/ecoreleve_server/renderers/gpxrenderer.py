@@ -16,7 +16,6 @@ class GPXRenderer(object):
             
         fout = io.StringIO()
         rows=value.get('rows', [])
-        
 
         gpx='<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="byHand" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">\n'
         gpx_data = [dict(row) for row in rows]
