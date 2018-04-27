@@ -120,13 +120,13 @@ define([
             _this.nbDateInLimit += 1;
             element.inRange = true;
           } else {
-            console.log("date in range")
+            // console.log("date in range")
           }
         });
 
       }
-      console.log(" nb date out of range ", this.nbDateOutOfLimit);
-      console.log(" nb date in range for correction ", this.nbDateInLimit)
+      // console.log(" nb date out of range ", this.nbDateOutOfLimit);
+      // console.log(" nb date in range for correction ", this.nbDateInLimit)
 
       //TODO check all date swal and define range possible, impossible
 
@@ -170,8 +170,8 @@ define([
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
-        console.log("error");
-        console.log(errorThrown);
+        // console.log("error");
+        // console.log(errorThrown);
       });
 
     },
@@ -203,8 +203,8 @@ define([
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
-          console.log("error");
-          console.log(errorThrown);
+          // console.log("error");
+          // console.log(errorThrown);
         });
       //this.dfd.resolve();
 
@@ -478,7 +478,7 @@ define([
         }
         text+='<BR>';
         text+= _this.addTemplateCollapse().innerHTML;
-        console.log(text)
+        // console.log(text)
         Swal({
           title: 'Upload complete',
           html: text,
@@ -524,7 +524,7 @@ define([
 
       var data = Array(dataObj);
 
-      console.log(data)
+      // console.log(data)
 
       var columnsDefs = [{
           field: 'StartDate',

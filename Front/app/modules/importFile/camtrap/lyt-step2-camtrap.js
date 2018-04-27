@@ -111,8 +111,8 @@ define([
         }
       })
       .fail( function( jqXHR, textStatus, errorThrown ){
-        console.log("error");
-        console.log(errorThrown);
+        // console.log("error");
+        // console.log(errorThrown);
       });
 
     },

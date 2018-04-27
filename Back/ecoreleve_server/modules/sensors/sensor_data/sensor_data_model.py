@@ -222,6 +222,7 @@ class CamTrap(Base, ORMUtils):
     tags = Column(String,nullable=True)
     note = Column(Integer, nullable=False)
     stationId = Column(Integer, nullable= True)
+    processed = Column(Integer,nullable=False,server_default='0')
     FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
     __table_args__ = (
         {'schema': sensor_schema, 'implicit_returning': False}
