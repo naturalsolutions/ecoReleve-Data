@@ -1,0 +1,10 @@
+USE [ecoReleve_Sensor]
+GO
+ALTER TABLE [dbo].[TcameraTrap]
+ADD processed INT NOT NULL DEFAULT(0)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('187_[CONF]_sensor_add_col_TcameraTrap_for_async',GETDATE(),(SELECT db_name()))
+
+
+GO

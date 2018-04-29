@@ -21,7 +21,7 @@ GO
 
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('182_[cameraTrap]_CREATE_View_TcameraTrap',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('179_[cameraTrap]_CREATE_View_TcameraTrap',GETDATE(),(SELECT db_name()))
 
 
 GO

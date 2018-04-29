@@ -34,7 +34,7 @@ INSERT INTO [dbo].[ProtocoleType_ObservationDynProp]
            ,NULL)
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('188_Conf_create_new_protocole_media_files',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('184_[CONF]_create_new_protocole_media_files',GETDATE(),(SELECT db_name()))
 
 
 GO

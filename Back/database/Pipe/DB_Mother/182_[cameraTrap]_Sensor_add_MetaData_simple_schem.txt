@@ -15,7 +15,7 @@ REFERENCES [dbo].[TcameraTrap] ([pk_id])
 
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('185_Sensor_add_MetaData_simple_schem',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('182_[cameraTrap]_Sensor_add_MetaData_simple_schem',GETDATE(),(SELECT db_name()))
 
 
 GO

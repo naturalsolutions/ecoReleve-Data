@@ -41,7 +41,7 @@ WHERE (cam.checked IS NULL )
 GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('178_create_view_camtrap_site',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('175_[cameraTrap]_create_view_camtrap_site',GETDATE(),(SELECT db_name()))
 
 
 GO

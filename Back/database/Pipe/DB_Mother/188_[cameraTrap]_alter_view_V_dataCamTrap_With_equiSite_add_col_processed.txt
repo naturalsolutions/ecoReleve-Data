@@ -56,7 +56,7 @@ LEFT OUTER JOIN dbo.Equipment AS E3 ON E3.FK_Sensor = cam.fk_sensor
 	)
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('192_alter_view_V_dataCamTrap_With_equiSite_add_col_processed',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('188_[cameraTrap]_alter_view_V_dataCamTrap_With_equiSite_add_col_processed',GETDATE(),(SELECT db_name()))
 
 
 GO

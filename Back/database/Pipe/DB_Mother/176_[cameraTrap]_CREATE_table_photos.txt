@@ -26,7 +26,7 @@ ALTER TABLE [dbo].[Photos] CHECK CONSTRAINT [FK_Photos_MonitoredSite]
 GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('179_[cameraTrap]_CREATE_table_photos',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('176_[cameraTrap]_CREATE_table_photos',GETDATE(),(SELECT db_name()))
 
 
 GO
