@@ -149,7 +149,7 @@ define([
       else {
         Swal({
           title: 'Warning',
-          text: 'You need to choose a session', 
+          html: 'You need to select one session before going to the next step.<BR>', 
           type: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',

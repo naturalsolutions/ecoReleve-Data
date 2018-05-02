@@ -1,0 +1,13 @@
+INSERT INTO [dbo].[StationType_StationDynProp]
+           ([Required]
+           ,[FK_StationType]
+           ,[FK_StationDynProp])
+     VALUES
+           (1,6,23),
+		   (1,6,24)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('185_[CONF]_add_dynprops_nbfieldworker_and_distance_to_pending_station',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -1,0 +1,45 @@
+USE [dbo].[ecoReleve_Sensor]
+
+CREATE TABLE [dbo].[TcameraTrap](
+	[pk_id] [int] IDENTITY(1,1) NOT NULL,
+	[fk_sensor] [int] NOT NULL,
+	[path] [varchar](250) NOT NULL,
+	[name] [varchar](250) NOT NULL,
+	[extension] [varchar](250) NOT NULL,
+	[checked] [bit] NULL,
+	[validated] [tinyint] NULL,
+	[date_creation] [datetime] NULL,
+	[date_uploaded] [datetime] NULL DEFAULT (getdate()),
+	[tags] [xml] NULL,
+	[note] [int] NOT NULL,
+	[stationId] [int] NULL,
+	[FK_Import] [int] NOT NULL,
+	[processed] [int] NOT NULL DEFAULT ((0)),
+PRIMARY KEY CLUSTERED 
+(
+	[pk_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[TcameraTrap]  WITH CHECK ADD  CONSTRAINT [fk_import_check] FOREIGN KEY([FK_Import])
+REFERENCES [dbo].[Import] ([ID])
+GO
+
+ALTER TABLE [dbo].[TcameraTrap] CHECK CONSTRAINT [fk_import_check]
+GO
+
+ALTER TABLE [dbo].[TcameraTrap]  WITH CHECK ADD CHECK  (([checked]=(1) OR [checked]=(0)))
+GO
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('174_[cameraTrap]_create_TcameraTrap',GETDATE(),(SELECT db_name()))
+
+
+GO

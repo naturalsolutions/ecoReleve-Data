@@ -153,16 +153,17 @@ define([
       var listFiles = '';
       var nbFiles = filesErrorList.length;
       title += 'No date in metadata<BR>'
-      text += 'Please contact an admin<BR>'
       if(nbFiles > 0) {
         if(nbFiles === 1 ){
           // title += 'Error on '+nbFiles+' file while reading (no date in metadata, we removed it from files selection) <BR>'   
-          text += 'And send this file below :<BR>'
+          text += 'One file do not contains date in metadata.<BR>'
+          text += 'Please contact your administrator and send the follong file'
           // text += 'Something goes wrong when we try to get the exif date of this file (it was removed from the files selection) :<BR>'
         }
         else {
           // title += 'Error on '+nbFiles+' files while reading (no date in metadata, we removed them from files selection)<BR>'
-          text += 'And send these '+nbFiles+' files below :<BR>'
+          text += ''+nbFiles+' files do not contain date in metadata.<BR>'
+          text += 'Please contact your administrator and send the following files :<BR>'
           // text += 'Something goes wrong when we try to get the exif date of this files (they were removed from the files selection) :<BR>'
         }
       }
@@ -177,7 +178,7 @@ define([
         html: text,
         type: 'error',
         showCancelButton: false,
-        confirmButtonText: 'OK',
+        confirmButtonText: 'Got it !',
         closeOnCancel: true
       })
       this.eraseFilesInErrorArray();
@@ -353,7 +354,7 @@ define([
       } else {
         Swal({
           title: 'Warning',
-          html: 'You need to add some files for going on the next step<BR>',
+          html: 'You need to add at least one file before going to the next step<BR>',
           type: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',
