@@ -286,25 +286,25 @@ define([
         var textWarningSwal =''
         if (_this.nbDateOutOfLimit > 0 || _this.nbDateInLimit > 0 ) {
           if(_this.nbPhotos === 1 ) {
-            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photo out of session range limit (+- 24h) and will not be uploaded<BR>'
+            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' picture is out of the session range and will not be uploaded<BR>'
           }
           else {
-            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photos out of session range limit (+- 24h) and will not be uploaded<BR>'
+            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' picture are out of the session range and will not be uploaded<BR>'
           }
          
         }
         if(_this.nbDateInLimit > 0) {
           if(_this.nbPhotos === 1 ) {
-            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded<BR>'
+            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' picture is in the session range and ready to be uploaded<BR>'
           }
           else {
-            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded<BR>'
+            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' pictures are in the session range and ready to be uploaded<BR>'
           }
           
         }
         if(_this.availableSpace.usedPercentage > 70) {
           textWarningSwal+='Disk usage: '+_this.availableSpace.usedPercentage+'% <BR>'
-          textWarningSwal+='Please contact an admin<BR>'
+          textWarningSwal+='Please contact your administrator<BR>'
         }
 
         if(textWarningSwal && textInfosSwal) {
@@ -313,7 +313,7 @@ define([
             html: textInfosSwal,
             type: 'warning',
             showCancelButton: false,
-            confirmButtonText: 'OK',
+            confirmButtonText: 'Got it !',
             closeOnCancel: false,
             closeOnConfirm: false
 
@@ -323,7 +323,7 @@ define([
               html: textWarningSwal,
               type: 'warning',
               showCancelButton: false,
-              confirmButtonText: 'OK',
+              confirmButtonText: 'Got it !',
               closeOnCancel: true,
             });
           });
@@ -347,7 +347,7 @@ define([
             html: text,
             type: 'warning',
             showCancelButton: false,
-            confirmButtonText: 'OK',
+            confirmButtonText: 'Got it !',
             closeOnCancel: true
           });
         }

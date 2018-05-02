@@ -1290,10 +1290,10 @@ define([
       if (listPhotos.length) {
         var text = '';
         if( listPhotos.length == 1 )  {
-          text = 'you will destroy station for photo N°:<BR>'+listPhotos.join(',');
+          text = 'Station will be destroyed for picture N°:<BR>'+listPhotos.join(',');
         }
         else {
-          text =  'you will destroy stations for photos N°:<BR>'+listPhotos.join(',');
+          text =  'Stations will be destroyed for pictures N°:<BR>'+listPhotos.join(',');
         }
 
         Swal({
@@ -1748,11 +1748,11 @@ define([
       var _this = this;
       var text = "";
       if (_this.nbPhotosAccepted == 0) {
-        text += _this.nbPhotosRefused + ' will be refused<BR>';
+        text += _this.nbPhotosRefused + ' picture(s) will be refused<BR>';
       } else if (_this.nbPhotosRefused == 0) {
-        text += _this.nbPhotosAccepted + ' will be accepted<BR>';
+        text += _this.nbPhotosAccepted + ' picture(s) will be accepted<BR>';
       } else {
-        text += _this.nbPhotosAccepted + ' will be accepted<BR>' + _this.nbPhotosRefused + ' will be refused<BR>';
+        text += _this.nbPhotosAccepted + ' pictrure(s) will be accepted<BR>' + _this.nbPhotosRefused + ' picture(s) will be refused<BR>';
       }
       if( _this.nbPhotosStationed == 1) {
           text +=  _this.nbPhotosStationed+' station will be created <BR>'
@@ -1770,7 +1770,7 @@ define([
           confirmButtonColor: '#5cb85c',
           cancelButtonColor:'red',
           confirmButtonText: 'Ok !',
-          cancelButtonText: 'No !',
+          cancelButtonText: 'Back !',
           closeOnConfirm: true,
           closeOnCancel: true
         }).then( (result) => {
@@ -1833,7 +1833,7 @@ define([
             .fail(function (jqXHR, textStatus, errorThrown) {
               Swal({
                 title: 'Error',
-                html: 'Something goes wrong<BR>Please contact an admin<BR>',
+                html: 'Error while validating picture(s).<BR>Please contact your administrator<BR>',
                 type: 'error',
                 // showCancelButton: true,
                 confirmButtonColor: '#5cb85c',
