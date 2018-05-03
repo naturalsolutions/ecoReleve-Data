@@ -18,7 +18,7 @@ cam.checked,
 cam.validated,
 cam.date_creation,
 cam.processed
-FROM  ecoReleve_Sensor.dbo.TcameraTrap AS cam 
+FROM  [your_ecoReleve_Sensor].dbo.TcameraTrap AS cam 
 LEFT OUTER JOIN dbo.Equipment AS E ON E.FK_Sensor = cam.fk_sensor 
 	AND E.Deploy = 1 
 	AND E.StartDate < cam.date_creation 
@@ -54,7 +54,7 @@ LEFT OUTER JOIN dbo.Equipment AS E3 ON E3.FK_Sensor = cam.fk_sensor
 	AND (StartDate < E3.StartDate) 
 	AND (StartDate > E.StartDate)
 	)
-
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('183_[cameraTrap]_alter_view_V_dataCamTrap_With_equiSite_add_col_processed',GETDATE(),(SELECT db_name()))
 
