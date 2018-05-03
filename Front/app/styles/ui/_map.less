@@ -286,19 +286,24 @@
 	margin-bottom: 150px!important;
 }
 
-.js-popover-player-position {
+// .js-popover-player-position {
 	.popover-title {
 		background-color: transparent;
 		text-align: center;
 		margin : 0;
 		border :0;
-
+		padding: 0;
+	}
+	.popover-content{
+		i{
+			padding-bottom: 5px
+		}
 	}
 	.js-shortcuts-help {
 		display: flex;
 		flex-direction: column;
 	}
-}
+// }
 
 .player{
 	// height: 500px !important;
@@ -380,6 +385,17 @@
 		}
 		.js-icon-tooltip{
 			cursor: help;
+			.shortcutsIcon {
+				font-size: 1.4em;
+				&:hover{	
+					&:before{
+						color:yellow;
+					}			
+				}
+				span{
+					font-size: initial;
+				}
+			}
 		}
 		.player-controller-btns{
 			button {

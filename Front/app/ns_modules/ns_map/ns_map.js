@@ -1265,7 +1265,7 @@ this.parentContainer.append('\
               <label for="track" title="follow positions on the map"> Last point centered </label>\
             </div>\
             <div class="js-icon-tooltip" >\
-              <i class="reneco reneco-info">Shortcuts</i>\
+              <i class="reneco reneco-ECORELEVE-shortcuts shortcutsIcon"><span class="content">Shortcuts</span></i>\
             </div>\
             <div class="player-controller-btns">\
               <button title="previous location" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
@@ -1273,7 +1273,7 @@ this.parentContainer.append('\
               <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
               <button title="next location" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
             </div>\
-            <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Location by location </button>\
+            <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-ECORELEVE-location-by-location"></i>Location by location </button>\
               <div class="js-speed-range">\
                <span>Speed : </span>\
                <input title="" class="js-player-day-in-ms" min=-24000 max=-200 value=-1000 step=100 width="100" type="range">\
@@ -1326,9 +1326,9 @@ this.parentContainer.append('\
                               trigger :'hover',
                               title: '<h5 class="custom-title"><u>Shortcuts</u></h5>',
                               content: '<div class="js-shortcuts-help">\
-                                          <i class="reneco reneco-info">: Pause</i>\
-                                          <i class="reneco reneco-leftarrow">: Previous location</i>\
-                                          <i class="reneco reneco-rightarrow">: Next location</i>\
+                                          <i class="reneco reneco-space">: Pause</i>\
+                                          <i class="reneco reneco-left">: Previous location</i>\
+                                          <i class="reneco reneco-right">: Next location</i>\
                                         </div>',
                               html: true,
                               delay: { 
