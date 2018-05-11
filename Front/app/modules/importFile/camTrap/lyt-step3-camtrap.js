@@ -314,8 +314,8 @@ define([
             type: 'warning',
             showCancelButton: false,
             confirmButtonText: 'Got it !',
-            closeOnCancel: false,
-            closeOnConfirm: false
+            // closeOnCancel: false,
+            // closeOnConfirm: false
 
           }).then( () => {
             Swal({
@@ -324,7 +324,7 @@ define([
               type: 'warning',
               showCancelButton: false,
               confirmButtonText: 'Got it !',
-              closeOnCancel: true,
+              // closeOnCancel: true,
             });
           });
           /*
@@ -348,7 +348,7 @@ define([
             type: 'warning',
             showCancelButton: false,
             confirmButtonText: 'Got it !',
-            closeOnCancel: true
+            // closeOnCancel: true
           });
         }
       
