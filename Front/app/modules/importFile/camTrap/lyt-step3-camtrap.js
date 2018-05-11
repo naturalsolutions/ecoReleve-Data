@@ -487,7 +487,7 @@ define([
           confirmButtonColor: 'green',
           confirmButtonText: 'Go to Validate',
           cancelButtonText: 'Import new camera trap photo',
-          closeOnCancel: true
+          // closeOnCancel: true
         })
         .then( (result) => {
           if( 'value' in result){
