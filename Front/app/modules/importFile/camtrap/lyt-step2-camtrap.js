@@ -153,7 +153,7 @@ define([
           type: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',
-          closeOnCancel: true
+         // closeOnCancel: true
         })
       }
 
