@@ -179,7 +179,7 @@ define([
         type: 'error',
         showCancelButton: false,
         confirmButtonText: 'Got it !',
-        closeOnCancel: true
+        //closeOnCancel: true
       })
       this.eraseFilesInErrorArray();
 
@@ -357,8 +357,7 @@ define([
           html: 'You need to add at least one file before going to the next step<BR>',
           type: 'warning',
           showCancelButton: false,
-          confirmButtonText: 'OK',
-          closeOnCancel: true,
+          confirmButtonText: 'OK'
         })
       }
     },

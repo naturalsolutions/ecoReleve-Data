@@ -153,6 +153,7 @@ define([
         }
         else { // add item selected
           newTab.push(indexFind);
+          // $(_this.tabView[indexFind].el).addClass('ui-selected');
         }
       }
       else { // click => focus if new img
@@ -164,6 +165,31 @@ define([
       _this.model.set('newSelected', newTab);
  
 
+    },
+
+    cleanWillBeActive : function(tab) {
+      if(!tab)
+        return;
+        var index;
+        for( var i=0; i < tab.length ; i++ ) {
+          index = tab[i];
+          if( index < this.tabView.length) {
+            $(this.tabView[index].el).removeClass('js-activate_saved');
+          }
+        }
+
+    },
+
+    setWillBeActive : function(tab) {
+      if(!tab)
+        return;
+        var index;
+        for( var i=0; i < tab.length ; i++ ) {
+          index = tab[i];
+          if( index < this.tabView.length) {
+            $(this.tabView[index].el).addClass('js-activate_saved');
+          }
+        }
     },
 
     setoldSelectedInactive: function(tab) {
@@ -244,10 +270,11 @@ define([
           }
         }
 
-        var diff = _.difference(oldTab,newTab);
-
+        // var diff = _.difference(oldTab,newTab);
+        _this.setWillBeActive(newTab);
         _this.setoldSelectedInactive(oldTab);
         _this.setAllSelectedActive(newTab);
+        _this.cleanWillBeActive(newTab);
         
         
 
@@ -478,13 +505,14 @@ define([
             }
         }
         if (this.currentPosition == newPosition ) {
-          this.model.trigger('change', this.model, [newPosition]);
+          this.model.set('newSelected' , [newPosition] , {silent:true});
           // this.model.set('newSelected' , [newPosition]);
           // this.model.trigger("change:{newSelected}");
         }
         else {
-          this.model.set('newSelected' , [newPosition]);
+          this.model.set('newSelected' , [newPosition], {silent:true});
         }
+        this.model.trigger('change', this.model, [newPosition]);
 
         // this.tabSelected = [];
 
@@ -502,32 +530,15 @@ define([
 
           start: function (e) { // for all elem
             // console.log("start selection")
-            var tabSelected = $('#gallery .ui-selected');
+            var tabSelected = $('#gallery > .active');
+            var index;
             tabOldUiSelected = []
             for ( var i = 0 ; i < tabSelected.length ; i++) {
               tabOldUiSelected.push(tabSelected[i]);
-              // if (tabSelected[i].className.indexOf('ui-selected') > -1 ) {
-              //   tabSelected[i].className += ' ui-oldSelected';
-              // }
+              index = $(".imageCamTrap").index(tabOldUiSelected[i]);
+              _this.tabView[index].removeActive();
+              $(tabOldUiSelected[i]).addClass('ui-selected');
             }
-
-           // console.log("tab on start",this.tabOldUiSelected);
-            
-            
-            // if (_this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active')) {
-            //   _this.tabView[_this.current]
-            //   _this.tabView[_this.currentPosition].$el.find('.vignette').removeClass('active');
-            // }
-
-            // if (typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0) {
-            //   for (var i of _this.tabSelected) {
-            //     if (_this.currentPosition != i) {
-            //       if (_this.tabView[i].$el.find('.vignette').hasClass('active')) {
-            //         _this.tabView[i].$el.find('.vignette').removeClass('active');
-            //       }
-            //     }
-            //   }
-            // }
           },
 
           selected: function (e, ui) { // for one elem
@@ -544,7 +555,10 @@ define([
                 for ( var i = 0 ; i < tabNewSelected.length ; i++ ) {
                   for (var j = 0 ; j < tabOldUiSelected.length ; j++ ) {
                     if(tabNewSelected[i] === tabOldUiSelected[j] ) {
-                      tabNewSelected[i].className = tabNewSelected[i].className.replace(' ui-selected','')
+                      //  tabNewSelected[i].className = tabNewSelected[i].className.replace(' ui-selected','')
+                      $(tabNewSelected[i]).removeClass('ui-selected');
+                      var curIndex = $(".imageCamTrap").index(tabNewSelected[i]);
+                      _this.tabView[curIndex].removeActive();
                       break;
                     }
                     else {
@@ -560,64 +574,12 @@ define([
 
               // from here we have all selected 
               var indexItemSelected = []
-              $(".ui-selected", this).each(function () {
+              $(".ui-selected,.ui-selectee.active", this).each(function () {
                 var index = $(".imageCamTrap").index(this);
                 indexItemSelected.push(index);
               });
               _this.model.set('newSelected',indexItemSelected);// change selected item
-
-            // console.log("stop selection ")
-            // this.tabOldUiSelected = [];
-            // this.tabNewSelected = [];
-            // this.tabNewUnSelected = [];
-
-            // $('#gallery .tmp-selected').addClass('already-selected').removeClass('tmp-selected').addClass('ui-selected');
-            // $('#gallery .tmp-selectedctrl').addClass('already-selected').removeClass('tmp-selectedctrl').addClass('ui-selected');
-
-            // var result = "";
-            // _this.tabSelected = [];
-
-            // var tmpSelected = [];
-
-            // $(".ui-selected", this).each(function () {
-            //   var index = $(".imageCamTrap").index(this);
-            //   _this.tabSelected.push(index);
-            //   tmpSelected.push(index);
-            //   // if (!(_this.tabView[index].$el.find('.vignette').hasClass('active'))) {
-            //   //   _this.tabView[index].$el.find('.vignette').toggleClass('active');
-            //   // }
-            // });
-            // _this.model.set('newSelected',tmpSelected);
-
-            // console.log("test tags");
-            // var nbPhotos = _this.tabSelected.length
-            // var nbphotosValidated = 0;
-            // if (nbPhotos > 0) {
-            //   var tagsInAllPhotos = []
-            //   var stringTagTmp ='';
-            //   var uniqTagsAndOccurence = []
-            //   for( var i = 0 ; i < nbPhotos ; i++) {
-            //     if(_this.tabView[_this.tabSelected[i]].model.get('validated') === 2 ) {
-            //       nbphotosValidated += 1;
-            //     }
-            //     stringTagTmp += _this.tabView[_this.tabSelected[i]].model.get('tags');
-            //     if( i+1 < nbPhotos) {
-            //       stringTagTmp += ',';
-            //     }
-            //   }
-            //   var allTagsTab = stringTagTmp.split(',');
-            //   uniqTagsAndOccurence = _.countBy(allTagsTab);
-            //   for( var item in uniqTagsAndOccurence) {
-            //     if(uniqTagsAndOccurence[item] === nbphotosValidated) {
-            //       tagsInAllPhotos.push(item);
-            //     }
-            //   }
-            //   console.log("bim");
-            //   _this.toolsBar.render();
-            //   _this.toolsBar.$elemTags.val(null).trigger('change');
-            //   _this.toolsBar.$elemTags.val(tagsInAllPhotos).trigger('change');
-            // }
-            
+         
            
             /*  keep it : algo for all edit all tags in all photos
 

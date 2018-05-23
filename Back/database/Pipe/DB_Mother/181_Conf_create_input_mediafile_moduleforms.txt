@@ -44,7 +44,7 @@ INSERT INTO [dbo].[ModuleForms]
            ,NULL)
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('165_Conf_create_input_mediafile_moduleforms',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('181_Conf_create_input_mediafile_moduleforms',GETDATE(),(SELECT db_name()))
 
 
 GO
