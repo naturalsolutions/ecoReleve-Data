@@ -36,6 +36,8 @@ self.getEndianFromNav = function() {
 }
 
 self.init = function(options) {
+    if(!options)
+        return;
     self.message = {
         uniqueIdentifier: options.uniqueIdentifier,
         fileName : options.fileName,
