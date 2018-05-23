@@ -71,28 +71,106 @@ define([
 		// },
 
 		setActive : function(e) {
-			if( this.el.className.indexOf(' active') == -1 ) {
-				this.el.className += ' active'
+			$(this.el).removeClass('active_bl');
+			$(this.el).removeClass('active_br');
+			$(this.el).removeClass('active_bt');
+			$(this.el).removeClass('active_bb');
+			$(this.el).removeClass('active');
+
+			this.calculateBorders();
+			if( this.el.className.split(' ').indexOf('active') == -1 ) {
+				$(this.el).addClass('active');
 			}
-			if( this.el.className.indexOf(' ui-selected') == -1 ) {
-				this.el.className += ' ui-selected'
+			if( this.ui.vignette[0].className.split(' ').indexOf('active') == -1 ) {
+				$(this.ui.vignette[0]).addClass('active');
 			}
 
-			if( this.ui.vignette[0].className.indexOf(' active') == -1 ) {
-				this.ui.vignette[0].className += ' active'
-			}
 		},
 
 		removeActive : function(e) {
-			if( this.el.className.indexOf(' active') > -1) {
-				this.el.className = this.el.className.replace(' active', '' );
+			$(this.el).removeClass('active_bl');
+			$(this.el).removeClass('active_br');
+			$(this.el).removeClass('active_bt');
+			$(this.el).removeClass('active_bb');
+			$(this.el).removeClass('active');
+			// $(this.el).removeClass('ui-selected');
+			// if( this.el.className.indexOf(' active') > -1) {
+			// 	// this.el.className = this.el.className.replace(' active', '' );
+			// 	$(this.el).removeClass('active');
+			// }
+			// if( this.el.className.indexOf(' ui-selected') > -1) {
+			// 	$(this.el).removeClass('ui-selected')
+			// 	// this.el.className = this.el.className.replace(' ui-selected', '' );
+			// }
+			if( this.ui.vignette[0].className.split(' ').indexOf('active') > -1 ) {
+				$(this.ui.vignette[0]).removeClass('active');
 			}
-			if( this.el.className.indexOf(' ui-selected') > -1) {
-				this.el.className = this.el.className.replace(' ui-selected', '' );
+		},
+
+		calculateBorders: function(){
+			var positionInTabView = $(this.el).index();
+			// var positionInTabView = positionInDom - 1;
+			var maxPositon = this.el.parentElement.childElementCount - 1 ;
+			var lineNumber = parseInt( maxPositon / 6);
+
+			var elemLeft,elemRight,elemAbove,elemUnder;
+
+			if( positionInTabView % 6) {
+				elemLeft = this.el.previousElementSibling;
 			}
-			if( this.ui.vignette[0].className.indexOf(' active') > -1 ) {
-				this.ui.vignette[0].className = this.ui.vignette[0].className.replace(' active', '' );
+			if( ( positionInTabView + 1 ) <= maxPositon && ( (positionInTabView + 1) % 6)  ) {
+				elemRight = this.el.nextElementSibling;
 			}
+			if( positionInTabView - 6 >= 0) {
+				elemAbove = this.parent.tabView[ positionInTabView - 6].el;
+			}
+			if( positionInTabView + 6 <= maxPositon ) {
+				elemUnder = this.parent.tabView[ positionInTabView + 6].el;
+			}
+			
+
+			if( !elemLeft ){
+				$(this.el).addClass('active_bl');
+			}
+			else {
+				if( elemLeft.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_bl');
+				}
+			}
+			if( !elemRight ){
+				$(this.el).addClass('active_br');
+			}
+			else {
+				if(   elemRight.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_br');
+				}
+			}
+			if( !elemAbove ){
+				$(this.el).addClass('active_bt');
+			}
+			else {
+				if(   elemAbove.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_bt');
+				}
+			}
+			if( !elemUnder ){
+				$(this.el).addClass('active_bb');
+			}
+			else {
+				if(   elemUnder.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_bb');
+				}
+			}
+
+			// if( !elemRight )||( (  elemRight.className.indexOf('ui-selected') == -1 || elemRight.className.indexOf('active') > -1 ) && !( elemRight.className.indexOf('ui-selected') == -1 && elemRight.className.indexOf('active') > -1) )  ) {
+			// 	$(this.el).addClass('active_br');
+			// }
+			// if( !elemAbove ||( (  elemAbove.className.indexOf('ui-selected') == -1 || elemAbove.className.indexOf('active') > -1 )  && !(  elemAbove.className.indexOf('ui-selected') == -1 && elemAbove.className.indexOf('active') > -1 ))) {
+			// 	$(this.el).addClass('active_bt');
+			// }
+			// if( !elemUnder || ((  elemUnder.className.indexOf('ui-selected') == -1 || elemUnder.className.indexOf('active') > -1 )  &&  !(  elemUnder.className.indexOf('ui-selected') == -1 && elemUnder.className.indexOf('active') > -1 ) )  ) {
+			// 	$(this.el).addClass('active_bb');
+			// }
 		},
 
 		initialize: function (options) {
