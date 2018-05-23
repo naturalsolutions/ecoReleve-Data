@@ -1,7 +1,8 @@
 .toolsBarCamTrap{
 
     .actionsBtn {
-      display : flex;
+      //display : flex;
+      display: none;
       justify-content: space-between;
     }
 
@@ -120,43 +121,62 @@
 }
 .toolsBarCamTrapTop{
   .camtrap-displayMode {
-    display: inline;
+    display: inline-block;
+    vertical-align: middle;
+    position: absolute;
+    right: 0;
+    top: 10px;
   }
   .camtrap-filterSession {
     display: inline;
+    // padding: 1em 2em;
+    margin-left: 0;
+    margin-right: 5px;
   //  font-weight: bolder;
-    font-size: 1.1vw;
+    font-size: 0.7vw;
     input[type="radio"] {
       transform: scale(1.2);
     }
       
     .allPhotos {
-      padding-right: 20px;
-       color: #909090;
+      //padding-right: 20px;
+      padding : 14px;
+       color: #e2e2e2;
     }
     .accepted {
-      padding-right: 20px;
-      color: #909090;
+      //padding-right: 20px;
+      padding : 14px;
+      color: #e2e2e2;
     }
     .refused {
-      padding-right: 20px;
-      color: #909090;
+      //padding-right: 20px;
+      padding : 14px;      
+      color: #e2e2e2;
     }
     .notChecked {
-      padding-right: 20px;
-      color: #909090;
+      //padding-right: 20px;
+      padding : 14px;
+      color: #e2e2e2;
     }
     .stationed{
-      padding-right: 20px;
-      color: #909090;
+      //padding-right: 20px;
+      padding : 14px;
+      color: #e2e2e2;
     }
   }
   .selected{
     // border: 1.5px solid #39b34a;
     // border-radius: 8px;
     // text-decoration: underline;
-    font-weight: bold !important;
-    color: #39b34a !important;
+    // font-weight: bold !important;
+    color: #fff !important;
+    font-size: 14px;
+    background-color: #449d44;
+    padding: 0 10px;
+    width: 150px;
+    margin : 0;
+    padding-top: 8px;
+    padding-bottom: 9px;
   }
   i{
     cursor: pointer;
@@ -168,9 +188,9 @@
   .reneco{
     width: 28px;
     height: 24px;
-    background-color: #434343;
+    /*background-color: #434343;
     border: 1px solid #666;
-    border-radius: 4px;
+    border-radius: 4px;*/
     color : #909090;
   }
   .reneco-ecollectionsmall::before{
@@ -180,7 +200,9 @@
     padding-right: 3px;
   }
   .active{
-    color : #39b34a;
+    background-color : #39b34a;
+    color: #fff;
+    padding: 0.2em 0.2em;
   }
   // span{
   //   color: #909090;
@@ -190,31 +212,43 @@
   //   position:relative;
   // }
   span#infossession{
-    margin-left: 20px;
-  }
-  #infossession:hover,#js_accepted_top:hover,#js_accepted_top:hover,#js_refused_top:hover,#js_checked_top:hover,#js_notchecked_top:hover{
-    background-color: #666;
+    padding: 15px 15px;
+    height: 53px;
+    margin-left: 0;
+    margin-right: 5px;
   }
   // #nbphotosaccepted{
   //   color : green;
   // }
   #infossession{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_accepted_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_refused_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_checked_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_notchecked_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_stationed_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   // .accepted:before{
   //   font-family: 'reneco' !important;
@@ -272,4 +306,119 @@
   //   //background-color: #f00;
   // }
 
+}
+.camtrap-filterSession > button{
+  background-color: rgb(64, 100, 64);
+  padding: 6px 10px;
+  margin-left: 0;
+  margin-right: 1px;
+  font-size: 12px;
+  border-radius: 0;
+  width: 140px;
+  margin-top: 2px;
+  padding-bottom: 7px;
+}
+
+.toolsBarCamTrapTop{
+  position: relative;
+}
+
+// TOOLBAR BOTTOM
+
+.select2-container--default.select2-container--disabled .select2-selection--multiple{
+  background-color: #3d3d3d;
+  border: solid 1px #777;
+  margin : 5px auto;
+}
+// input
+.select2-container--default.select2-container .select2-selection--multiple{
+  background-color: #3d3d3d;
+  border: solid 1px #777;
+  margin-top: 5px;
+  position: relative;
+  color : #838383;
+  height: 34px;
+}
+.select2-container--default.select2-container--open.select2-container--below .select2-selection--single, .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple{
+  border-bottom-left-radius: 5px; border-bottom-right-radius : 5px;
+  border-top-left-radius: 0;
+}
+// incone tag
+.select2-container--default.select2-container .select2-selection--multiple:before{
+  font-family: 'Glyphicons Halflings';
+  background-color: #777;
+  color: white;
+  content: '\e011';
+  position: absolute;
+  left : 0; top: 0;
+  padding: 6px;
+  cursor: pointer;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__rendered{
+  padding : 0 0 0 30px;
+}
+//ul
+.select2-container--default .select2-results>.select2-results__options{
+  color: rgb(190, 190, 190);
+  background-color: #777;
+  //max-height: 200px;
+  //border: none;
+  position: absolute;
+  top: -234px; right: 50%; left: 0; bottom: 0;
+}
+// span ul
+.select2-dropdown{
+  border: none;
+}
+//hover + selected
+.select2-container--default .select2-results__option--highlighted[aria-selected]{
+  color: #fff;
+  background-color: #777;
+  font-weight: bold;
+}
+// true = selectionné
+.select2-container--default .select2-results__option[aria-selected=true]{
+  background-color: #777;
+  font-weight: bold;
+  color: white;
+}
+// hover
+.select2-results__option .select2-results__option--highlighted:hover{
+  //background-color: #3d3d3d;
+}
+// choix
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+  background-color: #3d3d3d;
+  color: white;
+  border-radius : 0;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice:hover{
+  background-color: #4d4d4d;
+  color: white;
+  border-radius : 0;
+}
+@media (min-width: 992px){
+  .col-md-6{
+    width: 85%;
+  }
+}
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn{
+  width: 15%;
+  margin-top : 5px;
+  background-color: #666 !important;
+}
+// bouton valider session
+#validate{
+  background-color: #666 !important;
+  margin-top : 5px;
+  width: 15%;
+  box-shadow: none;
+  border: solid 1px transparent;
+}
+#validate:hover{
+  background-color: #838383 !important;
+}
+// bouton retour
+.reneco-back{
+  margin-top: 3px;
 }

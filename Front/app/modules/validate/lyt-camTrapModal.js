@@ -65,16 +65,16 @@ define([
 			this.elems.container.className = 'infosfullscreen';
 
 			this.elems.content = document.createElement('div');
-			this.elems.content.className = 'infosfullscreencontent'
+			this.elems.content.className = 'infosfullscreencontent';
 
-			this.elems.status = document.createElement('div');
+			this.elems.status = document.createElement('span');
 			this.elems.status.className = 'status';
 
 			this.elems.station = document.createElement('span');
-			this.elems.station.className = 'station'
+			this.elems.station.className = 'station';
 
 			this.elems.date = document.createElement('div');
-			this.elems.date.className = 'date'
+			this.elems.date.className = 'date';
 
 			this.elems.position = document.createElement('div');
 			this.elems.position.className = 'indexposition';

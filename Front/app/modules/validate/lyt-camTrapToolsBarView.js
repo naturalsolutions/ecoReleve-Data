@@ -58,7 +58,7 @@ define([
 				data :  new Array( JSON.parse(_this.jsonParsed) ),
 				maximumSelectionLength: 8,
 				closeOnSelect : false,
-				placeholder: 'Add a tag',
+				placeholder: 'Add tags ...',
 				tokenSeparators: [",", " "],
 				separator : ',',
 				tags: false, // prohib value not in thesau
