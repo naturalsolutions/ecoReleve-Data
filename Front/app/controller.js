@@ -30,6 +30,7 @@ define([
   './modules/monitoredSites/monitored_sites.new.view',
 
   './modules/importHistory/history.view',
+  './modules/redirection/redirect.view'
 
 ],function(
   Marionette,
@@ -46,7 +47,8 @@ define([
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
-  LytImportHistory
+  LytImportHistory,
+  LytRedirect,
 
 ) {
   'use strict';
@@ -219,6 +221,11 @@ define([
     export: function() {
       this.rgMain.show(new LytExport());
     },
+
+    redirectToStations : function(id) {
+ 
+      this.rgMain.show(new LytRedirect({idToFetch:id}))
+    }
 
   });
 });

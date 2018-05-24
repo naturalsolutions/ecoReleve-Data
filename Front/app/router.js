@@ -23,6 +23,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'monitoredSites(/)': 'monitoredSites',
       'monitoredSites/new/:type(/)': 'newMonitoredSite',
 
+      'observations/:id(/)' : 'redirectToStations',
 
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensor',
