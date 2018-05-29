@@ -127,7 +127,7 @@ Thank you!
 
 ## Demo
 
-http://demo.ecoreleve.com
+http://ecoreleve.com
 
 ## Commercial Support
 
