@@ -97,7 +97,13 @@ define([
       'totalS': '#totalS',
       'total': '#total',
       'paginator': '#paginator',
-      'imageFullScreen': '#imageFullScreen'
+      'imageFullScreen': '#imageFullScreen',
+      'refusedBtn':'#refusedBtn',
+      'acceptedBtn' : '#acceptedBtn',
+      'stationBtn' : '#StationBtn',
+      'createStationBtn':'#createStationBtn',
+      'editStationBtn':'#editStationBtn',
+      'deleteStationBtn':'#deleteStationBtn',
       
     },
     
@@ -112,6 +118,157 @@ define([
     /*
     TODO refact: change selection by a backbone.collection 
     */
+
+   displayBtnsActions : function(status) {
+    var btnAccepted = this.ui.acceptedBtn[0];
+    var btnRefused = this.ui.refusedBtn[0];
+    switch(status) {
+      case 1: {//undeterminate
+        if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
+          btnAccepted.className = btnAccepted.className.replace(' disabled ','');
+        }
+        if( btnRefused.className.indexOf(' disabled ') > -1 ) {
+          btnRefused.className = btnRefused.className.replace(' disabled ','');
+        }
+        break;
+      }
+      case 2: { // accepted
+        if( btnAccepted.className.indexOf(' disabled ') === -1 ) {
+          btnAccepted.className +=' disabled ';
+        }
+        if( btnRefused.className.indexOf(' disabled ') > -1 ) {
+          btnRefused.className = btnRefused.className.replace(' disabled ','');
+        }
+        break;
+      }
+      case 4: { //refused
+        if( btnRefused.className.indexOf(' disabled ') === -1 ) {
+          btnRefused.className+=' disabled ';
+        }
+        if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
+          btnAccepted.className = btnAccepted.className.replace(' disabled ','');
+        }
+        break;
+      }
+      default: { //unknown
+        if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
+          btnAccepted.className = btnAccepted.className.replace(' disabled ','');
+        }
+        if( btnRefused.className.indexOf(' disabled ') > -1 ) {
+          btnRefused.className = btnRefused.className.replace(' disabled ','');
+        }
+        break;
+      }
+    }
+
+  },
+  displayBtnsStation: function(status,stationId) {
+    // var btnStation = this.ui.stationBtn[0];
+    var btnCreateStation = this.ui.createStationBtn[0];
+    var btnEditStation = this.ui.editStationBtn[0];
+    var btnDeleteStation = this.ui.deleteStationBtn[0];
+
+    switch(status) {
+      case 2: { // accepted
+        switch(stationId) {
+          case undefined :
+          case null: {
+            // if( btnStation.className.indexOf(' disabled ') > -1 ) {
+            //   btnStation.className = btnStation.className.replace(' disabled ','');
+            // }
+            if( btnCreateStation.className.indexOf(' disabled ') > -1 ) {
+              btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
+            }
+            if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
+              btnEditStation.className+= ' disabled ';
+            }
+            if( btnDeleteStation.className.indexOf(' disabled ') === -1 ) {
+              btnDeleteStation.className+= ' disabled ';
+            }
+            break;
+          }
+          default: {
+            if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
+              btnCreateStation.className += ' disabled ';
+            }
+            if( btnEditStation.className.indexOf(' disabled ') > -1 ) {
+              btnEditStation.className = btnEditStation.className.replace(' disabled ','');
+            }
+            if( btnDeleteStation.className.indexOf(' disabled ') > -1 ) {
+              btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
+            }
+            break;
+          }
+        }
+        break;
+      }
+      default: { //unknown
+        if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
+          btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
+        }
+        if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
+          btnEditStation.className += ' disabled '
+        }
+        if( btnDeleteStation.className.indexOf(' disabled ') === -1 ) {
+          btnDeleteStation.className += ' disabled '
+        }
+        break;
+      }
+    }
+
+  },
+
+
+   		displaySingleSelect: function() {
+
+      var tabSelected =  this.model.get('newSelected');
+      if ( this.tabView ) {
+        var modelTmp = this.tabView[tabSelected[0]].model;
+        var statusPhoto = modelTmp.get('validated');
+        var stationId = modelTmp.get('stationId');
+        this.displayBtnsActions(statusPhoto);
+        this.displayBtnsStation(statusPhoto,stationId);
+        if (this.toolsBar) {
+          this.toolsBar.displayTagsSelect();
+          this.toolsBar.displayValidateSession();
+        }
+        // this.displayTagsInput(statusPhoto);
+        // this.displayValidateSession();
+        // this.displayTagsSelect();
+      }
+      else {
+        console.error("na !!")
+      }
+      
+    },
+
+    displayMultiselect : function() {
+			
+			var btnAccepted = this.ui.acceptedBtn[0];
+			var btnRefused = this.ui.refusedBtn[0];
+			btnAccepted.className = btnAccepted.className.replace(' disabled ','');
+			btnRefused.className = btnRefused.className.replace(' disabled ','');
+
+			// var btnStation = this.ui.stationBtn[0];
+			var btnCreateStation = this.ui.createStationBtn[0];
+			var btnEditStation = this.ui.editStationBtn[0];
+			var btnDeleteStation = this.ui.deleteStationBtn[0];
+			// btnStation.className = btnStation.className.replace(' disabled ','');
+			btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
+			btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
+			if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
+				btnEditStation.className+= ' disabled ';
+      }
+      if (this.toolsBar) {
+        this.toolsBar.displayTagsSelect();
+        this.toolsBar.displayValidateSession();
+      }
+      
+
+			// this.displayTagsSelect();
+			// this.displayValidateSession();
+		},
+
 
     findIndexOfElemImg : function(elem) {
       var index 
@@ -296,6 +453,7 @@ define([
       this.initCollection();
       // this.model.set('newSelected',[1,2,12]);
     },
+
     updateUIWhenSelectionChange : function() {
       var _this = this;
       var tabSelected = this.model.get('newSelected');
@@ -318,22 +476,24 @@ define([
       .then(function(resp) {
 
         _this.toolsBar.fillElemTags(collection);
-        if (collection.length == 1 ) {
-          _this.toolsBar.displaySingleSelect()
-        }
-        if( collection.length > 1 ) {
-          _this.toolsBar.displayMultiselect()
-        }
+        // if (collection.length == 1 ) {
+        //   _this.toolsBar.displaySingleSelect()
+        // }
+        // if( collection.length > 1 ) {
+        //   _this.toolsBar.displayMultiselect()
+        // }
         
       })
 
 
-      // if( tabSelected.length == 1 ) {
-      //   console.log("control pour une photo")
-      // }
-      // if ( tabSelected.length > 1) {
-      //   console.log("multicontrol (le plus simple)")
-      // }
+      if( tabSelected.length == 1 ) {
+        this.displaySingleSelect()
+        console.log("control pour une photo")
+      }
+      if ( tabSelected.length > 1) {
+        this.displayMultiselect()
+        console.log("multicontrol (le plus simple)")
+      }
 
     },
 

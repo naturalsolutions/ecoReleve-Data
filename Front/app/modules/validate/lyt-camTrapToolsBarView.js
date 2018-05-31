@@ -23,12 +23,6 @@ define([
 		ui : {
 		'tagsInput' :'#tagsInput',
 		'selectTags' : '.js-data-tags',
-		'refusedBtn':'#refusedBtn',
-		'acceptedBtn' : '#acceptedBtn',
-		'stationBtn' : '#StationBtn',
-		'createStationBtn':'#createStationBtn',
-		'editStationBtn':'#editStationBtn',
-		'deleteStationBtn':'#deleteStationBtn',
 		'validate': '#validate'
 		},
 		// events:{
@@ -166,48 +160,7 @@ define([
 			if( !_this.$elemTags) {
 					_this.instantiateElemTags()
 				}
-				_this.fillElemTags();
-				var tabSelected = this.parent.model.get('newSelected')
-			if( tabSelected && tabSelected.length > 1 ) {
-				this.displayMultiselect();
-			}
-			if( tabSelected && tabSelected.length == 1 ) {
-				this.displaySingleSelect();
-			}
-			
-		},
-
-		displaySingleSelect: function() {
-			var tabSelected =  this.parent.model.get('newSelected');
-			var modelTmp = this.parent.tabView[tabSelected[0]].model;
-			var statusPhoto = modelTmp.get('validated');
-			var stationId = modelTmp.get('stationId');
-			this.displayBtnsActions(statusPhoto);
-			this.displayBtnsStation(statusPhoto,stationId);
-			// this.displayTagsInput(statusPhoto);
-			this.displayValidateSession();
-			this.displayTagsSelect();
-		},
-
-		displayMultiselect : function() {
-			
-			var btnAccepted = this.ui.acceptedBtn[0];
-			var btnRefused = this.ui.refusedBtn[0];
-			btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-			btnRefused.className = btnRefused.className.replace(' disabled ','');
-
-			var btnStation = this.ui.stationBtn[0];
-			var btnCreateStation = this.ui.createStationBtn[0];
-			var btnEditStation = this.ui.editStationBtn[0];
-			var btnDeleteStation = this.ui.deleteStationBtn[0];
-			btnStation.className = btnStation.className.replace(' disabled ','');
-			btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
-			btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
-			if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
-				btnEditStation.className+= ' disabled ';
-			}
-			this.displayTagsSelect();
-			this.displayValidateSession();
+				_this.fillElemTags();		
 		},
 
 		displayValidateSession : function() {
@@ -225,110 +178,7 @@ define([
 
 		},
 
-		displayBtnsActions : function(status) {
-			var btnAccepted = this.ui.acceptedBtn[0];
-			var btnRefused = this.ui.refusedBtn[0];
-			switch(status) {
-				case 1: {//undeterminate
-					if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-						btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-					}
-					if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-						btnRefused.className = btnRefused.className.replace(' disabled ','');
-					}
-					break;
-				}
-				case 2: { // accepted
-					if( btnAccepted.className.indexOf(' disabled ') === -1 ) {
-						btnAccepted.className +=' disabled ';
-					}
-					if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-						btnRefused.className = btnRefused.className.replace(' disabled ','');
-					}
-					break;
-				}
-				case 4: { //refused
-					if( btnRefused.className.indexOf(' disabled ') === -1 ) {
-						btnRefused.className+=' disabled ';
-					}
-					if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-						btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-					}
-					break;
-				}
-				default: { //unknown
-					if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-						btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-					}
-					if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-						btnRefused.className = btnRefused.className.replace(' disabled ','');
-					}
-					break;
-				}
-			}
-
-		},
-		displayBtnsStation: function(status,stationId) {
-			var btnStation = this.ui.stationBtn[0];
-			var btnCreateStation = this.ui.createStationBtn[0];
-			var btnEditStation = this.ui.editStationBtn[0];
-			var btnDeleteStation = this.ui.deleteStationBtn[0];
-
-			switch(status) {
-				case 2: { // accepted
-					switch(stationId) {
-						case undefined :
-						case null: {
-							if( btnStation.className.indexOf(' disabled ') > -1 ) {
-								btnStation.className = btnStation.className.replace(' disabled ','');
-							}
-							if( btnCreateStation.className.indexOf(' disabled ') > -1 ) {
-								btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
-							}
-							if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
-								btnEditStation.className+= ' disabled ';
-							}
-							if( btnDeleteStation.className.indexOf(' disabled ') === -1 ) {
-								btnDeleteStation.className+= ' disabled ';
-							}
-							break;
-						}
-						default: {
-							if( btnStation.className.indexOf(' disabled ') > -1 ) {
-								btnStation.className = btnStation.className.replace(' disabled ','');
-							}
-							if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
-								btnCreateStation.className += ' disabled ';
-							}
-							if( btnEditStation.className.indexOf(' disabled ') > -1 ) {
-								btnEditStation.className = btnEditStation.className.replace(' disabled ','');
-							}
-							if( btnDeleteStation.className.indexOf(' disabled ') > -1 ) {
-								btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
-							}
-							break;
-						}
-					}
-					break;
-				}
-				default: { //unknown
-					if( btnStation.className.indexOf(' disabled ') === -1 ) {
-						btnStation.className += ' disabled ';
-					}
-					if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
-						btnCreateStation.className += ' disabled '
-					}
-					if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
-						btnEditStation.className += ' disabled '
-					}
-					if( btnDeleteStation.className.indexOf(' disabled ') === -1 ) {
-						btnDeleteStation.className += ' disabled '
-					}
-					break;
-				}
-			}
-
-		},
+		
 
 		displayTagsSelect : function() {
 			var _this = this;

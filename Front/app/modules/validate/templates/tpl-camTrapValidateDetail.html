@@ -1,21 +1,24 @@
 <div class="full-height col-md-4 no-padding">
   <div class="clearfix toolbar top">
     <a class="btn" href="#validate/camtrap">
-        <span class="reneco reneco-back"></span>
-        &nbsp;
-        <span data-i18n="button.back">Back</span>
+      <span class="reneco reneco-back"></span>
+      &nbsp;
+      <span data-i18n="button.back">Back</span>
     </a>
     <div class="js-rg-navbar pull-right"></div>
-    <!-- <div class="pull-right">
-      <div id="navbar"></div>
-    </div> -->
   </div>
   <div class="crop2" id="js_zoom_plus">
     <br>
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#site" aria-controls="site" role="tab" data-toggle="tab">Site details</a></li>
-      <li role="presentation"><a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a></li>
-      <li role="presentation"><a href="#imageDetails" aria-controls="imageDetails" role="tab" data-toggle="tab">Image details</a></li>
+      <li role="presentation" class="active">
+        <a href="#site" aria-controls="site" role="tab" data-toggle="tab">Site details</a>
+      </li>
+      <li role="presentation">
+        <a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a>
+      </li>
+      <li role="presentation">
+        <a href="#imageDetails" aria-controls="imageDetails" role="tab" data-toggle="tab">Image details</a>
+      </li>
     </ul>
 
     <!-- Tab panes -->
@@ -37,76 +40,75 @@
 <div class="full-height no-padding col-md-8 dark">
   <div class="camTrap toolbar top clearfix">
     <div id="rgToolsBarTop" class="col-md-12"></div>
-    <!-- <div class="col-md-2" style= "visibility : hidden">
-      <div class="btn-group">
-        <a class="btn btn-default disabled" role="button">
-            <i class="reneco reneco-search2 icon-one"></i>
-        </a>
-        <button id="filternavbtn" class="btn btn-success">Filter</button>
-      </div>
-    </div> -->
-  <!--  <button><i class="reneco reneco-ECOL-ecollectionsmall icon-two"></i></button>
-  <button><i class="reneco reneco-image_file icon-two"></i></button>
-  <button><i class="reneco reneco-list icon-two"></i></button>
-  <span>images to validate </span>
-<button id="displayAll" class="btn">All</button>
-  <button id="displayDeleted" class="btn">Deleted</button>
-  <button id="displayValidated" class="btn">Validated</button>
-  <button id="displayTags" class="btn">Tags</button> -->
   </div>
 
   <div id="gallery" class="crop2 crop-paginator">
   </div>
-  <div id="imageFullScreen" ></div>
-<!--  <div id="gallerytest" class="crop2 crop-paginator">
+  <div id="imageFullScreen"></div>
+  <div class="actionsBtn">
+      <div id="accepted">
+        <i id="acceptedBtn" class="btn">
+          <span class="reneco reneco-checked"></span>
+        </i>
+      </div>
+      <div id="createStation">
+        <i id="createStationBtn" class="btn">
+          <span class="reneco reneco-add"></span>
+        </i>
+      </div>
+      <div id="editStation">
+        <i id="editStationBtn" class="btn">
+          <span class="reneco reneco-edit"></span>
+        </i>
+      </div>
+      <div id="deleteStation">
+        <i id="deleteStationBtn" class="btn">
+          <span class="reneco reneco-trash"></span>
+        </i>
+      </div>
+    <div id="refused">
+      <i id="refusedBtn" class="btn">
+        <span class="reneco reneco-close"></span>
+      </i>
+    </div>
   </div>
--->
-
   <div id="paginator" class="paginatorCamTrap"></div>
 
   <div class="clearfix toolbar bottom col-md-12" style="background-color : #3d3d3d; border-color: #4d4d4d">
     <div id="rgToolsBar" class="col-md-12"></div>
-
-    <!-- <legend class="inherit pull-right">Selected : <span id="totalS"></span><span id="total">/</span></legend> -->
   </div>
-
-
-
-
-
-<!-- <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-  Launch demo modal
-</button>
- -->
-<!-- Modal -->
+  <!-- Modal -->
 </div>
 <div id="rgModal"></div>
 <div id="mySidenav" class="sidenav">
-  <i id="closeNav" class="closebtn"><span class="reneco reneco-close icon-one right"></span></i>
+  <i id="closeNav" class="closebtn">
+    <span class="reneco reneco-close icon-one right"></span>
+  </i>
   <div class="col-md-12">
-       <h4>Filter On status</h4>
+    <h4>Filter On status</h4>
 
-      <div class="funkyradio">
-          <div class="funkyradio-success">
-              <input type="radio" name="filterstatus" id="radio1" class="allphotos" value="0" />
-              <label for="radio1">All Status</label>
-          </div>
-          <div class="funkyradio-success">
-              <input type="radio" name="filterstatus" id="radio2" class="accepted" value="1"/>
-              <label for="radio2">Accepted</label>
-          </div>
-          <div class="funkyradio-success">
-              <input type="radio" name="filterstatus" id="radio3" class="refused" value="2"/>
-              <label for="radio3">Rejected</label>
-          </div>
-          <div class="funkyradio-success">
-              <input type="radio" name="filterstatus" id="radio4" class="checked" value="3"/>
-              <label for="radio4">Unknown</label>
-          </div>
-          <div class="funkyradio-success">
-              <input type="radio" name="filterstatus" id="radio5" class="notchecked" value="4"/>
-              <label for="radio5">Not seen</label>
-          </div>
+    <div class="funkyradio">
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio1" class="allphotos" value="0" />
+        <label for="radio1">All Status</label>
       </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio2" class="accepted" value="1" />
+        <label for="radio2">Accepted</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio3" class="refused" value="2" />
+        <label for="radio3">Rejected</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio4" class="checked" value="3" />
+        <label for="radio4">Unknown</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio5" class="notchecked" value="4" />
+        <label for="radio5">Not seen</label>
+      </div>
+    </div>
   </div>
 </div>
+
