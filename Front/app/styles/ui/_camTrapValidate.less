@@ -43,6 +43,71 @@ div.bootstrap-tagsinput{
   }
 }
 
+.actionsBtn {
+  display : flex;
+  justify-content: center;
+
+
+  #refused{
+    #refusedBtn{
+      background: #f00;
+      color : white;
+    }
+  }
+  #checked{
+    #checkedBtn{
+      background: #666;
+      color : white;
+      .reneco-support::before{
+        content: '?' !important;
+      }
+    }
+  }
+  #accepted{
+    #acceptedBtn{
+      background: #39b34a;
+      color : white;
+    }
+  }
+  #createStationBtn {
+    background-color: green;
+  }
+  #deleteStationBtn {
+    background-color: red;
+  }
+  #editStationBtn {
+    // background-color : black;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+  }
+
+  #mouvementAction{
+    #leftMouvement{
+      .reneco{
+        color: white;
+      }
+      #leftMouvementBtn{
+        background: #666;
+      }
+    }
+    #rightMouvement{
+      .reneco{
+        color: white;
+      }
+      #rightMouvementBtn{
+        background: #666;
+      }
+    }
+  }
+  .reneco {
+    line-height: 2!important;
+  }
+
+
+
+
+}
+
 
 #imageFullScreen {
   padding : 0;
@@ -154,7 +219,7 @@ div.bootstrap-tagsinput{
 }
 
 #gallery{
-  background-color: #434343;
+  background-color: #3a3333;
   padding: 20px;
   user-select: none;
   .ui-selecting > .vignette {
