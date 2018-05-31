@@ -128,6 +128,8 @@ Thank you!
 ## Demo
 
 http://ecoreleve.com
+login:demo
+password:demo
 
 ## Commercial Support
 
