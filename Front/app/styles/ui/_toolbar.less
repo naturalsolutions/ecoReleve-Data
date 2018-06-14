@@ -1,10 +1,12 @@
-@toolbarHeight : 53px;
+@toolbarHeight : 40px;
 @paginatorHeight: 45px;
 
 .toolbar{
-  height: @toolbarHeight;
+  //height: @toolbarHeight;
+  height: 50px;
   overflow: auto;
   padding: 10px;
+  padding-top: 3px;
   padding-bottom: 0px;
   position: relative;
   z-index:1;
@@ -38,7 +40,8 @@
 .crop2{
   position: relative;
   @crop: @toolbarHeight*2;
-  height: ~"calc(100% - @{crop})";
+  //height: ~"calc(100% - @{crop})";
+  height: ~"calc(100% - 100px)";
   padding: 0px 15px;
   overflow-y: auto;
   &.overflowXH{
@@ -47,6 +50,7 @@
   &.crop-paginator{
     @crop : @toolbarHeight*2 + @paginatorHeight;
     height: ~"calc(100% - @{crop})";
+    height: ~"calc(100% - 155px)"; //145
   }
 }
 /*

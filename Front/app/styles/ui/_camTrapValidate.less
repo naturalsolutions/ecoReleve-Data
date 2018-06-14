@@ -42,15 +42,27 @@ div.bootstrap-tagsinput{
     box-shadow: inset 0 0px 0px #000000 !important;
   }
 }
-
+.actionsContainer{
+  position: relative;
+  height: 120px; //80
+  background-color : #3d3d3d;
+}
 .actionsBtn {
   display : flex;
   justify-content: center;
-
-
+  background-color: #3d3d3d;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  .btn{
+    width: 60px !important;
+    height: 60px !important;
+    margin : 10px 5px !important;
+  }
   #refused{
     #refusedBtn{
-      background: #f00;
+      background: rgb(228, 27, 27);
       color : white;
     }
   }
@@ -70,15 +82,18 @@ div.bootstrap-tagsinput{
     }
   }
   #createStationBtn {
-    background-color: green;
+    background-color: rgb(191, 179, 0);
+    color : white;
   }
   #deleteStationBtn {
-    background-color: red;
+    background-color: rgb(206, 100, 77);
+    color : white;
   }
   #editStationBtn {
     // background-color : black;
     background-color: #f0ad4e;
-    border-color: #eea236;
+    color : white;
+  //border-color: #eea236;
   }
 
   #mouvementAction{
@@ -101,21 +116,17 @@ div.bootstrap-tagsinput{
   }
   .reneco {
     line-height: 2!important;
+    font-size: 25px;
   }
-
-
-
-
 }
-
 
 #imageFullScreen {
   padding : 0;
-
+  overflow-x: hidden;
   .fullscreenimg {
     width: 100%;
     height: 100%;
-    background-color: #434343;
+    background-color: #3d3d3d;
     .infosonimg {
       width: 100%;
       height: 100%;
@@ -132,8 +143,21 @@ div.bootstrap-tagsinput{
     img:active {
       cursor : -webkit-grabbing;
     }
+    i.reneco-chevron_left{
+      background-color : #00000049;
+      font-size: 3em;
+      padding: 1.5em 1.5em 1.5em 0.5em;
+      -webkit-clip-path: circle(50% at 0 50%);
+      clip-path: circle(50% at 0 50%);
+      }
 
-
+      i.reneco-chevron_right{
+        background-color : #00000049;
+        font-size: 3em;
+        padding: 1.5em 0.5em 1.5em 1.5em;
+        -webkit-clip-path: circle(50% at 100% 50%);
+        clip-path: circle(50% at 100% 50%);
+        }
     div.leftnavicon {
       height: 100%;
       position: absolute;
@@ -143,6 +167,7 @@ div.bootstrap-tagsinput{
     }
     div.leftnavicon:hover i{
       opacity: 1;
+      transform: translateX(-10px);
     }
     div.rightnavicon {
       height: 100%;
@@ -152,6 +177,10 @@ div.bootstrap-tagsinput{
       right: 0;
       top: 0;
     }
+    div.rightnavicon:hover i{
+      opacity: 1;
+      transform: translateX(10px);
+    }
     div.rightnavicon:hover i.reneco-chevron_left {
       opacity: 1;
     }
@@ -159,24 +188,28 @@ div.bootstrap-tagsinput{
       opacity: 1;
     }
     i.reneco-chevron_left {
-      visibility: hidden;
-      opacity: 0;
+      opacity: 0.5;
       position: absolute;
-      top:~"calc(50% - 35px)";
+      top:~"calc(50% - 100px)";
       color : white;
-      text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
-      transition: opacity 0.8s linear;
-      left: 0;
+      transform: translateX(-55px);
+      transition: 0.3s linear;
+      left: -3px;
     }
     i.reneco-chevron_right {
-      visibility: hidden;
-      opacity: 0;
+      opacity: 0.5;
       position: absolute;
-      top:~"calc(50% - 35px)";
+      top:~"calc(50% - 100px)";
       color : white;
-      text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
-      transition: opacity 0.8s linear;
-      right: 0;
+      transform: translateX(55px);
+      transition: 0.3s linear;
+      right: -3px;
+    }
+    i.reneco-chevron_right:before{
+      color: #fff !important;
+    }
+    i.reneco-chevron_left:before{
+      color: #fff !important;
     }
   }
 
@@ -197,23 +230,25 @@ div.bootstrap-tagsinput{
   }
 }
 
+// Ancien statut
+.infosfullscreencontent{
+  display: none;
+}
+
 #gallery{
-  background-color: #3a3333;
+  background-color: #3d3d3d;
   padding: 20px;
   user-select: none;
   .ui-selecting > .vignette {
-    background-color: #39b34a !important;
-
+   // background-color: #000000ab !important;
+    background-color : #3d3d3d !important;
     img{
       opacity: 0.7;
     }
-
-    border: 1.5px solid #39b34a;
-    border-radius: 8px;
+   border : 3px solid #fff;
   }
   .ui-selected > .vignette {
-    border: 1.5px solid #39b34a;
-    border-radius: 8px;
+    //border : 3px solid #fff;
   }
   .imageCamTrap{
     margin: 0;
@@ -236,10 +271,11 @@ div.bootstrap-tagsinput{
 
 
     .vignette{
-      border-radius : 8px;
+      
       background-color: #3d3d3d;
-      height : 96%;
-      width: 96%;
+      height : 100%; //96
+      width: 100%; //96
+      padding : 5px;
       .camtrapItemViewHeader{
         .rating-xs {
           font-size: 0.8vw;
@@ -259,7 +295,7 @@ div.bootstrap-tagsinput{
 
         }
         i.reneco-stations{
-          color: #449d44;
+          color: #459e45;
           border-radius : 0px !important;
           font-size: xx-large !important;
           top: 4px !important;
@@ -285,14 +321,14 @@ div.bootstrap-tagsinput{
       }
       .camtrapItemViewContent{
         height: 100%;
-        border-radius: 8px;
+       // border-radius: 8px;
         img{
           height: 100%;
           width: 100%;
           cursor : pointer;
           object-fit: cover;
           overflow: hidden;
-          border-radius: 8px;
+          // border-radius: 8px;
           -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0%, 100% 0);
           transition : -webkit-clip-path 0.5s;
         }
@@ -323,7 +359,8 @@ div.bootstrap-tagsinput{
 
 
         img.checked{
-          -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 25%, 75% 0);
+          -webkit-clip-path: polygon(0 100%, 100% 100%, 100% 7%, 0 7%);
+          clip-path: polygon(0 100%, 100% 100%, 100% 7%, 0 7%);
         }
       }
       .camtrapItemViewContent:hover div.dateexif {
@@ -345,8 +382,11 @@ div.bootstrap-tagsinput{
 
       }
       .camtrapItemViewContent.accepted{
-        background-color : green;
+        background-color : #348134;
       }
+      .camtrapItemViewContent.undeterminated{
+        background-color : yellow;
+    }
       .camtrapItemViewContent.rejected{
           background-color : red;
       }
@@ -367,10 +407,9 @@ div.bootstrap-tagsinput{
         }
       }
     }
-    // .active{
-    //   border: 3px solid #39b34a;
-    //   border-radius: 8px;
-    // }
+    .active{
+     // border: 3px solid #fff;
+    }
 
   }
   /*.accepted:before{
@@ -446,13 +485,16 @@ div.bootstrap-tagsinput{
 
 .paginatorCamTrap {
   max-height: 45px;
-  background-color: #434343;
+  background-color: #3d3d3d;
+/*   position: absolute;
+  bottom: -10px; left: 50%;
+  transform: translateX(-50%); */
   .infosfullscreen{
     display: flex;
     justify-content: space-between;
-    font-size: 30px;
-    font-weight: bold;
-    color: #909090;
+    font-size: 25px;
+    // font-weight: bold;
+    color: #fff;
     align-content: flex-end;
     padding-left: 30px;
     padding-right: 30px;
@@ -463,7 +505,8 @@ div.bootstrap-tagsinput{
 
       .status {
       padding-right: 20px;
-      display : inline;
+      // display : inline;
+      display: none;
       //flex-grow: 1;
       // position: absolute;
       // padding-left: 50px;
@@ -473,7 +516,8 @@ div.bootstrap-tagsinput{
       line-height: inherit;
       // flex-grow: 1;   
       }
-  }
+    }
+  
     .date {
       // flex-grow: 2;
       // position: absolute;
@@ -510,9 +554,13 @@ div.bootstrap-tagsinput{
       position: relative;
       height: 50px;
       max-height: 45px;
+      position: absolute;
+      bottom: -10px; left: 50%;
+      transform: translateX(-50%);
       ul {
         color:#666;
         text-align: center;
+        padding-left: 0;
         li {
           list-style: none;
           display: inline;
@@ -529,7 +577,7 @@ div.bootstrap-tagsinput{
         }
         li.active {
           a {
-            background-color: #373737;
+           // background-color: #373737;
             border-radius: 5px;
             color: white;
           }
@@ -541,18 +589,17 @@ div.bootstrap-tagsinput{
     }
 }
 
-
 .camTrap.toolbar.top{
   //border:0;
   background-color: #3d3d3d;
   border-bottom-color: #606060;
   box-shadow: 0px 1px 17px 0px rgba(107, 107, 107, 0.5);
-  border-bottom: 1px solid #ddd;
+  border-bottom: 2px solid #449d44 !important;
+  overflow-y: hidden;
 }
 *:focus {
   outline: none;
 }
-
 
 .importCamTrap {
   .sessionGrid {
@@ -580,7 +627,6 @@ div.bootstrap-tagsinput{
     text-align: center;
   }
 
-
   .filesInfos{
   position: absolute;
   bottom: 0px;
@@ -588,7 +634,7 @@ div.bootstrap-tagsinput{
   background-color: lightgray;
   }
 
-.title-camtrap {
+  .title-camtrap {
   padding-bottom: 30px;
   margin-bottom: 30px;
   }
