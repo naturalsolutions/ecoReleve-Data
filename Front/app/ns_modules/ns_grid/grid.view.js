@@ -72,7 +72,7 @@ define([
       var _this = this;
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
-      this.model.set('objectType', options.objectType || 1);
+      this.model.set('objectType', options.objectType);
       if(options.url){
         this.model.set('url', options.url);
       } else {

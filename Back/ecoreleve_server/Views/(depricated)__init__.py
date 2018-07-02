@@ -132,10 +132,10 @@ class DynamicObjectValues(CustomView):
     def retrieve(self):
         from ..utils.parseValue import formatThesaurus
 
-        propertiesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropTable()]
-        dynamicValuesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropValuesTable()]
-        FK_name = self.parent.objectDB.GetSelfFKNameInValueTable()
-        FK_property_name = self.parent.objectDB.GetDynPropFKName()
+        propertiesTable = Base.metadata.tables[self.parent.objectDB.TypeClass.PropertiesClass.__tablename__]
+        dynamicValuesTable = Base.metadata.tables[self.parent.objectDB.DynamicValuesClass.__tablename__]
+        FK_name = 'FK_' + self.parent.objectDB.__tablename__
+        FK_property_name = self.parent.objectDB.fk_table_DynProp_name
 
         tableJoin = join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
@@ -182,8 +182,10 @@ class DynamicObjectView(CustomView):
                 self.objectDB = self.session.query(self.model).get(ref)
             else:
                 self.objectDB = None
+        # if not hasattr(self.objectDB, 'session') or not self.objectDB.session:
+        #     self.objectDB.session = self.session
 
-        '''Set security according to permissions dict... yes just that ! '''
+        '''Set security according to permissions'''
         self.__acl__ = context_permissions[parent.__name__]
 
     @property
@@ -191,15 +193,15 @@ class DynamicObjectView(CustomView):
         raise Exception('method has to be overriden')
 
     def getData(self):
-        self.objectDB.LoadNowValues()
-        return self.objectDB.getFlatObject()
+        # self.objectDB.LoadNowValues()
+        return self.objectDB.values
 
     def getDataWithForm(self):
         try:
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
-        self.objectDB.LoadNowValues()
+        # form = self.objectDB.getForm(displayMode, objectType, moduleName)
         return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
@@ -214,7 +216,8 @@ class DynamicObjectView(CustomView):
     def update(self):
         data = self.request.json_body
         self.objectDB.beforeUpdate()
-        self.objectDB.updateFromJSON(data)
+        self.objectDB.values = data
+        self.objectDB.afterUpdate()
         return 'updated'
 
     def delete(self):
@@ -234,10 +237,12 @@ class DynamicObjectCollectionView(CustomView):
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
+        if not hasattr(self.objectDB, 'session') or not self.objectDB.session:
+            self.objectDB.session = self.session
 
         if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
             objType = self.request.params['typeObj']
-            self.setType(objType)
+            self.objectDB.type_id = objType
             self.typeObj = objType
         else:
             self.typeObj = None
@@ -283,9 +288,9 @@ class DynamicObjectCollectionView(CustomView):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
-        self.setType(data[self.objectDB.getTypeObjectFKName()])
-        self.objectDB.init_on_load()
-        self.objectDB.updateFromJSON(data)
+        # self.setType(data[self.objectDB.getTypeObjectFKName()])
+        # self.objectDB.init_on_load()
+        self.objectDB.values = data
         self.session.add(self.objectDB)
         self.session.flush()
         return {'ID': self.objectDB.ID}
@@ -338,7 +343,8 @@ class DynamicObjectCollectionView(CustomView):
         moduleFront = self.getConf(self.moduleGridName)
 
         if self.request is not None:
-            searchInfo, history, startDate = self.formatParams({}, paging=False)
+            searchInfo, history, startDate = self.formatParams(
+                {}, paging=False)
             self.collection = self.getCollection(moduleFront,
                                                  history=history,
                                                  startDate=startDate)
@@ -389,9 +395,10 @@ class DynamicObjectCollectionView(CustomView):
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
+            self.objectDB.type_id = objectType
         if not objectType:
             objectType = None
-        self.setType(int(objectType))
+        # self.setType(int(objectType))
         if not moduleName:
             moduleName = self.moduleFormName
 
@@ -411,7 +418,8 @@ class DynamicObjectCollectionView(CustomView):
         # gridCols = self.getConfigJSON(moduleName, type_)
         gridCols = None
         if not gridCols:
-            gridCols = self.objectDB.getGrid(type_=type_, moduleName=moduleName)
+            gridCols = self.objectDB.getGrid(
+                type_=type_, moduleName=moduleName)
             self.setConfigJSON(moduleName, type_, gridCols)
 
         return gridCols
@@ -427,11 +435,12 @@ class DynamicObjectCollectionView(CustomView):
         # filters = self.getConfigJSON(moduleName+'Filter', type_)
         filters = None
         if not filters:
-            filtersList = self.objectDB.getFilters(type_=type_, moduleName=moduleName)
+            filtersList = self.objectDB.getFilters(
+                type_=type_, moduleName=moduleName)
             filters = {}
             for i in range(len(filtersList)):
                 filters[str(i)] = filtersList[i]
-            self.setConfigJSON(moduleName+'Filter', type_, filters)
+            self.setConfigJSON(moduleName + 'Filter', type_, filters)
 
         return filters
 
@@ -443,21 +452,18 @@ class DynamicObjectCollectionView(CustomView):
             self.configJSON[moduleName] = {}
         self.configJSON[moduleName][typeObj] = configObject
 
-    def setType(self, objectType=1):
-        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+    # def setType(self, objectType=1):
+    #     setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
 
     def getType(self):
-        table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
+        table = self.objectDB.TypeClass.__table__
         query = select([table.c['ID'].label('val'),
                         table.c['Name'].label('label')])
-        response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
+        response = [OrderedDict(row)
+                    for row in self.session.execute(query).fetchall()]
         return response
 
     def export(self):
-        import pandas as pd
-        import io
-        from pyramid.response import Response
-        from datetime import datetime
 
         dataResult = self.search(paging=False, noCount=True)
         df = pd.DataFrame.from_records(dataResult,

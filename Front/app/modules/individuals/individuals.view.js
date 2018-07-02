@@ -27,7 +27,8 @@ define([
             return obj;
           }
         })[0];
-
+        
+        this.model.set('defaultTypeObj',typeObj.val);
         this.model.set('objectType',typeObj.val);
         this.model.set('objectTypeLabel',typeObj.label);
 

@@ -16,7 +16,7 @@ define([
       label: 'individuals',
       single: 'individual',
       type: 'individuals',
-
+      defaultTypeObj: 1,
       icon: 'reneco-bustard',
       subincon: 'reneco-bustard',
 

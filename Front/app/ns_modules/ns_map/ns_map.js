@@ -531,41 +531,45 @@ define([
       for (var j = 0; j < features.length; j++) {
         feature = features[j];
         if(feature.geometry.coordinates[1] != null && feature.geometry.coordinates[0] != null){
-          latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
-          i++;
-          var infos = '';
-          if (!feature.id) {
-            feature.id = i;
-            if (feature.properties.ID) {
-              feature.id = feature.properties.ID;
+          try{
+            latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
+            i++;
+            var infos = '';
+            if (!feature.id) {
+              feature.id = i;
+              if (feature.properties.ID) {
+                feature.id = feature.properties.ID;
+              }
             }
-          }
 
-          var className = _this.getMarkerIconClassName(feature);
+            var className = _this.getMarkerIconClassName(feature);
 
-          icon = new L.DivIcon({className : className});
-          marker = L.marker(latlng, {icon: icon});
+            icon = new L.DivIcon({className : className});
+            marker = L.marker(latlng, {icon: icon});
 
-          if(_this.popup){
-            prop = feature.properties;
-            for(var p in prop){
-              infos +='<b>'+p+' : '+prop[p]+'</b><br />';
+            if(_this.popup){
+              prop = feature.properties;
+              for(var p in prop){
+                infos +='<b>'+p+' : '+prop[p]+'</b><br />';
+              }
+              marker.bindPopup(infos);
             }
-            marker.bindPopup(infos);
-          }
 
-          marker.feature = feature;
+            marker.feature = feature;
 
-          _this.dict[feature.id] = marker;
-          
-          marker.on('click', function(e){
-            if(_this.selection && this.feature.properties.type_ !== 'station'){
-              _this.interaction('singleSelection', this.feature.id);
-            }
-            _this.interaction('focus', this.feature.id);
-          });
+            _this.dict[feature.id] = marker;
             
-          markerList.push(marker);
+            marker.on('click', function(e){
+              if(_this.selection && this.feature.properties.type_ !== 'station'){
+                _this.interaction('singleSelection', this.feature.id);
+              }
+              _this.interaction('focus', this.feature.id);
+            });
+              
+            markerList.push(marker);
+          } catch(excpetion){
+            continue;
+          }
         }else{
           console.warn('latlng null');
         }
@@ -1036,6 +1040,9 @@ define([
     },
 
     displayError: function(geoJson){
+      if(!this.errorElt){
+        this.initErrorLayer();
+      }
       this.errorElt.addClass('hidden');
       var msg;
       if(geoJson){

@@ -1,0 +1,53 @@
+
+ALTER PROCEDURE [dbo].[pr_checkValidatedLocationOnEquipmentProtocol]
+ @obsID int,
+ @FK_Sensor int,
+ @FK_Individual int,
+ @result int OUTPUT
+   AS
+ 
+
+   SET NOCOUNT ON
+   SET @result = NULL
+	DECLARE	@StartDate datetime;
+	DECLARE @EndDate datetime;
+	DECLARE @stationDate datetime;
+	--DECLARE @FK_Sensor int;
+	--DECLARE @FK_Individual int;
+
+	select @stationDate=StationDate
+	FROM Station s
+	WHERE EXISTS (SELECT * 
+					FROM Observation o where o.FK_Station = s.ID AND o.ID = @obsID)
+
+	--IF @FK_Sensor IS NULL
+	--BEGIN
+	--	SELECT @FK_Sensor = ValueInt	
+	--	FROM ObservationDynPropValuesNow
+	--	WHERE FK_Observation = @obsID 
+	--	AND Name = 'FK_Sensor'
+	--END
+
+	--SELECT @FK_Individual = FK_Individual
+	--FROM Observation o where o.ID = @obsID
+		--select @StartDate = StartDate , @EndDate = EndDate 
+		--from SensorEquipment
+		--where FK_Sensor =  @FK_sensor
+		--and  (@stationDate >= StartDate and (EndDate is null or  @stationDate <=  EndDate ) )
+
+
+	SELECT @result = 1 WHERE EXISTS (SELECT * FROM Individual_Location 
+									WHERE date >= @stationDate
+									--and (@EndDate is null or date <=  @EndDate )
+									AND FK_Individual = @FK_Individual
+									AND FK_sensor = @FK_sensor )
+
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('173_Alter_business_PR_checkEquipment',GETDATE(),(SELECT db_name()))
+
+
+GO
