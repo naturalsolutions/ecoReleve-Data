@@ -278,6 +278,7 @@ define([
         binReader.onload = function (event) {
           var message;
           message = {
+            from: 'exifLib',
             uniqueIdentifier: file.uniqueIdentifier,
             fileName : file.fileName,
             cid : modelTmp.cid,
