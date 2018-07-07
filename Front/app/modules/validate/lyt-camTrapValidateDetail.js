@@ -22,11 +22,12 @@ define([
   'jqueryui',
   './lyt-imageDetails',
   'exif-js',
+  './lyt-camTrapActionsContainer',
   'backgrid.paginator'
 ], function ($, _, Backbone, Marionette, Swal, Translater,
   config, NsMap, NsForm, moment, Navbar, PageColl,
   CamTrapItemView, CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut,
-  virtualcollection, ToolsBarTop, jqueryUi, imageDetailsView, Exif) {
+  virtualcollection, ToolsBarTop, jqueryUi, imageDetailsView, Exif,ActionsContainer) {
 
   'use strict';
 
@@ -65,7 +66,7 @@ define([
     events: {
       'click i#refusedBtn': 'rejectPhoto',
       'click i#acceptedBtn': 'acceptPhoto',
-      'click i#checkedBtn': 'undeterminatePhoto',
+      // 'click i#checkedBtn': 'undeterminatePhoto',
       'click i#leftMouvementBtn': 'leftMouvement',
       'click i#rightMouvementBtn': 'rightMouvement',
       'click button#validate': 'validateAll',
@@ -114,284 +115,18 @@ define([
       'rgToolsBar': '#rgToolsBar',
       'rgToolsBarTop': '#rgToolsBarTop',
       'rgImageDetails': '#imageDetails',
+      'rgActionsContainer' : '#rgActionsContainer',
     },
-    /*
-    TODO refact: change selection by a backbone.collection 
-    */
-
-   displayBtnsActions : function(status) {
-    var btnAccepted = this.ui.acceptedBtn[0];
-    var btnRefused = this.ui.refusedBtn[0];
-    switch(status) {
-      case 1: {//undeterminate
-        if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-          btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-        }
-        if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-          btnRefused.className = btnRefused.className.replace(' disabled ','');
-        }
-        break;
-      }
-      case 2: { // accepted
-        if( btnAccepted.className.indexOf(' disabled ') === -1 ) {
-          btnAccepted.className +=' disabled ';
-        }
-        if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-          btnRefused.className = btnRefused.className.replace(' disabled ','');
-        }
-        break;
-      }
-      case 4: { //refused
-        if( btnRefused.className.indexOf(' disabled ') === -1 ) {
-          btnRefused.className+=' disabled ';
-        }
-        if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-          btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-        }
-        break;
-      }
-      default: { //unknown
-        if( btnAccepted.className.indexOf(' disabled ') > -1 ) {
-          btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-        }
-        if( btnRefused.className.indexOf(' disabled ') > -1 ) {
-          btnRefused.className = btnRefused.className.replace(' disabled ','');
-        }
-        break;
-      }
-    }
-
-  },
-  displayBtnsStation: function(status,stationId) {
-    // var btnStation = this.ui.stationBtn[0];
-    var btnCreateStation = this.ui.createStationBtn[0];
-    var btnEditStation = this.ui.editStationBtn[0];
-    var btnDeleteStation = this.ui.deleteStationBtn[0];
-
-    switch(status) {
-      case 2: { // accepted
-        switch(stationId) {
-          case undefined :
-          case null: {
-            // if( btnStation.className.indexOf(' disabled ') > -1 ) {
-            //   btnStation.className = btnStation.className.replace(' disabled ','');
-            // }
-            if( btnCreateStation.className.indexOf(' disabled ') > -1 ) {
-              btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
-            }
-            if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
-              btnEditStation.className+= ' disabled ';
-            }
-            if( btnDeleteStation.className.indexOf(' disabled ') === -1 ) {
-              btnDeleteStation.className+= ' disabled ';
-            }
-            break;
-          }
-          default: {
-            if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
-              btnCreateStation.className += ' disabled ';
-            }
-            if( btnEditStation.className.indexOf(' disabled ') > -1 ) {
-              btnEditStation.className = btnEditStation.className.replace(' disabled ','');
-            }
-            if( btnDeleteStation.className.indexOf(' disabled ') > -1 ) {
-              btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
-            }
-            break;
-          }
-        }
-        break;
-      }
-      default: { //unknown
-        if( btnCreateStation.className.indexOf(' disabled ') === -1 ) {
-          btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
-        }
-        if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
-          btnEditStation.className += ' disabled '
-        }
-        if( btnDeleteStation.className.indexOf(' disabled ') === -1 ) {
-          btnDeleteStation.className += ' disabled '
-        }
-        break;
-      }
-    }
-
-  },
-
-
-   		displaySingleSelect: function() {
-
-      var tabSelected =  this.model.get('newSelected');
-      if ( this.tabView ) {
-        var modelTmp = this.tabView[tabSelected[0]].model;
-        var statusPhoto = modelTmp.get('validated');
-        var stationId = modelTmp.get('stationId');
-        this.displayBtnsActions(statusPhoto);
-        this.displayBtnsStation(statusPhoto,stationId);
-        if (this.toolsBar) {
-          this.toolsBar.displayTagsSelect();
-          this.toolsBar.displayValidateSession();
-        }
-        // this.displayTagsInput(statusPhoto);
-        // this.displayValidateSession();
-        // this.displayTagsSelect();
-      }
-      else {
-        console.error("na !!")
-      }
-      
-    },
-
-    displayMultiselect : function() {
-			
-			var btnAccepted = this.ui.acceptedBtn[0];
-			var btnRefused = this.ui.refusedBtn[0];
-			btnAccepted.className = btnAccepted.className.replace(' disabled ','');
-			btnRefused.className = btnRefused.className.replace(' disabled ','');
-
-			// var btnStation = this.ui.stationBtn[0];
-			var btnCreateStation = this.ui.createStationBtn[0];
-			var btnEditStation = this.ui.editStationBtn[0];
-			var btnDeleteStation = this.ui.deleteStationBtn[0];
-			// btnStation.className = btnStation.className.replace(' disabled ','');
-			btnCreateStation.className = btnCreateStation.className.replace(' disabled ','');
-			btnDeleteStation.className = btnDeleteStation.className.replace(' disabled ','');
-			if( btnEditStation.className.indexOf(' disabled ') === -1 ) {
-				btnEditStation.className+= ' disabled ';
-      }
-      if (this.toolsBar) {
-        this.toolsBar.displayTagsSelect();
-        this.toolsBar.displayValidateSession();
-      }
-      
-
-			// this.displayTagsSelect();
-			// this.displayValidateSession();
-		},
-
-
-    findIndexOfElemImg : function(elem) {
-      var index 
-      var curElem
-      for( var i =0 ; i < this.tabView.length ; i ++ ) {//loop on elm to find index img clicked
-        curElem = this.tabView[i].el.getElementsByTagName('img');
-        //TODO be sure that's work in any case
-        if(curElem && (curElem[0] === elem) ) {
-          index = i;
-          break;
-        }
-        curElem = undefined;
-      }
-      return index;
-    },
-
-    handleFocus : function(e) {
-      var _this = this;
-      var indexFind = this.findIndexOfElemImg( e.currentTarget )
-      var newTab = [];
-      if( e.ctrlKey ) { //ctrl + click add/remove item selected
-        var oldTab = this.model.get('newSelected');
-        var detected = -1;
-        newTab = _.clone(oldTab); //hack to handle change not fired 
-
-        for( var i = 0 ; i < oldTab.length ; i++) {
-          if( indexFind == oldTab[i] ) {
-            detected = i;
-          }
-        }
-       
-        if( detected  > -1 ) { //remove item selected
-          if( oldTab.length === 1 ) {
-            return;
-          }
-          else {
-           newTab.splice(detected,1);
-          }
-        }
-        else { // add item selected
-          newTab.push(indexFind);
-          // $(_this.tabView[indexFind].el).addClass('ui-selected');
-        }
-      }
-      else { // click => focus if new img
-        if ( typeof(indexFind) !== 'undefined') {
-          newTab = [indexFind]
-          // this.model.set('newSelected',[indexFind]);
-        }
-      }
-      _this.model.set('newSelected', newTab);
- 
-
-    },
-
-    cleanWillBeActive : function(tab) {
-      if(!tab)
-        return;
-        var index;
-        for( var i=0; i < tab.length ; i++ ) {
-          index = tab[i];
-          if( index < this.tabView.length) {
-            $(this.tabView[index].el).removeClass('js-activate_saved');
-          }
-        }
-
-    },
-
-    setWillBeActive : function(tab) {
-      if(!tab)
-        return;
-        var index;
-        for( var i=0; i < tab.length ; i++ ) {
-          index = tab[i];
-          if( index < this.tabView.length) {
-            $(this.tabView[index].el).addClass('js-activate_saved');
-          }
-        }
-    },
-
-    setoldSelectedInactive: function(tab) {
-      // console.log("on va mettre a inactif", tab)
-      if( !tab )
-        return;
-      var index;
-      for( var i = 0 ; i < tab.length ; i++) {
-        index = tab[i];
-        if( index < this.tabView.length ) {
-          this.tabView[index].removeActive();
-        }
-      }
-
-    },
-
-    setAllSelectedActive: function(tab) {
-      // console.log("on va mettre a active " , tab)
-      if( !tab )
-       return;
-      var index;  
-      for( var i = 0 ; i < tab.length ; i++) {
-        index = tab[i];
-        if( index < this.tabView.length ) {
-          this.tabView[index].setActive();
-        }
-      }
-    },
-
-    
     initialize: function (options) {
       var _this = this;
       this.equipmentId = parseInt(this.checkUrl(location.hash));
-
-      if (this.equipLine < 0) {
-        // console.log("lol pas de session");
-        return
-      }
 
       this.translater = Translater.getTranslater();
       this.type = options.type;
       this.model = options.model || new Backbone.Model();
       this.lastImageActive = null;
       this.currentViewImg = null;
-      this.currentPosition = null;
+      this.currentPosition = 0;
       this.pageChange = '';
       this.currentCollection = null;
       this.currentPaginator = null;
@@ -403,100 +138,18 @@ define([
       this.nbPhotosStationed = 0;
       this.stopSpace = false;
       this.tabSelected = [];
+      this.selectedCollection = new Backbone.Collection({model:CamTrapImageModel}); //will contains camtrapmodel and position in tabview 
 
       this.globalGrid = options.globalGrid;
-
-
-      this.newSelected = [];
-      this.listenTo(this.model, 'change', function (e) { 
-        // trigger on init or on change page
-        // trigger when selection change so we update ui here
-
-        if( !e ) {
-          return;
-        }
-
-        var newTab = e.attributes.newSelected;
-        var oldTab = e._previousAttributes.newSelected;
-
-        if ( newTab.length === 1 ) {
-          _this.currentPosition = newTab[0];
-          if( _this.imageDetails) {
-            _this.imageDetails.model = _this.tabView[newTab[0]].model
-            _this.imageDetails.render()
-          }
-        }
-
-        // var diff = _.difference(oldTab,newTab);
-        _this.setWillBeActive(newTab);
-        _this.setoldSelectedInactive(oldTab);
-        _this.setAllSelectedActive(newTab);
-        _this.cleanWillBeActive(newTab);
-        
-        
-
-        _this.updateUIWhenSelectionChange();
-        
-
-        /*update control ui here */
-
-        // if( tabSelected.length == 1) {
-        //   //updateui
-        // }
-        // if(tabSelected.length > 1 ) {
-        //   console.log("change from multi select ")
-        //   console.log(this.model.get('newSelected'))
-        // }
-      });
+     
 
       this.fetchSessionInfos();
       this.initCollection();
-      // this.model.set('newSelected',[1,2,12]);
+
+      this.viewActions = new ActionsContainer({
+        collection : _this.myImageCollection
+      })     
     },
-
-    updateUIWhenSelectionChange : function() {
-      var _this = this;
-      var tabSelected = this.model.get('newSelected');
-      if( !tabSelected ) {
-        // console.log("désactive tout");
-        
-      } 
-      var collection = new Backbone.Collection();
-      var index,tmpModel;
-
-      for( var i = 0 ; i < tabSelected.length ; i++ ) {
-        index = tabSelected[i];
-        tmpModel = this.tabView[index].model;
-        collection.push(tmpModel)
-        index = undefined
-        tmpModel = undefined
-      }
-
-      $.when(_this.dataTags)
-      .then(function(resp) {
-
-        _this.toolsBar.fillElemTags(collection);
-        // if (collection.length == 1 ) {
-        //   _this.toolsBar.displaySingleSelect()
-        // }
-        // if( collection.length > 1 ) {
-        //   _this.toolsBar.displayMultiselect()
-        // }
-        
-      })
-
-
-      if( tabSelected.length == 1 ) {
-        this.displaySingleSelect()
-        console.log("control pour une photo")
-      }
-      if ( tabSelected.length > 1) {
-        this.displayMultiselect()
-        console.log("multicontrol (le plus simple)")
-      }
-
-    },
-
 
     fetchSessionInfos: function () {
       var _this = this;
@@ -539,7 +192,6 @@ define([
       });
     },
 
-
     initCollection: function () {
       var _this = this;
       var ImageCollection = PageColl.extend({
@@ -549,7 +201,27 @@ define([
           pageSize: 24
         },
         url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
-        patch: function () {}
+        patch: function () {},
+        getNextPage : function(options){
+          if (this.hasNextPage()) {
+            _this.pageChange = 'N';
+          }
+          return PageColl.prototype.getNextPage.call(this,options);
+        },
+        getPreviousPage : function(options){
+          if (this.hasPreviousPage()) {
+            _this.pageChange = 'P';
+          }
+            return PageColl.prototype.getPreviousPage.call(this,options);
+        },
+        getPage : function (index,options) {
+          var tabModels = this.fullCollection.where({activeFront : true});
+          for( var i = 0 ; i < tabModels.length ; i ++ ) {
+            tabModels[i].set({'activeFront' : false})
+          }
+          return PageColl.prototype.getPage.call(this,index,options);
+        }
+        
       });
 
       this.myImageCollection = new ImageCollection();
@@ -565,14 +237,118 @@ define([
       });
 
       this.myImageCollection.on('sync', function () {
+        //triggered when collection fetched
+        //set first item active
+        this.models[_this.currentPosition].set({activeFront : true });
         _this.refreshCounter();
       });
+
+      this.myImageCollection.on('change' , function(){
+       var activeModel = this.where({activeFront : true})
+       console.log("all active : ",activeModel)
+      })
 
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function (e) {
         // console.log("reset du paginator");
       });
+
+    },
+
+    findIndexOfElemImg : function(elem) {
+      var index 
+      var curElem
+      for( var i =0 ; i < this.tabView.length ; i ++ ) {//loop on elm to find index img clicked
+        curElem = this.tabView[i].el.getElementsByTagName('img');
+        //TODO be sure that's work in any case
+        if(curElem && (curElem[0] === elem) ) {
+          index = i;
+          break;
+        }
+        curElem = undefined;
+      }
+      return index;
+    },
+    handleFocus : function(e) {
+      if (  this.stopSpace ){
+        return;
+      }
+      var _this = this;
+      var indexFind = this.findIndexOfElemImg( e.currentTarget )
+      var lastPosition = this.currentPosition
+      this.currentPosition = indexFind;
+      var newTab = [];
+      var idClicked = Number(e.currentTarget.id.replace("zoom_",''))
+      var modelClicked = this.currentCollection.where({id : idClicked });
+      var tabModelActivatedBefore = this.currentCollection.where({activeFront : true });
+
+      if( e.ctrlKey ) { //ctrl + click add/remove item selected
+        this.currentPosition = lastPosition
+        //will activate everything then remove img ever selected
+        for( var i = 0 ; i < modelClicked.length ; i++){
+          modelClicked[i].set({activeFront : true })
+        }
+        if (tabModelActivatedBefore.length > 1) {
+          for(var i = 0 ; i < modelClicked.length ; i++ ) {
+            for( var j = 0 ; j< tabModelActivatedBefore.length ; j++) {
+              if( tabModelActivatedBefore[j].cid ===  modelClicked[i].cid ){
+                modelClicked[i].set({activeFront : false })
+              }
+            }
+          }
+        }
+      }
+      else {
+        for( var i = 0 ; i < tabModelActivatedBefore.length ; i++ ) {
+          tabModelActivatedBefore[i].set({activeFront : false })
+        }
+        for( var i = 0 ; i < modelClicked.length ; i++ ){
+          modelClicked[i].set({activeFront : true })
+        }
+
+      }
+      var tabModelActivated = this.currentCollection.where({activeFront : true });
+      if( tabModelActivated.length == 1 ) {
+        var model = tabModelActivated[0]
+        this.currentPosition = this.currentCollection.indexOf(model)
+        if (this.rgImageDetails.currentView != undefined) {
+          this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
+        }
+
+        if (this.rgFullScreen.currentView !== undefined && this.stopSpace) {
+          this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+        }
+      }
+      this.currentCollection.trigger('change')
+    },
+
+
+    updateUIWhenSelectionChange : function() {
+      return;
+      var _this = this;
+      var tabSelected = this.model.get('newSelected');
+      if( !tabSelected ) {
+        // console.log("désactive tout");
+        
+      } 
+      var collection = new Backbone.Collection();
+      var index,tmpModel;
+
+      for( var i = 0 ; i < tabSelected.length ; i++ ) {
+        index = tabSelected[i];
+        tmpModel = this.tabView[index].model;
+        collection.push(tmpModel)
+        index = undefined
+        tmpModel = undefined
+      }
+
+      $.when(_this.dataTags)
+      .then(function(resp) {
+        _this.toolsBar.fillElemTags(collection);      
+      })
+
+
 
     },
 
@@ -584,8 +360,11 @@ define([
       this.nbPhotosRefused = this.myImageCollection.fullCollection.where({
         validated: 4
       }).length;
-      this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
-        validated: null
+      // this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
+      //   validated: null
+      // }).length;
+      this.nbPhotosNotChecked = this.myImageCollection.fullCollection.filter(function (model) {
+        return (model.get('validated') !== 4 && model.get('validated') !== 2);
       }).length;
       this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function (model) {
         return (model.get('stationId') !== null && model.get('validated') === 2);
@@ -602,6 +381,7 @@ define([
 
     onRender: function () {
       this.$el.i18n();
+      this.rgActionsContainer.show(this.viewActions)
     },
 
     onShow: function () {
@@ -613,6 +393,7 @@ define([
     display: function () {
       var _this = this;
       this.listenTo(this.myImageCollection, 'reset', function (e) { // trigger on init or on change page
+        
         _this.displayImages(_this.myImageCollection);
         _this.rgToolsBarTop.show(this.toolsBarTop);
         this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
@@ -625,7 +406,15 @@ define([
 
     displayImages: function (myCollectionToDisplay) {
       var _this = this;
-      this.currentCollection = myCollectionToDisplay;
+      if ( myCollectionToDisplay !== this.currentCollection) {
+        var tabModels = this.currentCollection.where({activeFront : true })
+        for( var i = 0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].set({activeFront : false })
+        }
+        this.currentCollection = myCollectionToDisplay;
+        this.rgActionsContainer.currentView.changeCollection(this.currentCollection)
+        this.rgToolsBar.currentView.changeCollection(this.currentCollection)
+      }
       var ImageModel = new CamTrapImageModel();
       
 
@@ -664,15 +453,11 @@ define([
               break;
             }
         }
-        if (this.currentPosition == newPosition ) {
-          this.model.set('newSelected' , [newPosition] , {silent:true});
-          // this.model.set('newSelected' , [newPosition]);
-          // this.model.trigger("change:{newSelected}");
+        if (this.currentPosition != newPosition ) {
+          this.currentPosition = newPosition;
         }
-        else {
-          this.model.set('newSelected' , [newPosition], {silent:true});
-        }
-        this.model.trigger('change', this.model, [newPosition]);
+        this.tabView[this.currentPosition].model.set({activeFront : true});
+        // this.model.trigger('change', this.model, [newPosition]);
 
         // this.tabSelected = [];
 
@@ -683,27 +468,28 @@ define([
 
         var tabOldUiSelected = [];
         var tabNewSelected = [];
- 
         $('#gallery').selectable({
           filter: '.imageCamTrap',
           distance: 10,
 
           start: function (e) { // for all elem
-            // console.log("start selection")
-            var tabSelected = $('#gallery > .active');
-            var index;
-            tabOldUiSelected = []
-            for ( var i = 0 ; i < tabSelected.length ; i++) {
-              tabOldUiSelected.push(tabSelected[i]);
-              index = $(".imageCamTrap").index(tabOldUiSelected[i]);
-              _this.tabView[index].removeActive();
-              $(tabOldUiSelected[i]).addClass('ui-selected');
+            tabOldUiSelected = _this.currentCollection.where({activeFront : true })
+            if (tabOldUiSelected.length == 1 ) {
+              var model = tabOldUiSelected[0]
+              _this.currentPosition = _this.currentCollection.indexOf(model)
+            }
+            for ( var i = 0 ; i < tabOldUiSelected.length ; i++) {
+              tabOldUiSelected[i].set({activeFront : false});
             }
           },
 
           selected: function (e, ui) { // for one elem
             var elem = ui.selected;
-            tabNewSelected.push(elem)
+            var imgTmp = elem.getElementsByTagName('img')[0]
+            var idClicked = Number(imgTmp.id.replace("zoom_",''))
+            var modelSelected = _this.currentCollection.where({id : idClicked });
+            modelSelected[0].set({activeFront : true})
+            tabNewSelected.push(modelSelected[0])
           },
 
           unselected: function (e, ui) { //for one elem
@@ -712,35 +498,32 @@ define([
 
           stop: function (e) { //for all elem
               if( e.ctrlKey ) {
+                for( var i =0 ; i < tabOldUiSelected.length ; i++ ) { //restore all selected
+                  tabOldUiSelected[i].set({activeFront : true})
+                }
                 for ( var i = 0 ; i < tabNewSelected.length ; i++ ) {
                   for (var j = 0 ; j < tabOldUiSelected.length ; j++ ) {
-                    if(tabNewSelected[i] === tabOldUiSelected[j] ) {
-                      //  tabNewSelected[i].className = tabNewSelected[i].className.replace(' ui-selected','')
-                      $(tabNewSelected[i]).removeClass('ui-selected');
-                      var curIndex = $(".imageCamTrap").index(tabNewSelected[i]);
-                      _this.tabView[curIndex].removeActive();
+                    if(tabNewSelected[i].cid === tabOldUiSelected[j].cid ) {
+                      tabNewSelected[i].set({activeFront : false })                    
                       break;
                     }
-                    else {
-                      //find index
-                      // console.log("on test")
-                    }
-                  }
-    
+                  } 
                 }
+              }
+              var tabModelsActivate = _this.currentCollection.where({activeFront : true })
+              if( tabModelsActivate.length == 0) {
+                //Nope!
+                for( var i =0 ; i < tabOldUiSelected.length ; i++ ) { //restore all selected
+                  tabOldUiSelected[i].set({activeFront : true})
+                }
+              }
+              if( tabModelsActivate.length == 1) {
+                  var model = tabModelsActivate[0]
+                  _this.currentPosition = _this.currentCollection.indexOf(model)
               }
               tabOldUiSelected = [];
               tabNewSelected = [];
 
-              // from here we have all selected 
-              var indexItemSelected = []
-              $(".ui-selected,.ui-selectee.active", this).each(function () {
-                var index = $(".imageCamTrap").index(this);
-                indexItemSelected.push(index);
-              });
-              _this.model.set('newSelected',indexItemSelected);// change selected item
-         
-           
             /*  keep it : algo for all edit all tags in all photos
 
             if (_this.tabSelected.length > 0) {
@@ -844,7 +627,7 @@ define([
         // _this.jsonParsed.push({})
         _this.toolsBar = new ToolsBar({
           parent: _this,
-          model : null,
+          collection : _this.currentCollection,
           jsonParsed : _this.jsonParsed
         });
         _this.rgToolsBar.show(_this.toolsBar);
@@ -864,289 +647,7 @@ define([
 
 
 
-    populateDataForCreatingStation: function (imageModel) {
-      var monitoredSiteModel = this.monitoredSiteForm.model;
-      var data = {};
-      data.LAT = monitoredSiteModel.get('LAT');
-      data.LON = monitoredSiteModel.get('LON');
-      data.FK_MonitoredSite = this.siteId;
-      data.Name = imageModel.model.get('name'); //"izhjfoiuzehoezfhn";
-      data.FieldWorkers = [{
-        ID: null,
-        defaultValues: "",
-        FieldWorker: "" + window.app.user.get('PK_id') + ""
-      }];
-      data.FK_StationType = 6;
-      data.StationDate = moment(imageModel.model.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
-      for (var item in data) { // check for required val
-        var val = data[item]
-        if (typeof (val) === 'undefined' || val === null) {
-          if (item === 'stationDate')
-            throw new Error("The photo have no value for " + item);
-          else
-            throw new Error("Monitored site have no value for " + item);
-          break;
-        }
-      }
-      data.ELE = monitoredSiteModel.get('ELE') || null;
-      data.precision = monitoredSiteModel.get('precision') || null;
-      data.Comments = "created from camera trap validation" || null;
-      data.NbFieldWorker = 1;
-      data.creator = window.app.user.get('PK_id');
-      data.fieldActivityId = 39 // Id from BDD for fieldactivity : camera trapping
-      return data;
-    },
 
-    callDeleteStationAPI: function (tabOfIds, tabOfItem) {
-      if (tabOfIds.length === 1) {
-        var stationId = tabOfIds[0];
-        var item = tabOfItem[0];
-        var _this = this;
-        if (stationId === null)
-          return;
-
-        $.ajax({
-            type: 'DELETE',
-            url: config.coreUrl + 'stations/' + stationId,
-            contentType: 'application/json'
-          })
-          .done(function (resp) {
-            item.removeStation();
-            // console.log("Station" + stationId + " removed ok");
-          })
-          .fail(function (err) {
-            // console.log(err);
-          });
-      } else {
-
-        $.ajax({
-            type: 'POST',
-            url: config.coreUrl + 'stations/deleteMany',
-            contentType: 'application/json',
-            data: JSON.stringify(tabOfIds)
-          })
-          .done(function (resp) {
-            // console.log(resp);
-            for (var item in resp) {
-              var indexElem = tabOfIds.findIndex(function (elem) {
-                return Number(item) === elem;
-              });
-              tabOfItem[indexElem].removeStation();
-            }
-          })
-          .fail(function (err) {
-            // console.log(err);
-          })
-
-      }
-
-
-    },
-
-    editStation: function (event) {
-      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
-        return;
-      }
-      var stationId, title, text;
-      if (this.tabSelected.length == 0) {
-        if (this.currentPosition !== null) {
-          stationId = this.tabView[this.currentPosition].model.get('stationId')
-          if (stationId) {
-            window.open('./#stations/' + stationId + '');
-          } else {
-            title = 'No Station for this photo !';
-            text = 'Please select a photo with station attached';
-          }
-        }
-      } else {
-        title: 'You can\'t edit multi stations in the same time';
-        text = 'Please select only ONE photo'
-      }
-      if (!stationId) {
-        Swal({
-          title: title,
-          // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-          html: text,
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(218, 146, 15)',
-          confirmButtonText: 'Ok',
-          closeOnConfirm: false,
-        });
-      }
-    },
-
-    removeStation: function (event) {
-      
-      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
-        return;
-      }
-      var tabSelected = this.model.get('newSelected') || [];
-
-      var tabOfIds = [];
-      var tabOfItem = [];
-
-      for ( var i = 0 ; i < tabSelected.length ; i++ ){
-        var index = tabSelected[i];
-        if (this.tabView[index].model.get('stationId') !== null) {
-          tabOfIds.push(this.tabView[index].model.get('stationId'));
-          tabOfItem.push(this.tabView[index]);
-        }
-      }
-      if (tabOfIds.length === 0 || tabOfItem.length === 0) {
-        Swal({
-          title: 'Error',
-          html: 'No stations to remove',
-          type: 'error',
-          confirmButtonColor: 'rgb(218, 146, 15)',
-          confirmButtonText: 'Ok',
-          closeOnConfirm: true,
-          closeOnCancel: true
-        });
-        return;
-      }
-      this.callDeleteStationAPI(tabOfIds, tabOfItem);
-      this.refreshCounter();
-      this.updateUIWhenSelectionChange()
-    },
-
-    callPostAllStationsAPI: function(tabElem,tabData) {
-
-      var _this = this;
-      $.ajax({
-        type: 'POST',
-        url: config.coreUrl + 'stations/insertAll',
-        data: JSON.stringify(tabData),
-        contentType: 'application/json',
-        dataType: 'json'
-      })
-      .done(function (resp) {
-        var namePhoto,model;
-        var tabModel = new Backbone.Collection();
-        for( var i = 0 ; i < resp.length ; i++ ) {
-          namePhoto = Object.keys(resp[i])[0];
-          model = _this.myImageCollection.fullCollection.where({
-            name: namePhoto
-          });
-          if (model[0]) {
-            model[0].set({ stationId : resp[i][namePhoto]},{silent:true} )
-            tabModel.add(model)
-          }
-          model=undefined;
-        }
-
-        $.ajax({
-          type: 'PUT',
-          url: config.coreUrl + 'sensorDatas/camtrap/'+_this.equipmentId+'/updateMany',
-          contentType: 'application/json',
-          data: JSON.stringify(tabModel)
-        })
-        .done(function (resp) {
-          var index,model
-          var tabSelected = _this.model.get('newSelected');
-
-          for( var i = 0; i < tabSelected.length ; i ++ ) {
-            index = tabSelected[i]
-            model = _this.tabView[index].model
-            if ( model.get('stationId') ){
-              _this.tabView[index].setVisualStationAttached(true);
-            }
-          }
-          _this.refreshCounter();
-          _this.updateUIWhenSelectionChange()
-
-        })
-        .fail(function (err) {
-          // console.log(err);
-          alert("someting goes wrong")
-        })
-
-      })
-      .fail(function (err) {
-        // console.log(err)
-        throw new Error("error create station");
-      });
-
-    },
-
-    callPostStationAPI: function (elem, data) {
-      var _this = this;
-      $.ajax({
-          type: 'POST',
-          url: config.coreUrl + 'stations/',
-          data: JSON.stringify(data),
-          contentType: 'application/json',
-          dataType: 'json'
-        })
-        .done(function (resp) {
-          elem.attachStation(resp.ID);
-          _this.refreshCounter();
-          _this.updateUIWhenSelectionChange()
-        })
-        .fail(function (err) {
-          // console.log(err)
-          throw new Error("error create station");
-        });
-
-    },
-
-
-    createStation: function (event) {
-      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
-        return;
-      }
-      var _this = this;
-      var tabSelected = this.model.get('newSelected') || [];
-      var listOfElem = []
-      
-
-      if( !tabSelected ) {
-        return;
-      }
-      
-      var tabStationPending = []
-        for( var item in tabSelected ) {
-          var elem = tabSelected[item];
-          if (this.tabView[elem].model.get('validated') === 2 && this.tabView[elem].model.get('stationId') === null  ) {
-            tabStationPending.push(elem);
-          }
-        }
-
-        if (tabStationPending.length == 0 ) {
-          Swal({
-            title: 'Error',
-            html: 'You can\'t create stations on rejected photo(s)',
-            type: 'error',
-            confirmButtonColor: 'rgb(218, 146, 15)',
-            confirmButtonText: 'Ok',
-            closeOnConfirm: true,
-            closeOnCancel: true
-          });
-          return;
-        }
-      //TODO will fail if same position , same name
-      if( tabStationPending.length == 1 ) {
-        var data = this.populateDataForCreatingStation(this.tabView[elem]);
-        this.callPostStationAPI(this.tabView[elem], data);
-      }
-      if (tabStationPending.length > 1 ) {
-        var allData = []
-        for (var i = 0; i < tabStationPending.length; i++) {
-          var elem = tabStationPending[i];
-          var data = this.populateDataForCreatingStation(this.tabView[elem]);
-          allData.push(data)
-          // this.callPostStationAPI(this.tabView[elem], data);
-        }
-        this.callPostAllStationsAPI(tabStationPending,allData)
-      }
-
-    },
-
-
-    filterCollectionCtrl2: function (event) {
-
-      // console.log(event);
-    },
 
     filterNavOpen: function () {
       var sidenav = this.$el.find("#mySidenav");
@@ -1179,21 +680,6 @@ define([
         return Number(tmp);
       return NaN;
     },
-
-    fetchAllSessions: function () {
-      var _this = this;
-      $.ajax({
-          url: config.coreUrl + 'sensorDatas/' + _this.type,
-        })
-        .done(function (resp) {
-          _this.equipmentId = resp[1][_this.equipLine].sessionID
-          _this.fetchSessionInfos();
-          _this.initCollection();
-        })
-        .fail(function () {
-          // console.log("pas bon");
-        });
-    },
     destroyViews: function (tabView) {
       for (var i = 0; i < tabView.length; i++) {
         tabView[i].destroy();
@@ -1217,206 +703,78 @@ define([
     },
 
     acceptPhoto: function (e) {
-      if (this.tabSelected.length == 0) {
-        if( e.currentTarget.className.indexOf('disabled') > -1 ) {
-          return;
-        }
-        var tabPhotoAccepted = this.model.get('newSelected') || [];
-        if( tabPhotoAccepted.length ==1 ) {
-          var elem = tabPhotoAccepted[0];
-          this.tabView[elem].setModelValidated(2);
-          this.refreshCounter();
-          this.updateUIWhenSelectionChange();
-        }
-        else {
-          this.acceptAllPhoto();
-        }
-     }
-
+      var tabModels = this.currentCollection.where({activeFront : true });
+      if( tabModels.length > 1) { //batch
+        this.acceptAllPhoto(tabModels);        
+      }
+      if( tabModels.length == 1) { //single
+        tabModels[0].set({validated : 2 });
+      }
     },
 
-    acceptAllPhoto : function() {
+    acceptAllPhoto : function(tabModels) {
       var _this = this;
-      var tabPhotoAccepted = this.model.get('newSelected') || [];
-      var collectionPhotoAccepted = new Backbone.Collection();
-      var tabItemAccepted = [];
-      var index;
-      var tmpModel
-      
-      for( var i = 0 ; i < tabPhotoAccepted.length ; i++ ) {
-        index = tabPhotoAccepted[i];
-        tmpModel = this.tabView[index].model;
-        if( tmpModel.validated !== 2 ) {
-          this.tabView[index].setModelValidatedSilent(2);
-          collectionPhotoAccepted.push(tmpModel);
-          tabItemAccepted.push(index)
-        }
-        index = undefined;
-        tmpModel = undefined;
+      var oldValidatedValues = []
+      for( var i =0 ; i< tabModels.length ; i++ ) {
+        oldValidatedValues.push(tabModels[i].get('validated') )
+        tabModels[i].set({validated : 2 },{silent:true});
       }
-
       $.ajax({
         type: 'PUT',
         url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
         contentType: 'application/json',
-        data: JSON.stringify(collectionPhotoAccepted)
+        data: JSON.stringify(tabModels)
       })
       .done(function (resp) {
-        var item
-        // for( var i = 0 ; i < tabItemAccepted.length ; i++ ) {
-        //   index = tabItemAccepted[i]
-        //   item = _this.tabView[index];
-
-        //   item.setModelValidatedSilent(2);
-        //   item = undefined;
-        // }
-        _this.refreshCounter();
-        _this.updateUIWhenSelectionChange();
-      })
-      .fail(function (err) {
-        for( var i = 0 ; i < tabItemAccepted.length ; i ++ ) {
-          index = tabItemAccepted[i]
-          item = _this.tabView[index];
-
-          item.setModelValidatedSilent(null);
-          item = undefined;
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].trigger("custom:refreshUI");
         }
         _this.refreshCounter();
-        _this.updateUIWhenSelectionChange();
-        // console.log(err);
-        alert("someting goes wrong")
-      })
-
-    },
-
-    nextPage: function (e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (this.currentCollection.hasNextPage()) {
-        this.pageChange = 'N';
-        this.currentCollection.getNextPage();
-      }
-    },
-
-    prevPage: function (e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (this.currentCollection.hasPreviousPage()) {
-        this.pageChange = 'P';
-        this.currentCollection.getPreviousPage();
-      }
-    },
-
-    firstPage: function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      this.currentCollection.getFirstPage();
-    },
-
-    lastPage: function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      this.currentCollection.getLastPage();
-    },
-
-    removeStationsBdd : function() {
-      var _this = this ;
-      var tabStationIdRejected = [];
-      var tabPhotoRejected = this.model.get('newSelected') || [];
-
-      for( var i = 0 ; i < tabPhotoRejected.length ; i++ ) {
-        var index = tabPhotoRejected[i];
-        var stationId = _this.tabView[index].model.get('stationId')
-        if( stationId ) {
-          tabStationIdRejected.push(stationId);
-        }
-      }
-      $.ajax({
-        type: 'POST',
-        url: config.coreUrl + 'stations/deleteMany',
-        contentType: 'application/json',
-        data: JSON.stringify(tabStationIdRejected)
-      })
-      .done(function (resp) {
-        //ok so all stations are deleted 
-
-        for( var item in tabPhotoRejected ) {
-          var elem = tabPhotoRejected[item]
-          _this.tabView[elem].removeStationAndReject();        
-        }
-        _this.refreshCounter();
-        _this.updateUIWhenSelectionChange();
-
-      })
-      .fail(function (err) {
-        // console.log(err);
-      })
         
-      //call delete 
-      //resp ok 
-      //for each model set stations null validated = 2
-    },
-
-    rejectAll: function() {
-      var _this = this;
-      var tabSelected = this.model.get('newSelected');
-      var tabRejected = [];
-
-      var index,item,model;
-      for( var i = 0 ; i < tabSelected.length ; i ++ ) {
-        index = tabSelected[i]
-        model = _this.tabView[index].model;
-        _this.tabView[index].setModelValidatedSilent(4);
-        tabRejected.push(model.toJSON())
-      }
-
-      $.ajax({
-        type: 'PUT',
-        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
-        contentType: 'application/json',
-        data: JSON.stringify(tabRejected)
-      })
-      .done(function (resp) {
-        // var item
-        // for( var i = 0 ; i < tabSelected.length ; i++ ) {
-        //   index = tabSelected[i]
-          
-        // }
-        _this.refreshCounter();
-        _this.updateUIWhenSelectionChange();
       })
       .fail(function (err) {
-        // console.log(err);
-        alert("someting goes wrong")
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].set({validated : oldValidatedValues[i] },{silent:true,refreshUI : true});
+        }
+        _this.refreshCounter();
       })
-    },
 
-    canIRefused : function(tab) {
-      var listPhotos = [];
-      var index ;
-      var flag = true;
-      var _this = this
-      for(var i= 0 ; i< tab.length ; i++ ) {
-        index = tab[i]
-        // if(this.tabView[index].model.get('tags') || this.tabView[index].model.get('stationId') ) {
-        //   listPhotos.push(index+1)
-        // }
-        if(this.tabView[index].model.get('stationId') ) {
-          listPhotos.push(index+1)
+    },
+    rejectPhoto: function (e) {
+      if( e.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
+      var tabModels = this.currentCollection.where({activeFront : true });
+      var tabModelsWithStation = this.currentCollection.filter(function (model) {
+        return (model.get('stationId') !== null && model.get('activeFront'));
+      });
+
+      if( tabModelsWithStation.length ) {
+        this.handlerDestroyStations(tabModelsWithStation);
+      }
+      else {
+        if( tabModels.length > 1 ) {
+          this.rejectAllPhotos(tabModels);
+        }
+        if( tabModels.length == 1){
+          tabModels[0].set({validated : 4 })
         }
       }
-      if (listPhotos.length) {
+      
+    },
+    handlerDestroyStations : function(tabModelsWithStation) {
+        var _this = this
         var text = '';
-        if( listPhotos.length == 1 )  {
-          text = 'Station will be destroyed for picture N°:<BR>'+listPhotos.join(',');
+        var tabIndexPhoto = tabModelsWithStation.map(function(elem){
+          return elem.collection.indexOf(elem)
+        });
+        if( tabModelsWithStation.length == 1 )  {
+          text = 'Station will be destroyed for picture N°:<BR>'+tabIndexPhoto.join(',');;
         }
         else {
-          text =  'Stations will be destroyed for pictures N°:<BR>'+listPhotos.join(',');
+          text =  'Stations will be destroyed for pictures N°:<BR>'+tabIndexPhoto.join(',');;
         }
+
 
         Swal({
           title: 'Warning',
@@ -1432,72 +790,334 @@ define([
           
         }).then((result) => {
           if( 'value' in result ) {
-            _this.removeStationsBdd();
-            var tabToRefuse = []
-            for(var i = 0 ; i < tab.length ; i++ ) {
-              _this.tabView[tab[i]].setModelValidated(4);
-              tabToRefuse.push(tab[i]);
-            }
+            _this.removeStationsBdd(tabModelsWithStation);
           }
 
         });        
-        /*
-        ,function (isConfirm) {
-          if (isConfirm) {
-            _this.removeStationsBdd();
-            // var tabToRefuse = []
-            // for(var i = 0 ; i < tab.length ; i++ ) {
-            //   _this.tabView[tab[i]].setModelValidated(4);
-            //   tabToRefuse.push(tab[i]);
-            // }
-          } 
+      
+    },
+
+    
+    removeStationsBdd : function(tabModelsWithStation) {
+      var _this = this ;
+      var tabStationIdRejected = [];
+      tabStationIdRejected = tabModelsWithStation.map(function(elem) {
+        return elem.get('stationId');
+      })
+      $.ajax({
+        type: 'POST',
+        url: config.coreUrl + 'stations/deleteManyWithCamTrap',
+        contentType: 'application/json',
+        data: JSON.stringify(tabStationIdRejected)
+      })
+      .done(function (resp) {
+        //ok so all stations are deleted 
+        //and we are sure that all camptrap with stationsId is null so we reject
+        for(var i = 0 ; i < tabModelsWithStation.length ; i++ ) {
+          tabModelsWithStation[i].set({stationId : null } , {silent: true,refreshUI : true})
+        }
+        var tabModels = _this.currentCollection.where({activeFront : true });
+        _this.rejectAllPhotos(tabModels)
+      })
+      .fail(function (err) {
+        // console.log(err);
+      })
+        
+    },
+
+    rejectAllPhotos : function(tabModels){
+      var _this = this;
+      var oldValidatedValues = []
+      for( var i =0 ; i< tabModels.length ; i++ ) {
+        oldValidatedValues.push(tabModels[i].get('validated') )
+        tabModels[i].set({validated : 4 },{silent:true});
+      }
+      $.ajax({
+        type: 'PUT',
+        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        contentType: 'application/json',
+        data: JSON.stringify(tabModels)
+      })
+      .done(function (resp) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].trigger("custom:refreshUI");
+        }
+        _this.refreshCounter();
+        
+      })
+      .fail(function (err) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].set({validated : oldValidatedValues[i] },{silent:true,refreshUI : true});
+        }
+        _this.refreshCounter();
+      })
+    },
+
+    editStation: function (event) {
+      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
+      var stationId, title, text;
+      var tabModels = this.currentCollection.where({activeFront : true });
+      if (tabModels.length == 1) {
+          stationId = tabModels[0].get('stationId')
+          if (stationId) {
+            window.open('./#stations/' + stationId + '');
+          } else {
+            title = 'No Station for this photo !';
+            text = 'Please select a photo with station attached';
+          }
+      } else {
+        title: 'You can\'t edit multi stations in the same time';
+        text = 'Please select only ONE photo'
+      }
+      if (!stationId) {
+        Swal({
+          title: title,
+          // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+          html: text,
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(218, 146, 15)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: false,
+        });
+      }
+    },
+
+    createStation: function (event) {
+      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
+      var _this = this;
+      var tabModelsActiveWithoutStation = this.currentCollection.filter(function (model) {
+        return (model.get('stationId') == null && model.get('activeFront'));
+      });
+
+      //TODO will fail if same position , same name
+      if( tabModelsActiveWithoutStation.length == 1 ) {
+        var data = this.populateDataForCreatingStation(tabModelsActiveWithoutStation[0]);
+        this.callPostStationAPI(tabModelsActiveWithoutStation[0], data);
+      }
+      if (tabModelsActiveWithoutStation.length > 1 ) {
+        var allData = []
+        for (var i = 0; i < tabModelsActiveWithoutStation.length; i++) {
+          var data = this.populateDataForCreatingStation(tabModelsActiveWithoutStation[i]);
+          allData.push(data)
+        }
+        this.callPostAllStationsAPI(tabModelsActiveWithoutStation,allData)
+      }
+
+    },
+    callPostStationAPI: function (elem, data) {
+      var _this = this;
+      $.ajax({
+          type: 'POST',
+          url: config.coreUrl + 'stations/insertWithCamTrap',
+          data: JSON.stringify(data),
+          contentType: 'application/json',
+          dataType: 'json'
+        })
+        .done(function (resp) {
+          elem.set({'stationId': resp.ID, 'validated' : 2 },{silent:true , refreshUI : true })
+          _this.refreshCounter();
+        })
+        .fail(function (err) {
+          // console.log(err)
+          throw new Error("error create station");
         });
 
-        */
+    },
+
+
+    populateDataForCreatingStation: function (imageModel) {
+      var monitoredSiteModel = this.monitoredSiteForm.model;
+      var data = {};
+      data.LAT = monitoredSiteModel.get('LAT');
+      data.LON = monitoredSiteModel.get('LON');
+      data.FK_MonitoredSite = this.siteId;
+      data.Name = imageModel.get('name'); //"izhjfoiuzehoezfhn";
+      data.FieldWorkers = [{
+        ID: null,
+        defaultValues: "",
+        FieldWorker: "" + window.app.user.get('PK_id') + ""
+      }];
+      data.FK_StationType = 6;
+      data.StationDate = moment(imageModel.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
+      for (var item in data) { // check for required val
+        var val = data[item]
+        if (typeof (val) === 'undefined' || val === null) {
+          if (item === 'stationDate')
+            throw new Error("The photo have no value for " + item);
+          else
+            throw new Error("Monitored site have no value for " + item);
+          break;
+        }
       }
-      else {
-        _this.rejectAll();
-        // for(var i = 0 ; i < tab.length ; i++ ) {
-        //   _this.tabView[tab[i]].setModelValidated(4);
-        // }
+      data.ELE = monitoredSiteModel.get('ELE') || null;
+      data.precision = monitoredSiteModel.get('precision') || null;
+      data.Comments = "created from camera trap validation" || null;
+      data.NbFieldWorker = 1;
+      data.creator = window.app.user.get('PK_id');
+      data.fieldActivityId = 39 // Id from BDD for fieldactivity : camera trapping
+      data.camtrapId = imageModel.get('id');
+      return data;
+    },
+
+    callPostAllStationsAPI: function(tabElem,tabData) {
+
+      var _this = this;
+      $.ajax({
+        type: 'POST',
+        url: config.coreUrl + 'stations/insertAllWithCamTrap',
+        data: JSON.stringify(tabData),
+        contentType: 'application/json',
+        dataType: 'json'
+      })
+      .done(function (resp, textStatus, jqXHR ) {
+        var keyVal;
+        var value;
+        var tabModelNotUpdated = [];
+        for( var i = 0 ; i < resp.length ; i++ ) {
+          keyVal = Object.keys(resp[i])[0]
+          value = resp[i][keyVal]
+         for(var j = 0 ; j < tabElem.length ; j++){
+          if (tabElem[j].attributes.id == keyVal) {
+            if( Number(value) ) {
+              tabElem[j].set({stationId :  value , validated : 2},{silent:true,refreshUI : true})
+            }
+            else {
+              tabModelNotUpdated.push({model : tabElem[j], message :value})
+            }
+            break;
+          }
+         }
+        }
+        if( jqXHR.status == 202) {
+          var text = []
+          for( var i = 0 ; i < tabModelNotUpdated.length ; i++ ) {
+            var model = tabModelNotUpdated[i].model;
+            var message = tabModelNotUpdated[i].message;
+            var indexInGallery = model.collection.indexOf(model) + 1;
+            text.push("photo N°"+String(indexInGallery)+" : "+message);
+          }
+          //swal
+          Swal({
+            title: 'Data Conflicts',
+            html: text.join("<BR>"),
+            type: 'error',
+            confirmButtonColor: 'rgb(218, 146, 15)',
+            confirmButtonText: 'Ok',
+            closeOnConfirm: true,
+            closeOnCancel: true
+          });
+        }
+          _this.refreshCounter();      
+      })
+      .fail(function (err) {
+        console.log(err)
+        throw new Error("error create station");
+      });
+
+    },
+
+    removeStation: function (event) {
+      
+      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
+      var tabModelsWithStation = this.currentCollection.filter(function (model) {
+        return (model.get('stationId') !== null && model.get('activeFront'));
+      });
+
+      if (tabModelsWithStation.length === 0) {
+        Swal({
+          title: 'Error',
+          html: 'No stations to remove',
+          type: 'error',
+          confirmButtonColor: 'rgb(218, 146, 15)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+          closeOnCancel: true
+        });
+        return;
+      }
+      this.callDeleteStationAPI(tabModelsWithStation);
+    },
+
+    callDeleteStationAPI: function (tabModelsWithStation) {
+      if (tabModelsWithStation.length >= 1) {
+        var _this = this;
+        $.ajax({
+            type: 'POST',
+            url: config.coreUrl + 'stations/deleteStationWithCamTrap',
+            contentType: 'application/json',
+            data : JSON.stringify(tabModelsWithStation)
+          })
+          .done(function (resp) {
+            var keyVal;
+            for( var i = 0 ; i < resp.length ; i++ ) {
+              keyVal = Object.keys(resp[i])[0]
+             for(var j = 0 ; j < tabModelsWithStation.length ; j++){
+              if (tabModelsWithStation[j].attributes.id == keyVal ){
+                tabModelsWithStation[j].set({stationId : null},{silent:true,refreshUI : true})
+                break;
+              }
+             }
+            }
+          })
+          .fail(function (err) {
+            // console.log(err);
+          });
       }
     },
 
-    rejectPhoto: function (e) {
-
-      // var tabSelected = this.model.get('newSelected');
-
-      // if (tabSelected.length == 0) {
-        if( e.currentTarget.className.indexOf('disabled') > -1 ) {
-          return;
-        }
-        this.canIRefused(this.model.get('newSelected'));
-        this.refreshCounter();
-        this.updateUIWhenSelectionChange()
-        
-      //   if (this.currentPosition !== null ) {
-      //     this.canIRefused([this.currentPosition]);
-         
-      //   }
-      // } else {
-      //   this.canIRefused(this.tabSelected);
-
-        // for (var i of this.tabSelected) {
-        //   // this.tabView[i].setModelValidated(4);
-        // }
-      // }
-    },
-    undeterminatePhoto: function (e) {
-      if (this.tabSelected.length == 0) {
-        if (this.currentPosition !== null) {
-          this.tabView[this.currentPosition].setModelValidated(1);
-        }
-      } else {
-        for (var i of this.tabSelected) {
-          this.tabView[i].setModelValidated(1);
-        }
+    nextPage: function (e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (this.currentCollection.hasNextPage()) {
+        this.currentCollection.getNextPage();
       }
     },
+
+    prevPage: function (e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (this.currentCollection.hasPreviousPage()) {
+        this.currentCollection.getPreviousPage();
+      }
+    },
+
+    firstPage: function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.tabView[this.currentPosition].model.set({activeFront : false})
+      this.currentCollection.getFirstPage();
+    },
+
+    lastPage: function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.tabView[this.currentPosition].model.set({activeFront : false})
+      this.currentCollection.getLastPage();
+    },
+
+   
+    // undeterminatePhoto: function (e) {
+    //   if (this.tabSelected.length == 0) {
+    //     if (this.currentPosition !== null) {
+    //       this.tabView[this.currentPosition].setModelValidated(1);
+    //     }
+    //   } else {
+    //     for (var i of this.tabSelected) {
+    //       this.tabView[i].setModelValidated(1);
+    //     }
+    //   }
+    // },
 
     toggleModelStatus: function (e) {
       e.preventDefault();
@@ -1521,12 +1141,26 @@ define([
           this.rgFullScreen.$el.removeClass("crop2 crop-paginator");
           this.ui.gallery.show();
           this.rgFullScreen.currentView.hide();
+          this.rgFullScreen.el.style.display = 'none';
         }
       }
     },
 
     displayModal: function (e) {
       e.preventDefault();
+      var tabModel = this.currentCollection.where({activeFront : true})
+      if( tabModel.length > 1 ) {
+        Swal({
+          title: 'Warning',
+          html: 'You can only display one photo at a time ',
+          type: 'info',
+          confirmButtonColor: 'rgb(218, 146, 15)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+          closeOnCancel: true
+        });
+        return;
+      }
 
       if (this.currentPosition !== null && !this.stopSpace) { //il faut une position pour afficher le modal
         /*activate icon*/
@@ -1539,7 +1173,8 @@ define([
           this.rgFullScreen.show(new ModalView({
             model: this.tabView[this.currentPosition].model,
             parent: this
-          }))
+          }));
+          this.rgFullScreen.el.style.display = 'block';
           this.rgFullScreen.$el.addClass("crop2 crop-paginator");
           this.rgFullScreen.$el.show();
         } else {
@@ -1547,6 +1182,7 @@ define([
             this.rgFullScreen.$el.addClass("crop2 crop-paginator");
           }
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+          this.rgFullScreen.el.style.display = 'block';
           this.rgFullScreen.$el.show();
         }
       }
@@ -1554,8 +1190,6 @@ define([
 
     mouvement: function (e) {
       /** this.stopSpace handle up and down for the fullscreen **/
-
-      var tabSelected = this.model.get('newSelected');
       var lastPosition = this.currentPosition;
       var newPosition = this.currentPosition;
       
@@ -1599,90 +1233,24 @@ define([
         }
 
         if (lastPosition !== newPosition) { // si on a bougé
-          this.model.set('newSelected',[newPosition]);
-          // this.rgToolsBar.currentView.changeModel(this.tabView[newPosition].model);
+          // this.tabView[lastPosition].model.set({activeFront : false});
+          var tabModelsActivate = this.currentCollection.where({activeFront : true });
+          for( var i =0 ; i < tabModelsActivate.length ; i ++ ) {
+            tabModelsActivate[i].set({activeFront: false })
+          }
+          this.currentPosition = newPosition;
+          this.tabView[this.currentPosition].model.set({activeFront : true});
 
           if (this.rgImageDetails.currentView != undefined) {
-            this.rgImageDetails.currentView.changeDetails(this.tabView[newPosition].model)
+            this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
           }
 
           if (this.rgFullScreen.currentView !== undefined && this.stopSpace) {
-            this.rgFullScreen.currentView.changeModel(this.tabView[newPosition].model);
+            this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           }
 
         }
     },
-
-    // mouvement: function (e) {
-    //   /** this.stopSpace handle up and down for the fullscreen **/
-    //   if (this.currentPosition !== null) {
-    //     var lastPosition = this.currentPosition; //stock la position avant changement pour savoir si on a bougé
-
-    //     switch (e.keyCode) {
-    //       case 38:
-    //         { // up
-    //           if (this.currentPosition - 6 >= 0 && !this.stopSpace) {
-    //             this.currentPosition -= 6;
-    //           }
-    //           break;
-    //         }
-    //       case 40:
-    //         { //down
-    //           if (this.currentPosition + 6 <= this.tabView.length - 1 && !this.stopSpace) {
-    //             this.currentPosition += 6;
-    //           }
-    //           break;
-    //         }
-    //       case 37:
-    //         { //left
-    //           if (this.currentPosition - 1 >= 0) {
-    //             this.currentPosition -= 1;
-    //           } else {
-    //             this.prevPage();
-    //             return;
-    //           }
-    //           break;
-    //         }
-    //         //right
-    //       case 39:
-    //         { //right
-    //           if (this.currentPosition + 1 <= this.tabView.length - 1) {
-    //             this.currentPosition += 1;
-    //           } else {
-    //             this.nextPage();
-    //             return;
-    //           }
-    //           break;
-    //         }
-    //     }
-
-    //     if (lastPosition !== this.currentPosition) { // si on a bougé
-    //       // if (this.tabSelected.length > 0 ) {
-    //       //   this.tabSelected = [];
-    //       //   this.tabView[this.currentPosition].$el.find('img').click()
-    //       //   //dirty hack
-    //       // }
-    //       this.model.set('newSelected',[this.currentPosition]);
-
-    //       if (this.tabSelected.length === 0) {
-    //         // this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
-    //         // this.tabView[this.currentPosition].handleFocus();
-    //         this.rgToolsBar.currentView.changeModel(this.tabView[this.currentPosition].model);
-    //       }
-
-    //       if (this.rgImageDetails.currentView != undefined) {
-    //         this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
-    //       }
-
-    //       if (this.rgFullScreen.currentView !== undefined && this.stopSpace) {
-    //         this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-    //       }
-
-    //     }
-
-    //   }
-
-    // },
 
     rightMouvement: function () {
       var simE = {
@@ -1700,22 +1268,17 @@ define([
 
     findTags: function (e) {
       e.preventDefault(); // disable browser tab
-      if( ! this.toolsBar.$elemTags[0].disabled ) {
-        if( this.toolsBar.$elemTags.data('select2').isOpen() ) {
-          this.toolsBar.$elemTags.select2('close');
-          this.toolsBar.$elemTags.select2().trigger('blur');
-          //TODO BUG FIX HANDLE CONTEXT fullscreen ? one photos selected ? tab photos selected?
-        }
-        else {
-          this.toolsBar.$elemTags.select2('open');
-        }
-      }
-    },
+      e.stopPropagation()
+      console.log("click on tab detected")
 
-    // findInput: function (e) {
-    //   e.preventDefault(); // disable browser tab
-    //   this.$el.find(".bootstrap-tagsinput  input").focus();
-    // },
+      if( this.toolsBar.$elemTags.data('select2').isOpen() ){
+        this.toolsBar.$elemTags.select2('close');
+      }
+      else {
+        this.toolsBar.$elemTags.select2('open');
+      }
+      
+    },
 
     prevImage: function () {
       var index = this.myImageCollection.indexOf(this.currentViewImg.model); // index 0 a n-1
@@ -1760,10 +1323,11 @@ define([
         this.leaveModal();
       }
       var parent$elem = e.currentTarget.parentElement
-      var allSpan = parent$elem.getElementsByTagName('span')
-      for (var i = 0; i < allSpan.length; i++) {
-        if (allSpan[i].className.indexOf('selected') > -1) {
-          allSpan[i].className = allSpan[i].className.replace(' selected', '')
+      // var allSpan = parent$elem.getElementsByTagName('span')
+      var allSelected = parent$elem.getElementsByClassName('selected') //.getElementsByTagName('span')
+      for (var i = 0; i < allSelected.length; i++) {
+        if (allSelected[i].className.split(' ').indexOf('selected') > -1) {
+          allSelected[i].className = allSelected[i].className.replace('selected', '')
         }
       }
 
@@ -1778,7 +1342,10 @@ define([
           return (model.get('stationId') != null && model.get('validated') === 2);
         }
       } else if ($elem.hasClass('notChecked')) {
-        myFilter.validated = null;
+        // myFilter.validated = null;
+        myFilter = function (model) {
+          return (model.get('validated') !== 4 && model.get('validated') !== 2);
+        }
       } else if ($elem.hasClass('allphotos')) {
         //remet la collection mere
         this.displayImages(this.myImageCollection);
@@ -1802,15 +1369,6 @@ define([
           filter
         }
       );
-
-      this.paginationFiltered = PageColl.extend({
-        mode: 'client',
-        state: {
-          pageSize: 24
-        },
-        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
-      });
-
       this.displayFiltered();
     },
 
@@ -1831,6 +1389,25 @@ define([
           return {
             totalRecords: resp.total_entries
           };
+        },
+        getNextPage : function(options){
+          if (this.hasNextPage()) {
+            _this.pageChange = 'N';
+          }
+          return PageColl.prototype.getNextPage.call(this,options);
+        },
+        getPreviousPage : function(options){
+          if (this.hasPreviousPage()) {
+            _this.pageChange = 'P';
+          }
+            return PageColl.prototype.getPreviousPage.call(this,options);
+        },
+        getPage : function (index,options) {
+          var tabModels = this.fullCollection.where({activeFront : true});
+          for( var i = 0 ; i < tabModels.length ; i ++ ) {
+            tabModels[i].set({'activeFront' : false})
+          }
+          return PageColl.prototype.getPage.call(this,index,options);
         }
       });
 
@@ -1912,13 +1489,13 @@ define([
             .done(function (response, status, jqXHR) {
                 //todo handle stored procedre return
               var newText = '';
-              newText += _this.nbPhotosAccepted + ' photos validated <BR>'
-              newText += _this.nbPhotosRefused + ' photos refused <BR>'
-              newText += _this.nbPhotosStationed + ' stations created <BR>'
+              newText += response.nbValidated + ' photos validated <BR>'
+              newText += response.nbRefused  + ' photos refused <BR>'
+              newText += response.nbStationsCreated + ' stations created <BR>'
 
               Swal({
                 title: 'Session validated',
-                html: 'On ' + _this.nbPhotos + ' photos <BR>' + text,
+                html: 'On ' + _this.nbPhotos + ' photos <BR>' + newText,
                 type: 'success',
                 showCancelButton: true,
                 confirmButtonColor: 'rgb(218, 146, 15)',
@@ -1937,20 +1514,7 @@ define([
                   Backbone.history.navigate('validate/camtrap');
                   window.location.reload();
                 }
-              });            /*
-              , function () {
-                if (isConfirm) {
-                  Backbone.history.navigate('monitoredSites/' + _this.siteId, {
-                    trigger: true
-                  });
-                } else {
-                  Backbone.history.navigate('validate/camtrap');
-                  window.location.reload();
-                }
-
-              })
-
-              */
+              });
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
               Swal({
