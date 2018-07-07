@@ -22,7 +22,9 @@ define([
 			//'space': 'onClickImage',
 		},
 		modelEvents: {
-			"change": "changeValid"
+			"change": "changeValid",
+			"custom:activechange": "changeActive",
+			"custom:refreshUI" : "render"
 		},
 		events: {
 			// 'click img': 'clickFocus',
@@ -70,29 +72,44 @@ define([
 		// 	}
 		// },
 
+		changeActive: function(e){
+			var active = this.model.get('activeFront');
+			this.render()
+				if(active === true) {
+					this.$el.addClass('ui-selected')
+				}
+				if( active === false) {
+					this.$el.removeClass('ui-selected')
+				}
+			
+		},
+
 		setActive : function(e) {
+			// this.model.set('activeFront',true);
 			$(this.el).removeClass('active_bl');
 			$(this.el).removeClass('active_br');
 			$(this.el).removeClass('active_bt');
 			$(this.el).removeClass('active_bb');
-			$(this.el).removeClass('active');
+			// $(this.el).removeClass('active');
 
-			this.calculateBorders();
-			if( this.el.className.split(' ').indexOf('active') == -1 ) {
-				$(this.el).addClass('active');
-			}
-			if( this.ui.vignette[0].className.split(' ').indexOf('active') == -1 ) {
-				$(this.ui.vignette[0]).addClass('active');
-			}
+			// this.calculateBorders();
+			// if( this.el.className.split(' ').indexOf('active') == -1 ) {
+			// 	$(this.el).addClass('active');
+			// }
+			// if( this.ui.vignette[0].className.split(' ').indexOf('active') == -1 ) {
+			// 	$(this.ui.vignette[0]).addClass('active');
+			// }
 
 		},
 
 		removeActive : function(e) {
+			// this.model.set('activeFront',false);
+
 			$(this.el).removeClass('active_bl');
 			$(this.el).removeClass('active_br');
 			$(this.el).removeClass('active_bt');
 			$(this.el).removeClass('active_bb');
-			$(this.el).removeClass('active');
+			// $(this.el).removeClass('active');
 			// $(this.el).removeClass('ui-selected');
 			// if( this.el.className.indexOf(' active') > -1) {
 			// 	// this.el.className = this.el.className.replace(' active', '' );
@@ -102,9 +119,9 @@ define([
 			// 	$(this.el).removeClass('ui-selected')
 			// 	// this.el.className = this.el.className.replace(' ui-selected', '' );
 			// }
-			if( this.ui.vignette[0].className.split(' ').indexOf('active') > -1 ) {
-				$(this.ui.vignette[0]).removeClass('active');
-			}
+			// if( this.ui.vignette[0].className.split(' ').indexOf('active') > -1 ) {
+			// 	$(this.ui.vignette[0]).removeClass('active');
+			// }
 		},
 
 		calculateBorders: function(){
@@ -179,16 +196,17 @@ define([
 		},
 
 		onRender: function () {
-			this.setVisualValidated(this.model.get("validated"));
+			// this.setVisualValidated(this.model.get("validated"));
 		},
 
 		changeValid: function (e) {
+			// this.render();
 			var _this = this;
-			var detectError = false;
+
 			this.model.save(
 				e.Changed, {
 					error: function () {
-						detectError = true;
+						
 						_this.model.set(_this.model.previousAttributes(), {
 							silent: true
 						});
@@ -197,16 +215,18 @@ define([
 							type: 'error',
 							text: 'Connection problem for modification \n <br> Not modified please retry (if the problem persist check your connection or contact an admin)'
 						});
-						_this.setVisualValidated(_this.model.get("validated"));
+						_this.render()
 					},
 					success: function () {
+						_this.model.trigger('custom:refreshUI');
 						_this.parent.refreshCounter();
-						//_this.render();
+						_this.render()
 					},
 					patch: true,
 					wait: true,
 				}
 			);
+			
 		},
 
 		setModelTags: function (xmlTags) {
@@ -254,10 +274,8 @@ define([
 				validated: val
 			}, {
 				silent: true
-			})
-			this.setVisualValidated(val);
-
-
+			});
+			this.render();
 		},
 
 		setModelValidated: function (val) {
@@ -273,8 +291,7 @@ define([
 							stationId : null 
 						});
 						_this.parent.toolsBar.$elemTags.val(null).trigger('change');
-						_this.setVisualValidated(val);
-						_this.setVisualStationAttached(false);
+						_this.render();
 					})
 					.fail(function(err) {
 						console.error('destroy station failed')
@@ -286,8 +303,7 @@ define([
 						// tags : null
 					});
 					_this.parent.toolsBar.$elemTags.val(null).trigger('change');
-					_this.setVisualValidated(val);
-					_this.setVisualStationAttached(false);
+					_this.render();
 				}
 			
 			}
@@ -295,69 +311,9 @@ define([
 				this.model.set({
 					validated: val
 				});
-				this.setVisualValidated(val);
+				_this.render();
 			}
 			
-		},
-
-		setVisualStationAttached: function (valBoolean) {
-			var header = this.el.getElementsByClassName('camtrapItemViewHeader')[0];
-			if (valBoolean) {
-				if (header.style.display)
-					header.style.display = ''
-			} else {
-				if (header.style.display === '')
-					header.style.display = "none";
-			}
-		},
-
-		setVisualValidated: function (valBool) {
-			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent');
-			var $image = $content.children('img');
-
-			switch (this.model.get("validated")) {
-				case 1:
-					{ // not checked
-						if ($content.hasClass('accepted')) {
-							$content.removeClass('accepted');
-						}
-						if ($content.hasClass('rejected')) {
-							$content.removeClass('rejected');
-						}
-						$image.removeClass('checked');
-						break;
-					}
-				case 2:
-					{
-						$image.addClass('checked');
-						if ($content.hasClass('rejected')) {
-							$content.removeClass('rejected');
-						}
-						$content.addClass('accepted'); //css("background-color" , "green");
-						break;
-					}
-				case 4:
-					{
-						$image.addClass('checked');
-						if ($content.hasClass('accepted')) {
-							$content.removeClass('accepted');
-						}
-						$content.addClass('rejected'); //css("background-color" , "red");
-						break;
-					}
-				default:
-					{
-						if ($content.hasClass('accepted')) {
-							$content.removeClass('accepted');
-						}
-						if ($content.hasClass('rejected')) {
-							$content.removeClass('rejected');
-						}
-
-						$image.removeClass('checked');
-						break;
-					}
-			}
 		},
 
 		goFullScreen: function (e) {
@@ -372,11 +328,11 @@ define([
 
 		attachStation: function (id) {
 			this.model.set('stationId', id);
-			this.setVisualStationAttached(true);
+			this.render();
 		},
 		removeStation: function () {
 			this.model.set('stationId', null);
-			this.setVisualStationAttached(false);
+			this.render();
 		},
 
 		removeStationAndReject: function() {
