@@ -186,7 +186,7 @@ class SensorDatasBySession(CustomResource):
                         bddItem.validated = elemRequest['validated']
                         if elemRequest['stationId']:
                             bddItem.stationId = elemRequest['stationId']
-                        
+
                         break
             # self.bulk_save_objects(allItems)
             # s.bulk_save_objects(objects)    
@@ -998,7 +998,11 @@ class SensorDatasByType(CustomResource):
         #     """for key in index:
         #         if ( str(key) =='checkedvalidated'   )
         #         print ( str(key)+":"+str(index[key]))"""
-        return {'nbInserted' : result['nbInserted'] }
+        return {
+            'nbValidated' : result['nbValidated'],
+            'nbRefused' : result['nbRefused'],
+            'nbStationsCreated' : result['nbStationsCreated']
+            }
         # return resultat
 
 
