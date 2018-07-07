@@ -1,0 +1,69 @@
+<%
+var tabActive = items.filter(function(item){
+  if(item.activeFront){
+    return item;
+  }
+})
+var acceptedBtnClasses = ['disabled']
+var createStationBtnClasses = ['disabled']
+var editStationBtnClasses = ['disabled']
+var deleteStationBtnClasses = ['disabled']
+var refusedBtnClasses = ['disabled']
+if (tabActive.length === 1) {
+  var currentModel = tabActive[0];
+  var validated = currentModel.validated
+  var stationId =  currentModel.stationId
+  switch( validated ) {
+    case 2 : {
+      refusedBtnClasses = []
+      break;
+    }
+    case 4: {
+      acceptedBtnClasses = createStationBtnClasses = []
+      break;
+    }
+    default: {
+      acceptedBtnClasses = createStationBtnClasses = refusedBtnClasses = []
+      
+    } 
+  }
+  if (stationId) { 
+    editStationBtnClasses = deleteStationBtnClasses = []
+    createStationBtnClasses = ['disabled']
+  }
+  else {
+    createStationBtnClasses = []
+  } 
+}
+if (tabActive.length > 1) {
+  acceptedBtnClasses = []
+  createStationBtnClasses = []
+  editStationBtnClasses = ['disabled']
+  deleteStationBtnClasses = []
+  refusedBtnClasses = []
+}
+%><div id="accepted">
+  <i id="acceptedBtn" class="btn <%= acceptedBtnClasses.join(' ') %>">
+    <span class="reneco reneco-checked"></span>
+  </i>
+</div>
+<div id="createStation">
+  <i id="createStationBtn" class="btn <%= createStationBtnClasses.join(' ') %>">
+    <span class="reneco reneco-pin"></span>
+  </i>
+</div>
+<div id="editStation">
+  <i id="editStationBtn" class="btn <%= editStationBtnClasses.join(' ') %>">
+    <span class="reneco reneco-edit"></span>
+  </i>
+</div>
+<div id="deleteStation">
+  <i id="deleteStationBtn" class="btn <%= deleteStationBtnClasses.join(' ') %>">
+    <span class="reneco reneco-ECORELEVE-delete-station"></span>
+  </i>
+</div>
+<div id="refused">
+  <i id="refusedBtn" class="btn <%= refusedBtnClasses.join(' ') %>">
+    <span class="reneco reneco-close"></span>
+  </i>
+</div>
