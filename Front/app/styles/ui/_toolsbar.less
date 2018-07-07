@@ -1,4 +1,40 @@
-.toolsBarCamTrap{
+#rgToolsBar{
+  background-color : #3d3d3d; 
+  border-color: #4d4d4d;
+
+  .toolsBarCamTrap{
+  display : flex;
+  flex-direction: row;
+  justify-content: space-between;
+  #tags{
+    flex-grow: 1;
+    padding-right: 10px
+
+  }
+
+  .btn.disabled, .btn[disabled], fieldset[disabled] .btn{
+    // width: 15%;
+    margin-top : 5px;
+    background-color: #666 !important;
+  }
+
+
+  // bouton valider session
+
+    #validate{
+      // background-color: #666 !important;
+      margin-top : 4px;
+      // width: 15%;
+      box-shadow: none;
+      border: solid 1px transparent;
+    }
+    #validate.disabled{
+      background-color: #666 !important;
+    }
+    #validate:hover{
+      background-color: #449d44 !important;
+      color : #fff !important;
+    }
     .actionsBtn {
       display: none;
       justify-content: space-between;
@@ -105,6 +141,7 @@
         line-height: 2!important;
       }
     }
+}
 }
 
 .toolsBarCamTrapTop{
@@ -278,17 +315,17 @@
   margin-right: 1px !important;
   font-size: 14px;
   border-radius: 0;
-  width: 140px;
+  min-width: 140px;
   margin-top: 4px;
   padding-bottom: 7px;
 }
 // TOOLBAR BOTTOM
 
-.select2-container--default.select2-container--disabled .select2-selection--multiple{
-  background-color: #3d3d3d;
-  border: solid 1px #777;
-  margin : 5px auto;
-}
+// .select2-container--default.select2-container--disabled .select2-selection--multiple{
+//   background-color: #3d3d3d;
+//   border: solid 1px #777;
+//   margin : 5px auto;
+// }
 // input
 .select2-container--default.select2-container .select2-selection--multiple{
   background-color: #3d3d3d;
@@ -322,7 +359,7 @@
   color: rgb(190, 190, 190);
   background-color: #777;
   position: absolute;
-  top: -234px; right: 50%; left: 0; bottom: 0;
+  top: -234px; right: 0; left: 0; bottom: 0;
 }
 // span ul
 .select2-dropdown{
@@ -358,28 +395,17 @@
   color: white;
   border-radius : 0;
 }
-@media (min-width: 992px){
-  .col-md-6{
-    width: 85%;
-  }
-}
-.btn.disabled, .btn[disabled], fieldset[disabled] .btn{
-  width: 15%;
-  margin-top : 5px;
-  background-color: #666 !important;
-}
-// bouton valider session
-#validate{
-  background-color: #666 !important;
-  margin-top : 4px;
-  width: 15%;
-  box-shadow: none;
-  border: solid 1px transparent;
-}
-#validate:hover{
-  background-color: #449d44 !important;
-  color : #fff !important;
-}
+// @media (min-width: 992px){
+//   .col-md-6{
+//     width: 85%;
+//   }
+// }
+// .btn.disabled, .btn[disabled], fieldset[disabled] .btn{
+//   width: 15%;
+//   margin-top : 5px;
+//   background-color: #666 !important;
+// }
+
 // bouton retour panel de droite
 .reneco-back{
   margin-top: 3px;

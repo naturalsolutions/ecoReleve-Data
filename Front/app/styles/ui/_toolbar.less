@@ -1,18 +1,18 @@
-@toolbarHeight : 40px;
+@toolbarHeight : 53px;
 @paginatorHeight: 45px;
 
 .toolbar{
-  //height: @toolbarHeight;
-  height: 50px;
+  height: @toolbarHeight;
+  // height: 50px;
   overflow: auto;
   padding: 10px;
-  padding-top: 3px;
+  // padding-top: 3px;
   padding-bottom: 0px;
   position: relative;
   z-index:1;
   box-shadow: 0px 0px 15px 0px rgba(107, 107, 107, 0.5);
   &.bottom{
-    //z-index: 10;
+    z-index: 10;
     border-top: 1px solid #ddd;
   }
   &.top{
@@ -40,8 +40,8 @@
 .crop2{
   position: relative;
   @crop: @toolbarHeight*2;
-  //height: ~"calc(100% - @{crop})";
-  height: ~"calc(100% - 100px)";
+  height: ~"calc(100% - @{crop})";
+  // height: ~"calc(100% - 100px)";
   padding: 0px 15px;
   overflow-y: auto;
   &.overflowXH{
@@ -50,7 +50,7 @@
   &.crop-paginator{
     @crop : @toolbarHeight*2 + @paginatorHeight;
     height: ~"calc(100% - @{crop})";
-    height: ~"calc(100% - 155px)"; //145
+    // height: ~"calc(100% - 155px)"; //145
   }
 }
 /*
