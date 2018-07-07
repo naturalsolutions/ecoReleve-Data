@@ -14,6 +14,7 @@ from ..field_activities import fieldActivity
 from ..observations.observation_resource import ObservationsResource
 from .station_collection import StationCollection
 from ..permissions import context_permissions
+from ..sensors.sensor_data import CamTrap
 
 
 class StationResource(DynamicObjectResource):
@@ -48,18 +49,101 @@ class StationsResource(DynamicObjectCollectionResource):
         self.__acl__ = context_permissions[ref]
 
 
-    # def create(self):
-    #     data = self.request.json_body
-    #     if not isinstance(data, list):
-    #         return self.insert()
-    #     else:
-    #         return self.insertMany()
+    def insertWithCamTrap(self):
+        session = self.request.dbsession
+        data = {}
+        for items, value in self.request.json_body.items():
+            data[items] = value
+        
+        if data['camtrapId'] is None:
+            self.request.response.status_code = 502
+            raise KeyError("no camtrapId submitted")
+        else:
+            idCreated = -1 
+            camtrapItem = session.query(CamTrap).get(data['camtrapId'])
+            self.objectDB.values = data
+            try:
+                session.begin_nested()
+                try:
+                    session.add(self.objectDB)
+                    session.flush()
+                except Exception as e:
+                    # error when try inserting station ever on server
+                    #hack handle error raise by business ruler
+                    # need to find a cleaner way
+                    self.request.response.status_code = 409
+                    self.request.response.text = e.value
+                    session.rollback()
+                    pass
+                session.commit()
+                # session.refresh(self.objectDB)
+                idCreated = self.objectDB.ID
+                camtrapItem.stationId = idCreated
+                camtrapItem.validated = 2
+                session.add(camtrapItem)
+                session.flush()
+            except  Exception as e:
+                self.request.response.status_code = 502
+            if self.request.response.status_code == 409 :
+                return self.request.response.text
+            else:
+                return {'ID': idCreated}
+                
+    def insertAllWithCamTrap(self):
+        session = self.request.dbsession
+        session.autoflush = False
+        data = self.request.json_body
+        result = []
+        collectionItem = []
+        
+        for row in data:        
+            try:
+                self.newobjectDB = Station()
+                self.newobjectDB.values = row
+                session.begin_nested()
+                try:
+                    session.add(self.newobjectDB)
+                    session.flush()
+                    camtrapItem = session.query(CamTrap).get(row['camtrapId'])         
+                    if self.newobjectDB.ID:
+                        camtrapItem.stationId = self.newobjectDB.ID
+                    camtrapItem.validated = 2
+                    session.add(camtrapItem)
+                    session.flush()
+                    result.append({ row['camtrapId'] : self.newobjectDB.ID  })
+                except Exception as e:
+                    # error when try inserting station ever on server
+                    #hack handle error raise by business ruler
+                    # need to find a cleaner way
+                    result.append({ row['camtrapId'] : e.value   })
+                    self.request.response.status_code = 202
+                    self.newobjectDB.ID = None
+                    session.rollback()
+                    pass
+                session.commit()               
+            except Exception as e:
+                self.request.response.status_code = 502
+                raise e
+    
+        return result
 
-    # def insert(self):
-    #     session = self.request.dbsession
-    #     data = {}
-    #     for items, value in self.request.json_body.items():
-    #         data[items] = value
+    def deleteStationWithCamTrap(self):
+        session = self.request.dbsession
+        data = self.request.json_body
+        result = []
+        for row in data:
+            camTrapItem = session.query(CamTrap).get(row['id'])
+            stationItem = session.query(self.model).get(row['stationId'])
+            try:
+                if stationItem:
+                    session.delete(stationItem)
+                camTrapItem.stationId = None
+                session.add(camTrapItem)
+                result.append({camTrapItem.pk_id : 'station deleted'})
+            except Exception as e:
+                self.request.response.status_code = 502
+                raise e
+        return result
 
     def insertAll(self) :
         session = self.request.dbsession
@@ -171,11 +255,42 @@ class StationsResource(DynamicObjectCollectionResource):
             stas = session.query(Station).filter(Station.ID.in_(self.request.json_body)).all()
             for sta in stas:
                 data[str(sta.ID)] = 'not deleted'
-                try :
-                    session.delete(sta)
-                    data[str(sta.ID)] = 'deleted'
-                except :
-                    self.request.response.status_code = 502
+            try :
+                session.delete(sta)
+                data[str(sta.ID)] = 'deleted'
+            except :
+                self.request.response.status_code = 502
+
+        return data
+
+    def deleteManyWithCamTrap(self):
+        error = False
+        data = {}
+        if len(self.request.json_body) > 0 :
+            session = self.request.dbsession
+            stas = session.query(Station).filter(Station.ID.in_(self.request.json_body)).all()
+            camtraps = session.query(CamTrap).filter(CamTrap.stationId.in_(self.request.json_body)).all()
+            if len(camtraps):
+                for cam in camtraps:
+                    data[str(cam.stationId)] = 'not exist'
+                    flagNotFound = True
+                    for sta in stas:
+                        if sta.ID == cam.stationId:
+                            flagNotFound = False
+                            data[str(cam.stationId)] = 'not deleted'
+                            try:
+                                session.delete(sta)
+                                cam.stationId = None
+                                session.add(cam)
+                                data[str(cam.stationId)] = 'deleted'
+                            except:
+                                self.request.response.status_code = 502
+                    if flagNotFound:
+                        try:
+                            cam.stationId = None
+                            session.add(cam)
+                        except:
+                            self.request.response.status_code = 502
 
         return data
 
