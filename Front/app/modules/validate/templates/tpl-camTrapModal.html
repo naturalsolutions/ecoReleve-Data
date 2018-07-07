@@ -1,3 +1,24 @@
+<% 
+var classes = []
+if(validated){
+  classes.push('checked')
+}
+switch( validated ) {
+  case 2 : {
+    classes.push('accepted')
+    break;
+  }
+  case 4: {
+    classes.push('rejected')
+    break;
+  }
+  default: {
+    break;
+  } 
+}
+if (stationId) { 
+  classes.push('stationed') 
+} %>
 <div class="fullscreenimg">
     <div class="leftnavicon">
       <i class="reneco reneco-chevron_left icon-five"></i>

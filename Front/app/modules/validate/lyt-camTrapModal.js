@@ -43,7 +43,7 @@ define([
 			this.createTemplateElems();
 			this.setStatus(this.model.get('validated'))
 
-			this.listenTo(this.model, "change", function() {
+			this.listenTo(this.model, "change custom:activechange custom:refreshUI", function() {
 				_this.setStatus(_this.model.get('validated'))
 
 				if( ! this.parent.stopSpace ) {
@@ -70,8 +70,8 @@ define([
 			this.elems.status = document.createElement('span');
 			this.elems.status.className = 'status';
 
-			this.elems.station = document.createElement('span');
-			this.elems.station.className = 'station';
+			// this.elems.station = document.createElement('span');
+			// this.elems.station.className = 'station';
 
 			this.elems.date = document.createElement('div');
 			this.elems.date.className = 'date';
@@ -87,31 +87,40 @@ define([
 		},
 
 		buildTemplate: function() {
-			this.elems.content.append(this.elems.status);
-			this.elems.content.append(this.elems.station)
-			// this.elems.container.append(this.elems.status);
-			// this.elems.container.append(this.elems.station);
-			this.elems.container.append(this.elems.content);
+			// this.elems.content.append(this.elems.status);
+			// this.elems.content.append(this.elems.station)
 			this.elems.container.append(this.elems.date);
+			this.elems.container.append(this.elems.status);
+			// this.elems.container.append(this.elems.station);
+			// this.elems.container.append(this.elems.content);
 			this.elems.container.append(this.elems.position);
 		},
 
 		setStatus : function(val) {
-
+			//TODO bug
+			var $content = this.$el.find('.infosonimg')
+			$content.removeClass();
+			$content.addClass('infosonimg')
 			switch ( val ) {
 				case 1: {
 					this.statusPhoto = "UNDETERMINATE"	
 					this.elems.status.innerText = this.statusPhoto;
-					this.elems.status.style.color = 'yellow'		
+					this.elems.status.style.color = 'white'		
 					break;
 				}
 				case 2 : {
+					if( !$content.hasClass('accepted') ) {
+						$content.addClass('accepted');
+					}
 					this.statusPhoto = "ACCEPTED"
 					this.elems.status.innerText = this.statusPhoto;
 					this.elems.status.style.color = 'green'	
 					break;
 				}
 				case 4 : {
+					if( !$content.hasClass('refused') ) {
+						$content.addClass('refused');
+					}
 					this.statusPhoto = "REFUSED"
 					this.elems.status.innerText = this.statusPhoto;
 					this.elems.status.style.color = 'red'	
@@ -119,14 +128,32 @@ define([
 				}
 				default: {
 					this.statusPhoto = "UNKNOWN"
+					this.elems.status.innerText = this.statusPhoto;
+					this.elems.status.style.color = 'white'	
 					break;
 				}
 			}
 
+			if ( this.model.get('stationId') ) {
+				if( !$content.hasClass('stationed') ) {
+					this.statusPhoto = "ACCEPTED AND STATION ATTACHED"
+					this.elems.status.innerText = this.statusPhoto;
+					this.elems.status.style.color =  "rgb(191, 179, 0)";	
+					$content.addClass('stationed');
+				}
+			}
+			else {
+				if( $content.hasClass('stationed') ) {
+					$content.removeClass('stationed');
+				}
+
+			}
+
+
 			
 		},
 
-		onRender: function() {
+		onRender: function(e) {
 			var _this = this;
 			var stationAttached = '';
 			this.buildTemplate();
@@ -148,12 +175,12 @@ define([
 			// this.elems.status.innerText = this.statusPhoto;
 			this.elems.date.innerText = this.model.get('date_creation');
 			this.elems.position.innerText = this.position+'/'+this.total;
-			if(this.model.get('stationId') ) {
-				this.elems.station.className = 'station reneco icon-one reneco-stations'
-			}
-			else {
-				this.elems.station.className = 'station'
-			}
+			// if(this.model.get('stationId') ) {
+			// 	this.elems.station.className = 'station reneco icon-one reneco-stations'
+			// }
+			// else {
+			// 	this.elems.station.className = 'station'
+			// }
 
 			this.parent.$el.find('.paginatorCamTrap').prepend(this.elems.container);
 
@@ -179,12 +206,12 @@ define([
 			// 	this.$el.find('.rating-container').css('visibility' , 'hidden')
 			// }
 
-			this.theWheel = wheelzoom(_this.$el.find('img'), {zoom:1});
+			this.theWheel = wheelzoom(_this.$el.find('img'), {zoom:0.20});
 
 
 		},
 
-		changeModel (model) {
+	changeModel (model) {
       var _this = this;
       this.stopListening(this.model);
 			this.parent.$el.find('.infosfullscreen').html('');
@@ -195,7 +222,7 @@ define([
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.setStatus(this.model.get('validated'));
 
-      this.listenTo(this.model, "change", function() {
+      this.listenTo(this.model, "change custom:activechange custom:refreshUI", function() {
 				_this.setStatus(_this.model.get('validated'));
 				if( ! this.parent.stopSpace ) {
 					_this.render();
