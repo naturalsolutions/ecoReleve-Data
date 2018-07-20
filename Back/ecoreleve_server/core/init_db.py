@@ -34,6 +34,8 @@ def load_db_config(settings):
     dbConfig['data_schema'] = settings['data_schema']
     dbConfig['sensor_schema'] = settings['sensor_schema']
     dbConfig['cn.dialect'] = settings['cn.dialect']
+    dbConfig['dbLog.url'] = settings['dbLog.url']
+    dbConfig['dbLog.schema'] = settings['dbLog.schema']
 
 def initialize_session_export(settings):
     engineExport = None
