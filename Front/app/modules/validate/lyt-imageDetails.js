@@ -18,7 +18,7 @@ define([
 			//'space': 'onClickImage',
 		},
 		events:{
-			'click div#detailstitle': 'changeExif'
+			'click div#detailsExifsPhotos': 'changeExif'
 
 		},
 		className : "detailsimage",
