@@ -823,7 +823,7 @@ define([
                           <div class="panel panel-default">\
                               <div class="panel-heading" role="tab" id="headingPhotosCancelled">\
                                   <h4 class="panel-title">\
-                                      <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosCancelled" aria-expanded="true" aria-controls="collapsePhotosCancelled">\ Cancelled : '+ this.tabFilesCancelled.length +'/'+this.nbPhotos+
+                                      <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosCancelled" aria-expanded="true" aria-controls="collapsePhotosCancelled">\ Cancelled : '+ this.tabFilesCancelled.length +'/'+this.nbPhotos+
                                       '</a>\
                                   </h4>\
                               </div>\
@@ -835,7 +835,7 @@ define([
                           <div class="panel panel-default">\
                               <div class="panel-heading" role="tab" id="headingPhotosAccepted">\
                                   <h4 class="panel-title">\
-                                      <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosAccepted" aria-expanded="true" aria-controls="collapsePhotosAccepted">\ Accepted : '+ this.tabFilesAccepted.length +'/'+this.nbPhotos+
+                                      <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosAccepted" aria-expanded="true" aria-controls="collapsePhotosAccepted">\ Accepted : '+ this.tabFilesAccepted.length +'/'+this.nbPhotos+
                                       '</a>\
                                   </h4>\
                               </div>\
@@ -847,7 +847,7 @@ define([
                           <div class="panel panel-default">\
                               <div class="panel-heading" role="tab" id="headingPhotosRefused">\
                                   <h4 class="panel-title">\
-                                      <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosRefused" aria-expanded="true" aria-controls="collapsePhotosRefused">\ Refused : '+ this.uploadInfos.nbFilesRefused +'/'+this.nbPhotos+
+                                      <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapsePhotosRefused" aria-expanded="true" aria-controls="collapsePhotosRefused">\ Refused : '+ this.uploadInfos.nbFilesRefused +'/'+this.nbPhotos+
                                       '</a>\
                                   </h4>\
                               </div>\
@@ -856,7 +856,7 @@ define([
                                       <div class="panel panel-default">\
                                           <div class="panel-heading" role="tab" id="headingPhotosRefusedForExist">\
                                               <h4 class="panel-title">\
-                                                  <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForExist" aria-expanded="true" aria-controls="collapsePhotosRefusedForExist">\ Existing on server : '+ this.tabRefusedFilesForExist.length +'/'+this.nbPhotos+
+                                                  <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForExist" aria-expanded="true" aria-controls="collapsePhotosRefusedForExist">\ Existing on server : '+ this.tabRefusedFilesForExist.length +'/'+this.nbPhotos+
                                                   '</a>\
                                               </h4>\
                                           </div>\
@@ -868,7 +868,7 @@ define([
                                       <div class="panel panel-default">\
                                           <div class="panel-heading" role="tab" id="headingPhotosRefusedForDate">\
                                               <h4 class="panel-title">\
-                                                  <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForDate" aria-expanded="true" aria-controls="collapsePhotosRefusedForDate">\ Date not valid : '+ this.tabRefusedFilesForDate.length +'/'+this.nbPhotos+
+                                                  <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForDate" aria-expanded="true" aria-controls="collapsePhotosRefusedForDate">\ Date not valid : '+ this.tabRefusedFilesForDate.length +'/'+this.nbPhotos+
                                                   '</a>\
                                               </h4>\
                                           </div>\
@@ -880,7 +880,7 @@ define([
                                       <div class="panel panel-default">\
                                           <div class="panel-heading" role="tab" id="headingPhotosRefusedForUnknown">\
                                               <h4 class="panel-title">\
-                                                  <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForUnknow" aria-expanded="true" aria-controls="collapsePhotosRefusedForUnknow">\ Critical error : '+ this.tabRefusedFilesForUnknow.length +'/'+this.nbPhotos+
+                                                  <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapsePhotosRefusedForUnknow" aria-expanded="true" aria-controls="collapsePhotosRefusedForUnknow">\ Critical error : '+ this.tabRefusedFilesForUnknow.length +'/'+this.nbPhotos+
                                                   '</a>\
                                               </h4>\
                                           </div>\
