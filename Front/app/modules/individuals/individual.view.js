@@ -87,7 +87,7 @@ define([
         popup: true,
         com: this.com,
         selection: true,
-        player: false,
+        player: true,
         //bbox: true,
       });
 

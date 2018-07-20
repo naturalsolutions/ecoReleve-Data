@@ -97,6 +97,12 @@ define([
 
   Map.prototype = {
 
+
+    remove : function() {
+      console.log("on remove et oui")
+
+    },
+
     destroy: function(){
       this.map.remove();
       clearInterval(this.timer); //player timer
@@ -141,7 +147,6 @@ define([
         position:'topright'
       }).addTo(this.map);
 
-      L.control.scale().addTo(this.map);
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
@@ -500,7 +505,7 @@ define([
 
     getMarkerIconClassName: function(feature){
       var className = 'marker';
-      switch(feature.properties.type_) {
+      switch(feature.properties.type_.toLowerCase()) {
         case 'station':
           className += ' marker-station';
           break;
@@ -762,6 +767,9 @@ define([
       if(this.selection){
       var marker;
         marker=this.dict[id];
+        if( !marker ) { //litle hack
+          return;
+        }
         marker.selected=!marker.selected;
         if(this.selectedMarkers){
           this.selectedMarkers[id]=marker;
@@ -1133,6 +1141,8 @@ define([
       this.degraded();
       this.draw();
       this.playerDisplayed = true;
+      this.keyboard = true;
+      this.bindKeyboardShortcuts();
     },
 
     hidePlayer: function(){
@@ -1143,6 +1153,8 @@ define([
       this.map.addLayer(this.clusterLayer);
       this.map.removeLayer(this.playerLayer);
       this.playerDisplayed = false;
+      this.keyboard = false;
+      this.bindKeyboardShortcuts();
     },
 
     firstInit: function(geoJson){
@@ -1174,11 +1186,15 @@ define([
         } else {
           _this.showPlayer();
         }
+        $('.js-player-toggle').blur();
       });
       this.parentContainer = $($('#map').parent());
       this.parentContainer.css('overflow', 'hidden');
 
-      this.parentContainer.append('\
+
+      /*
+
+this.parentContainer.append('\
         <div id="player" class="player">\
         <div class="col-xs-12">\
         </div>\
@@ -1186,6 +1202,9 @@ define([
           <div class="js-player-scale scale"></div>\
           <div class="js-timeline-total timeline-total">\
             <div class="js-timeline-current timeline-current"></div>\
+            <div class="js-cursor-timeline-current cursor-timeline-current">\
+              <div class="js-timeline-currentDate timeline-currentDate"></div>\
+            </div>`\
           </div>\
         </div>\
         <div class="col-xs-12 custom-row">\
@@ -1197,11 +1216,11 @@ define([
           <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
           <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
           <button title="next location" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
-          <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+          <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Location by location </button> \
         </div>\
         <div class="col-xs-4 no-padding">\
           <div class="pull-left">\
-            <label for="track" title="follow positions on the map"> Track </label>\
+            <label for="track" title="follow positions on the map"> Map centered </label>\
             <input id="track" title="follow positions on the map" type="checkbox" class="js-player-track form-control pull-left" /> \
           </div>\
           <div class="pull-left">\
@@ -1211,9 +1230,55 @@ define([
           <label for="" class="pull-right">speed: </label>\
         </div>\
         <div class="col-xs-3 range">\
-          <input title="" class="js-player-day-in-ms" min=-24000 max=-200 value=-1000 step=100 width="100" type="range">\
-          <input title="" class="js-player-auto-next-speed hidden" min=-2000 max=-50 value=-1000 step=10 width="100" type="range">\
+          <input title="" class="js-player-day-in-ms" min=-24000 max=-200 value=-1000 step=100 type="range">\
+          <input title="" class="js-player-auto-next-speed hidden" min=-2000 max=-50 value=-1000 step=10 type="range">\
         </div>\
+        </div>\
+      ');
+
+      */
+
+      this.parentContainer.append('\
+        <div id="player" class="player">\
+          <div class="timeline">\
+            <div class="js-player-scale scale">\
+            </div>\
+            <div class="js-timeline-total timeline-total">\
+              <span class="js-myTooltip">hje he he he </span>\
+              <div class="js-timeline-current timeline-current" >\
+              </div>\
+              <div class="js-cursor-timeline-current cursor-timeline-current">\
+              </div>\
+            </div>\
+            <div>\
+            <span class="js-timeline-currentDate timeline-currentDate left">\
+            </span>\
+            </div>\
+          </div>\
+          <div class="custom-row">\
+            <span class="js-time-current">00:00:00</span>\
+            <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
+          </div>\
+          <div class="player-controller">\
+            <div class="checkbox-labelled">\
+              <input id="track" title="follow positions on the map" type="checkbox" class="js-player-track form-control" /> \
+              <label for="track" title="follow positions on the map"> Last point centered </label>\
+            </div>\
+            <div class="js-icon-tooltip" >\
+              <i class="reneco reneco-ECORELEVE-shortcuts shortcutsIcon"><span class="content">Shortcuts</span></i>\
+            </div>\
+            <div class="player-controller-btns">\
+              <button title="previous location" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
+              <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
+              <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
+              <button title="next location" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+            </div>\
+            <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-ECORELEVE-location-by-location"></i>Location by location </button>\
+              <div class="js-speed-range">\
+               <span>Speed : </span>\
+               <input title="" class="js-player-day-in-ms" min=-24000 max=-200 value=-1000 step=100 width="100" type="range">\
+               <input title="" class="js-player-auto-next-speed hidden" min=-2000 max=-50 value=-1000 step=10 width="100" type="range">\
+              </div>\
         </div>\
       ');
       this.bindPlayer();
@@ -1233,6 +1298,11 @@ define([
       this.index = 0;
       this.time = 0;
       this.p_markers = [];
+      // for the last 3 points
+      this.lines = {
+        0 : null,
+        1: null
+      };
 
        //usefull for position presicion & perf: is actually a framerate.
        // and to be on real quartz time because setInterval is multithread.
@@ -1244,6 +1314,44 @@ define([
       this.map.addLayer(this.playerLayer);
       
       this.computeInitialData(geoJson);
+                                         
+      $('.js-icon-tooltip').popover({
+                              animation : true,
+                              placement: 'top',
+                              template :'<div class="popover js-popover-player-position" role="tooltip">\
+                                          <h5 class="popover-title"></h5>\
+                                          <div class="popover-content"></div>\
+                                        </div>',
+                              container :'body',
+                              trigger :'hover',
+                              title: '<h5 class="custom-title"><u>Shortcuts</u></h5>',
+                              content: '<div class="js-shortcuts-help">\
+                                          <i class="reneco reneco-space">: Pause</i>\
+                                          <i class="reneco reneco-left">: Previous location</i>\
+                                          <i class="reneco reneco-right">: Next location</i>\
+                                        </div>',
+                              html: true,
+                              delay: { 
+                                show: 300,
+                                hide : 300
+                               },
+                               // viewport: 'body'
+                          }); 
+
+
+      // $('.js-icon-tooltip').tooltip({
+      //   placement : 'top',
+      //    title: 'tes gfdgfeg regre gh etgr t',
+      //   template : templateTooltip
+      // })
+    },
+
+    clearLines : function() {
+     for( var line in this.lines ) {
+       if( this.lines[line] ) {
+         this.playerLayer.removeLayer(this.lines[line])
+       }
+     }
     },
 
     degraded: function(){
@@ -1264,6 +1372,7 @@ define([
 
       var relDayInMs = ( x || 1000)
       var speed = relDayInMs / dayInMs;
+      this.speedForUi = speed;
 
       var firstDate = geoJson.features[0].properties.Date || geoJson.features[0].properties.date;
       var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date || geoJson.features[geoJson.features.length - 1].properties.date;
@@ -1302,6 +1411,7 @@ define([
       
       this.displayScale();
 
+
       $('.js-toggle-ctrl-player').removeClass('hidden');
     },
 
@@ -1312,17 +1422,17 @@ define([
       var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
       firstDate = moment(firstDate);
       $('.js-player-scale').html('');
-      $('.js-player-scale').append('<span class="note" style="left:0">' + firstDate.format(format) + '</span>');
+      $('.js-player-scale').append('<span class="note" style="left:0%">' + firstDate.format(format) + '</span>');
 
       for (var i = 0.25; i < 1; i+=0.25) {
         var diff = Math.floor(this.p_realDuration * 0.25);
         firstDate.add(diff, 'ms');
-        $('.js-player-scale').append('<span class="js-mid-scale note" style="left:' + i * 100 + '%">' + firstDate.format(format) + '</span>');
+        $('.js-player-scale').append('<span class="js-mid-scale note" style="left:'+((i)*100)+'%">' + firstDate.format(format) + '</span>');
       }
 
       var diff = Math.floor(this.p_realDuration * 0.25);
       firstDate.add(diff, 'ms');
-      $('.js-player-scale').append('<span class="note last" style="right:0">' + firstDate.format(format) + '</span>');
+      $('.js-player-scale').append('<span class="note last" style="right:0%">' + firstDate.format(format) + '</span>');
 
     },
 
@@ -1353,6 +1463,7 @@ define([
     play: function(e){
       this.playing = true;
       var _this= this;
+      this.interaction('noFocus');
       $('.js-player-play-pause>i').addClass('reneco-pause').removeClass('reneco-play');
       $('.js-timeline-current').css('transition', 'none');
       clearInterval(this.timer);
@@ -1405,6 +1516,7 @@ define([
         for (var i = 0; i < this.p_markers.length; i++) {
           this.playerLayer.removeLayer(this.p_markers[i])
         }
+        this.p_markers = [];
       }
     },
 
@@ -1412,6 +1524,7 @@ define([
       var rapport =  e.offsetX / e.currentTarget.clientWidth;
 
       this.clearMarkers();
+      this.clearLines();
 
       this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
       this.index = this.findClosestFloorPositionIndex(this.time);
@@ -1441,6 +1554,8 @@ define([
 
     pause: function(){
       this.playing = false;
+      var feature = this.locations[this.index];
+      this.interaction('highlight', feature.properties.ID || feature.id);
       $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
       $('.js-timeline-current').css('transition', 'width .2s');
       clearInterval(this.autoNextTimer);
@@ -1449,22 +1564,73 @@ define([
 
 
     updateInfos: function(){
+      var elemTimeLineTotal = $('.js-timeline-total')[0]
+      var elemTimeLineCurrent = $('.js-timeline-current')[0];
+      var elemCursorTimeline = $('.cursor-timeline-current')[0];
+      var elemTimeLineCurrentDate = $('.js-timeline-currentDate')[0];
       if(this.autoNext){
         
         $('.js-time-total').html(this.msToReadable( this.locations.length * (this.autoNextSpeed / 1000) * 1000 ));
         $('.js-time-current').html(this.msToReadable( this.index * (this.autoNextSpeed / 1000) * 1000 ));
 
         var width = (this.index /this.locations.length * 100);
-        $('.js-timeline-current').css('width', width + '%');
+        // $('.js-timeline-current').css('width', width + '%');
+        elemTimeLineCurrent.style.width = width+'%';
 
       } else {
+
+
         $('.js-time-total').html(this.msToReadable(this.p_relDuration));
 
         $('.js-time-current').html(this.msToReadable(this.time));
         var width = (this.time /this.p_relDuration * 100);
-        $('.js-timeline-current').css('width', width + '%');
-      }
 
+        // $('.js-timeline-current').css('width', width + '%');
+        elemTimeLineCurrent.style.width = width+'%';
+        }
+
+        elemCursorTimeline.style.left = 'calc('+width+'% - 7px)';
+        var format = 'DD/MM/YYYY';
+        var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
+        firstDate = moment(firstDate);
+        firstDate.add(this.time/this.speedForUi , 'ms');
+        elemTimeLineCurrentDate.innerHTML = firstDate.format(format);
+
+        //invert ?
+        var widthTotal = elemTimeLineTotal.getBoundingClientRect().width;
+        var pxAvailable = widthTotal - ( ( widthTotal * width) /100 )
+        if ( elemTimeLineCurrentDate.getBoundingClientRect().width < pxAvailable ) {
+          elemTimeLineCurrentDate.style.left = width+'%';
+          elemTimeLineCurrentDate.style.right = null;
+         if( elemTimeLineCurrentDate.className.indexOf('right') > -1 ) {
+          elemTimeLineCurrentDate.className = elemTimeLineCurrentDate.className.replace('right','left');
+         }
+        }
+        else {
+          elemTimeLineCurrentDate.style.left = null;
+          if( elemTimeLineCurrentDate.className.indexOf('left') > -1 ) {
+            elemTimeLineCurrentDate.className = elemTimeLineCurrentDate.className.replace('left','right');
+          }
+          elemTimeLineCurrentDate.style.right = (100 - width)+'%';
+        }  
+    },
+
+    drawLines : function() {
+      var p1,p2,p3;
+      //get last three points (p1 last )
+      p1 = this.p_markers[0];
+      p2 = this.p_markers[1];
+      p3 = this.p_markers[2];
+
+      if ( p2 && p3 ) {
+        if( this.lines[1])
+          this.playerLayer.removeLayer(this.lines[1]);
+        if (this.lines[0] )
+          this.lines[1] = this.lines[0];
+      }
+      if( p1 && p2  ) {
+        this.lines[0] = L.polyline( [p1.getLatLng(),p2.getLatLng()] , {className : 'polylineTest'}).addTo(this.playerLayer);
+      }
     },
 
     draw: function(){
@@ -1472,8 +1638,8 @@ define([
 
       var feature = this.locations[this.index];
       var coords = feature.geometry.coordinates;
-      var className = this.getMarkerIconClassName(feature) + ' focus';
-      var icon = new L.DivIcon({className: className});
+      var className = this.getMarkerIconClassName(feature)+ ' focus';
+      var icon = new L.DivIcon({className: className, iconSize: new L.Point(18,18)});
       var m = new L.marker(coords, {icon: icon});
       var prop = feature.properties;
       var infos = '';
@@ -1485,8 +1651,11 @@ define([
       this.p_markers.unshift(m);
 
       m.addTo(this.playerLayer);
-
-      this.interaction('highlight', feature.properties.ID || feature.id);
+      this.drawLines();
+      
+      if( !this.playing ) {
+        this.interaction('highlight', feature.properties.ID || feature.id);
+      }
 
       if(this.p_markers.length > 20){
         this.playerLayer.removeLayer(this.p_markers.pop());
@@ -1516,6 +1685,7 @@ define([
        this.index++;
        this.draw();
       }
+
       
       this.updateInfos();
 
@@ -1529,6 +1699,7 @@ define([
         return;
       }
       this.clearMarkers();
+      this.clearLines();
 
       this.index--;
       this.time = this.locations[this.index].time;
@@ -1539,6 +1710,7 @@ define([
     next: function(pass){
       if(this.time >= this.p_relDuration || this.index + 1 >= this.locations.length){
         this.clearMarkers();
+        this.clearLines();
         this.time = 0;
         this.index = 0;
       } else {
@@ -1560,6 +1732,7 @@ define([
       this.index = 0;
       this.time = 0;
       this.clearMarkers();
+      this.clearLines();
       this.draw();
     },
 
@@ -1569,7 +1742,33 @@ define([
       this.time = 0;
       this.draw();
       this.clearMarkers();
+      this.clearLines();
       this.hidePlayer();
+    },
+    displayDate : function(e) {
+
+      var _this = this;
+      var rapport =  e.offsetX / e.currentTarget.clientWidth;
+      var time = Math.floor(( _this.p_relDuration * rapport) / 10) * 10;
+      var format = 'DD/MM/YYYY';
+      var firstDate = _this.locations[0].properties.Date || _this.locations[0].properties.date;
+      firstDate = moment(firstDate);
+      firstDate.add(time/this.speedForUi , 'ms');
+      _this.myTooltipElem.innerHTML = firstDate.format(format);
+      var y = (_this.timelineTotalElem.getBoundingClientRect().y - 25) +'px';
+      var dim = _this.myTooltipElem.getBoundingClientRect();
+      _this.myTooltipElem.style.top = y;
+
+      var dimTotal = _this.timelineTotalElem.getBoundingClientRect();
+
+      if ( dim.width + e.clientX < dimTotal.right ) {
+        _this.myTooltipElem.style.left = (e.clientX) + 'px';
+        _this.myTooltipElem.style.right = null;
+      }
+      else {
+        _this.myTooltipElem.style.left = null;
+        _this.myTooltipElem.style.right = '0px';
+      }  
     },
 
     bindPlayer: function(){
@@ -1585,15 +1784,21 @@ define([
       $('.js-player-day-in-ms').on('change', $.proxy(this.handleSpeed, this));
       $('.js-player-track').on('change', $.proxy(this.toggleTrack, this));
       $('.js-timeline-total').on('click', $.proxy(this.travel, this));
+      // $('.js-timeline-total').tooltip({title:'',container:'body' ,trigger: 'manual'})
+      // $('.js-timeline-total').on('hover', $.proxy(this.displayDate, this));
+      $('.js-timeline-total').mousemove(this.displayDate.bind(this));
 
-      this.keyboard = false;
-      $('.js-player-keyboard').on('change', $.proxy(this.bindKeyboardShortcuts, this));
+      _this.myTooltipElem = $('.js-myTooltip')[0];
+      _this.timelineTotalElem = $('.js-timeline-total')[0];
+      this.keyboard = true;
+      // _this.bindKeyboardShortcuts();
+      // $('.js-player-keyboard').on('change', $.proxy(this.bindKeyboardShortcuts, this));
 
     },
 
     bindKeyboardShortcuts: function(){
       var _this = this;
-      this.keyboard = !this.keyboard;
+      // this.keyboard = !this.keyboard;
       if(this.keyboard){
         document.onkeydown = function(e){
           if(e.code === 'Space'){
@@ -1611,6 +1816,7 @@ define([
       }
 
     },
+
 
 
   }
