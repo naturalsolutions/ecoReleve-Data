@@ -89,21 +89,20 @@ define([
 
     createWorker: function() {
       var _this = this;
-      if( window.Worker ) {
         this.wExif = new Worker('./app/modules/importFile/camTrap/workerExif.js');
-      }
-      else {
-        Swal({
-          title: 'Feature not supported',
-          html: 'Sorry but your browser doesn\'t support this feature<BR>Please use Chrome<BR>',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonText: 'OK'
-        }).then( () => {
-          Backbone.history.navigate('home',{trigger: true}); }
-        })
-        ;
-      }
+      // if( window.Worker ) {
+      // }
+      // else {
+      //   // Swal({
+      //   //   title: 'Feature not supported',
+      //   //   html: 'Sorry but your browser doesn\'t support this feature<BR>Please use Chrome<BR>',
+      //   //   type: 'error',
+      //   //   showCancelButton: false,
+      //   //   confirmButtonText: 'OK'
+      //   // }).then( () => {
+      //   //   Backbone.history.navigate('home',{trigger: true}); }
+      //   // })
+      // }
       this.wExif.onmessage = function (event) {
         _this.nbFilesParsed += 1;
         _this.progressBarElem.style.width = _this.progress(_this.nbFilesParsed,_this.nbFilesToParse);

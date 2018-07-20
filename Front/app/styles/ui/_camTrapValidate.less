@@ -25,6 +25,24 @@ div.bootstrap-tagsinput{
 }
 
 .detailsimage{
+  #detailsExifsPhotos{
+    a{
+      display: block;
+      color : #333333 !important;
+    }
+    a.collapsed:after{
+      font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+      content:  "\e080"; /* adjust as needed, taken from bootstrap.css */
+      float: right;        /* adjust as needed */
+      color: grey;         /* adjust as needed */
+    }
+    a:not(.collapsed):after{
+      font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+      content:"\e114";    /* adjust as needed, taken from bootstrap.css */
+      float: right;        /* adjust as needed */
+      color: grey;         /* adjust as needed */
+    }
+  }
   .nopadding {
    padding: 0 !important;
    margin: 0 !important;
