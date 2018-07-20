@@ -998,7 +998,7 @@ define([
     },
 
     filter: function(param){
-
+      
       //TODO : refact
       var _this = this;
       if(this.url){
@@ -1407,7 +1407,7 @@ this.parentContainer.append('\
 
       this.p_relDuration = speed * this.p_realDuration;
       
-      var diff = geoJson.features[10].time / speed;
+      //var diff = geoJson.features[10].time / speed;
       
       this.displayScale();
 

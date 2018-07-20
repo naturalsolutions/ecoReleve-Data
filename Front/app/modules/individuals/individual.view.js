@@ -159,7 +159,12 @@ define([
           },
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
+          },
+          onFilterChanged: function(row){
+            _this.map.clearMarkers()
+            _this.map.clearLines()
           }
+          
         }
       }));
       this.gridViews.push(this.locationsGrid);
