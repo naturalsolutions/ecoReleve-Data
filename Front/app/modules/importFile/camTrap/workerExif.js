@@ -179,7 +179,7 @@ self.getUint32 = function (offset) {
 
 
 self.onmessage = function(event) {
-    if( !event || event.from != 'exifLib') {
+    if( !event || ( event.data &&  event.data.from != 'exifLib') ) {
         return;
     }
     self.init(event.data);
