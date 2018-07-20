@@ -280,3 +280,4 @@ class ObservationsView(DynamicObjectCollectionView):
 
 
 RootCore.listChildren.append(('protocols', ObservationsView))
+RootCore.listChildren.append(('observations', ObservationsView))
