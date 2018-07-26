@@ -854,6 +854,9 @@ define([
         node.setSelected(false);
       });
     },
+    noFocus : function() {
+      this.gridOptions.api.focusedCellController.clearFocusedCell()
+    },
 
 
     deselectAll: function(){
@@ -1016,27 +1019,13 @@ define([
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
-      }).then( (result) => {
-        if( 'value' in result && callback) {
+      },
+      function(isConfirm) {
+        //could be better
+        if (isConfirm && callback) {
           callback();
         }
       });
-
-      // Swal({
-      //   title: opt.title,
-      //   text: opt.text || '',
-      //   type: type,
-      //   showCancelButton: true,
-      //   confirmButtonColor: btnColor,
-      //   confirmButtonText: 'OK',
-      //   closeOnConfirm: true,
-      // },
-      // function(isConfirm) {
-      //   //could be better
-      //   if (isConfirm && callback) {
-      //     callback();
-      //   }
-      // });
     },
 
     deleteSelectedRows: function(callback){

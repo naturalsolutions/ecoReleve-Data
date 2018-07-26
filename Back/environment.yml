@@ -9,7 +9,7 @@ dependencies:
   - reportlab=3.4.0
   - pycrypto=2.6.1
   - sqlalchemy=1.1.13
-  - pyodbc=4.0.17
+  - pyodbc=4.0.23
   - zope.interface
   - psutil
   - scipy

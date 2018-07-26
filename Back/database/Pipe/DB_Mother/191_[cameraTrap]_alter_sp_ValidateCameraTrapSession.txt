@@ -29,7 +29,7 @@ BEGIN
 		SET @maxID = 0;
 		SET @minStatus = NULL;
 		SET @maxStatus = NULL;
-        SET @cmdForResizeOriginal = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\convert ';
+        SET @cmdForResizeOriginal = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\convert.exe ';
 
 		EXEC Master.dbo.xp_fileexist @cmdForResizeOriginal ,@fileExist OUT;
 

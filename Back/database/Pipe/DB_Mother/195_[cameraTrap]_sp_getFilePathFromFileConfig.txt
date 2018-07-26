@@ -1,0 +1,158 @@
+USE [EcoReleve_DATABASENAME]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[sp_getFilePathFromFileConfig] 
+	@camTrapPath VARCHAR(MAX) OUTPUT,
+	@mediasFilesPath VARCHAR(MAX)  OUTPUT
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	DECLARE @errorMessageMain VARCHAR(MAX)
+	DECLARE @pathConfig VARCHAR(255)
+	DECLARE @fileExist INT
+	DECLARE @sqlDyn VARCHAR(MAX)
+	SET @pathConfig = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\development.ini'
+
+	EXEC Master.dbo.xp_fileexist @pathConfig ,@fileExist OUT;
+
+	IF @fileExist = 0
+	BEGIN 
+		SET @errorMessageMain = CONCAT(
+			'No config file in : ',
+			@pathConfig,
+			CHAR(13),
+			CHAR(10),
+			'Please change the @pathConfig in stored procedure'
+		)
+
+		RAISERROR (@errorMessageMain, -- Message text.  
+				15, -- Severity,    
+				1)
+	END
+
+
+
+	SET @camTrapPath = ''
+	SET @mediasFilesPath = ''
+
+	IF OBJECT_ID('tempdb..#TEXTFILE_1 ') IS NOT NULL
+		DROP TABLE #TEXTFILE_1 
+
+	CREATE TABLE #TEXTFILE_1  
+	(  
+		Ligne   NVARCHAR(4000)  
+	);  
+	--Will insert each line from file in table as a row
+	/*
+	BULK INSERT #TEXTFILE_1 FROM 'C:\inetpub\wwwroot\ecoreleve-data_dev\Back\development.ini'
+	WITH (ROWTERMINATOR ='0x0a') --'0x0a' == LF (special char for end line)
+	*/
+	SET @sqlDyn = 'BULK INSERT #TEXTFILE_1 FROM '''+@pathConfig+'''
+	WITH (ROWTERMINATOR =''0x0a'')'
+
+	EXEC (@sqlDyn)
+	
+	SELECT 
+		@camTrapPath = txt.[Ligne]
+	FROM #TEXTFILE_1 txt
+	WHERE txt.[Ligne] LIKE '%camTrap.path%'
+
+	SELECT 
+		@mediasFilesPath = txt.[Ligne]
+	FROM #TEXTFILE_1 txt
+	WHERE txt.[Ligne] LIKE '%mediasFiles.path%'
+
+	--remove space 
+	SET @camTrapPath = REPLACE(@camTrapPath,' ','')
+	SET @mediasFilesPath = REPLACE(@mediasFilesPath,' ','')
+	--remove key we just keep value
+	SET @camTrapPath = REPLACE(@camTrapPath,'camTrap.path=','')
+	SET @mediasFilesPath = REPLACE(@mediasFilesPath,'mediasFiles.path=' ,'')
+	--remove special char CR LF (Carriage Return Line Feed)
+	SET @camTrapPath = REPLACE(REPLACE(@camTrapPath, CHAR(13), ''), CHAR(10), '')
+	SET @mediasFilesPath = REPLACE(REPLACE(@mediasFilesPath, CHAR(13), ''), CHAR(10), '')
+	if @camTrapPath = ''
+	BEGIN
+	SET @errorMessageMain = CONCAT(
+		'No cametrap Path in the config file',
+		CHAR(13),
+		CHAR(10),
+		'Please check the config file in :',
+		CHAR(13),
+		CHAR(10),
+		@pathConfig,
+		CHAR(13),
+		CHAR(10),
+		'you should have :',
+		CHAR(13),
+		CHAR(10),
+		'camTrap.path = "<path/for/storage>"'
+
+	)
+	RAISERROR (@errorMessageMain, -- Message text.  
+				15, -- Severity,    
+				1)
+	END
+
+	if @mediasFilesPath =''
+	BEGIN
+		SET @errorMessageMain = CONCAT(
+		'No medias files Path in the config file',
+		CHAR(13),
+		CHAR(10),
+		'Please check the config file in :',
+		CHAR(13),
+		CHAR(10),
+		@pathConfig,
+		CHAR(13),
+		CHAR(10),
+		'you should have :',
+		CHAR(13),
+		CHAR(10),
+		'mediasFiles.path = "<path/for/storage>"'
+	)
+	RAISERROR (@errorMessageMain, -- Message text.  
+				15, -- Severity,    
+				1)
+	END
+
+
+
+	IF OBJECT_ID('tempdb..#TEXTFILE_1 ') IS NOT NULL
+		DROP TABLE #TEXTFILE_1  
+	IF @@TRANCOUNT > 0 		
+			COMMIT TRAN
+	END TRY
+    BEGIN CATCH
+        print 'CATCH du sp_getFilePathFromFileConfig'
+        print @@TRANCOUNT
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+        print @@TRANCOUNT
+                   
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+                   
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+                   
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('195_[cameraTrap]_sp_getFilePathFromFileConfig',GETDATE(),(SELECT db_name()))
+
+
+GO

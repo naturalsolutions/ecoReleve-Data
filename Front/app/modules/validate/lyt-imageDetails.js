@@ -18,7 +18,7 @@ define([
 			//'space': 'onClickImage',
 		},
 		events:{
-			'click div#detailstitle': 'changeExif'
+			'click div#detailsExifsPhotos': 'changeExif'
 
 		},
 		className : "detailsimage",
@@ -204,7 +204,7 @@ define([
 			$keyExif.html('');
 			var $valueExif = _this.$el.find('#valueExif');
 			$valueExif.html('');
-      this.listenTo(this.model, "change", function() {
+      this.listenTo(this.model, "custom:activechange custom:refreshUI change", function() {
         _this.onRender();
       });
 

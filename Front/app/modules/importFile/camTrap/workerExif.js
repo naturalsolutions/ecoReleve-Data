@@ -37,6 +37,15 @@ self.getEndianFromNav = function() {
 
 self.init = function(options) {
     self.message = {
+        uniqueIdentifier: null,
+        fileName : null,
+        cid : null,
+        error : null
+    };
+    
+    if(!options)
+        return;
+    self.message = {
         uniqueIdentifier: options.uniqueIdentifier,
         fileName : options.fileName,
         cid : options.cid,
@@ -170,6 +179,9 @@ self.getUint32 = function (offset) {
 
 
 self.onmessage = function(event) {
+    if( !event || (event.data && event.data.from != 'exifLib') ) {
+        return;
+    }
     self.init(event.data);
     try {
         self.checkJPEG();
@@ -186,7 +198,7 @@ self.onmessage = function(event) {
             error = EXIF_UNKNOWN_ERROR;
         }
         self.message.error = error
-        postMessage(self.message)
+        self.postMessage(self.message)
 
      }
 };

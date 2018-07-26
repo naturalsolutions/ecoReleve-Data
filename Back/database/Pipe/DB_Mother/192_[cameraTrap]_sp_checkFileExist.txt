@@ -1,0 +1,71 @@
+USE [EcoReleve_DATABASENAME]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_checkFileExist] 
+	@FilePath VARCHAR(1024)
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	DECLARE @fileExist INT;
+	DECLARE @needToBeSysAdmin INT;
+	DECLARE @errorMessageMain VARCHAR(MAX)
+
+	--SELECT @needToBeSysAdmin = is_srvrolemember('sysadmin');
+
+	EXEC Master.dbo.xp_fileexist @FilePath ,@fileExist OUT;
+	
+	IF (@fileExist = 0)
+	BEGIN 
+		SET @errorMessageMain = CONCAT(
+			'No file with for path : ',
+			@FilePath,
+			CHAR(13),
+			CHAR(10)
+		)
+
+		RAISERROR (@errorMessageMain, -- Message text.  
+				15, -- Severity,    
+				1)
+	END
+	ELSE
+	BEGIN
+		PRINT(CONCAT(@FilePath,' EXIST'))
+	END
+	
+	IF @@TRANCOUNT > 0 		
+			COMMIT TRAN;
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+      
+        IF @@TRANCOUNT > 0  
+			ROLLBACK TRAN;
+ 
+                   
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+                   
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+                   
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('192_[cameraTrap]_sp_checkFileExist',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -32,6 +32,7 @@ define([
 
   './modules/validate/lyt-camTrapValidateDetail',
   './modules/importHistory/history.view',
+  './modules/redirection/redirect.view'
 
 ],function(
   Marionette,
@@ -48,7 +49,8 @@ define([
   LytSensor, LytSensors, LytSensorsNew,
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
   LytCamTrapValidateDetail,
-  LytImportHistory
+  LytImportHistory,
+  LytRedirect,
 
 ) {
   'use strict';
@@ -226,6 +228,11 @@ define([
     export: function() {
       this.rgMain.show(new LytExport());
     },
+
+    redirectToStations : function(id) {
+ 
+      this.rgMain.show(new LytRedirect({idToFetch:id}))
+    }
 
   });
 });

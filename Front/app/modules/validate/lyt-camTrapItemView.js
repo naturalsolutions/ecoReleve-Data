@@ -22,7 +22,9 @@ define([
 			//'space': 'onClickImage',
 		},
 		modelEvents: {
-			"change": "changeValid"
+			"change": "changeValid",
+			"custom:activechange": "changeActive",
+			"custom:refreshUI" : "render"
 		},
 		events: {
 			// 'click img': 'clickFocus',
@@ -70,29 +72,122 @@ define([
 		// 	}
 		// },
 
-		setActive : function(e) {
-			if( this.el.className.indexOf(' active') == -1 ) {
-				this.el.className += ' active'
-			}
-			if( this.el.className.indexOf(' ui-selected') == -1 ) {
-				this.el.className += ' ui-selected'
-			}
+		changeActive: function(e){
+			var active = this.model.get('activeFront');
+			this.render()
+				if(active === true) {
+					this.$el.addClass('ui-selected')
+				}
+				if( active === false) {
+					this.$el.removeClass('ui-selected')
+				}
+			
+		},
 
-			if( this.ui.vignette[0].className.indexOf(' active') == -1 ) {
-				this.ui.vignette[0].className += ' active'
-			}
+		setActive : function(e) {
+			// this.model.set('activeFront',true);
+			$(this.el).removeClass('active_bl');
+			$(this.el).removeClass('active_br');
+			$(this.el).removeClass('active_bt');
+			$(this.el).removeClass('active_bb');
+			// $(this.el).removeClass('active');
+
+			// this.calculateBorders();
+			// if( this.el.className.split(' ').indexOf('active') == -1 ) {
+			// 	$(this.el).addClass('active');
+			// }
+			// if( this.ui.vignette[0].className.split(' ').indexOf('active') == -1 ) {
+			// 	$(this.ui.vignette[0]).addClass('active');
+			// }
+
 		},
 
 		removeActive : function(e) {
-			if( this.el.className.indexOf(' active') > -1) {
-				this.el.className = this.el.className.replace(' active', '' );
+			// this.model.set('activeFront',false);
+
+			$(this.el).removeClass('active_bl');
+			$(this.el).removeClass('active_br');
+			$(this.el).removeClass('active_bt');
+			$(this.el).removeClass('active_bb');
+			// $(this.el).removeClass('active');
+			// $(this.el).removeClass('ui-selected');
+			// if( this.el.className.indexOf(' active') > -1) {
+			// 	// this.el.className = this.el.className.replace(' active', '' );
+			// 	$(this.el).removeClass('active');
+			// }
+			// if( this.el.className.indexOf(' ui-selected') > -1) {
+			// 	$(this.el).removeClass('ui-selected')
+			// 	// this.el.className = this.el.className.replace(' ui-selected', '' );
+			// }
+			// if( this.ui.vignette[0].className.split(' ').indexOf('active') > -1 ) {
+			// 	$(this.ui.vignette[0]).removeClass('active');
+			// }
+		},
+
+		calculateBorders: function(){
+			var positionInTabView = $(this.el).index();
+			// var positionInTabView = positionInDom - 1;
+			var maxPositon = this.el.parentElement.childElementCount - 1 ;
+			var lineNumber = parseInt( maxPositon / 6);
+
+			var elemLeft,elemRight,elemAbove,elemUnder;
+
+			if( positionInTabView % 6) {
+				elemLeft = this.el.previousElementSibling;
 			}
-			if( this.el.className.indexOf(' ui-selected') > -1) {
-				this.el.className = this.el.className.replace(' ui-selected', '' );
+			if( ( positionInTabView + 1 ) <= maxPositon && ( (positionInTabView + 1) % 6)  ) {
+				elemRight = this.el.nextElementSibling;
 			}
-			if( this.ui.vignette[0].className.indexOf(' active') > -1 ) {
-				this.ui.vignette[0].className = this.ui.vignette[0].className.replace(' active', '' );
+			if( positionInTabView - 6 >= 0) {
+				elemAbove = this.parent.tabView[ positionInTabView - 6].el;
 			}
+			if( positionInTabView + 6 <= maxPositon ) {
+				elemUnder = this.parent.tabView[ positionInTabView + 6].el;
+			}
+			
+
+			if( !elemLeft ){
+				$(this.el).addClass('active_bl');
+			}
+			else {
+				if( elemLeft.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_bl');
+				}
+			}
+			if( !elemRight ){
+				$(this.el).addClass('active_br');
+			}
+			else {
+				if(   elemRight.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_br');
+				}
+			}
+			if( !elemAbove ){
+				$(this.el).addClass('active_bt');
+			}
+			else {
+				if(   elemAbove.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_bt');
+				}
+			}
+			if( !elemUnder ){
+				$(this.el).addClass('active_bb');
+			}
+			else {
+				if(   elemUnder.className.indexOf('js-activate_saved') == -1 ) {
+					$(this.el).addClass('active_bb');
+				}
+			}
+
+			// if( !elemRight )||( (  elemRight.className.indexOf('ui-selected') == -1 || elemRight.className.indexOf('active') > -1 ) && !( elemRight.className.indexOf('ui-selected') == -1 && elemRight.className.indexOf('active') > -1) )  ) {
+			// 	$(this.el).addClass('active_br');
+			// }
+			// if( !elemAbove ||( (  elemAbove.className.indexOf('ui-selected') == -1 || elemAbove.className.indexOf('active') > -1 )  && !(  elemAbove.className.indexOf('ui-selected') == -1 && elemAbove.className.indexOf('active') > -1 ))) {
+			// 	$(this.el).addClass('active_bt');
+			// }
+			// if( !elemUnder || ((  elemUnder.className.indexOf('ui-selected') == -1 || elemUnder.className.indexOf('active') > -1 )  &&  !(  elemUnder.className.indexOf('ui-selected') == -1 && elemUnder.className.indexOf('active') > -1 ) )  ) {
+			// 	$(this.el).addClass('active_bb');
+			// }
 		},
 
 		initialize: function (options) {
@@ -101,16 +196,17 @@ define([
 		},
 
 		onRender: function () {
-			this.setVisualValidated(this.model.get("validated"));
+			// this.setVisualValidated(this.model.get("validated"));
 		},
 
 		changeValid: function (e) {
+			// this.render();
 			var _this = this;
-			var detectError = false;
+
 			this.model.save(
 				e.Changed, {
 					error: function () {
-						detectError = true;
+						
 						_this.model.set(_this.model.previousAttributes(), {
 							silent: true
 						});
@@ -119,16 +215,18 @@ define([
 							type: 'error',
 							text: 'Connection problem for modification \n <br> Not modified please retry (if the problem persist check your connection or contact an admin)'
 						});
-						_this.setVisualValidated(_this.model.get("validated"));
+						_this.render()
 					},
 					success: function () {
+						_this.model.trigger('custom:refreshUI');
 						_this.parent.refreshCounter();
-						//_this.render();
+						_this.render()
 					},
 					patch: true,
 					wait: true,
 				}
 			);
+			
 		},
 
 		setModelTags: function (xmlTags) {
@@ -176,10 +274,8 @@ define([
 				validated: val
 			}, {
 				silent: true
-			})
-			this.setVisualValidated(val);
-
-
+			});
+			this.render();
 		},
 
 		setModelValidated: function (val) {
@@ -195,8 +291,7 @@ define([
 							stationId : null 
 						});
 						_this.parent.toolsBar.$elemTags.val(null).trigger('change');
-						_this.setVisualValidated(val);
-						_this.setVisualStationAttached(false);
+						_this.render();
 					})
 					.fail(function(err) {
 						console.error('destroy station failed')
@@ -208,8 +303,7 @@ define([
 						// tags : null
 					});
 					_this.parent.toolsBar.$elemTags.val(null).trigger('change');
-					_this.setVisualValidated(val);
-					_this.setVisualStationAttached(false);
+					_this.render();
 				}
 			
 			}
@@ -217,69 +311,9 @@ define([
 				this.model.set({
 					validated: val
 				});
-				this.setVisualValidated(val);
+				_this.render();
 			}
 			
-		},
-
-		setVisualStationAttached: function (valBoolean) {
-			var header = this.el.getElementsByClassName('camtrapItemViewHeader')[0];
-			if (valBoolean) {
-				if (header.style.display)
-					header.style.display = ''
-			} else {
-				if (header.style.display === '')
-					header.style.display = "none";
-			}
-		},
-
-		setVisualValidated: function (valBool) {
-			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent');
-			var $image = $content.children('img');
-
-			switch (this.model.get("validated")) {
-				case 1:
-					{ // not checked
-						if ($content.hasClass('accepted')) {
-							$content.removeClass('accepted');
-						}
-						if ($content.hasClass('rejected')) {
-							$content.removeClass('rejected');
-						}
-						$image.removeClass('checked');
-						break;
-					}
-				case 2:
-					{
-						$image.addClass('checked');
-						if ($content.hasClass('rejected')) {
-							$content.removeClass('rejected');
-						}
-						$content.addClass('accepted'); //css("background-color" , "green");
-						break;
-					}
-				case 4:
-					{
-						$image.addClass('checked');
-						if ($content.hasClass('accepted')) {
-							$content.removeClass('accepted');
-						}
-						$content.addClass('rejected'); //css("background-color" , "red");
-						break;
-					}
-				default:
-					{
-						if ($content.hasClass('accepted')) {
-							$content.removeClass('accepted');
-						}
-						if ($content.hasClass('rejected')) {
-							$content.removeClass('rejected');
-						}
-
-						$image.removeClass('checked');
-						break;
-					}
-			}
 		},
 
 		goFullScreen: function (e) {
@@ -294,11 +328,11 @@ define([
 
 		attachStation: function (id) {
 			this.model.set('stationId', id);
-			this.setVisualStationAttached(true);
+			this.render();
 		},
 		removeStation: function () {
 			this.model.set('stationId', null);
-			this.setVisualStationAttached(false);
+			this.render();
 		},
 
 		removeStationAndReject: function() {

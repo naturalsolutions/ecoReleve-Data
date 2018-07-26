@@ -87,7 +87,7 @@ define([
         popup: true,
         com: this.com,
         selection: true,
-        player: false,
+        player: true,
         //bbox: true,
       });
 
@@ -159,7 +159,46 @@ define([
           },
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
+          },
+          onFilterChanged: function(row){
+            var newfeatures = []
+
+            this.api.forEachNodeAfterFilterAndSort(function(node) {
+            var jsonItem = {
+              "geometry": {
+            "coordinates" : [node.data.LAT,node.data.LON],
+            "type": "Point"
+            }, 
+            "properties": {
+                "Date" :"node.data.Date",
+                "ID" : node.data.ID,
+                "precision" : node.data.precision,
+                "type_" : node.data.type_
+            },
+            "type": "Feature"
+            };
+            newfeatures.push(jsonItem)
+                })
+
+            var newGeoJson = {
+                "total" : newfeatures.length ,
+                "exceed" : false,
+                "features" : newfeatures,
+                "type" :"FeatureCollection"
+            }
+
+
+
+            if($('#player').hasClass('active')){
+              // _this.map.firstInit();
+              _this.map.hidePlayer();
+              _this.map.initPlayer(newGeoJson)
+            }
+            // _this.map.clearMarkers()
+            // _this.map.clearLines()
+            // _this.map.draw()
           }
+          
         }
       }));
       this.gridViews.push(this.locationsGrid);

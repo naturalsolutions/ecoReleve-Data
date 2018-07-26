@@ -1,14 +1,46 @@
-.toolsBarCamTrap{
+#rgToolsBar{
+  background-color : #3d3d3d; 
+  border-color: #4d4d4d;
 
+  .toolsBarCamTrap{
+  display : flex;
+  flex-direction: row;
+  justify-content: space-between;
+  #tags{
+    flex-grow: 1;
+    padding-right: 10px
+
+  }
+
+  .btn.disabled, .btn[disabled], fieldset[disabled] .btn{
+    // width: 15%;
+    margin-top : 5px;
+    background-color: #666 !important;
+  }
+
+
+  // bouton valider session
+
+    #validate{
+      // background-color: #666 !important;
+      margin-top : 4px;
+      // width: 15%;
+      box-shadow: none;
+      border: solid 1px transparent;
+    }
+    #validate.disabled{
+      background-color: #666 !important;
+    }
+    #validate:hover{
+      background-color: #449d44 !important;
+      color : #fff !important;
+    }
     .actionsBtn {
-      display : flex;
+      display: none;
       justify-content: space-between;
     }
-
     .actions{
       border-radius : 20px;
-      //background-color: #2c2c2c;
-
       float : left;
       padding: 0;
       margin: 0;
@@ -19,7 +51,6 @@
         float : left;
         padding: 0;
         margin: 0;
-
       }
       i {
         padding: 0;
@@ -49,7 +80,6 @@
           color : white;
         }
       }
-
       #mouvementAction{
         #leftMouvement{
           .reneco{
@@ -71,8 +101,6 @@
       .reneco {
         line-height: 2!important;
       }
-
-
     }
     .actionsStations{
       border-radius : 20px;
@@ -86,7 +114,6 @@
         float : left;
         padding: 0;
         margin: 0;
-
       }
       i {
         padding: 0;
@@ -95,7 +122,6 @@
         height: 30px;
         border-radius: 15px;
       }
-
       #createStationBtn {
         background-color: green;
       }
@@ -114,49 +140,56 @@
         color: white;
         line-height: 2!important;
       }
-
-
     }
 }
+}
+
 .toolsBarCamTrapTop{
+    position: relative;
   .camtrap-displayMode {
-    display: inline;
+    display: inline-block;
+    vertical-align: middle;
+    position: absolute;
+    right: 0;
+    top: 10px;
   }
   .camtrap-filterSession {
     display: inline;
-  //  font-weight: bolder;
-    font-size: 1.1vw;
+    margin-left: 0;
+    margin-right: 5px;
+    font-size: 0.7vw;
     input[type="radio"] {
       transform: scale(1.2);
+      display: none;
     }
-      
     .allPhotos {
-      padding-right: 20px;
-       color: #909090;
+      padding : 14px;
+       color: #e2e2e2;
     }
     .accepted {
-      padding-right: 20px;
-      color: #909090;
+      padding : 14px;
+      color: #e2e2e2;
     }
     .refused {
-      padding-right: 20px;
-      color: #909090;
+      padding : 14px;      
+      color: #e2e2e2;
     }
     .notChecked {
-      padding-right: 20px;
-      color: #909090;
+      padding : 14px;
+      color: #e2e2e2;
     }
     .stationed{
-      padding-right: 20px;
-      color: #909090;
+      padding : 14px;
+      color: #e2e2e2;
     }
   }
   .selected{
-    // border: 1.5px solid #39b34a;
-    // border-radius: 8px;
-    // text-decoration: underline;
-    font-weight: bold !important;
-    color: #39b34a !important;
+    color: #fff !important;
+    background-color: #348134;
+    padding: 0 10px;
+    margin : 0;
+    padding-top: 8px;
+    padding-bottom: 9px;
   }
   i{
     cursor: pointer;
@@ -168,9 +201,7 @@
   .reneco{
     width: 28px;
     height: 24px;
-    background-color: #434343;
-    border: 1px solid #666;
-    border-radius: 4px;
+    font-size: 25px;
     color : #909090;
   }
   .reneco-ecollectionsmall::before{
@@ -180,41 +211,45 @@
     padding-right: 3px;
   }
   .active{
-    color : #39b34a;
+    background-color : #39b34a;
+    color: #fff;
+    padding: 0.2em 0.2em;
   }
-  // span{
-  //   color: #909090;
-  //   font-size: 26px;
-  //   font-weight: 500;
-  //   line-height: 30px;
-  //   position:relative;
-  // }
   span#infossession{
-    margin-left: 20px;
+    padding: 15px 15px;
+    height: 53px;
+    margin-left: 0;
+    margin-right: 5px;
   }
-  #infossession:hover,#js_accepted_top:hover,#js_accepted_top:hover,#js_refused_top:hover,#js_checked_top:hover,#js_notchecked_top:hover{
-    background-color: #666;
-  }
-  // #nbphotosaccepted{
-  //   color : green;
-  // }
   #infossession{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_accepted_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_refused_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_checked_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_notchecked_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   #js_stationed_top{
     cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: none;
   }
   // .accepted:before{
   //   font-family: 'reneco' !important;
@@ -272,4 +307,106 @@
   //   //background-color: #f00;
   // }
 
+}
+.camtrap-filterSession > button{
+  background-color: rgb(64, 100, 64);
+  padding: 6px 10px;
+  margin-left: 0;
+  margin-right: 1px !important;
+  font-size: 14px;
+  border-radius: 0;
+  min-width: 140px;
+  margin-top: 4px;
+  padding-bottom: 7px;
+}
+// TOOLBAR BOTTOM
+
+// .select2-container--default.select2-container--disabled .select2-selection--multiple{
+//   background-color: #3d3d3d;
+//   border: solid 1px #777;
+//   margin : 5px auto;
+// }
+// input
+.select2-container--default.select2-container .select2-selection--multiple{
+  background-color: #3d3d3d;
+  border: solid 1px #777;
+  margin-top: 5px;
+  position: relative;
+  color : #838383;
+  height: 34px;
+}
+.select2-container--default.select2-container--open.select2-container--below .select2-selection--single,
+.select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple{
+  border-bottom-left-radius: 5px; border-bottom-right-radius : 5px;
+  border-top-left-radius: 0;
+}
+// incone tag
+.select2-selection.select2-selection--multiple:before{
+  font-family: 'reneco' !important;
+  background-color: #777;
+  color: white;
+  content: '\e9bc';
+  position: absolute;
+  left : 0; top: 0;
+  padding: 6px;
+  cursor: pointer;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__rendered{
+  padding : 0 0 0 30px;
+}
+//ul
+.select2-container--default .select2-results>.select2-results__options{
+  color: rgb(190, 190, 190);
+  background-color: #777;
+  position: absolute;
+  top: -234px; right: 0; left: 0; bottom: 0;
+}
+// span ul
+.select2-dropdown{
+  border: none;
+}
+// hover + selected tags
+.select2-container--default .select2-results__option--highlighted[aria-selected]{
+  color: #fff;
+  background-color: #777;
+  font-weight: bold;
+}
+// true = selectionné
+.select2-container--default .select2-results__option[aria-selected=true]{
+  background-color: #777;
+  font-weight: bold;
+  color: white;
+}
+// hover sur tags
+.select2-results__option .select2-results__option--highlighted:hover{
+  background-color: rgb(134, 134, 134);
+}
+// choix
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+  background-color: #3d3d3d;
+  color: white;
+  border-radius : 0;
+}
+.select2-results__group{
+  color : #fff;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice:hover{
+  background-color: #4d4d4d;
+  color: white;
+  border-radius : 0;
+}
+// @media (min-width: 992px){
+//   .col-md-6{
+//     width: 85%;
+//   }
+// }
+// .btn.disabled, .btn[disabled], fieldset[disabled] .btn{
+//   width: 15%;
+//   margin-top : 5px;
+//   background-color: #666 !important;
+// }
+
+// bouton retour panel de droite
+.reneco-back{
+  margin-top: 3px;
 }

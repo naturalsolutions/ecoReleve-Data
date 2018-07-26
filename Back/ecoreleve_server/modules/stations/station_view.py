@@ -23,6 +23,22 @@ class StationsView(RestCollectionView):
     def deleteMany(self):
         return self.context.deleteMany()
 
+    @view_config(name='deleteStationWithCamTrap', request_method='POST', renderer='json')
+    def deleteStationWithCamTrap(self):
+        return self.context.deleteStationWithCamTrap()
+
+    @view_config(name='deleteManyWithCamTrap', request_method='POST', renderer='json')
+    def deleteManyWithCamtrap(self):
+        return self.context.deleteManyWithCamTrap()
+
+    @view_config(name='insertWithCamTrap', request_method='POST', renderer='json')
+    def insertWithCamTrap(self):
+        return self.context.insertWithCamTrap()
+
+    @view_config(name='insertAllWithCamTrap', request_method='POST', renderer='json')
+    def insertAllWithCamTrap(self):
+        return self.context.insertAllWithCamTrap()
+
     @view_config(name='insertAll', request_method='POST', renderer='json')
     def insertAll(self):
         return self.context.insertAll()

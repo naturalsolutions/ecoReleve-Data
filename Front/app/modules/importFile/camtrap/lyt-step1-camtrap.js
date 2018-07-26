@@ -89,9 +89,20 @@ define([
 
     createWorker: function() {
       var _this = this;
-      this.wExif = new Worker('./app/modules/importFile/camTrap/workerExif.js', {
-        type: "module"
-      });
+        this.wExif = new Worker('./app/modules/importFile/camTrap/workerExif.js');
+      // if( window.Worker ) {
+      // }
+      // else {
+      //   // Swal({
+      //   //   title: 'Feature not supported',
+      //   //   html: 'Sorry but your browser doesn\'t support this feature<BR>Please use Chrome<BR>',
+      //   //   type: 'error',
+      //   //   showCancelButton: false,
+      //   //   confirmButtonText: 'OK'
+      //   // }).then( () => {
+      //   //   Backbone.history.navigate('home',{trigger: true}); }
+      //   // })
+      // }
       this.wExif.onmessage = function (event) {
         _this.nbFilesParsed += 1;
         _this.progressBarElem.style.width = _this.progress(_this.nbFilesParsed,_this.nbFilesToParse);
@@ -278,6 +289,7 @@ define([
         binReader.onload = function (event) {
           var message;
           message = {
+            from: 'exifLib',
             uniqueIdentifier: file.uniqueIdentifier,
             fileName : file.fileName,
             cid : modelTmp.cid,
