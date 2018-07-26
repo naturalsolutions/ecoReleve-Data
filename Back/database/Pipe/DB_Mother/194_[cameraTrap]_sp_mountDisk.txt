@@ -1,0 +1,84 @@
+USE [EcoReleve_DATABASENAME]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_mountDisk] 
+	@diskLetter VARCHAR(2),
+	@NASPath VARCHAR(256),
+	@login VARCHAR(64),
+	@password VARCHAR(64)
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	DECLARE @rescmdShell INT
+	DECLARE @errorMessageMain VARCHAR(MAX)
+	DECLARE @cmd VARCHAR(1024)
+	DECLARE @options VARCHAR(512)
+	DECLARE @resTableCmdShell TABLE ([line] VARCHAR(1024) );
+	DECLARE @errorRaised VARCHAR(MAX)
+
+	SET @options = ' /persistent:no'
+	PRINT(CONCAT(
+	'We try to mount disk (',
+	@diskLetter,
+	') with	remote path (',
+	@NASPath,
+	') and login and password given',
+	'and options (',
+	@options,
+	')')
+	)	
+
+	SET @cmd = CONCAT('net use ',@diskLetter,' ',@NASPath,' ',@password,' /user:',@login,' ',@options)
+	print(@cmd)
+	INSERT INTO @resTableCmdShell
+	EXECUTE @resCmdShell = xp_cmdshell @cmd
+
+	IF ( @resCmdShell =0 )
+	BEGIN
+		PRINT(CONCAT(@NASPath,' mounted to :',@diskLetter))
+	END
+	ELSE
+	BEGIN
+        SELECT @errorRaised = COALESCE(@errorRaised + '<BR>'+ line, line) FROM @resTableCmdShell WHERE [Line] IS NOT NULL
+			RAISERROR (@errorRaised, -- Message text.  
+			15, -- Severity,    
+			1) --critical error if net use 
+	END
+
+
+	IF @@TRANCOUNT > 0 		
+			COMMIT TRAN
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+      
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+ 
+                   
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+                   
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+                   
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('194_[cameraTrap]_sp_mountDisk',GETDATE(),(SELECT db_name()))
+
+
+GO
