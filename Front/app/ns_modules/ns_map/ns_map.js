@@ -1159,6 +1159,12 @@ define([
       this.pause();
       this.map.addLayer(this.clusterLayer);
       this.map.removeLayer(this.playerLayer);
+      this.clearMarkers();
+      this.clearLines();
+      if(this.lastMarker){
+        this.map.removeLayer(this.lastMarker);
+      }
+      // this.playerLayer.removeLayer(this.lastMarker)
       this.playerDisplayed = false;
       this.keyboard = false;
       this.bindKeyboardShortcuts();
