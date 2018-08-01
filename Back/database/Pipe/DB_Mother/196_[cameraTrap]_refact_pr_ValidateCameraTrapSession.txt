@@ -119,7 +119,7 @@ BEGIN TRAN
 	SELECT
 	*
 	INTO #tableSessionCamtrap
-	FROM dbo.camTrapTableSession(3232,8,20759)
+	FROM dbo.camTrapTableSession(@fk_sensor,@fk_monitoredsite,@fk_equipement)
 
     -- Creation table couple (idcamptrap , tag) pour les photos VALIDE!!
 	-- si la photo d'id 12 contient 5 tags on aura 5 lignes (12,tag1),(12,tag2) etc
