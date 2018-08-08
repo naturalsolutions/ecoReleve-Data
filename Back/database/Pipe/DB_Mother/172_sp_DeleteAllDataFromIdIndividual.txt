@@ -1,0 +1,103 @@
+create PROCEDURE [dbo].[sp_DeleteAllDataFromIdIndividual] 
+
+@IDIndividual int 
+
+AS
+BEGIN
+
+		-- �limination des donn�es concern�es
+		BEGIN TRAN
+		BEGIN TRY
+				
+				IF(OBJECT_ID('tempdb..#temp') Is Not Null)
+						BEGIN
+							DROP TABLE #Temp
+						END
+
+				DELETE FROM Individual_Location
+				WHERE FK_Individual = @IDIndividual
+				print 'ok Individual_Location'
+
+				DELETE FROM IndividualDynPropValue
+				WHERE FK_Individual = @IDIndividual
+				print 'ok IndividualDynPropValue'
+
+				DELETE FROM Equipment
+				WHERE FK_Individual = @IDIndividual
+				print 'ok Equipment'
+
+				CREATE TABLE #Temp
+					(
+						FK_Obs int, 
+					)
+				INSERT INTO #Temp
+				SELECT ID FROM Observation WHERE FK_Individual = @IDIndividual
+				
+						DECLARE @ObsId int
+
+                        DECLARE @tableTemp TABLE(
+                                FK_Obs int NOT NULL 
+                            )
+                        
+                        INSERT into @tableTemp SELECT DISTINCT FK_Obs FROM #Temp
+						-- DECLARE MY_CURSOR CURSOR 
+						--   LOCAL STATIC READ_ONLY FORWARD_ONLY
+						-- FOR 
+						-- SELECT DISTINCT FK_Obs
+						-- FROM #Temp
+
+						-- OPEN MY_CURSOR
+						-- FETCH NEXT FROM MY_CURSOR INTO @ObsId
+						-- WHILE @@FETCH_STATUS = 0
+                        WHILE EXISTS (SELECT * FROM @tableTemp)
+						BEGIN 
+                        select TOP 1 @ObsId = FK_Obs from @tableTemp
+							DELETE FROM ObservationDynPropSubValue
+							WHERE FK_Observation =  @ObsId 
+							print 'ok ObservationDynPropSubValue'
+
+							DELETE FROM ObservationDynPropValue
+							WHERE FK_Observation =  @ObsId
+							print 'ok ObservationDynPropValue'
+
+							-- FETCH NEXT FROM MY_CURSOR INTO @ObsId
+                            DELETE FROM @tableTemp where FK_Obs = @ObsId
+						END
+						-- CLOSE MY_CURSOR
+						-- DEALLOCATE MY_CURSOR
+				
+				DELETE FROM Observation
+				WHERE FK_Individual = @IDIndividual
+				print 'ok Observation'
+
+				DELETE FROM Individual
+				WHERE ID = @IDIndividual
+				print 'ok Individual'
+
+			COMMIT TRAN
+			END TRY
+
+			BEGIN CATCH
+				ROLLBACK TRAN
+
+				DECLARE @ErrorMessage NVARCHAR(4000)
+				DECLARE @ErrorSeverity INT;
+				DECLARE @ErrorState INT;
+
+				SELECT @ErrorMessage = ERROR_MESSAGE(),
+					   @ErrorSeverity = ERROR_SEVERITY(),
+					   @ErrorState = ERROR_STATE();
+				RAISERROR (@ErrorMessage, -- Message text.
+						   @ErrorSeverity, -- Severity.
+						   @ErrorState -- State.
+						   );
+			END CATCH
+	
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('172_sp_DeleteAllDataFromIdIndividual',GETDATE(),(SELECT db_name()))
+
+
+GO

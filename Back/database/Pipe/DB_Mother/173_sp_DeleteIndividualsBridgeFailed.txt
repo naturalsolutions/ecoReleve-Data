@@ -1,0 +1,88 @@
+create PROCEDURE [dbo].[sp_DeleteIndividualsBridgeFailed]
+
+@DateBridgeFailed varchar(max)
+
+AS
+BEGIN
+	BEGIN TRAN
+	BEGIN TRY
+		IF(OBJECT_ID('tempdb..#checkInd') Is Not Null)
+			BEGIN
+				DROP TABLE #checkInd
+			END
+
+		--CREATE TABLE #checkInd
+		--		(
+		--			ID_Individual int, 
+		--		)
+		--	INSERT INTO #checkInd
+		--	SELECT ID FROM Individual
+		--	WHERE creationDate < (GETDATE() - 5) --AND Original_ID like '%TRACK%'
+				-- v�rification des oiseaux cr��s il y a moins de 5 jours ????
+
+		IF(OBJECT_ID('tempdb..#IndividualBridge') Is Not Null)
+			BEGIN
+				DROP TABLE #IndividualBridge
+			END
+
+		CREATE TABLE #IndividualBridge
+				(
+					ID_Individual int, 
+				)
+			INSERT INTO #IndividualBridge
+			SELECT ID FROM Individual
+			WHERE creationDate = convert(datetime,@DateBridgeFailed,120) AND Original_ID like '%TRACK%'
+			--WHERE creationDate = @DateBridgeFailed AND Original_ID like '%TRACK%'*
+				DECLARE @IdBridge int
+                DECLARE @tableTemp Table(
+                    idBridge int
+                )
+                insert into @tableTemp SELECT DISTINCT ID_Individual FROM #IndividualBridge
+				-- DECLARE MY_CURSOR_BRIDGE CURSOR 
+				--   LOCAL STATIC READ_ONLY FORWARD_ONLY
+				-- 	FOR 
+				-- 	SELECT DISTINCT ID_Individual
+				-- 	FROM #IndividualBridge
+
+					-- OPEN MY_CURSOR_BRIDGE
+                    WHILE EXISTS (SELECT * FROM @tableTemp)
+					-- FETCH NEXT FROM MY_CURSOR_BRIDGE INTO @IdBridge
+						-- WHILE @@FETCH_STATUS = 0
+							BEGIN 		
+                            select TOP 1 @idBridge = idBridge from @tableTemp
+
+								EXEC sp_DeleteAllDataFromIdIndividual @IdBridge
+								
+								--FETCH NEXT FROM MY_CURSOR_BRIDGE INTO @IdBridge
+                            delete from @tableTemp where idBridge = @IdBridge
+							END
+					-- CLOSE MY_CURSOR_BRIDGE
+					-- DEALLOCATE MY_CURSOR_BRIDGE
+	COMMIT TRAN
+	END TRY	
+
+	BEGIN CATCH
+		ROLLBACK TRAN
+
+		DECLARE @ErrorMessage NVARCHAR(4000)
+		DECLARE @ErrorSeverity INT;
+		DECLARE @ErrorState INT;
+
+		SELECT @ErrorMessage = ERROR_MESSAGE(),
+			   @ErrorSeverity = ERROR_SEVERITY(),
+			   @ErrorState = ERROR_STATE();
+		RAISERROR (@ErrorMessage, -- Message text.
+				   @ErrorSeverity, -- Severity.
+				   @ErrorState -- State.
+				   );
+	END CATCH
+	 
+	
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('173_sp_DeleteIndividualsBridgeFailed',GETDATE(),(SELECT db_name()))
+
+
+GO
