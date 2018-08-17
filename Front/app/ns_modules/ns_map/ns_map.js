@@ -1105,15 +1105,21 @@ define([
 
     //Player
     sortByDate: function(geoJson){
+      
       geoJson.features.sort( function(a, b) {
+        // for refact opti moment no more needed perf X10
+        // var jsDateA = new Date(a.properties.Date || a.properties.date);
+        // var jsDateB = new Date(b.properties.Date || b.properties.date);
+        // return jsDateA - jsDateB;
         return moment(a.properties.Date || a.properties.date) - moment(b.properties.Date || b.properties.date)
       });
+
     },
 
-    disablePlayer: function(){
+    disablePlayer: function(options){
       if(this.player){
 
-        this.hidePlayer();
+        this.hidePlayer(options);
         $('.js-toggle-ctrl-player').addClass('hidden');
       }
     },
@@ -1140,9 +1146,15 @@ define([
     },
 
     showPlayer: function(){
-      $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
+      if ( !$('.js-player-chevron').hasClass('reneco-chevron_top reneco-chevron_bottom') ) {
+        $('.js-player-chevron').addClass('reneco-chevron_top reneco-chevron_bottom')
+      }
+      // $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
       $('#player').addClass('active');
-      $('.leaflet-bottom').toggleClass('active-player');
+      if ( !$('.leaflet-bottom').hasClass('active-player') ) {
+        $('.leaflet-bottom').addClass('active-player')
+      }
+      // $('.leaflet-bottom').toggleClass('active-player');
       this.map.removeLayer(this.clusterLayer);
       this.map.addLayer(this.playerLayer);
       this.degraded();
@@ -1152,11 +1164,18 @@ define([
       this.bindKeyboardShortcuts();
     },
 
-    hidePlayer: function(){
-      $('.leaflet-bottom').toggleClass('active-player');
-      $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
+    hidePlayer: function(options){
+
+      if( $('.leaflet-bottom').hasClass('active-player') ) {
+        $('.leaflet-bottom').removeClass('active-player')
+      }
+      // $('.leaflet-bottom').toggleClass('active-player');
+      if ( $('.js-player-chevron').hasClass('reneco-chevron_bottom') ) {
+        $('.js-player-chevron').removeClass('reneco-chevron_bottom')
+      }
+      // $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
       $('#player').removeClass('active');
-      this.pause();
+      this.pause(options);
       this.map.addLayer(this.clusterLayer);
       this.map.removeLayer(this.playerLayer);
       this.clearMarkers();
@@ -1174,6 +1193,7 @@ define([
       var geoJson = this.geoJson;
       if(geoJson.features.length < 3){
         this.noPlayer = true;
+        this.hidePlayer();
         return;
       }
       this.autoNextSpeed = 1000;
@@ -1301,7 +1321,7 @@ this.parentContainer.append('\
 
     initPlayer: function(geoJson){
       if(geoJson.features.length < 3){
-        this.disablePlayer();
+        this.disablePlayer({silent:true});
         return;
       }
 
@@ -1565,10 +1585,13 @@ this.parentContainer.append('\
       }      
     },
 
-    pause: function(){
+    pause: function(options) {
+
       this.playing = false;
-      var feature = this.locations[this.index];
-      this.interaction('highlight', feature.properties.ID || feature.id);
+      if( typeof(options) == 'undefined' ||  !options.hasOwnProperty('silent') || !options.silent  ) {
+        var feature = this.locations[this.index];
+        this.interaction('highlight', feature.properties.ID || feature.id);
+      }
       $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
       $('.js-timeline-current').css('transition', 'width .2s');
       clearInterval(this.autoNextTimer);
