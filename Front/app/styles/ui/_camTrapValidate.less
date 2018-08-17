@@ -261,6 +261,7 @@ div.bootstrap-tagsinput{
 #gallery{
   background-color: #3d3d3d;
   padding: 20px;
+  padding-top : 15px;
   user-select: none;
   height: ~"calc(100% - 226px)";
   .ui-selecting > .vignette {
@@ -624,6 +625,7 @@ div.bootstrap-tagsinput{
   box-shadow: 0px 1px 17px 0px rgba(107, 107, 107, 0.5);
   border-bottom: 2px solid #449d44 !important;
   overflow-y: hidden;
+  padding-top: 3px;
 }
 *:focus {
   outline: none;
@@ -666,4 +668,68 @@ div.bootstrap-tagsinput{
   padding-bottom: 30px;
   margin-bottom: 30px;
   }
+}
+
+.shortcuts{
+  margin : 0 auto;
+  margin-bottom: 10px;
+  position: relative;
+  text-align: center;
+  .reneco-ECORELEVE-shortcuts{
+    background-color: #fff;
+    border-radius: 25px;
+    padding : 12px 10px;
+  }
+  .reneco-ECORELEVE-shortcuts:before{
+    font-size: 1.3em;
+  }
+}
+
+.shortcuts_infos{
+  display: none;
+  position : absolute;
+  width: 720px;
+  top : 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 10px;
+  z-index : 9999;
+  padding : 5px 15px;
+  text-align: left;
+  background-color: #fff;
+  h5{
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 17px;
+  }
+  h6{
+    font-weight: bold;
+    font-size: 20px;
+  }
+  p>span{
+    padding-left: 10px;
+  }
+  span:before{
+    font-size : 2em;
+  }
+  .col-md-4{
+    width: fit-content;
+    p.row{
+      display: flex;
+      align-items: center;
+      margin : 0;
+      padding-bottom: 5px;
+      .reneco-ECORELEVE_ENTER:before{
+        font-size: 60px;
+      }
+    }
+    p.row.tags_shortcut{
+      display: flex;
+      align-items: flex-start;
+    }
+  }
+}
+#shortcuts:hover ~ .shortcuts_infos{
+  display: block;
 }
