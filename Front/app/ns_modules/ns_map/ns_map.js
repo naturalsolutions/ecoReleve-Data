@@ -164,6 +164,93 @@ define([
       });
     },
 
+    refreshGeoJsonWithRowGrid: function(refView) {
+      var newfeatures = []
+
+      refView.locationsGrid.gridOptions.api.forEachNodeAfterFilterAndSort(function(node) {
+        var jsonItem = {
+          "geometry": {
+            "coordinates" : [node.data.LAT,node.data.LON],
+            "type": "Point"
+          }, 
+          "properties": {
+            "Date" :"node.data.Date",
+            "ID" : node.data.ID,
+            "precision" : node.data.precision,
+            "type_" : node.data.type_
+          },
+          "type": "Feature"
+        };
+        newfeatures.push(jsonItem)
+      })
+
+      var newGeoJson = {
+          "total" : newfeatures.length ,
+          "exceed" : false,
+          "features" : newfeatures,
+          "type" :"FeatureCollection"
+      }
+
+      this.map.removeLayer(this.clusterLayer);
+
+      if (this.cluster){
+        this.initClusters(newGeoJson);
+
+        // if(this.player){
+        //   this.firstInit();
+        // }
+      } else {
+        // this.geoJson = geoJson;
+        this.initLayer(newGeoJson);
+      }
+      var displayLegend = false;
+      this.ready(displayLegend);
+      this.fitBound();
+
+      // if (this.clusterLayer){
+      //   if (newfeatures.length < 1000) {
+      //     this.cluster = false
+      //   }
+        // this.map.removeLayer(this.clusterLayer);
+        // this.clusterLayer = new L.FeatureGroup();
+        // this.setMarkerListFromGeoJson(newGeoJson);
+      //  this.updateLayers(newGeoJson);
+        // var _this= this;
+        // var firstLvl= true;
+        // this.firstLvl= [];
+
+        // var disableClusteringAtZoom = 16; //16 (scale at 200m), maxZomm at 18 (scale at 20m)
+        // if(newGeoJson.features.length > 1000){
+        //   disableClusteringAtZoom = 2; //minZoom
+        // }
+        // var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
+        //   _defaultIconCreateFunction: function (cluster, contains) {
+        //     //push on firstLvl
+        //     if(firstLvl){
+        //       _this.firstLvl.push(cluster);
+        //     }
+        //     if(_this.selection){
+        //       return _this.getClusterIcon(cluster, false, 0);
+        //     }else{
+        //       return _this.getClusterIcon(cluster);
+        //     }
+        //   },
+        // });
+        
+        // this.clusterLayer = new CustomMarkerClusterGroup({
+        //   disableClusteringAtZoom: disableClusteringAtZoom,
+        //   maxClusterRadius: 70,
+        //   polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
+        // });
+
+        // this.setMarkerListFromGeoJson(newGeoJson);
+        // // this.clusterLayer.addLayers(this.markerList);
+        // this.addClusterLayers();
+      // }
+        // this.ready();
+      // debugger;
+    },
+
 
     fetchGeoJson: function(url){
       var _this = this;
@@ -180,18 +267,24 @@ define([
         contentType:'application/json',
         type:'GET',
         context: this,
-      }).done(function(geoJson) {
-          this.geoJson = geoJson;
+      }).done(function(resp) {
+        if (resp.length == 2 ) {
+          this.geoJson = resp[1];
+        }
+        else {
+          this.geoJson = resp
+        }
+
 
           if (this.cluster){
-            this.initClusters(geoJson);
+            this.initClusters(this.geoJson);
 
             if(this.player){
               this.firstInit();
             }
           } else {
+            // this.geoJson = geoJson;
             this.initLayer(geoJson);
-            this.geoJson = geoJson;
           }
           this.ready();
           this.fitBound();
@@ -303,10 +396,10 @@ define([
     },
 
 
-    ready: function(){
+    ready: function(displayLegend = true){
       this.setTotal(this.geoJson);
 
-      if(this.legend){
+      if(this.legend && displayLegend){
         this.addLegend();
       }
       if(this.clusterLayer){
@@ -423,7 +516,7 @@ define([
       });
 
       var disableClusteringAtZoom = 16; //16 (scale at 200m), maxZomm at 18 (scale at 20m)
-      if(geoJson.features.length < 500){
+      if(geoJson.features.length < 600){
         disableClusteringAtZoom = 2; //minZoom
       }
       

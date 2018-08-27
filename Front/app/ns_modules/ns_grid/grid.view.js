@@ -93,6 +93,7 @@ define([
       this.afterFetchColumns = options.afterFetchColumns;
       this.afterFirstRowFetch = options.afterFirstRowFetch;
       this.goTo = options.goTo || false;
+      this.overWritePaginations = options.overWritePaginations;
 
       this.name = options.name || false;
       if(options.gridOptions)
@@ -123,12 +124,17 @@ define([
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
               _this.ui.totalRecords.html(_this.model.get('totalRecords'));
+              // if( _this.overWritePaginations ) {
+              //   _this.overWritePaginations();
+              // }
             }, 0);
           });
         },
         onAfterFilterChanged: function(){
           _this.handleSelectAllChkBhv();
-          _this.clientSideFilter();
+          if(!_this.gridOptions.enableServerSideFilter) {
+            _this.clientSideFilter();
+          }
 
           if( _.isEmpty(this.api.getFilterModel()) ){
             _this.ui.filtered.addClass('hidden');
@@ -138,14 +144,19 @@ define([
             _this.ui.filteredElems.html(this.api.getModel().getRowCount());
           }
 
-        }
+          // if( _this.overWritePaginations ) {
+          //   _this.overWritePaginations();
+          // }
 
+          // _this.refreshGridLegend();
+
+        }
       };
 
       if(!this.clientSide) {
         $.extend(this.gridOptions, {
           enableServerSideSorting: true,
-          paginationPageSize: this.pageSize,
+          paginationPageSize: options.gridOptions.pageSize || this.pageSize,
         });
       }
 
@@ -172,6 +183,19 @@ define([
       } else {
         this.model.set('legend', true);
       }
+    },
+
+    refreshGridLegend : function() {
+      // var filterModel = this.gridOptions.api.getFilterModel()
+      var nbRows = this.gridOptions.api.getModel().getRowCount()  || 0;
+      // if( _.isEmpty(filterModel) ){
+      //   this.ui.filtered.addClass('hidden');
+      //   this.ui.filteredElems.html(nbRows);
+      // } else {
+        this.ui.filtered.removeClass('hidden');
+        this.ui.filteredElems.html(nbRows);
+      // }
+
     },
 
     focusFirstCell: function(){
@@ -418,7 +442,7 @@ define([
             break;
           }
           case 'date': {
-            col.minWidth = 180;
+            // col.minWidth = 180;
             col.filter = CustomDateFilter;
             col.cellRenderer = DateTimeRenderer;
             break;
@@ -696,13 +720,38 @@ define([
           var pageSize = params.endRow - params.startRow;
           var page = params.endRow / pageSize;
           var offset = (page - 1) * pageSize;
-
+        
           var order_by = [];
           if(params.sortModel.length) {
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
 
+          if( _this.gridOptions.enableServerSideFilter ) {
+            var objFilters = _this.gridOptions.api.getFilterModel();
+             var filtersTmp = [];
+            for ( var item in objFilters ) {
+              var filterString = objFilters[item].strFilter;
+              if (Array.isArray(filterString)){
+                for(var i = 0 ; i < filterString.length ; i++ ) {
+                  var curItem = filterString[i];
+                  if( curItem.Value != "") {
+                    curItem.Column = item.toString();
+                    filtersTmp.push(curItem)
+                  }
+                }
+              }
+              else {
+                filterString["Column"] = item.toString();
+                filtersTmp.push(filterString);
+              }
+            }
+            // filtersTmp
+            _this.filters = filtersTmp;
+          }
+
+          pageSize = _this.gridOptions.paginationPageSize;
           var status = {
+            //criteria: JSON.stringify(_this.filters),
             criteria: JSON.stringify(_this.filters),
             page: page,
             per_page: pageSize,
@@ -710,6 +759,10 @@ define([
             order_by: JSON.stringify(order_by),
             typeObj: _this.model.get('objectType')
           };
+
+          if ( _this.model && _this.model.get('type') == 'individuals' ) {
+            status.order_by = JSON.stringify(order_by);
+          }
 
           //mm
           if(this.startDate){
@@ -725,8 +778,14 @@ define([
             context: this,
             data: status
           }).done( function(response) {
-            var rowsThisPage = response[1];
-            var total = response[0].total_entries;
+           /* if ( _this.gridOptions.enableServerSideFilter) {
+              var rowsThisPage = response;
+              var total = response.length;
+            }
+            else {*/
+              var rowsThisPage = response[1];
+              var total = response[0].total_entries;
+           /* }*/
 
             _this.model.set('totalRecords', total);
             _this.model.set('status', status);
@@ -792,8 +851,43 @@ define([
       });
     },
 
+    fillIconCol:function(idTop) {
+      var firstRow; 
+      this.gridOptions.api.forEachNode( function(node) {
+        if ( node.data.ID === idTop || node.data.id === idTop) {
+          firstRow = node;
+        }
+      })
+      var allRows = this.gridOptions.api.rowModel.rowsToDisplay;
+      for(var j = 0 ; j < allRows.length ; j++ ) {
+        var dataTmp = allRows[j].data
+        dataTmp.iconOnMap = null;
+        allRows[j].setData(dataTmp);
+      }
+      var nbIcons = 0; 
+      var i = firstRow.childIndex;
+      var opacity = 1;
+      while(nbIcons < 20 && i < allRows.length ) {
+        var theRow = allRows[i];
+
+        if( theRow.data.type_ !='station') {
+          var data = theRow.data;
+          data.iconOnMap = (opacity).toFixed(2);
+          theRow.setData(data);
+          // theRow.data.iconOnMap = opacity;
+          opacity = opacity - 0.05;
+          nbIcons = nbIcons + 1;
+        }
+        i = i+1;
+
+      }
+
+    },
+
     highlight: function(param){
       var _this = this;
+      this.toggleIconCol(true)
+      
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.gridOptions.api.ensureIndexVisible(node.childIndex);
@@ -803,6 +897,7 @@ define([
             },0);
           }
       });
+      this.fillIconCol(param);
     },
 
     focusByIndex: function(params) {
@@ -854,8 +949,24 @@ define([
         node.setSelected(false);
       });
     },
+
+    toggleIconCol:function(displayIt = true) {
+      var _this = this;
+      var columns = this.gridOptions.columnApi.getAllColumns();
+      columns.forEach(function(col) {
+        if( col.colDef.hide == displayIt && col.colDef.field =='iconOnMap') {
+          _this.gridOptions.columnApi.setColumnVisible(col.colId, displayIt);
+          col.colDef.hide = !displayIt;
+          _this.gridOptions.api.sizeColumnsToFit()
+        }
+      })
+    },
+
+
     noFocus : function() {
+     
       this.gridOptions.api.focusedCellController.clearFocusedCell()
+      this.toggleIconCol(false);
     },
 
 
