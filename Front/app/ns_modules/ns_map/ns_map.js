@@ -1452,9 +1452,9 @@ this.parentContainer.append('\
                               trigger :'hover',
                               title: '<h5 class="custom-title"><u>Shortcuts</u></h5>',
                               content: '<div class="js-shortcuts-help">\
-                                          <i class="reneco reneco-space">: Pause</i>\
-                                          <i class="reneco reneco-left">: Previous location</i>\
-                                          <i class="reneco reneco-right">: Next location</i>\
+                                          <i class="reneco reneco-ECORELEVE_space"> : Pause</i>\
+                                          <i class="reneco reneco-ECORELEVE_left"> : Previous location</i>\
+                                          <i class="reneco reneco-ECORELEVE_right"> : Next location</i>\
                                         </div>',
                               html: true,
                               delay: { 
