@@ -1440,7 +1440,7 @@ this.parentContainer.append('\
 
       this.p_relDuration = speed * this.p_realDuration;
       
-      //var diff = geoJson.features[10].time / speed;
+      // var diff = geoJson.features[10].time / speed;
       
       this.displayScale();
 
