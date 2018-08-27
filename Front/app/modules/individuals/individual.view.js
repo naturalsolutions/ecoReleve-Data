@@ -253,13 +253,11 @@ define([
                 "type" :"FeatureCollection"
             }
 
-
-
-            if($('#player').hasClass('active')){
+          //  if($('#player').hasClass('active')){
               // _this.map.firstInit();
-              _this.map.hidePlayer();
+              _this.map.hidePlayer({silent : true});
               _this.map.initPlayer(newGeoJson)
-            }
+         //   }
             // _this.map.clearMarkers()
             // _this.map.clearLines()
             // _this.map.draw()

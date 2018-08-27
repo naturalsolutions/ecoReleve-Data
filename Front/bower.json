@@ -24,7 +24,7 @@
     "fancytree": "2.9.0",
     "tooltipster": "4.2.5",
     "chartjs": "1.0.2",
-    "reneco-fonts": "*",
+    "reneco-fonts": "git@github.com:NaturalSolutions/RenecoFonts.git#553549cd51afb207aac491484ac3831e6bb7dd21",
     "ag-grid": "^5.2.0",
     "resumable.js": "https://github.com/23/resumable.js.git#4199ab8270f764effdb9d1de50bf285df9495367",
     "ez-plus": "^1.1.20",
