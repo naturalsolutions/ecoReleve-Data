@@ -28,12 +28,15 @@ define([
 		initialize : function(options) {
       var _this = this;
 			this.parent = options.parent;
-      this.model = options.model;
+			this.model = options.model;
+			this.flagExif = false;
+			this.listenTo(this.model, "custom:activechange custom:refreshUI change", function() {
+        _this.render();
+      });
       // this.listenTo(this.model, "change", function() {
       //   console.log("j'ai changé");
       //   _this.onRender();
       // });
-      this.flagExif = false;
 
 		//	console.log("init des details");
 
@@ -178,10 +181,18 @@ define([
 
 		}
 
-    },
+		},
+		serializeData : function() {
+			var data = this.model.attributes;
+			data.flagExif = this.flagExif
+
+
+			return data;
+		},
 
 		onRender: function(){
 
+				// console.log("on render la vue details")
       this.changeStatus();
       // this.changeStars();
       this.changeTags();
@@ -200,15 +211,16 @@ define([
       this.stopListening(this.model);
       this.flagExif = false;
 			this.model = model;
-			var $keyExif = _this.$el.find('#keyExif');
-			$keyExif.html('');
-			var $valueExif = _this.$el.find('#valueExif');
-			$valueExif.html('');
+			// var $keyExif = _this.$el.find('#keyExif');
+			// $keyExif.html('');
+			// var $valueExif = _this.$el.find('#valueExif');
+			// $valueExif.html('');
       this.listenTo(this.model, "custom:activechange custom:refreshUI change", function() {
-        _this.onRender();
+				_this.flagExif = false;
+        _this.render();
       });
 
-			this.onRender();
+			this.render();
 		},
 
 		onDestroy: function() {

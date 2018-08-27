@@ -34,6 +34,7 @@
 
 
   <div id="detailsExifsPhotos">
+    <% if(!flagExif)  { %>
     <div id="detailstitle">
         <a role="button" class="collapsed" data-toggle="collapse" href="#detailsExif" aria-expanded="true" >EXIF INFOS</a>
       <!-- <span href="#detailsExif" data-toggle="collapse" class="collapsed">EXIF INFOS</span> -->
@@ -52,5 +53,6 @@
       <div id="valueExif"  class="col-md-6 nopadding">
       </div>
     </div>
+    <% } %>
   </div>
 </div>
