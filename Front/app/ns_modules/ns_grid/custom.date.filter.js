@@ -285,7 +285,17 @@ define([
           if (that.isFilterActive()) {
             return {
               type: 1,
-              filter: that.filterDate
+              filter: that.filterDate,
+              strFilter: [
+                 {
+                    "Operator" : ">=",
+                    "Value" : that.dateFrom.value
+                  },
+                  {
+                    "Operator" : "<=",
+                    "Value" : that.dateTo.value
+                  }
+                ]
             };
           }
           else {
