@@ -150,6 +150,7 @@ define([
     swalError: function (title, content) {
       var _this = this;
       Swal({
+        heightAuto: false,
         title: title,
         text: content,
         type: 'error',

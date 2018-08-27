@@ -66,6 +66,7 @@ define([
             msg = response.responseText;
           }
         Swal({
+          heightAuto: false,
           title: 'Error',
           text: msg ,
           type: 'error',
@@ -222,41 +223,45 @@ define([
                 _this.locationsGrid.toggleIconCol(false)
                 _this.locationsGrid.refreshGridLegend();
                 _this.locationsGrid.overWritePaginations();
+
+                var newfeatures = []
+
+                _this.locationsGrid.gridOptions.api.forEachNodeAfterFilterAndSort(function(node) {
+                  var jsonItem = {
+                    "geometry": {
+                      "coordinates" : [node.data.LAT,node.data.LON],
+                      "type": "Point"
+                    }, 
+                    "properties": {
+                      "Date" :node.data.Date,
+                      "ID" : node.data.ID,
+                      "precision" : node.data.precision,
+                      "type_" : node.data.type_
+                    },
+                    "type": "Feature"
+                  };
+                  newfeatures.push(jsonItem)
+                })
+    
+                var newGeoJson = {
+                    "total" : newfeatures.length ,
+                    "exceed" : false,
+                    "features" : newfeatures,
+                    "type" :"FeatureCollection"
+                }
+
+                _this.map.hidePlayer({silent : true});
+                _this.map.initPlayer(newGeoJson)
               }, 0);
             }
 
           )},
           onFilterChanged: function(row){
-            var newfeatures = []
 
-            this.api.forEachNodeAfterFilterAndSort(function(node) {
-              var jsonItem = {
-                "geometry": {
-                  "coordinates" : [node.data.LAT,node.data.LON],
-                  "type": "Point"
-                }, 
-                "properties": {
-                  "Date" :"node.data.Date",
-                  "ID" : node.data.ID,
-                  "precision" : node.data.precision,
-                  "type_" : node.data.type_
-                },
-                "type": "Feature"
-              };
-              newfeatures.push(jsonItem)
-            })
-
-            var newGeoJson = {
-                "total" : newfeatures.length ,
-                "exceed" : false,
-                "features" : newfeatures,
-                "type" :"FeatureCollection"
-            }
 
           //  if($('#player').hasClass('active')){
               // _this.map.firstInit();
-              _this.map.hidePlayer({silent : true});
-              _this.map.initPlayer(newGeoJson)
+
          //   }
             // _this.map.clearMarkers()
             // _this.map.clearLines()
@@ -290,6 +295,7 @@ define([
         return;
       }
       this.swal({
+        heightAuto: false,
         title: 'Are you sure?',
         text: 'selected event will be deleted'
       }, 'warning', _.bind(this.deleteHistory, this));
@@ -366,6 +372,7 @@ define([
       }
 
       Swal({
+        heightAuto: false,
         title: opt.title,
         text: opt.text || '',
         type: type,

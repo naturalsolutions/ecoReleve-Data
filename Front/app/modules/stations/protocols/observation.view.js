@@ -118,6 +118,7 @@ define([
           msgText = response.responseText;
         }
         Swal({
+          heightAuto: false,
           title: 'Data conflicts',
           text: msgText,
           type: 'warning',
@@ -130,13 +131,16 @@ define([
         if (response.responseJSON)
          {
            if(response.responseJSON.response.equipment_error){
-              this.swal({'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not available', 'confirmButtonColor':'rgb(221, 107, 85)'});
+              this.swal({
+                heightAuto: false,'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not available', 'confirmButtonColor':'rgb(221, 107, 85)'});
               }
               else if(response.responseJSON.response.unequipment_error ){
-              this.swal({'title':'Data saving error', 'type':'error', 'text':"Selected sensor can't be unequiped at this date with this "+response.responseJSON.response.unequipment_error, 'confirmButtonColor':'rgb(221, 107, 85)'});
+              this.swal({
+                heightAuto: false,'title':'Data saving error', 'type':'error', 'text':"Selected sensor can't be unequiped at this date with this "+response.responseJSON.response.unequipment_error, 'confirmButtonColor':'rgb(221, 107, 85)'});
               }
               else if(response.responseJSON.response.errorSite == true ){
-              this.swal({'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
+              this.swal({
+                heightAuto: false,'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
               }
             //   else {
             //     this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseJSON.response, 'confirmButtonColor':'rgb(221, 107, 85)'});

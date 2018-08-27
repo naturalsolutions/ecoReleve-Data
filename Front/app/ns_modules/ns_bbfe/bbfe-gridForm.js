@@ -287,6 +287,7 @@ define([
 
       if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
         this.swal({
+          heightAuto: false,
           title : 'Rule error',
           text : errorMsg,
           type:'error',

@@ -65,6 +65,7 @@ define([
 
     swal: function(opts) {
       Swal({
+        heightAuto: false,
         title: opts.title || opts.responseText || 'error',
         text: opts.text || '',
         type: opts.type,

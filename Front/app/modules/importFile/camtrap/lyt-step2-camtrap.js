@@ -148,6 +148,7 @@ define([
       }
       else {
         Swal({
+          heightAuto: false,
           title: 'Warning',
           html: 'You need to select one session before going to the next step.<BR>', 
           type: 'warning',

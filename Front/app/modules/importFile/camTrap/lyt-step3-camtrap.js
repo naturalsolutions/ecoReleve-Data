@@ -309,6 +309,7 @@ define([
 
         if(textWarningSwal && textInfosSwal) {
           Swal({
+            heightAuto: false,
             title: 'Infos',
             html: textInfosSwal,
             type: 'warning',
@@ -319,6 +320,7 @@ define([
 
           }).then( () => {
             Swal({
+              heightAuto: false,
               title: 'Warning',
               html: textWarningSwal,
               type: 'warning',
@@ -343,6 +345,7 @@ define([
         else if(textInfosSwal || textWarningSwal) {
           var text = textInfosSwal || textWarningSwal;
           Swal({
+            heightAuto: false,
             title: 'Warning',
             html: text,
             type: 'warning',
@@ -480,6 +483,7 @@ define([
         text+= _this.addTemplateCollapse().innerHTML;
         // console.log(text)
         Swal({
+          heightAuto: false,
           title: 'Upload complete',
           html: text,
           type: 'warning',
