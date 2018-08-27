@@ -870,14 +870,14 @@ define([
       while(nbIcons < 20 && i < allRows.length ) {
         var theRow = allRows[i];
 
-        if( theRow.data.type_ !='station') {
+       // if( theRow.data.type_ !='station') {
           var data = theRow.data;
           data.iconOnMap = (opacity).toFixed(2);
           theRow.setData(data);
           // theRow.data.iconOnMap = opacity;
           opacity = opacity - 0.05;
           nbIcons = nbIcons + 1;
-        }
+       // }
         i = i+1;
 
       }
@@ -1123,6 +1123,7 @@ define([
       }
 
       Swal({
+        heightAuto: false,
         title: opt.title,
         text: opt.text || '',
         type: type,
