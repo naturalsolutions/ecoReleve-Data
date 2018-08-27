@@ -219,6 +219,7 @@ define([
               _this.map.refreshGeoJsonWithRowGrid(_this);
               
               setTimeout(() => {
+                _this.locationsGrid.toggleIconCol(false)
                 _this.locationsGrid.refreshGridLegend();
                 _this.locationsGrid.overWritePaginations();
               }, 0);
@@ -266,8 +267,7 @@ define([
           
         }
       }));
-      this.gridViews.push(this.locationsGrid);
-      
+      this.gridViews.push(this.locationsGrid);     
     },
 
     warnDeleteLocations: function() {
