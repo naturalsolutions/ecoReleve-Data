@@ -28,7 +28,8 @@ define([
     events: {
       'click .tab-link': 'displayTab',
       'click button.js-btn-delete-locations': 'warnDeleteLocations',
-      'click button.js-btn-delete-history': 'warnDeleteHistory'
+      'click button.js-btn-delete-history': 'warnDeleteHistory',
+      'change .js-page-size': 'changePageSize',
     },
 
     ModelPrototype: IndividualModel,
@@ -97,6 +98,7 @@ define([
         }
       );
     },
+    
 
     displayGrids: function() {
       this.displayHistoryGrid();
@@ -143,42 +145,105 @@ define([
       this.gridViews.push(this.equipmentGrid);
     },
 
+    changePageSize: function(e){
+      this.locationsGrid.changePageSize($(e.target).val());
+    },
+
     displayLocationsGrid: function() {
       var _this = this;
       this.rgLocationsGrid.show(this.locationsGrid = new GridView({
         com: this.com,
+        
         columns: this.model.get('locationsColumnDefs'),
         type: this.model.get('type'),
         url: this.model.get('type') + '/' + this.model.get('id')  + '/locations',
-        clientSide: true,
+        overWritePaginations : function() {
+         var spanPagination = document.getElementById('pageRowSummaryPanel');
+         var spanFirstRow = spanPagination.querySelector('#firstRowOnPage');
+         var spanLastRow = spanPagination.querySelector('#lastRowOnPage');
+         var spanTotalRow = spanPagination.querySelector('#recordCount');
+
+
+         var totalRecords = this.model.get('totalRecords');
+          if ( totalRecords == undefined || totalRecords == null) {
+            totalRecords = 0;
+          }
+
+         spanTotalRow.innerHTML =  totalRecords + ' Positions';
+         
+         var modelGrid = this.gridOptions.api.getModel();
+         var rowsNodes = modelGrid.rowsToDisplay;
+         var nbStations = 0;
+        //  spanLastRow.html = rowsNodes.length;
+         for(var i =0; i < rowsNodes.length ; i++ ) {
+          if (rowsNodes[i].data.type_ == 'station') {
+            nbStations=nbStations+1;
+          }
+         }
+         var  strSta = 'Station'
+         if( nbStations > 1) {
+          strSta = 'Stations'
+         }
+
+        
+        var startingRow = new Number(spanFirstRow.innerText.replace(',','')) - 1 ;
+         
+        spanLastRow.innerText = startingRow + rowsNodes.length;
+
+         var spanNbStations =  spanPagination.querySelector('#nbStations');
+         if (spanNbStations == null ) {
+          spanNbStations = document.createElement('span');
+          spanNbStations.id= 'nbStations'
+          spanPagination.appendChild(spanNbStations); 
+         }
+
+         spanNbStations.innerText ='(with '+ nbStations +' '+strSta+')';
+        },
+        // clientSide: true,
         gridOptions: {
           rowSelection: 'multiple',
+          rowModelType: 'pagination',
+          clientSide:false,
+          pageSize : 500,
           enableFilter: true,
+          enableServerSideFilter: true,
           onRowDoubleClicked: function (row){
             _this.locationsGrid.interaction('focusAndZoom', row.data.ID || row.data.id);
           },
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
           },
+          onModelUpdated: function() {
+            $.when(_this.locationsGrid.deferred).then(function() {
+              
+              _this.map.refreshGeoJsonWithRowGrid(_this);
+              
+              setTimeout(() => {
+                _this.locationsGrid.refreshGridLegend();
+                _this.locationsGrid.overWritePaginations();
+              }, 0);
+            }
+
+          )},
           onFilterChanged: function(row){
             var newfeatures = []
 
             this.api.forEachNodeAfterFilterAndSort(function(node) {
-            var jsonItem = {
-              "geometry": {
-            "coordinates" : [node.data.LAT,node.data.LON],
-            "type": "Point"
-            }, 
-            "properties": {
-                "Date" :"node.data.Date",
-                "ID" : node.data.ID,
-                "precision" : node.data.precision,
-                "type_" : node.data.type_
-            },
-            "type": "Feature"
-            };
-            newfeatures.push(jsonItem)
-                })
+              var jsonItem = {
+                "geometry": {
+                  "coordinates" : [node.data.LAT,node.data.LON],
+                  "type": "Point"
+                }, 
+                "properties": {
+                  "Date" :"node.data.Date",
+                  "ID" : node.data.ID,
+                  "precision" : node.data.precision,
+                  "type_" : node.data.type_
+                },
+                "type": "Feature"
+              };
+              newfeatures.push(jsonItem)
+            })
 
             var newGeoJson = {
                 "total" : newfeatures.length ,
@@ -202,6 +267,7 @@ define([
         }
       }));
       this.gridViews.push(this.locationsGrid);
+      
     },
 
     warnDeleteLocations: function() {
