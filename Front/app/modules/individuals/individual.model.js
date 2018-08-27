@@ -155,6 +155,7 @@ define([
         suppressFilter: true,
         suppressSorting: true,
         hide: true,
+        minWidth: 50,
         cellRenderer: function(params){
           if( params.data.iconOnMap!= null) {
             var span = document.createElement('span')
@@ -179,8 +180,7 @@ define([
           //   return params.data.ID;
           // }
         }
-      },
-      {
+      },{
         field: 'FieldworkArea',
         headerName: 'FieldWorkArea',
         filter: 'text',
