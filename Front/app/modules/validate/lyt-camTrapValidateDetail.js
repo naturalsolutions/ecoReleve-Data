@@ -927,8 +927,8 @@ define([
           _this.refreshCounter();
         })
         .fail(function (err) {
-          // console.log(err)
-          throw new Error("error create station");
+           console.log(err)
+          // throw new Error("error create station");
         });
 
     },
@@ -1021,7 +1021,7 @@ define([
       })
       .fail(function (err) {
         console.log(err)
-        throw new Error("error create station");
+        // throw new Error("error create station");
       });
 
     },
