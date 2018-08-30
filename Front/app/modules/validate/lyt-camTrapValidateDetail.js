@@ -50,6 +50,8 @@ define([
       // 'backspace': 'undeterminatePhoto',
       'enter': function(){ $('i#acceptedBtn').click(); },//'simulateAcceptPhoto',
       'del': function(){$('i#refusedBtn').click();},//'simulateRejectPhoto',
+      'ins': function(){$('i#createStationBtn').click();},
+      'backspace': function(){$('i#deleteStationBtn').click();},
       'esc': 'leaveModal',
       'pagedown': 'nextPage',
       'pageup': 'prevPage',
@@ -777,6 +779,7 @@ define([
 
 
         Swal({
+          heightAuto: false,
           title: 'Warning',
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
           html: text,
@@ -873,6 +876,7 @@ define([
       }
       if (!stationId) {
         Swal({
+          heightAuto: false,
           title: title,
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
           html: text,
@@ -923,8 +927,8 @@ define([
           _this.refreshCounter();
         })
         .fail(function (err) {
-          // console.log(err)
-          throw new Error("error create station");
+           console.log(err)
+          // throw new Error("error create station");
         });
 
     },
@@ -1003,6 +1007,7 @@ define([
           }
           //swal
           Swal({
+            heightAuto: false,
             title: 'Data Conflicts',
             html: text.join("<BR>"),
             type: 'error',
@@ -1016,7 +1021,7 @@ define([
       })
       .fail(function (err) {
         console.log(err)
-        throw new Error("error create station");
+        // throw new Error("error create station");
       });
 
     },
@@ -1032,6 +1037,7 @@ define([
 
       if (tabModelsWithStation.length === 0) {
         Swal({
+          heightAuto: false,
           title: 'Error',
           html: 'No stations to remove',
           type: 'error',
@@ -1151,6 +1157,7 @@ define([
       var tabModel = this.currentCollection.where({activeFront : true})
       if( tabModel.length > 1 ) {
         Swal({
+          heightAuto: false,
           title: 'Warning',
           html: 'You can only display one photo at a time ',
           type: 'info',
@@ -1431,6 +1438,7 @@ define([
     displaySwalUnchecked: function (compteur) {
       var _this = this;
       Swal({
+        heightAuto: false,
         title: 'You can\'t validate this sessions',
         // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
         html: +_this.nbPhotosNotChecked + ' photos still underteminate',
@@ -1462,6 +1470,7 @@ define([
         }
 
       Swal({
+          heightAuto: false,
           title: 'Validation',
           html: 'You have finish this session on ' + _this.nbPhotos + ' photos :<BR>' + text,
           type: 'success',
@@ -1494,6 +1503,7 @@ define([
               newText += response.nbStationsCreated + ' stations created <BR>'
 
               Swal({
+                heightAuto: false,
                 title: 'Session validated',
                 html: 'On ' + _this.nbPhotos + ' photos <BR>' + newText,
                 type: 'success',
@@ -1518,6 +1528,7 @@ define([
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
               Swal({
+                heightAuto: false,
                 title: 'Error',
                 html: 'Error while validating picture(s).<BR>Please contact your administrator<BR>',
                 type: 'error',

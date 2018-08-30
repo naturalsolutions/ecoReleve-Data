@@ -65,6 +65,8 @@ define([
         for (_i = 0, _len = this.dropzone.files.length; _i < _len; _i++) {
           if (this.dropzone.files[_i].name === file.name && this.dropzone.files[_i].size === file.size) {
             Swal({
+              
+              heightAuto: false,
               title: 'Warning Duplicate Files',
               text: this.dropzone.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
               type: 'warning',
@@ -115,6 +117,7 @@ define([
       this.dropzone.on("maxfilesexceeded", function (file) {
         this.removeFile(file);
         Swal({
+          heightAuto: false,
           title: 'Max file exceeded',
           text: "You can't add more files \n (max files: "+_this.maxFiles+")",
           type: 'warning',
@@ -217,6 +220,8 @@ define([
       var _this = this;
       if (!_this.errors && !_this.timeout) {
         Swal({
+          
+          heightAuto: false,
           title: 'Well done',
           text: 'File(s) have been correctly imported\n\n' +
             JSON.stringify(sumObjreturned).replace(',',',\n'),
@@ -261,6 +266,7 @@ define([
         } 
         if(_this.errors) {
           Swal({
+            heightAuto: false,
             title: 'An error occured',
             text: 'Please verify your file',
             type: 'error',
@@ -272,6 +278,7 @@ define([
 
       if(_this.timeout){
         Swal({
+          heightAuto: false,
           title: 'Connection Timeout',
           text: 'Connection is down because the uploaded file is too large. The process is still running, but you can not get its result',
           type: 'warning',

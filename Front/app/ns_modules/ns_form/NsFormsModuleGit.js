@@ -261,6 +261,7 @@ define([
 
       if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
         this.swal({
+          heightAuto: false,
           title : 'Rule error',
           text : errorMsg,
           type:'error',
@@ -441,6 +442,7 @@ define([
           }
           if(flagEmpty){
             this.swal({
+              heightAuto: false,
               title : 'Empty observation',
               text : 'The observation won\'t be recorded',
               type:'warning',
@@ -587,6 +589,7 @@ define([
         error: function(model , response){
           if( response.status === 409) {
               Swal({
+                heightAuto: false,
                 title: 'Data conflicts',
                 text: response.responseText,
                 type: 'warning',
@@ -697,6 +700,7 @@ define([
       var _this = this;
       if( response.status == 409) {
         Swal({
+          heightAuto: false,
           title: 'Data conflicts',
           text: response.responseText,
           type: 'warning',
@@ -801,6 +805,7 @@ define([
 
     swal: function(opts){
       Swal({
+        heightAuto: false,
         title: opts.title || opts.responseText || 'error',
         html: opts.html || opts.text || '',
         type: opts.type,

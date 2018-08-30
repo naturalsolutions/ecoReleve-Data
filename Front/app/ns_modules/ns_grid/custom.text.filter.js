@@ -76,6 +76,7 @@ return (function () {
     TextFilter.prototype.init = function (params) {
         this.filterParams = params.filterParams;
         this.applyActive = this.filterParams && this.filterParams.apply === true;
+        this.applyActive = true;
         this.filterChangedCallback = params.filterChangedCallback;
         this.filterModifiedCallback = params.filterModifiedCallback;
         this.localeTextFunc = params.localeTextFunc;
@@ -242,9 +243,41 @@ return (function () {
             },
             getModel: function () {
                 if (that.isFilterActive()) {
+                    var operator;
+                    switch(that.filterType) {
+                        case 1 : {
+                            operator = 'contains'
+                            break;
+                        }
+                        case 2: {
+                            operator = 'is'
+                            break;
+                        }
+                        case 3: {
+                            operator = 'is not'
+                            break;
+                        }
+                        case 4:{
+                            operator = 'begins'
+                            break;
+                        }
+                        case 5 : {
+                            operator = 'ends'
+                            break;
+                        }
+                        default: {
+                            operator = 'null'
+                            break;
+                        }
+                    }
+
                     return {
                         type: that.filterType,
-                        filter: that.filterText
+                        filter: that.filterText,
+                        strFilter : {
+                            "Operator" : operator,
+                            "Value" : that.filterText
+                        }
                     };
                 }
                 else {
@@ -252,6 +285,8 @@ return (function () {
                 }
             },
             setModel: function (dataModel) {
+                if ( dataModel.strFilter ) {
+                }
                 if (dataModel) {
                     this.setType(dataModel.type);
                     this.setFilter(dataModel.filter);

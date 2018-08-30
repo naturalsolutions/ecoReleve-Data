@@ -59,6 +59,7 @@ define([
         if( row.data.nb_photo > row.data.processed ) {
 
           Swal({
+            heightAuto: false,
             title: 'Please wait while processing photos',
             // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
             xt: 'current state : '+row.data.processed+'/'+row.data.nb_photo,
@@ -199,6 +200,7 @@ define([
       }
 
       Swal({
+        heightAuto: false,
         title: opt.title || 'error',
         text: JSON.stringify(opt.resp)|| '',
         type: type,

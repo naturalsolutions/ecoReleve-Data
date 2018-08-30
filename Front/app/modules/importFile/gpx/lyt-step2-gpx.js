@@ -277,6 +277,7 @@ define([
       var selectedNodesError = false;
       if(!selectedNodes.length){
         Swal({
+          heightAuto: false,
           title: 'No station selected',
           text: 'You have to select at least one station',
           type: 'error',
@@ -295,6 +296,7 @@ define([
 
       if(selectedNodesError){
         Swal({
+          heightAuto: false,
           title: 'Error in selected stations',
           text: 'Verifiy your data, an error occured in "'+selectedNodesError+'" field',
           type: 'error',
@@ -312,6 +314,7 @@ define([
           var exisits = data.existing;
           var existingNames = data.existing_name
           Swal({
+            heightAuto: false,
             title: 'Stations import',
             text: inserted + ' inserted station(s), \n'
                   + exisits + ' existing stations, \n'

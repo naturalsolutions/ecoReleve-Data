@@ -81,6 +81,7 @@ define([
           for (_i = 0, _len = this.files.length; _i < _len; _i++) {
             if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
               Swal({
+                heightAuto: false,
                 title: 'Warning Duplicate Files',
                 text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
                 type: 'warning',
@@ -169,7 +170,10 @@ define([
       myDropzone.on('queuecomplete', function(file) {
         var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
         if (!this.errors) {
-          Swal({title: 'Well done',
+          Swal({
+            
+          heightAuto: false,
+          title: 'Well done',
           text: 'File(s) have been correctly imported\n'
                         + '\t inserted : ' + totalInserted
                         ,

@@ -69,6 +69,7 @@ define([
     afterSaveSuccess: function(){
       var _this = this;
       Swal({
+        heightAuto: false,
         title: 'Succes',
         text: 'creating new ' + _this.model.get('single'),
         type: 'success',

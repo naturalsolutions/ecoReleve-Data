@@ -185,6 +185,7 @@ define([
 
       text += listFiles;
       Swal({
+        heightAuto: false,
         title: title,
         html: text,
         type: 'error',
@@ -365,6 +366,7 @@ define([
         return this.model;
       } else {
         Swal({
+          heightAuto: false,
           title: 'Warning',
           html: 'You need to add at least one file before going to the next step<BR>',
           type: 'warning',

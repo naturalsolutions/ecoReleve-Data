@@ -42,6 +42,7 @@ define([
             e.preventDefault();
 
             Swal({
+                heightAuto: false,
                 title: 'Warning',
                 text: 'Monitored Site coordinates will be updated, are you sure ? ',
                 type: 'warning',
@@ -96,6 +97,7 @@ define([
         ajaxAlert: function(data){
             setTimeout(function() {
                 Swal({
+                    heightAuto: false,
                   title: 'Site position',
                   text: data,
                   type: 'info',

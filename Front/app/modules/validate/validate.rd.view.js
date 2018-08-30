@@ -144,7 +144,8 @@ define([
 
     displayIndForm: function() {
       if(this.model.get('FK_Individual') === null){
-        this.swal({title: 'No individual attached'}, 'warning');
+        this.swal({
+          heightAuto: false,title: 'No individual attached'}, 'warning');
         this.ui.individualForm.html('<br /><span class="bull-warn">●</span>No individual is attached');
         return;
       }
@@ -342,6 +343,7 @@ define([
 
 
       Swal({
+        heightAuto: false,
         title: opt.title || opt.responseText || 'error',
         html: opt.text || '',
         type: type,

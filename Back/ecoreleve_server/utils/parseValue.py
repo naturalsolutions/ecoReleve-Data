@@ -136,3 +136,18 @@ def getAutcompleteValues(ID, objName, NameValReturn):
 
     query = select([table.c[NameValReturn]]).where(table.c['ID'] == ID)
     return session.execute(query).scalar()
+
+
+def integerOrDefault(val,defaultVal,positive):
+    '''
+
+    will return an int or None
+
+    '''
+    try:
+        res = int(val)
+        if positive and res < 0:
+            raise ValueError
+    except ValueError:
+        res = defaultVal
+    return res

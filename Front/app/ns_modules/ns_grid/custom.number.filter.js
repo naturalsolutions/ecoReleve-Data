@@ -253,9 +253,48 @@ return (function () {
             },
             getModel: function () {
                 if (that.isFilterActive()) {
+                    var operator;
+                    switch(that.filterType) {
+                        case 1 :{
+                            operator = '='
+                        break;
+                        }
+                        case 2 : {
+                            operator = '<>'
+                            break;
+                        }
+                        case 3 :{
+                            operator = '<'
+                            break;
+                        }
+                        case 4 : {
+                            operator = '>'
+                            break;
+                        }
+                        case 5 :{
+                            operator = '<='
+                            break;
+                            }
+                        case 6 : {
+                            operator = '>='
+                            break;
+                        }
+                        case 7 :{
+                            operator = 'in'
+                            break;
+                            }
+                        default : {
+                            operator = null
+                            break;
+                        }
+                    }
                     return {
                         type: that.filterType,
-                        filter: that.filterNumber
+                        filter: that.filterNumber,
+                        strFilter : {
+                            "Operator" : operator,
+                            "Value" : that.filterNumber
+                        }
                     };
                 }
                 else {
@@ -263,7 +302,10 @@ return (function () {
                 }
             },
             setModel: function (dataModel) {
-                if (dataModel) {
+                if ( dataModel.strFilter ) {
+
+                }
+                else if (dataModel) {
                     this.setType(dataModel.type);
                     this.setFilter(dataModel.filter);
                 }

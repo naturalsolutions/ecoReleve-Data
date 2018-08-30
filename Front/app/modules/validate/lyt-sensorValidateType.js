@@ -468,6 +468,7 @@ define([
           break;
       }
       Swal({
+        heightAuto: false,
         title: opt.title || 'error',
         text: JSON.stringify(opt.resp)|| '',
         type: type,

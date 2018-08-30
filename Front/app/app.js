@@ -87,6 +87,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         break;
     }
     Swal({
+      heightAuto: false,
       title: opt.title,
       text: opt.text || '',
       type: type,
@@ -178,6 +179,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       }
       if(jqxhr.status == 401){
         Swal({
+          heightAuto: false,
           title: 'Unauthorized',
           text: "You don't have permission",
           type: 'warning',
@@ -188,6 +190,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       }
       if(jqxhr.status == 409){
         Swal({
+          heightAuto: false,
           title: 'Data conflicts',
           text: jqxhr.responseText,
           type: 'warning',
@@ -269,6 +272,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       //   }
       // });
       Swal({
+        heightAuto: false,
         title: title,
         text: savingFormContent,
         type: 'warning',
