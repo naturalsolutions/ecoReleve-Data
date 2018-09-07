@@ -10,7 +10,7 @@ from .observation_collection import ObservationCollection
 from ..field_activities import FieldActivity_ProtocoleType
 from ..media_files import MediasFiles
 from ..permissions import context_permissions
-
+from .equipment_model import  ErrorAvailable
 
 class ObservationResource(DynamicObjectResource):
 
