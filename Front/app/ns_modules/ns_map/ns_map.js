@@ -1152,7 +1152,7 @@ define([
           this.errorElt.removeClass('hidden');
           this.errorElt.find('.msg').html(msg);
         }
-        if (geoJson.exceed) {
+        else if (geoJson.exceed) {
           msg = ' Too much data to display';
           this.errorElt.removeClass('hidden');
           this.errorElt.find('.msg').html(msg)

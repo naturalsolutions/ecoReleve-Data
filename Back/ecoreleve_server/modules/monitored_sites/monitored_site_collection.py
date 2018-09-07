@@ -40,7 +40,7 @@ class MonitoredSiteCollection:
             SensorType,
             Sensor._type_id == SensorType.ID)
 
-        self.selectable.extend([lastPositionView.c['LAT'], lastPositionView.c['LON'],lastPositionView.c['ELE']])
+        self.selectable.extend([lastPositionView.c['LAT'], lastPositionView.c['LON'],lastPositionView.c['ELE'],lastPositionView.c['StartDate']])
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))
         self.selectable.append(Sensor.Model.label('FK_SensorModel'))

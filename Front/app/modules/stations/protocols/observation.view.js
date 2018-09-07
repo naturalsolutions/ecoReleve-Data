@@ -132,15 +132,34 @@ define([
          {
            if(response.responseJSON.response.equipment_error){
               this.swal({
-                heightAuto: false,'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not available', 'confirmButtonColor':'rgb(221, 107, 85)'});
+                heightAuto: false,
+                title:'Data saving error',
+                type:'error',
+                text:'Selected sensor is not available',
+                confirmButtonColor:'rgb(221, 107, 85)',
+                confirmButtonText: 'OK'
+              });
               }
               else if(response.responseJSON.response.unequipment_error ){
               this.swal({
-                heightAuto: false,'title':'Data saving error', 'type':'error', 'text':"Selected sensor can't be unequiped at this date with this "+response.responseJSON.response.unequipment_error, 'confirmButtonColor':'rgb(221, 107, 85)'});
+                heightAuto: false,
+                title:'Data saving error',
+                type:'error', 
+                text:"Selected sensor can't be unequiped at this date with this "+response.responseJSON.response.unequipment_error,
+                confirmButtonColor:'rgb(221, 107, 85)',
+                confirmButtonText: 'OK'
+
+              });
               }
               else if(response.responseJSON.response.errorSite == true ){
               this.swal({
-                heightAuto: false,'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
+                heightAuto: false,
+                title:'Data saving error',
+                type:'error',
+                text:'No monitored site is attached',
+                confirmButtonColor:'rgb(221, 107, 85)',
+                confirmButtonText: 'OK'
+              });
               }
             //   else {
             //     this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseJSON.response, 'confirmButtonColor':'rgb(221, 107, 85)'});
