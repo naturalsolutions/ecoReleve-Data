@@ -10,6 +10,11 @@ html, body{
   background-size: cover;
 }
 
+button{
+  outline: none;
+  box-shadow: none;
+}
+
 main{
   height: 100%;
   padding-top: 50px;
@@ -120,6 +125,10 @@ a{
 .half-height{
   height: 50%;
   overflow: auto;
+}
+
+.half-height.individuals{
+  height: fit-content;
 }
 
 @media (max-width: @screen-lg){
@@ -363,5 +372,135 @@ a.btn{
 .js-dateInRange {
   #js-fileDate {
     color : yellow;
+  }
+}
+
+/* INDIVIDUALS */
+.individual{
+  .btn{
+    border-radius : 25px !important;
+  }
+  
+  .pull-left{
+    a.btn:not([class*="btn-"]){
+      margin-top: 0px !important;
+    }
+  }
+  .individuals{
+    #formTab{
+      .js-form{
+        padding: 5px;
+      }
+      /* height : fit-content; */
+      /* ICI INPUT ECT EN LOCAL */
+    }
+    .half-height{
+      /* .grid-view .ag-grid-container .ag-body .ag-row.ag-row-focus{
+        background : #5cb85cad !important;
+      } */
+      .toolbar.bottom{
+        border-top: solid 1px transparent;
+      }
+      .nav-tabs li a.tab-link{
+        border-bottom : solid 1px transparent !important;
+        padding: 5px 35px;
+        font-size: 18px;
+      }
+      .nav-tabs li.active a, .nav-tabs li.activeTab a{
+        font-weight: bold;
+      }
+      .grid-view .grid-legend{
+        display : none !important;
+      }
+      .ag-header-cell-sorted-asc, .ag-header-cell-sorted-desc{
+        background-color : #5cb85c !important;
+        color : #fff;
+        #agMenu{
+          background : linear-gradient(to right, rgba(199, 199, 199, 0) 0%, #5cb85c 30%, #5cb85c 100%) !important;
+        }
+        svg{
+          fill: #fff !important;
+        }
+      }
+      .ag-paging-page-summary-panel{
+        button{
+          background: transparent !important;
+          border: none;
+        }
+        button:hover{
+          span{
+             font-weight: bold;
+          }
+        }
+      }
+      .pull-left{
+        display: flex;
+        align-items: flex-end;
+        font-size: 18px;
+        color : #000;
+        select{
+          border: solid 1px transparent;
+          border-bottom: solid 1px #000;
+          box-shadow: none;
+          padding-bottom : 0px;
+          padding-left: 0px;
+          margin: 0 10px;
+        }
+      }
+    }
+  }
+  ::-webkit-scrollbar{
+    background: #888;
+  }
+  ::-webkit-scrollbar-thumb{
+    background: #fff;
+    border: solid 2px #888;
+    border-radius: 25px;
+  }
+}
+.individual{
+  .player{
+    .scale{
+      margin-bottom: 10px;
+    }
+    .timeline-total{
+      height: 10px;
+    }
+    .timeline-current{
+      background : rgb(53, 53, 53) !important;
+      top : -5px !important;
+    }
+    .cursor-timeline-current{
+      width: 20px;
+      height: 20px;
+      background: #5cb85c !important;
+      border: solid 1.5px #000;
+      margin-top: -5px;
+    }
+    .js-timeline-currentDate{
+      padding-top : 5px;
+    }
+  }
+}
+
+/* .input-group{
+  background-color : #fff !important;
+  border: solid 1px #000;
+}
+.input-group-addon{
+  background-color : #fff;
+  border-right : solid 1px #000;
+}
+input{
+  background-color : #fff !important;
+}
+.dateTimePicker{
+  border: solid 1px transparent;
+  border-bottom: solid 1px #000;
+}
+ */
+@media screen and (min-width: 1600px){
+  .half-height{
+    height: 60%;
   }
 }
