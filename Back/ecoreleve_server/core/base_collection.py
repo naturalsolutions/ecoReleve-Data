@@ -25,12 +25,15 @@ from ..utils.datetime import parse
 from ..utils.parseValue import parser
 from .base_model import HasDynamicProperties
 
+from ecoreleve_server.core import Base
 
 eval_ = Eval()
 
 class ColumnError(Exception):
     pass
 
+class TableError(Exception):
+    pass
 
 class QueryEngine(object):
     '''
@@ -72,6 +75,27 @@ class QueryEngine(object):
         initialize "SELECT FROM" statement
         @selectable corresponding to the columns you need in the SELECT statement
         '''
+
+        ##TODO :
+        ## Need to refact query engine based on model property 
+        ## we need to use model like Table and construct around it
+        ## Base.metadata.tables[]
+        # dictTableCol = {}
+        # cleanSelectable = []
+        # if self.model.__tablename__ == 'MonitoredSite':
+        #     for column in selectable :
+        #         if isinstance(column,str) and '@' in column:
+        #             tmpKey ,tmpVal = column.split('@')
+        #             #key doesn't exist yet we add it
+        #             if tmpKey not in dictTableCol:
+        #                 dictTableCol[tmpKey] = []
+        #             #key must exists here so we add val if not exist
+        #             if tmpVal not in dictTableCol[tmpKey]:
+        #                 dictTableCol[tmpKey].append(tmpVal)
+        #         else :
+        #             cleanSelectable.append(column)
+        #         # del selectable[column]
+        #     selectable = cleanSelectable
         self.fk_join_list = []
         self.selectable = []
         self.selectable_from_params = selectable
@@ -93,14 +117,51 @@ class QueryEngine(object):
         join_table, computed_selectable = self._select_from()
         join_table = self.extend_from(join_table)
         join_table = self._from_foreign(join_table)
+        # join_table = self._from_instrumented(join_table,dictTableCol)
         
         if not selectable:
             self.selectable.extend(computed_selectable)
         if not self.selectable:
             raise ColumnError('error on given columns ! ')
-
+        ## TODO 2 
+        # if self.model.__tablename__ == 'MonitoredSitezz':
+        #     newSelectable,queryExist = self._add_exists_test(dictTableCol)
+        #     self.selectable.extend(newSelectable)
+        #     join_table = outerjoin(join_table,Base.metadata.tables.get('MonitoredSitePosition'),Base.metadata.tables.get('MonitoredSitePosition').columns.FK_MonitoredSite == Base.metadata.tables.get('MonitoredSite').columns.ID )
+        #     # join_table = join ( join_table.left , outerjoin( Base.metadata.tables['MonitoredSite'],Base.metadata.tables['MonitoredSitePosition']) )
+        #     query = select(self.selectable).select_from(join_table)
+        #     query = query.where(queryExist)
+        # else:
         query = select(self.selectable).select_from(join_table)
+
         return query
+
+    def _add_exists_test(self,dictTableCol):
+        #TODO need a better way to do that ....
+        queryExists = None
+        tempSelectable = []
+        for table in dictTableCol:
+            tempSelectable = []
+            refTable = Base.metadata.tables[table]
+            aliasedTable =  refTable.alias('a')
+            # trueTable = Base.metadata.tables.get(table)
+            if refTable is None:
+                # raise TableError('error on given table ! ')
+                continue
+            for col in dictTableCol[table]:
+                refCol = refTable.columns.get(col)
+                aliasedCol = aliasedTable.columns.get(col)
+                tempSelectable.append(refCol)
+                # self.selectable.append(aliasedCol)
+                # tempSelectable[aliasedCol] = (aliasedTable.columns.ID,refTable.columns.ID)
+
+                # query = query.()
+        # for item in tempSelectable:
+            queryExists = not_(exists(select(tempSelectable).where(and_(aliasedTable.columns.ID == refTable.columns.ID,
+            refCol > aliasedCol)
+            ).limit(1)))
+
+        return tempSelectable,queryExists
 
     def init_count_statement(self, filtered_columns):
         '''
@@ -127,6 +188,19 @@ class QueryEngine(object):
         selectable = [self.model]
 
         return join_table, selectable
+    ## TODO 3
+    # def _from_instrumented(self,join_table,dictTableCol):
+    #     if dictTableCol is not {} :
+    #         for key in dictTableCol:
+    #             tableTmp = Base.metadata.tables[key]
+    #             join_table = outerjoin(join_table, tableTmp)
+    #             for col in dictTableCol[key]:
+    #                 objCol = tableTmp.columns.get(col)
+    #                 self.selectable.append(objCol)
+    #                 # self._add_exists_test(join_table,tableTmp,objCol)
+
+    #     return join_table
+
 
     def _from_foreign(self, join_table):
         '''
@@ -299,6 +373,11 @@ class QueryEngine(object):
             # raise ColumnError('Column :col not exists !'.format(col=column_name))
             column = None
         return column
+    # TODO 4
+    # def is_intrusmentedAttribute(self,name):
+    #     if name.__class__.__name__ == 'str' and '@' in name:
+    #         join_table_name,join_column_name = name.split('@')
+        
 
     def is_foreign_reference(self, name):
         if name.__class__.__name__ == 'str' and '@' in name:
