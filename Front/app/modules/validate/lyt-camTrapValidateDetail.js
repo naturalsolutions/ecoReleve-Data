@@ -621,8 +621,8 @@ define([
 
       $.when(_this.dataTags)
       .then(function(resp) {
-        resp.children.push({ title:"Standard quality",value : "Standard quality", children: []})
-        resp.children.push({ title:"Poor quality", value:"Poor quality", children: []})
+        // resp.children.push({ title:"Standard quality",value : "Standard quality", children: []})
+        // resp.children.push({ title:"Poor quality", value:"Poor quality", children: []})
         if(!_this.jsonParsed) {
           _this.jsonParsed = _this.parseJsonRecur(resp);
         }
