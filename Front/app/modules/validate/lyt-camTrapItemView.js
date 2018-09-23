@@ -10,10 +10,10 @@ define([
 	'ez-plus',
 	'backbone.marionette.keyShortcuts',
 	'noty',
-	// 'bootstrap-star-rating',
+	'bootstrap-star-rating'
 
 
-], function ($, _, Backbone, Marionette, Translater, config, ModalView, CamTrapImageModel, ezPlus, BckMrtKeyShortCut, noty/*, btstrp_star*/) {
+], function ($, _, Backbone, Marionette, Translater, config, ModalView, CamTrapImageModel, ezPlus, BckMrtKeyShortCut, noty, btstrp_star) {
 
 	'use strict';
 	return Marionette.ItemView.extend({
@@ -197,6 +197,24 @@ define([
 
 		onRender: function () {
 			// this.setVisualValidated(this.model.get("validated"));
+			var _this = this;
+			var notEditable = this.model.get('validated') === 2 ? false : true;
+
+			this.$el.find('input').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xs',
+				displayOnly: notEditable,
+				rtl:false,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});
+			this.$el.find('input').on('rating:change', function(event, value, caption) {
+				_this.model.set('note',value)
+			});
+
 		},
 
 		changeValid: function (e) {
