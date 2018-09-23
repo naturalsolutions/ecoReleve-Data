@@ -44,8 +44,8 @@ define([
       'left': 'mouvement',
       'right': 'mouvement',
       'tab': 'findTags',
-      // '+': 'addStars',
-      // '-': 'decreaseStars',
+      '+': 'addStars',
+      '-': 'decreaseStars',
       'space': 'displayModal',
       // 'backspace': 'undeterminatePhoto',
       'enter': function(){ $('i#acceptedBtn').click(); },//'simulateAcceptPhoto',
@@ -57,12 +57,12 @@ define([
       'pageup': 'prevPage',
       'home': 'firstPage',
       'end': 'lastPage',
-      // '1': 'setStars',
-      // '2': 'setStars',
-      // '3': 'setStars',
-      // '4': 'setStars',
-      // '5': 'setStars'
-
+      '1': 'setStars',
+      '2': 'setStars',
+      '3': 'setStars',
+      '4': 'setStars',
+      '5': 'setStars'
+      
     },
 
     events: {
@@ -702,6 +702,135 @@ define([
     setTotal: function () {
       this.ui.totalS.html(this.grid.grid.getSelectedModels().length);
       this.ui.total.html(this.grid.grid.collection.length);
+    },
+
+    addStars: function(e) {
+      var tabModels = this.currentCollection.where({activeFront : true });
+      if( tabModels.length > 1) { //batch
+        this.addStarsAllPhoto(tabModels);        
+      }
+      if( tabModels.length == 1) { //single
+        var tmpNote = Number(tabModels[0].get('note'));
+        var nextNote = tmpNote >= 5 ? 5 : (tmpNote + 1) ;
+        tabModels[0].set({note : nextNote },{refreshUI : true});
+      }
+    },
+
+    addStarsAllPhoto : function(tabModels) {
+      var _this = this;
+      var oldNotesdValues = []
+      for( var i =0 ; i< tabModels.length ; i++ ) {
+        var tmpNote = Number(tabModels[i].get('note'));
+        var nextNote = tmpNote >= 5 ? 5 : (tmpNote + 1) ;
+
+        oldNotesdValues.push(tmpNote )
+        tabModels[i].set({note : nextNote },{silent:true});
+      }
+      $.ajax({
+        type: 'PUT',
+        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        contentType: 'application/json',
+        data: JSON.stringify(tabModels)
+      })
+      .done(function (resp) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].trigger("custom:refreshUI");
+        }
+        _this.refreshCounter();
+        
+      })
+      .fail(function (err) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].set({note : oldNotesdValues[i] },{silent:true,refreshUI : true});
+        }
+        _this.refreshCounter();
+      })
+
+    },
+
+    decreaseStars: function(e) {
+      var tabModels = this.currentCollection.where({activeFront : true });
+      if( tabModels.length > 1) { //batch
+        this.decreaseStarsAllPhoto(tabModels);        
+      }
+      if( tabModels.length == 1) { //single
+        var tmpNote = Number(tabModels[0].get('note'));
+        var nextNote = tmpNote <= 1 ? 1 : (tmpNote - 1) ;
+        tabModels[0].set({note : nextNote },{refreshUI : true});
+      }
+    },
+
+    decreaseStarsAllPhoto: function(tabModels) {
+      var _this = this;
+      var oldNotesdValues = []
+      for( var i =0 ; i< tabModels.length ; i++ ) {
+        var tmpNote = Number(tabModels[i].get('note'));
+        var nextNote = tmpNote <= 1 ? 1 : (tmpNote - 1) ;
+
+        oldNotesdValues.push(tmpNote )
+        tabModels[i].set({note : nextNote },{silent:true});
+      }
+      $.ajax({
+        type: 'PUT',
+        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        contentType: 'application/json',
+        data: JSON.stringify(tabModels)
+      })
+      .done(function (resp) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].trigger("custom:refreshUI");
+        }
+        _this.refreshCounter();
+        
+      })
+      .fail(function (err) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].set({note : oldNotesdValues[i] },{silent:true,refreshUI : true});
+        }
+        _this.refreshCounter();
+      })
+    },
+
+    setStars : function(e) {
+      var keyNote = Number(e.key);
+      var tabModels = this.currentCollection.where({activeFront : true });
+      if( tabModels.length > 1) { //batch
+        this.setStarsAllPhoto(tabModels,keyNote);        
+      }
+      if( tabModels.length == 1) { //single
+        tabModels[0].set({note : keyNote },{refreshUI : true});
+      }
+    },
+
+    setStarsAllPhoto : function(tabModels , note ) {
+      var _this = this;
+      var oldNotesdValues = []
+      for( var i =0 ; i< tabModels.length ; i++ ) {
+        var tmpNote = Number(tabModels[i].get('note'));
+        oldNotesdValues.push(tmpNote )
+        tabModels[i].set({note : note },{silent:true});
+      }
+      $.ajax({
+        type: 'PUT',
+        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        contentType: 'application/json',
+        data: JSON.stringify(tabModels)
+      })
+      .done(function (resp) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].trigger("custom:refreshUI");
+        }
+        _this.refreshCounter();
+        
+      })
+      .fail(function (err) {
+        for( var i =0 ; i< tabModels.length ; i++ ) {
+          tabModels[i].set({note : oldNotesdValues[i] },{silent:true,refreshUI : true});
+        }
+        _this.refreshCounter();
+      })
+
+
     },
 
     acceptPhoto: function (e) {
