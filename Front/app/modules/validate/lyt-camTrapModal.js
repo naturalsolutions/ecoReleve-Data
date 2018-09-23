@@ -184,6 +184,23 @@ define([
 
 			this.parent.$el.find('.paginatorCamTrap').prepend(this.elems.container);
 
+
+			var notEditable = this.model.get('validated') === 2 ? false : true;
+
+			this.$el.find('input').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xl',
+				displayOnly: notEditable,
+				rtl:false,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});
+			this.$el.find('input').on('rating:change', function(event, value, caption) {
+				_this.model.set('note',value)
+			});
 			// var $input = this.$el.find('input');
 			// 	this.$el.find('input').rating({
 			// 		min:0,
