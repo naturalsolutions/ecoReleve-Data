@@ -76,33 +76,25 @@ define([
       }
 
     },
-    // changeStars: function() {
-    //   var _this = this;
+    changeStars: function() {
+      var _this = this;
 
-		//	console.log($radio);
-			// var $input = this.$el.find('input.rating');
-			//$input.html('');
-			// this.$el.find('input.rating').rating({
-			// 	min:0,
-			// 	max:5,
-			// 	step:1,
-			// 	size:'xs',
-			// 	rtl:false,
-			// 	displayOnly: true,
-			// 	showCaption:false,
-			// 	showClear:false,
-			// 	value : 0
-			// });
-			// if( _this.model.get('validated') == 2 ) {
-			// $input.rating('update', _this.model.get('note')).val();
-			// $input.trigger('rating.change', [_this.model.get('note') , null]);
-			// }
-			// else {
-			// 	$input.rating('update', 0).val();
-			// 	$input.trigger('rating.change', [0 , null]);
-			// }
+			
+			var $input = this.$el.find('input.rating');
+			$input.html('');
+			this.$el.find('input.rating').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xs',
+				rtl:false,
+				displayOnly: true,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});
 
-    // },
+    },
     changeTags: function() {
       var _this = this ;
       var tags = this.model.get('tags');
@@ -194,7 +186,7 @@ define([
 
 				// console.log("on render la vue details")
       this.changeStatus();
-      // this.changeStars();
+      this.changeStars();
       this.changeTags();
       /*if(!this.flagExif) {
         // console.log("on va afficher lexif");
