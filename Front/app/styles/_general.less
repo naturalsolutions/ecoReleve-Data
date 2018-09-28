@@ -123,7 +123,7 @@ a{
 }
 
 .half-height{
-  height: 50%;
+  height: 60%;
   overflow: auto;
 }
 
@@ -391,8 +391,7 @@ a.btn{
       .js-form{
         padding: 5px;
       }
-      /* height : fit-content; */
-      /* ICI INPUT ECT EN LOCAL */
+      height : 40%;
     }
     .half-height{
       /* .grid-view .ag-grid-container .ag-body .ag-row.ag-row-focus{
@@ -400,10 +399,14 @@ a.btn{
       } */
       .toolbar.bottom{
         border-top: solid 1px transparent;
+        display: flex;
+        justify-content: space-around;
+        overflow: hidden;
+        padding : 10px;
       }
       .nav-tabs li a.tab-link{
         border-bottom : solid 1px transparent !important;
-        padding: 5px 35px;
+        padding: 5px 15px;
         font-size: 18px;
       }
       .nav-tabs li.active a, .nav-tabs li.activeTab a{
@@ -499,8 +502,28 @@ input{
   border-bottom: solid 1px #000;
 }
  */
-@media screen and (min-width: 1600px){
-  .half-height{
-    height: 60%;
+
+@media screen and (max-width: 992px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: auto !important;
+      }
+      .half-height{
+        height: auto !important;
+      }
+    }
+  }
+}
+@media screen and (max-width: 1600px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: 50%;
+      }
+      .half-height{
+        height: 50%;
+      }
+    }
   }
 }
