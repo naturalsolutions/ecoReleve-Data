@@ -58,7 +58,7 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
         clientSide: true,
       }));
-      this.gridViews.push(this.rgHistoryGrid);
+      this.gridViews.push(this.historyGrid);
     },
 
     displayDeploymentGrid: function() {
@@ -68,7 +68,7 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '/equipment',
         clientSide: true,
       }));
-      this.gridViews.push(this.rgDeploymentGrid);
+      this.gridViews.push(this.deploymentGrid);
     },
 
   });
