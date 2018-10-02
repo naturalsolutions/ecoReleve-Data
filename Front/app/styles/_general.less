@@ -123,7 +123,7 @@ a{
 }
 
 .half-height{
-  height: 50%;
+  height: 60%;
   overflow: auto;
 }
 
@@ -322,7 +322,7 @@ a.btn{
   color: inherit;
   &:not([class*="btn-"]){
     background: rgb(221, 221, 221);
-    margin-top : 4px;
+    //margin-top : 4px;
   }
   &[class*="btn-"] {
     &:hover, &:focus, &:visited{
@@ -331,6 +331,10 @@ a.btn{
     }
     color: white;
   }
+}
+
+a.btn:hover, button.btn.pull-left:hover{
+  background-color: #c1c1c1;
 }
 
 .file-row.marg10{
@@ -375,6 +379,29 @@ a.btn{
   }
 }
 
+input.form-control{
+  min-height: 34.4px;
+}
+
+/* SENSORS */
+#infos{
+  .half-height{
+    .ag-bl-full-height{
+      overflow: hidden !important;
+    }
+  }
+}
+.toolbar.top{
+  .pull-right {
+    float: right !important;
+    margin-left: 3px;
+  }
+  .pull-left{
+    margin-left: 3px;
+  }
+}
+
+
 /* INDIVIDUALS */
 .individual{
   .btn{
@@ -391,19 +418,24 @@ a.btn{
       .js-form{
         padding: 5px;
       }
-      /* height : fit-content; */
-      /* ICI INPUT ECT EN LOCAL */
+      height : 40%;
+    }
+        form{
+          fieldset:last-child{
+          padding : 10px 0px;
+        }
     }
     .half-height{
-      /* .grid-view .ag-grid-container .ag-body .ag-row.ag-row-focus{
-        background : #5cb85cad !important;
-      } */
       .toolbar.bottom{
         border-top: solid 1px transparent;
+        display: flex;
+        justify-content: space-around;
+        overflow: hidden;
+        padding : 10px;
       }
       .nav-tabs li a.tab-link{
         border-bottom : solid 1px transparent !important;
-        padding: 5px 35px;
+        padding: 5px 15px;
         font-size: 18px;
       }
       .nav-tabs li.active a, .nav-tabs li.activeTab a{
@@ -499,8 +531,36 @@ input{
   border-bottom: solid 1px #000;
 }
  */
-@media screen and (min-width: 1600px){
-  .half-height{
-    height: 60%;
+
+@media screen and (max-width: 992px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: auto !important;
+      }
+      .half-height{
+        height: auto !important;
+      }
+    }
+  }
+}
+@media screen and (max-width: 1600px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: 50%;
+        .js-form{
+          fieldset{
+            padding: 5px !important;
+          }
+        }
+      }
+      .half-height{
+        height: 50%;
+        .toolbar.bottom:first-child{
+          padding: 20px 10px 0px 10px !important;
+        }
+      }
+    }
   }
 }

@@ -78,7 +78,7 @@ define([
         confirmButtonText: 'create another ' + _this.model.get('single'),
         cancelButtonText: 'cancel'
       }).then( (result) => { 
-        if ('dismiss' in value) {
+        if ('dismiss' in result) {
           _this.cancel();
         } else {
           _this.nsForm.butClickClear();

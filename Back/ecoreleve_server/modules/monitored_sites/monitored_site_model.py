@@ -68,8 +68,12 @@ class MonitoredSite (HasDynamicProperties, Base):
                  MonitoredSitePosition.StartDate <= date_)
         ).order_by(desc(MonitoredSitePosition.StartDate)
                    ).limit(1)
-        curPos = dict(self.session.execute(query).fetchone())
-        return curPos
+        curPos = self.session.execute(query).fetchone()
+        if curPos is not None:
+            return dict(curPos)
+        else:
+            return []
+        # return curPos
 
     def getValues(self):
         values = HasDynamicProperties.getValues(self)
