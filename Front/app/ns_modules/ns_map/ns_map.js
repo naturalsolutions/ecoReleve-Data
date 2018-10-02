@@ -1270,7 +1270,9 @@ define([
       $('#player').removeClass('active');
       this.pause(options);
       this.map.addLayer(this.clusterLayer);
-      this.map.removeLayer(this.playerLayer);
+      if (this.playerLayer) {
+        this.map.removeLayer(this.playerLayer);
+      }
       this.clearMarkers();
       this.clearLines();
       if(this.lastMarker){
@@ -1287,7 +1289,7 @@ define([
       var geoJson = this.geoJson;
       if(geoJson.features.length < 3){
         this.noPlayer = true;
-        this.hidePlayer();
+        this.hidePlayer({silent : true});
         return;
       }
       this.autoNextSpeed = 1000;
