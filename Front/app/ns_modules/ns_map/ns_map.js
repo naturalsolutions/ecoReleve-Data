@@ -1276,6 +1276,7 @@ define([
       if(this.lastMarker){
         this.map.removeLayer(this.lastMarker);
       }
+      this.interaction('noFocus');//for hidding icon col
       // this.playerLayer.removeLayer(this.lastMarker)
       this.playerDisplayed = false;
       this.keyboard = false;
