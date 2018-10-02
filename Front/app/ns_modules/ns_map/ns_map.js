@@ -150,17 +150,38 @@ define([
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
-        if(_this.url){
-          _this.fetchGeoJson(_this.url);
-        }else{
-          if (_this.cluster){
-            _this.initClusters(_this.geoJson);
-            
+
+          if(_this.url && !( _this.url.indexOf('sensors/') >= 0) ){
+            _this.fetchGeoJson(_this.url);
           }else{
-            _this.initLayer(_this.geoJson);
+            if ( _this.url.indexOf('sensors/') >= 0) {
+              _this.geoJson = {
+                "total" : 0 ,
+                "exceed" : false,
+                "features" : [],
+                "type" :"FeatureCollection"
+              }
+            }
+            if (_this.cluster){
+              _this.initClusters(_this.geoJson);
+              
+            }else{
+              _this.initLayer(_this.geoJson);
+            }
+            _this.ready();
           }
-          _this.ready();
-        }
+
+        //   if(_this.url ){
+        //     _this.fetchGeoJson(_this.url);
+        //   }else{
+        //     if (_this.cluster){
+        //       _this.initClusters(_this.geoJson);
+              
+        //     }else{
+        //       _this.initLayer(_this.geoJson);
+        //     }
+        //     _this.ready();
+        //   }
       });
     },
 
