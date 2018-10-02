@@ -83,7 +83,8 @@ define([
       this.model.set('id', options.id);
 
       if(this.map.player){
-        this.map.clearPlayer();
+        this.map.hidePlayer({silent : true});
+        // this.map.clearPlayer();
       }
 
       this.com.addModule(this.map);
@@ -148,7 +149,9 @@ define([
       }
 
       this.gridViews.map(function(gridView){
-        gridView.gridOptions.api.sizeColumnsToFit();
+        if (gridView.gridOptions.api) {
+          gridView.gridOptions.api.sizeColumnsToFit();
+        }
       })
     },
 
