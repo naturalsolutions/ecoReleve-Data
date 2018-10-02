@@ -32,7 +32,7 @@ if (activeFront){
     classes.push('stationed') 
   } %>
   <div class="camtrapItemViewContent <%= classes.join(' ') %>" >
-    <!-- <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" > -->
+    <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >
     <img id="zoom_<%=id%>" src =.<%= path %>thumbnails/<%= name %> class="<%= classes.join(' ') %>" tabindex="<%=id%>" alt="<%= name %>" data-zoom-image="<%= path %><%= name %>" />
       <div class="dateexif text-center"><%= date_creation %></div>
   </div>

@@ -183,7 +183,8 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
                 date_creation=date_creation, 
                 note=5,
                 FK_Import = currentImport.ID,
-                tags = '<TAGS><TAG>'+defaultTags+'</TAG></TAGS>' ,
+                # tags = '<TAGS><TAG>'+defaultTags+'</TAG></TAGS>' ,
+                tags = None ,
                 processed=1
                 )
             session.add(currentPhoto)

@@ -9,8 +9,8 @@ define([
 	'ez-plus',
 	'./lyt-camTrapImageModel',
 	'wheelzoom',
-	'imageLoaded'/*,
-	'bootstrap-star-rating'*/
+	'imageLoaded',
+	'bootstrap-star-rating'
 
 ], function($, _, Backbone, Marionette, Translater, config , ezPlus , CamTrapImageModel, wheelzoom , imageLoaded/*, btstrp_star*/ ) {
 
@@ -45,12 +45,13 @@ define([
 
 			this.listenTo(this.model, "change custom:activechange custom:refreshUI", function() {
 				_this.setStatus(_this.model.get('validated'))
-
+	
 				if( ! this.parent.stopSpace ) {
 					_this.render();
 				}
 				else {
 					_this.parent.$el.find('.infosfullscreenStatus').text(' '+_this.statusPhoto+' ');
+					_this.$el.find('input').rating('update',_this.model.get('note'));
 					// if ( this.model.get('validated') == 2 ) {
 					// 	this.$el.find('.rating-container').css('visibility' , 'visible')
 					// }
@@ -184,6 +185,23 @@ define([
 
 			this.parent.$el.find('.paginatorCamTrap').prepend(this.elems.container);
 
+
+			var notEditable = this.model.get('validated') === 2 ? false : true;
+
+			this.$el.find('input').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xl',
+				displayOnly: notEditable,
+				rtl:false,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});
+			this.$el.find('input').on('rating:change', function(event, value, caption) {
+				_this.model.set('note',value)
+			});
 			// var $input = this.$el.find('input');
 			// 	this.$el.find('input').rating({
 			// 		min:0,
@@ -224,11 +242,13 @@ define([
 
       this.listenTo(this.model, "change custom:activechange custom:refreshUI", function() {
 				_this.setStatus(_this.model.get('validated'));
+				_this.$el.find('input').rating('update',_this.model.get('note'));
 				if( ! this.parent.stopSpace ) {
 					_this.render();
 				}
 				else {
 						_this.parent.$el.find('.infosfullscreenStatus').text(' '+_this.statusPhoto+' ');
+						_this.$el.find('input').rating('update',_this.model.get('note'));
 					// if ( this.model.get('validated') == 2 ) {
 					// 	this.$el.find('.rating-container').css('visibility' , 'visible')
 					// }
