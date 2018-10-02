@@ -322,7 +322,7 @@ a.btn{
   color: inherit;
   &:not([class*="btn-"]){
     background: rgb(221, 221, 221);
-    margin-top : 4px;
+    //margin-top : 4px;
   }
   &[class*="btn-"] {
     &:hover, &:focus, &:visited{
@@ -331,6 +331,10 @@ a.btn{
     }
     color: white;
   }
+}
+
+a.btn:hover, button.btn.pull-left:hover{
+  background-color: #c1c1c1;
 }
 
 .file-row.marg10{
@@ -375,6 +379,29 @@ a.btn{
   }
 }
 
+input.form-control{
+  min-height: 34.4px;
+}
+
+/* SENSORS */
+#infos{
+  .half-height{
+    .ag-bl-full-height{
+      overflow: hidden !important;
+    }
+  }
+}
+.toolbar.top{
+  .pull-right {
+    float: right !important;
+    margin-left: 3px;
+  }
+  .pull-left{
+    margin-left: 3px;
+  }
+}
+
+
 /* INDIVIDUALS */
 .individual{
   .btn{
@@ -399,9 +426,6 @@ a.btn{
         }
     }
     .half-height{
-      /* .grid-view .ag-grid-container .ag-body .ag-row.ag-row-focus{
-        background : #5cb85cad !important;
-      } */
       .toolbar.bottom{
         border-top: solid 1px transparent;
         display: flex;
@@ -525,9 +549,17 @@ input{
     .individuals{
         #formTab{
         height: 50%;
+        .js-form{
+          fieldset{
+            padding: 5px !important;
+          }
+        }
       }
       .half-height{
         height: 50%;
+        .toolbar.bottom:first-child{
+          padding: 20px 10px 0px 10px !important;
+        }
       }
     }
   }
