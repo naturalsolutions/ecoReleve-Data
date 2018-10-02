@@ -88,8 +88,9 @@ define([
       }
 
       this.com.addModule(this.map);
-
-      this.locationsGrid.com = this.com;
+      if ( this.model.get('type') != 'sensors') {
+        this.locationsGrid.com = this.com;
+      }
       this.map.com = this.com;
       this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();

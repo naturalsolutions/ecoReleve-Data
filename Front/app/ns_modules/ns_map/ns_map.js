@@ -1080,6 +1080,10 @@ define([
       var _this = this;
       this.searchCriteria = param;
       
+
+      if (this.url.indexOf('sensors/') >= 0 ) {
+        return;
+      }
       var data = {
         'criteria': JSON.stringify(this.searchCriteria),
       };
