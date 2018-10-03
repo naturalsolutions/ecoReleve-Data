@@ -166,6 +166,10 @@ def getSessionZip(request):
     session = request.dbsession
     response = session.execute(query).fetchall()
 
+    if len(response) == 0:
+        request.response.status_code = 409
+        request.response.text = 'No photos To download'
+        return request.response
     fileNameReturned +='for_'+response[0]['site_name']
     rememberRows = []
     listFolderName = []
