@@ -150,17 +150,38 @@ define([
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
-        if(_this.url){
-          _this.fetchGeoJson(_this.url);
-        }else{
-          if (_this.cluster){
-            _this.initClusters(_this.geoJson);
-            
+
+          if(_this.url && !( _this.url.indexOf('sensors/') >= 0) ){
+            _this.fetchGeoJson(_this.url);
           }else{
-            _this.initLayer(_this.geoJson);
+            if ( _this.url.indexOf('sensors/') >= 0) {
+              _this.geoJson = {
+                "total" : 0 ,
+                "exceed" : false,
+                "features" : [],
+                "type" :"FeatureCollection"
+              }
+            }
+            if (_this.cluster){
+              _this.initClusters(_this.geoJson);
+              
+            }else{
+              _this.initLayer(_this.geoJson);
+            }
+            _this.ready();
           }
-          _this.ready();
-        }
+
+        //   if(_this.url ){
+        //     _this.fetchGeoJson(_this.url);
+        //   }else{
+        //     if (_this.cluster){
+        //       _this.initClusters(_this.geoJson);
+              
+        //     }else{
+        //       _this.initLayer(_this.geoJson);
+        //     }
+        //     _this.ready();
+        //   }
       });
     },
 
@@ -1059,6 +1080,10 @@ define([
       var _this = this;
       this.searchCriteria = param;
       
+
+      if (this.url.indexOf('sensors/') >= 0 ) {
+        return;
+      }
       var data = {
         'criteria': JSON.stringify(this.searchCriteria),
       };
@@ -1270,7 +1295,9 @@ define([
       $('#player').removeClass('active');
       this.pause(options);
       this.map.addLayer(this.clusterLayer);
-      this.map.removeLayer(this.playerLayer);
+      if (this.playerLayer) {
+        this.map.removeLayer(this.playerLayer);
+      }
       this.clearMarkers();
       this.clearLines();
       if(this.lastMarker){
@@ -1287,7 +1314,7 @@ define([
       var geoJson = this.geoJson;
       if(geoJson.features.length < 3){
         this.noPlayer = true;
-        this.hidePlayer();
+        this.hidePlayer({silent : true});
         return;
       }
       this.autoNextSpeed = 1000;

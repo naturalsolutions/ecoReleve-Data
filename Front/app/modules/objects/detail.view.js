@@ -83,12 +83,14 @@ define([
       this.model.set('id', options.id);
 
       if(this.map.player){
-        this.map.clearPlayer();
+        this.map.hidePlayer({silent : true});
+        // this.map.clearPlayer();
       }
 
       this.com.addModule(this.map);
-
-      this.locationsGrid.com = this.com;
+      if ( this.model.get('type') != 'sensors') {
+        this.locationsGrid.com = this.com;
+      }
       this.map.com = this.com;
       this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();
@@ -148,7 +150,9 @@ define([
       }
 
       this.gridViews.map(function(gridView){
-        gridView.gridOptions.api.sizeColumnsToFit();
+        if (gridView.gridOptions.api) {
+          gridView.gridOptions.api.sizeColumnsToFit();
+        }
       })
     },
 

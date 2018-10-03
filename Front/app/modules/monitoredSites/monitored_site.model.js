@@ -94,10 +94,11 @@ define([
         field : 'link',
         headerName : '',
         minWidth: 220,
-        headerCellTemplate: function () {
+        headerCellTemplate: function (params) {
           var eCell = document.createElement('span');
           var eBtn = document.createElement('button');
-          eBtn.className = 'js-btndetailssession btn btn-success start'
+          eBtn.id = 'headerDownloadLink'
+          eBtn.className = 'js-btndetailssession btn btn-success start hide'
           var eIcone = document.createElement('i');
           eIcone.className = 'glyphicon glyphicon-download-alt'
           var eSpan = document.createElement('span');
@@ -118,19 +119,24 @@ define([
             '<span id="agText" class="ag-header-cell-text"></span>' +
             // '</div>'+
             '</div>'
-            eCell.onclick =  function () {
+            eBtn.onclick =  function () {
+              var _this = this;
               // var siteID = _this.model.get('id');
               var path = window.location.href.split('/');
 
               var siteID = path[ path.length - 1 ];
-              var url = config.coreUrl + 'photos/export/?siteID='+siteID
+              var url = config.coreUrl + 'photos/export/?siteid='+siteID
 
               window.open(url);
           };
-
           return eCell;
         },
         cellRenderer: function (params) {
+
+          if (params.api.rowModel.getRowCount() >= 1) {
+            var headerCol = document.getElementById('headerDownloadLink')
+            headerCol.className = headerCol.className.replace('hide','')
+          }
           var eCell = document.createElement('span');
           var eBtn = document.createElement('button');
           eBtn.className = 'js-btndetailssession btn btn-success start'

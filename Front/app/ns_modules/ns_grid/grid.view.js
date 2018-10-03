@@ -120,7 +120,7 @@ define([
               if (!options.noResizeToFit){
                 _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               }
-              if(!_this.model.get('totalRecords')){
+              if(_this.model.get('totalRecords') == null){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
               _this.ui.totalRecords.html(_this.model.get('totalRecords'));
