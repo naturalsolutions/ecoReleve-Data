@@ -616,7 +616,7 @@ define([
 				url: config.thesaurusUrl + '/fastInitForCompleteTree/',
 				contentType:"application/json; charset=utf-8",
 				dataType:"json",
-				data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
+				data : '{"StartNodeID": "2012495", "lng": "en", "IsDeprecated": "false"}'
         });
 
       $.when(_this.dataTags)
