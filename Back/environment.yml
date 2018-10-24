@@ -37,3 +37,4 @@ dependencies:
     - ./windows_packages/opencv_python-3.2.0-cp35-cp35m-win_amd64.whl
     - geojson
     - git+https://github.com/smarnach/pyexiftool.git
+    - lxml
