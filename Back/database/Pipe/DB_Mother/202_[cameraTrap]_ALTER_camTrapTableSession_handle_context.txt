@@ -1,0 +1,44 @@
+ALTER FUNCTION [dbo].[camTrapTableSession]
+(	
+	-- Add the parameters for the function here
+	@fk_sensor INT,
+	@Fk_MonitoredSite INT,
+	@SessionId INT
+)
+RETURNS TABLE 
+AS
+RETURN 
+(
+	SELECT 
+	V_T.[pk_id] AS camtrapId,
+	V_T.[fk_sensor] AS fk_sensor,
+	V_T.[path] AS pathOnHDD,
+	V_T.[name] AS fileName,
+	V_T.[extension] AS fileExtension,
+	V_T.[date_creation] AS date_creation,
+	V_T.[checked] AS checked,
+	V_T.[validated] AS validated,
+	V_T.[tags] AS tags,
+	V_T.[note] AS note,
+	V_T.stationId AS stationId,
+	V_D.sessionID AS sessionId,
+	V_D.FK_MonitoredSite AS fk_monitoredSite
+	FROM [V_TcameraTrap] V_T
+	JOIN [V_dataCamTrap_With_equipSite] V_d ON V_T.pk_id = V_d.pk_id
+	WHERE 
+	V_d.[fk_sensor] = @fk_sensor
+	AND
+	v_d.[FK_MonitoredSite] = @Fk_MonitoredSite
+	AND
+	V_D.[sessionID] = @SessionId
+	AND
+	V_T.[checked] IS NULL
+
+)
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('202_[cameraTrap]_ALTER_camTrapTableSession_handle_context',GETDATE(),(SELECT db_name()))
+
+
+GO
