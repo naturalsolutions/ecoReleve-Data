@@ -185,7 +185,8 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
                 FK_Import = currentImport.ID,
                 # tags = '<TAGS><TAG>'+defaultTags+'</TAG></TAGS>' ,
                 tags = None ,
-                processed=1
+                processed=1,
+                databaseTarget = dbConfig['data_schema']
                 )
             session.add(currentPhoto)
             session.flush()
