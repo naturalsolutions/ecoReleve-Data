@@ -1,0 +1,33 @@
+<% 
+var classes = []
+if(validated){
+  classes.push('checked')
+}
+switch( validated ) {
+  case 2 : {
+    classes.push('accepted')
+    break;
+  }
+  case 4: {
+    classes.push('rejected')
+    break;
+  }
+  default: {
+    break;
+  } 
+}
+if (stationId) { 
+  classes.push('stationed') 
+} %>
+<div class="fullscreenimg">
+    <div class="leftnavicon">
+      <i class="reneco reneco-chevron_left icon-five"></i>
+    </div>
+    <div class="infosonimg">
+      <input id="ratingfullscreen_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >
+      <img id="zoom_<%=id%>" src =.<%= path %><%= name %>  alt="<%= name %>" />
+    </div>
+    <div class="rightnavicon">
+      <i class="reneco reneco-chevron_right icon-five"></i>
+    </div>
+</div>

@@ -1,0 +1,667 @@
+CREATE PROCEDURE [dbo].[pr_ValidateCameraTrapSession] 
+	@fk_sensor INT,
+	@fk_monitoredsite INT,
+	@fk_equipement INT,
+	@nb_insert int OUTPUT
+	/*
+	@exist int output, 
+	@error int output
+	*/
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+		DECLARE @idForAround INT;
+		DECLARE @minID INT;
+		DECLARE @maxID INT;
+		DECLARE @minStatus INT;
+		DECLARE @maxStatus INT;
+		DECLARE @camTrapPath VARCHAR(MAX);
+		DECLARE @mediasFilesPath VARCHAR(MAX);
+		DECLARE @return_value INT;
+		SET @nb_insert = -1;
+		SET @minID = 0;
+		SET @maxID = 0;
+		SET @minStatus = NULL;
+		SET @maxStatus = NULL;
+		/**
+		STATUS_REMINDER
+		+---------------+---------------+
+		|	VALIDATED	|	MEANING		|
+		+---------------+---------------+
+		|	NULL		|	NOT SEE		|	
+		+---------------+---------------+
+		|		1		|		SEE		|
+		+---------------+---------------+
+		|		2		|	VALIDATED	|	
+		+---------------+---------------+
+		|		4		|	REFUSED		|		
+		+---------------+---------------+
+		|		8		|	FORCED		|
+		+---------------+---------------+	
+		**/
+		-- TODO Gestion des exceptions + Ajout de transactions
+		/*DECLARE @fk_sensor INT,
+		@fk_equipement INT,
+		@fk_monitoredsite INT
+
+		SET @fk_sensor=3232
+		SET @FK_MonitoredSite =17
+		SET @fk_equipement=10453*/
+
+		EXEC	@return_value = [dbo].[sp_getFilePathFromFileConfig]
+		@camTrapPath = @camTrapPath OUTPUT,
+		@mediasFilesPath = @mediasFilesPath OUTPUT
+
+
+			IF OBJECT_ID('tempdb..#filesSourceTarget') IS NOT NULL
+		DROP TABLE #filesSourceTarget
+
+	/*CREATE TABLE #filesSourceTarget(
+	[id] INT IDENTITY(1,1) not null,
+	[Source] VARCHAR(MAX) not null,
+	[Target] VARCHAR(MAX) not null
+	)*/
+
+	--SELECT * from #filesSourceTarget
+
+	print('nb files to move')
+	SELECT 
+		IDENTITY(INT, 1, 1) AS [Id],
+		CONCAT([path],[name]) AS [Source],
+		CONCAT(@mediasFilesPath,'\',[stationId],'\') AS [Target]
+	INTO #filesSourceTarget
+	FROM [V_TcameraTrap]
+	WHERE 
+	[stationId] IS NOT NULL 
+	AND 
+	[validated] = 2
+	AND 
+	[checked] IS NULL
+
+
+	IF OBJECT_ID('tempdb..#pathFileResizePoor') IS NOT NULL
+		DROP TABLE #pathFileResizePoor
+
+	SELECT 
+	CONCAT( [path] , [name] ) AS filePath
+	INTO #pathFileResizePoor
+	FROM [V_TcameraTrap] V
+	WHERE CAST (V.tags AS VARCHAR(MAX)) LIKE '%poor quality%' 
+	AND ( V.checked is null or V.checked = 0)
+	AND V.validated = 2
+
+	IF OBJECT_ID('tempdb..#pathFileResizeStandard') IS NOT NULL
+	DROP TABLE #pathFileResizeStandard
+
+	SELECT 
+	CONCAT( [path] , [name] ) AS filePath
+	INTO #pathFileResizeStandard
+	FROM [V_TcameraTrap] V
+	WHERE CAST (V.tags AS VARCHAR(MAX)) LIKE '%standard quality%' 
+	AND ( V.checked is null or V.checked = 0)
+	AND V.validated = 2
+
+		
+		IF OBJECT_ID('tempdb..#CamTrapIDForSession') IS NOT NULL
+			DROP TABLE #CamTrapIDForSession
+		
+		-- Construit la table #CamTrapIDForSession représentant la session
+		PRINT('For Session ID :'+CONVERT(VARCHAR , @fk_equipement)+' ( with fk_sensor :'+CONVERT(VARCHAR, @fk_sensor)+'and fk_monitoredSite : '+CONVERT(VARCHAR, @fk_monitoredSite)+' )')
+		PRINT('Nb photos id in session not yet checked : ')
+		SELECT 
+		[pk_id] AS [ID],
+		[validated] AS [status],
+		[date_creation] AS [date_creation]
+		INTO #CamTrapIDForSession
+		FROM [V_dataCamTrap_With_equipSite] 
+		WHERE 
+		[fk_sensor] = @fk_sensor 
+		AND [FK_MonitoredSite] = @fk_monitoredsite
+		AND [sessionID] = @fk_equipement
+		AND [checked] IS NULL
+		ORDER BY [date_creation] ASC
+
+		IF OBJECT_ID('tempdb..#CamTrapIDValidated') IS NOT NULL
+			DROP TABLE #CamTrapIDValidated
+
+		---- Construit la table des photos valider
+		SELECT 
+		*
+		INTO #CamTrapIDValidated
+		FROM #CamTrapIDForSession
+		WHERE [status] = 2
+
+		---- on va boucler sur chacune des photos validées pour changer le status des photos qui était autour de cette photo validé
+		SELECT TOP 1 @idForAround = [ID] FROM #CamTrapIDValidated 
+		SET @minID = 0
+		SET @maxID = 0
+		SET @minStatus = NULL
+		SET @maxStatus = NULL
+
+		WHILE ( @@ROWCOUNT > 0 )
+		BEGIN
+		-- récupére la premiere  photo dont la date de creation est inférieur à la photo validé et dont le status n'est pas validé ou forcé (2 ou 8)
+		SELECT TOP 1
+		@minID = [ID],
+		@minStatus = [status]
+		FROM #CamTrapIDForSession
+		WHERE  
+		[date_creation] < ( SELECT [date_creation] FROM #CamTrapIDForSession WHERE [ID] = @idForAround)
+		ORDER BY [date_creation] DESC
+		
+		
+		-- récupére la premiere  photo dont la date de creation est supérieur à la photo validé et dont le status n'est pas validé ou forcé (2 ou 8)
+		SELECT TOP 1
+		@maxID = [ID],
+		@maxStatus = [status]
+		FROM #CamTrapIDForSession
+		WHERE  
+		[date_creation] > ( SELECT [date_creation] FROM #CamTrapIDForSession WHERE [ID] = @idForAround)
+		ORDER BY [date_creation] ASC
+
+		IF @maxID > 0 AND @maxStatus = 4
+		BEGIN
+			UPDATE [V_TcameraTrap]
+			SET [validated] = 8
+			WHERE [pk_id] = @maxID
+			UPDATE #CamTrapIDForSession
+			SET [status] = 8
+			WHERE [ID] = @maxID
+		END
+		IF @minID > 0 AND @minStatus = 4
+		BEGIN
+			UPDATE [V_TcameraTrap]
+			SET [validated] = 8
+			WHERE [pk_id] = @minID
+			UPDATE #CamTrapIDForSession
+			SET [status] = 8
+			WHERE [ID] = @minID
+		END
+
+		
+		SET @minID = 0
+		SET @maxID = 0
+		SET @minStatus = NULL
+		SET @maxStatus = NULL
+		DELETE FROM #CamTrapIDValidated WHERE [ID] = @idForAround
+		SELECT TOP 1 @idForAround = [ID] FROM #CamTrapIDValidated
+		END
+
+
+		/*******
+		--validation forcé 
+		PRINT('Nb id in compelled validated (when validated = 1 or null)')
+		UPDATE [V_TcameraTrap]
+		SET [validated] = 8
+		WHERE [pk_id] in (SELECT [ID] FROM #CamTrapIDForSession) AND ([validated] IS NULL OR [validated] = 1 )
+		*******/
+
+		-- TODO Gestion si pas de session
+		IF NOT EXISTS (SELECT * FROM #CamTrapIDForSession)
+		RETURN
+
+		--select * from V_dataCamTrap_With_equipSite  where pk_id  in (select ID FROM #CamTrapIDForSession) 
+
+
+		-- Récupération des Tags
+		IF OBJECT_ID('tempdb..#TagvsCamTrap') IS NOT NULL
+			DROP TABLE #TagvsCamTrap
+		
+		PRINT('Nb Tags from sessions ')
+		SELECT t.pk_id,N.C.value('.','varchar(100)') Tag 
+		INTO #TagvsCamTrap
+		FROM [V_TcameraTrap] T
+		CROSS APPLY tags.nodes('//TAGS/TAG') N(C)
+		WHERE T.[pk_id] in (SELECT [ID] FROM #CamTrapIDForSession)
+
+		--select * from #TagvsCamTrap
+
+		-- Création des tags manquants
+		PRINT('Nb new Tags inserted :')
+		INSERT INTO [Tags]
+			   ([Label])
+		SELECT DISTINCT Tag FROM #TagvsCamTrap CT
+		WHERE NOT EXISTS (SELECT * FROM [Tags] T WHERE t.[Label] = CT.[Tag]) 
+
+
+			----------------- INSERTIONS-------------------
+		PRINT('Nb photos inserted in '+CONVERT(VARCHAR, DB_NAME()))
+		INSERT INTO [dbo].[Photos]
+			   (
+				[Path],
+				[FileName],
+				[Date],
+				[Fk_MonitoredSite],
+				[old_id],
+				[Statut],
+				[Note]
+			   )
+		SELECT 
+		T.[path],
+		T.[name],
+		T.[date_creation],
+		V.[FK_MonitoredSite],
+		T.[pk_id],
+        T.[validated], 
+		T.[Note]
+		FROM [V_TcameraTrap] T 
+		JOIN [V_dataCamTrap_With_equipSite] V ON V.[pk_id] = T.[pk_id]
+		WHERE 
+		T.[pk_id] IN ( SELECT CID.[ID] FROM #CamTrapIDForSession CID )
+		AND (T.[validated] & 10) > 0
+		--binary weight 1 underterminate 2 accepted 4 refused 8 forced validate
+		SET @nb_insert = @@ROWCOUNT;
+
+		PRINT('Nb link between photos and tags')
+		INSERT INTO [dbo].[PhotosTags]
+			   ([Fk_Tags]
+			   ,[Fk_Photos])
+		SELECT 
+		T.[ID],
+        P.[ID] 
+		FROM [Photos] P  
+		JOIN #TagvsCamTrap TCT ON TCT.[pk_id] = P.[old_id] 
+		JOIN Tags T ON T.[Label] = TCT.[Tag] 
+		
+
+
+			----------------- fix la session -------------------
+		PRINT('Nb rows checked :')
+		--fix le checked a 1 pour valider la session
+		UPDATE [V_TcameraTrap]
+		SET [checked] = 1
+		WHERE [pk_id] IN (SELECT [pk_id] FROM #CamTrapIDForSession)
+
+		-------------------- gestion des stations et protocoles ------------------------
+
+		IF OBJECT_ID('tempdb..#stationsIds') IS NOT NULL
+			DROP TABLE #stationsIds
+
+		PRINT('Nb stations pending from this session')
+		SELECT 
+		T.[pk_id] AS [camTrapID] ,
+		T.[stationID] AS [stationID] 
+		INTO #stationsIds 
+		FROM [V_TcameraTrap] T 
+		WHERE 
+		T.[validated] != 4
+		AND T.[stationID] IS NOT NULL
+
+		PRINT('Nb stations transform to standard type :')
+			---- STATIONS PENDING TO STANDARD
+		UPDATE [dbo].[Station]
+			SET [FK_StationType] = 1
+			WHERE [ID] IN ( SELECT s.[stationID] FROM #stationsIds s) --( SELECT T.[stationID] FROM [V_TcameraTrap] T WHERE T.[validated] != 4 AND T.[stationID] IS NOT NULL )
+
+			---- STATIONS PENDING DELETED 
+			-- NO DELETE CASCADE WE HANDLE MANUALLY REMOVE FK IN STATION ROW
+			-- ONLY STATION ARE CREATED FROM STEP VALIDATE
+			-- SO WE JUST HAVE TO REMOVE STATION_FIELDWORKER
+		PRINT('REMOVING PENDING STATIONS')
+		PRINT('Remove link between stations and fieldworker :')
+		
+		DELETE SF
+		FROM [Station_FieldWorker] SF
+		JOIN [Station] S ON SF.[FK_Station] = S.[ID]
+		WHERE 
+		S.[ID] IN (SELECT T.[stationID] FROM [V_TcameraTrap] T WHERE T.[validated] = 4 AND T.[stationID] IS NOT NULL)
+
+		PRINT('Nb stations removed :')
+		DELETE S
+		FROM [Station] S 
+		WHERE [ID] IN ( SELECT T.[stationID] FROM [V_TcameraTrap] T WHERE T.[validated] = 4 AND T.[stationID] IS NOT NULL)
+
+
+
+		------------------ gestion des protocoles associés -----------------------------
+		-- suivant les tags associés et autres 
+		
+
+			PRINT('add protocol mediasFiles for stations')
+
+	IF OBJECT_ID('tempdb..#mergedInserted') IS NOT NULL
+	DROP TABLE #mergedInserted
+	
+
+	CREATE TABLE #mergedInserted (
+	[Id] [int] NOT NULL,
+	[camTrapID] [int] NULL,
+	[FK_Station] [int] NULL
+	)
+
+	MERGE [Observation] as Target
+	USING	(
+		SELECT 
+				PT.[ID] AS [FK_ProtocoleType],
+				S.[stationId] AS [FK_Station],
+				GETDATE() AS [CreationDate],
+				NULL AS [Parent_Observation],
+				NULL AS [FK_Individual],
+				NULL AS [original_id],
+				NULL AS [Comments],
+				V_T.[pk_id] AS [camTrapID],
+				V_T.[path] AS [path],
+				V_T.[name] AS [name]
+		FROM #stationsIds S
+		CROSS APPLY [ProtocoleType] PT
+		JOIN [V_TcameraTrap] V_T ON S.[camTrapID] = V_T.[pk_id]
+		WHERE PT.Name = 'Media files'
+	) AS SRC ON 1=0
+	WHEN NOT MATCHED THEN
+	INSERT	(
+			[FK_ProtocoleType],
+			[FK_Station],
+			[CreationDate],
+			[Parent_Observation],
+			[FK_Individual],
+			[original_id],
+			[Comments]
+			)
+	VALUES (
+			SRC.[FK_ProtocoleType],
+			SRC.[FK_Station],
+			GETDATE() ,
+			  NULL ,
+			  NULL ,
+			  NULL ,
+			  NULL
+			  )
+OUTPUT inserted.[Id],SRC.[camTrapID],SRC.[FK_Station] INTO #mergedInserted;
+		
+	DECLARE @DynPropId INT
+	SET 	@DynPropId = ( SELECT PT_ODP.FK_ObservationDynProp FROM [ProtocoleType] PT JOIN [ProtocoleType_ObservationDynProp] PT_ODP ON PT.ID = PT_ODP.FK_ProtocoleType WHERE PT.[Name] = 'Media files') 
+					
+	
+	--- insert dynprop val
+	MERGE [ObservationDynPropValue] as Target
+	USING	(
+	SELECT 
+		GETDATE() AS[StartDate],
+		NULL AS [ValueInt],
+		CONCAT(CONVERT(VARCHAR, MSGI.FK_Station),'/', V_T.name) AS [ValueString],
+		NULL AS [ValueDate],
+		NULL AS [ValueFloat],
+		@dynPropID AS [FK_ObservationDynProp],	
+		MSGI.[Id] AS [FK_Observation]
+	FROM	#mergedInserted MSGI
+	JOIN [V_TcameraTrap] V_T ON MSGI.camTrapID = V_T.pk_id
+	) AS SRC ON 1=0
+	WHEN NOT MATCHED THEN
+	INSERT	(
+			[StartDate],
+			[ValueInt],
+			[ValueString],
+			[ValueDate],
+			[ValueFloat],
+			[FK_ObservationDynProp],
+			[FK_Observation]
+			)
+	VALUES (
+			SRC.[startDate],
+			SRC.[ValueInt],
+			SRC.[ValueString],
+			SRC.[ValueDate] ,
+			SRC.[ValueFloat] ,
+			SRC.[FK_ObservationDynProp],
+			SRC.[FK_Observation]
+			);
+
+	-- COPY photo for mediafiles 
+	DECLARE @Cmd VARCHAR(1024)
+
+
+	print('files sources')
+	--SELECT * from #filesSourceTarget
+--	SELECT * FROM #filesSourceTarget
+
+	DECLARE @currentId INT;
+	DECLARE @sourceFile VARCHAR(MAX)
+	DECLARE @targetFile VARCHAR(MAX)
+	DECLARE @res VARCHAR(1024)
+
+	IF OBJECT_ID('tempdb..#cmdReturn') IS NOT NULL
+		DROP TABLE #cmdReturn
+
+	CREATE TABLE #cmdReturn (SomeCol VARCHAR(1024))
+
+
+	SELECT TOP 1 
+		@currentId = [Id],
+		@sourceFile = [Source],
+		@targetFile = [Target] 
+	FROM #filesSourceTarget
+
+	WHILE(@@rowcount > 0)
+		BEGIN
+			print('on est dans le while')
+			print(@cmd)
+			SET @cmd = 'XCOPY "'+@sourceFile+'" "'+@targetFile+'"'
+
+			
+			INSERT #cmdReturn
+			EXEC @res = master.dbo.xp_cmdshell @Cmd
+			IF @res <> 0
+			BEGIN
+				DECLARE @errMsg VARCHAR(MAX)
+				SET @errMsg = ''
+				SELECT TOP 1 @errMsg = [SomeCol] FROM #cmdReturn
+				SET @errMsg = CONCAT(
+					'something goes wrong when copy files pls contact an admin',
+					CHAR(13),
+					CHAR(10),
+					@errMsg)
+				RAISERROR(@errMsg,15,1)
+				BREAK
+			END
+			DELETE FROM #filesSourceTarget WHERE [Id] = @currentId
+			SELECT TOP 1 
+				@currentId = [Id],
+				@sourceFile = [Source],
+				@targetFile = [Target] 
+				FROM #filesSourceTarget
+	END
+
+	--END COPY files
+
+	-- resize photos
+	/*
+	IF OBJECT_ID('tempdb..#pathFileResize') IS NOT NULL
+		DROP TABLE #pathFileResize
+
+	--CREATE TABLE #pathFileResize ([filePath] VARCHAR(MAX))
+
+	SELECT 
+	CONCAT( [path] , [name] ) AS filePath
+	INTO #pathFileResize
+	FROM [V_TcameraTrap] V
+	WHERE CAST (V.tags AS VARCHAR(MAX)) LIKE '%poor quality%' 
+
+	DECLARE @CmdForResize VARCHAR(MAX)
+
+	SET @CmdForResize = ''
+	*/
+
+
+	--CREATE TABLE #pathFileResize ([filePath] VARCHAR(MAX))
+
+	IF OBJECT_ID('tempdb..#cmdReturnResize') IS NOT NULL
+		DROP TABLE #cmdReturnResize
+
+	CREATE TABLE #cmdReturnResize (SomeCol VARCHAR(1024))
+
+
+
+	DECLARE @CmdForResize VARCHAR(1024)
+	DECLARE @sourcePathFile VARCHAR(MAX)
+	DECLARE @targetPathFile VARCHAR(MAX)
+	--DECLARE @res VARCHAR(1024)
+
+
+	SET @CmdForResize = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\convert '
+	print('on va resize les images ')
+
+	
+	SELECT TOP 1 
+	@sourcePathFile = [filePath],
+	@targetPathFile = [filePath]
+	FROM #pathFileResizePoor
+	--SET @targetPathFile = @sourcePathFile 
+	WHILE(@@rowcount > 0)
+		BEGIN
+			print('on est dans le while')
+
+			--SET @CmdForResize = @CmdForResize+' "' + @sourcePathFile+'" -resize 150x150 "'+@targetPathFile+'"'
+			SET @CmdForResize = CONCAT(@CmdForResize,' "', @sourcePathFile,'" -resize 25% "',@targetPathFile,'"')
+			print(@CmdForResize)
+			
+			INSERT #cmdReturnResize
+			EXEC @res = master.dbo.xp_cmdshell @CmdForResize
+			IF @res <> 0
+				BEGIN
+					--DECLARE @errMsg VARCHAR(MAX)
+					SET @errMsg = ''
+					SELECT TOP 1 @errMsg = [SomeCol] FROM #cmdReturnResize
+					SET @errMsg = CONCAT(
+						'something goes wrong when resize files pls contact an admin',
+						CHAR(13),
+						CHAR(10),
+						@errMsg)
+					RAISERROR(@errMsg,15,1)
+					BREAK
+				END
+			DELETE TOP(1) FROM #pathFileResizePoor
+
+			SET @CmdForResize = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\convert'
+			SELECT TOP 1 
+			@sourcePathFile = [filePath],
+			@targetPathFile = [filePath]
+			FROM #pathFileResizePoor
+			--SET @targetPathFile = @sourcePathFile 
+		END
+		print('end of resize')
+		--end resize poor
+		--start resize standard
+	--DECLARE @res VARCHAR(1024)
+
+
+	SET @CmdForResize = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\convert '
+	print('on va resize les images ')
+
+	
+	SELECT TOP 1 
+	@sourcePathFile = [filePath],
+	@targetPathFile = [filePath]
+	FROM #pathFileResizeStandard
+
+	WHILE(@@rowcount > 0)
+		BEGIN
+			print('on est dans le while')
+
+			--SET @CmdForResize = @CmdForResize+' "' + @sourcePathFile+'" -resize 150x150 "'+@targetPathFile+'"'
+			SET @CmdForResize = CONCAT(@CmdForResize,' "', @sourcePathFile,'" -resize 75% "',@targetPathFile,'"')
+			print(@CmdForResize)
+			
+			INSERT #cmdReturnResize
+			EXEC @res = master.dbo.xp_cmdshell @CmdForResize
+			IF @res <> 0
+				BEGIN
+					--DECLARE @errMsg VARCHAR(MAX)
+					SET @errMsg = ''
+					SELECT TOP 1 @errMsg = [SomeCol] FROM #cmdReturnResize
+					SET @errMsg = CONCAT(
+						'something goes wrong when resize files pls contact an admin',
+						CHAR(13),
+						CHAR(10),
+						@errMsg)
+					RAISERROR(@errMsg,15,1)
+					BREAK
+				END
+			DELETE TOP(1) FROM #pathFileResizeStandard
+
+			SET @CmdForResize = 'C:\inetpub\wwwroot\ecoReleve-Data\Back\convert'
+			SELECT TOP 1 
+			@sourcePathFile = [filePath],
+			@targetPathFile = [filePath]
+			FROM #pathFileResizeStandard
+		END
+		print('end of resize')
+		--end resize standard
+	-- end resize
+	-- insert mediafiles
+
+	MERGE [MediasFiles] as Target
+	USING	(
+	SELECT 
+		CONCAT(@mediasFilesPath,'\',[Fk_Station]) AS [Path],
+		V_T.name AS [Name],
+		REVERSE(LEFT(REVERSE(V_T.name), CHARINDEX('.', REVERSE(V_T.name)) - 1)) AS [Extension],
+		GETDATE() AS [Date_Uploaded],
+		1474 AS  [Creator] ,
+		S.ID AS [Fk_Station]
+	FROM	#mergedInserted MSGI
+	JOIN [V_TcameraTrap] V_T ON MSGI.camTrapID = V_T.pk_id
+	JOIN [Station] S ON S.ID = MSGI.FK_Station
+	) AS SRC ON 1=0
+	WHEN NOT MATCHED THEN
+	INSERT	(
+			[Path],
+			[Name],
+			[Extension],
+			[Date_Uploaded],
+			[Creator],
+			[FK_Station]
+			)
+	VALUES (
+			SRC.[Path],
+			SRC.[Name],
+			SRC.[Extension],
+			SRC.[Date_Uploaded] ,
+			SRC.[Creator],
+			SRC.[FK_Station]
+			);
+
+		
+
+	--Test gestion erreur 
+	/*RAISERROR (
+	' Erreur générée', -- Message text.  
+	15, -- Severity
+	 1)*/
+
+	IF @@TRANCOUNT > 0 		
+		SELECT @nb_insert AS nbInserted;
+		COMMIT TRAN
+			
+			/*
+			set @exist = 0
+			set @error = 0
+			*/
+	--
+
+	END TRY
+    BEGIN CATCH
+        print 'CATCH'
+        print @@TRANCOUNT
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+        print @@TRANCOUNT
+                   
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+                   
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+                   
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+
+	--select path,name,validated from V_TcameraTrap where pk_id in (select ID from #CamTrapID)
+END
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('188_[cameraTrap]_CREATE_pr_ValidateCameraTrapSession',GETDATE(),(SELECT db_name()))

@@ -1,8 +1,10 @@
-from ..Models import thesaurusDictTraduction
 from pyramid import threadlocal
-from ..Models import Base
 from sqlalchemy import select
 from datetime import datetime
+
+from .thesaurusLoad import thesaurusDictTraduction
+from ..core import Base
+
 
 dictVal = {
     'null': None,
@@ -134,3 +136,18 @@ def getAutcompleteValues(ID, objName, NameValReturn):
 
     query = select([table.c[NameValReturn]]).where(table.c['ID'] == ID)
     return session.execute(query).scalar()
+
+
+def integerOrDefault(val,defaultVal,positive):
+    '''
+
+    will return an int or None
+
+    '''
+    try:
+        res = int(val)
+        if positive and res < 0:
+            raise ValueError
+    except ValueError:
+        res = defaultVal
+    return res

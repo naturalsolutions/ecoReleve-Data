@@ -189,6 +189,7 @@ define([
       });
       if (exists > 1) {
         Swal({
+          heightAuto: false,
           title: 'Fieldworker name error',
           text: 'Already selected ! ',
           type: 'error',

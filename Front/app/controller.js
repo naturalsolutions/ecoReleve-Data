@@ -4,6 +4,7 @@ define([
   './base/home/lyt-home',
 
   './modules/importFile/lyt-entry-importFile',
+
   './modules/export/lyt-export-stepper',
 
   './modules/validate/validate.st.view',
@@ -29,6 +30,7 @@ define([
   './modules/monitoredSites/monitored_sites.view',
   './modules/monitoredSites/monitored_sites.new.view',
 
+  './modules/validate/lyt-camTrapValidateDetail',
   './modules/importHistory/history.view',
   './modules/redirection/redirect.view'
 
@@ -42,11 +44,11 @@ define([
   LytSensorValidateDetail,
   LytRelease,
   LytStationsRelease,
-
   LytStation, LytStations, LytStationsNew,
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
+  LytCamTrapValidateDetail,
   LytImportHistory,
   LytRedirect,
 
@@ -150,7 +152,7 @@ define([
         this.rgMain.currentView.reload({
           id: id
         });
-      } else {
+      }else {
         this.rgMain.show(new LytMonitoredSite({
           id: id
         }));
@@ -176,11 +178,11 @@ define([
         }));
       }
     },
-    
+
     sensors: function() {
       this.rgMain.show(new LytSensors());
     },
-    
+
     newSensor: function(objectType) {
       this.rgMain.show(new LytSensorsNew({objectType: objectType}));
     },
@@ -188,7 +190,7 @@ define([
     validate: function() {
       this.rgMain.show(new LytSensorValidate());
     },
-    
+
     validateType: function(type) {
       this.rgMain.show(new LytSensorValidateType({
         type: type
@@ -201,7 +203,12 @@ define([
           type: type,
           index: index
         });
-      } else {
+      } else if( type === 'camtrap') {
+        this.rgMain.show(new LytCamTrapValidateDetail({
+          type: type,
+          index: index
+        }));
+      }else {
         this.rgMain.show(new LytSensorValidateDetail({
           type: type,
           index: index

@@ -150,18 +150,126 @@ define([
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
-        if(_this.url){
-          _this.fetchGeoJson(_this.url);
-        }else{
-          if (_this.cluster){
-            _this.initClusters(_this.geoJson);
-            
+
+          if(_this.url && !( _this.url.indexOf('sensors/') >= 0) ){
+            _this.fetchGeoJson(_this.url);
           }else{
-            _this.initLayer(_this.geoJson);
+            if ( _this.url.indexOf('sensors/') >= 0) {
+              _this.geoJson = {
+                "total" : 0 ,
+                "exceed" : false,
+                "features" : [],
+                "type" :"FeatureCollection"
+              }
+            }
+            if (_this.cluster){
+              _this.initClusters(_this.geoJson);
+              
+            }else{
+              _this.initLayer(_this.geoJson);
+            }
+            _this.ready();
           }
-          _this.ready();
-        }
+
+        //   if(_this.url ){
+        //     _this.fetchGeoJson(_this.url);
+        //   }else{
+        //     if (_this.cluster){
+        //       _this.initClusters(_this.geoJson);
+              
+        //     }else{
+        //       _this.initLayer(_this.geoJson);
+        //     }
+        //     _this.ready();
+        //   }
       });
+    },
+
+    refreshGeoJsonWithRowGrid: function(refView) {
+      var newfeatures = []
+
+      refView.locationsGrid.gridOptions.api.forEachNodeAfterFilterAndSort(function(node) {
+        var jsonItem = {
+          "geometry": {
+            "coordinates" : [node.data.LAT,node.data.LON],
+            "type": "Point"
+          }, 
+          "properties": {
+            "Date" :"node.data.Date",
+            "ID" : node.data.ID,
+            "precision" : node.data.precision,
+            "type_" : node.data.type_
+          },
+          "type": "Feature"
+        };
+        newfeatures.push(jsonItem)
+      })
+
+      var newGeoJson = {
+          "total" : newfeatures.length ,
+          "exceed" : false,
+          "features" : newfeatures,
+          "type" :"FeatureCollection"
+      }
+
+      this.map.removeLayer(this.clusterLayer);
+
+      if (this.cluster){
+        this.initClusters(newGeoJson);
+
+        // if(this.player){
+        //   this.firstInit();
+        // }
+      } else {
+        // this.geoJson = geoJson;
+        this.initLayer(newGeoJson);
+      }
+      var displayLegend = false;
+      this.ready(displayLegend);
+      this.fitBound();
+
+      // if (this.clusterLayer){
+      //   if (newfeatures.length < 1000) {
+      //     this.cluster = false
+      //   }
+        // this.map.removeLayer(this.clusterLayer);
+        // this.clusterLayer = new L.FeatureGroup();
+        // this.setMarkerListFromGeoJson(newGeoJson);
+      //  this.updateLayers(newGeoJson);
+        // var _this= this;
+        // var firstLvl= true;
+        // this.firstLvl= [];
+
+        // var disableClusteringAtZoom = 16; //16 (scale at 200m), maxZomm at 18 (scale at 20m)
+        // if(newGeoJson.features.length > 1000){
+        //   disableClusteringAtZoom = 2; //minZoom
+        // }
+        // var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
+        //   _defaultIconCreateFunction: function (cluster, contains) {
+        //     //push on firstLvl
+        //     if(firstLvl){
+        //       _this.firstLvl.push(cluster);
+        //     }
+        //     if(_this.selection){
+        //       return _this.getClusterIcon(cluster, false, 0);
+        //     }else{
+        //       return _this.getClusterIcon(cluster);
+        //     }
+        //   },
+        // });
+        
+        // this.clusterLayer = new CustomMarkerClusterGroup({
+        //   disableClusteringAtZoom: disableClusteringAtZoom,
+        //   maxClusterRadius: 70,
+        //   polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
+        // });
+
+        // this.setMarkerListFromGeoJson(newGeoJson);
+        // // this.clusterLayer.addLayers(this.markerList);
+        // this.addClusterLayers();
+      // }
+        // this.ready();
+      // debugger;
     },
 
 
@@ -180,18 +288,24 @@ define([
         contentType:'application/json',
         type:'GET',
         context: this,
-      }).done(function(geoJson) {
-          this.geoJson = geoJson;
+      }).done(function(resp) {
+        if (resp.length == 2 ) {
+          this.geoJson = resp[1];
+        }
+        else {
+          this.geoJson = resp
+        }
+
 
           if (this.cluster){
-            this.initClusters(geoJson);
+            this.initClusters(this.geoJson);
 
             if(this.player){
               this.firstInit();
             }
           } else {
+            // this.geoJson = geoJson;
             this.initLayer(geoJson);
-            this.geoJson = geoJson;
           }
           this.ready();
           this.fitBound();
@@ -303,10 +417,10 @@ define([
     },
 
 
-    ready: function(){
+    ready: function(displayLegend = true){
       this.setTotal(this.geoJson);
 
-      if(this.legend){
+      if(this.legend && displayLegend){
         this.addLegend();
       }
       if(this.clusterLayer){
@@ -423,7 +537,7 @@ define([
       });
 
       var disableClusteringAtZoom = 16; //16 (scale at 200m), maxZomm at 18 (scale at 20m)
-      if(geoJson.features.length < 500){
+      if(geoJson.features.length < 600){
         disableClusteringAtZoom = 2; //minZoom
       }
       
@@ -536,41 +650,45 @@ define([
       for (var j = 0; j < features.length; j++) {
         feature = features[j];
         if(feature.geometry.coordinates[1] != null && feature.geometry.coordinates[0] != null){
-          latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
-          i++;
-          var infos = '';
-          if (!feature.id) {
-            feature.id = i;
-            if (feature.properties.ID) {
-              feature.id = feature.properties.ID;
+          try{
+            latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
+            i++;
+            var infos = '';
+            if (!feature.id) {
+              feature.id = i;
+              if (feature.properties.ID) {
+                feature.id = feature.properties.ID;
+              }
             }
-          }
 
-          var className = _this.getMarkerIconClassName(feature);
+            var className = _this.getMarkerIconClassName(feature);
 
-          icon = new L.DivIcon({className : className});
-          marker = L.marker(latlng, {icon: icon});
+            icon = new L.DivIcon({className : className});
+            marker = L.marker(latlng, {icon: icon});
 
-          if(_this.popup){
-            prop = feature.properties;
-            for(var p in prop){
-              infos +='<b>'+p+' : '+prop[p]+'</b><br />';
+            if(_this.popup){
+              prop = feature.properties;
+              for(var p in prop){
+                infos +='<b>'+p+' : '+prop[p]+'</b><br />';
+              }
+              marker.bindPopup(infos);
             }
-            marker.bindPopup(infos);
-          }
 
-          marker.feature = feature;
+            marker.feature = feature;
 
-          _this.dict[feature.id] = marker;
-          
-          marker.on('click', function(e){
-            if(_this.selection && this.feature.properties.type_ !== 'station'){
-              _this.interaction('singleSelection', this.feature.id);
-            }
-            _this.interaction('focus', this.feature.id);
-          });
+            _this.dict[feature.id] = marker;
             
-          markerList.push(marker);
+            marker.on('click', function(e){
+              if(_this.selection && this.feature.properties.type_ !== 'station'){
+                _this.interaction('singleSelection', this.feature.id);
+              }
+              _this.interaction('focus', this.feature.id);
+            });
+              
+            markerList.push(marker);
+          } catch(excpetion){
+            continue;
+          }
         }else{
           console.warn('latlng null');
         }
@@ -962,6 +1080,10 @@ define([
       var _this = this;
       this.searchCriteria = param;
       
+
+      if (this.url.indexOf('sensors/') >= 0 ) {
+        return;
+      }
       var data = {
         'criteria': JSON.stringify(this.searchCriteria),
       };
@@ -1044,6 +1166,9 @@ define([
     },
 
     displayError: function(geoJson){
+      if(!this.errorElt){
+        this.initErrorLayer();
+      }
       this.errorElt.addClass('hidden');
       var msg;
       if(geoJson){
@@ -1052,7 +1177,7 @@ define([
           this.errorElt.removeClass('hidden');
           this.errorElt.find('.msg').html(msg);
         }
-        if (geoJson.exceed) {
+        else if (geoJson.exceed) {
           msg = ' Too much data to display';
           this.errorElt.removeClass('hidden');
           this.errorElt.find('.msg').html(msg)
@@ -1098,15 +1223,21 @@ define([
 
     //Player
     sortByDate: function(geoJson){
+      
       geoJson.features.sort( function(a, b) {
+        // for refact opti moment no more needed perf X10
+        // var jsDateA = new Date(a.properties.Date || a.properties.date);
+        // var jsDateB = new Date(b.properties.Date || b.properties.date);
+        // return jsDateA - jsDateB;
         return moment(a.properties.Date || a.properties.date) - moment(b.properties.Date || b.properties.date)
       });
+
     },
 
-    disablePlayer: function(){
+    disablePlayer: function(options){
       if(this.player){
 
-        this.hidePlayer();
+        this.hidePlayer(options);
         $('.js-toggle-ctrl-player').addClass('hidden');
       }
     },
@@ -1133,9 +1264,15 @@ define([
     },
 
     showPlayer: function(){
-      $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
+      if ( !$('.js-player-chevron').hasClass('reneco-chevron_top reneco-chevron_bottom') ) {
+        $('.js-player-chevron').addClass('reneco-chevron_top reneco-chevron_bottom')
+      }
+      // $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
       $('#player').addClass('active');
-      $('.leaflet-bottom').toggleClass('active-player');
+      if ( !$('.leaflet-bottom').hasClass('active-player') ) {
+        $('.leaflet-bottom').addClass('active-player')
+      }
+      // $('.leaflet-bottom').toggleClass('active-player');
       this.map.removeLayer(this.clusterLayer);
       this.map.addLayer(this.playerLayer);
       this.degraded();
@@ -1145,13 +1282,29 @@ define([
       this.bindKeyboardShortcuts();
     },
 
-    hidePlayer: function(){
-      $('.leaflet-bottom').toggleClass('active-player');
-      $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
+    hidePlayer: function(options){
+
+      if( $('.leaflet-bottom').hasClass('active-player') ) {
+        $('.leaflet-bottom').removeClass('active-player')
+      }
+      // $('.leaflet-bottom').toggleClass('active-player');
+      if ( $('.js-player-chevron').hasClass('reneco-chevron_bottom') ) {
+        $('.js-player-chevron').removeClass('reneco-chevron_bottom')
+      }
+      // $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
       $('#player').removeClass('active');
-      this.pause();
+      this.pause(options);
       this.map.addLayer(this.clusterLayer);
-      this.map.removeLayer(this.playerLayer);
+      if (this.playerLayer) {
+        this.map.removeLayer(this.playerLayer);
+      }
+      this.clearMarkers();
+      this.clearLines();
+      if(this.lastMarker){
+        this.map.removeLayer(this.lastMarker);
+      }
+      this.interaction('noFocus');//for hidding icon col
+      // this.playerLayer.removeLayer(this.lastMarker)
       this.playerDisplayed = false;
       this.keyboard = false;
       this.bindKeyboardShortcuts();
@@ -1161,6 +1314,7 @@ define([
       var geoJson = this.geoJson;
       if(geoJson.features.length < 3){
         this.noPlayer = true;
+        this.hidePlayer({silent : true});
         return;
       }
       this.autoNextSpeed = 1000;
@@ -1288,7 +1442,7 @@ this.parentContainer.append('\
 
     initPlayer: function(geoJson){
       if(geoJson.features.length < 3){
-        this.disablePlayer();
+        this.disablePlayer({silent:true});
         return;
       }
 
@@ -1326,9 +1480,9 @@ this.parentContainer.append('\
                               trigger :'hover',
                               title: '<h5 class="custom-title"><u>Shortcuts</u></h5>',
                               content: '<div class="js-shortcuts-help">\
-                                          <i class="reneco reneco-space">: Pause</i>\
-                                          <i class="reneco reneco-left">: Previous location</i>\
-                                          <i class="reneco reneco-right">: Next location</i>\
+                                          <i class="reneco reneco-ECORELEVE_space"> : Pause</i>\
+                                          <i class="reneco reneco-ECORELEVE_left"> : Previous location</i>\
+                                          <i class="reneco reneco-ECORELEVE_right"> : Next location</i>\
                                         </div>',
                               html: true,
                               delay: { 
@@ -1407,7 +1561,7 @@ this.parentContainer.append('\
 
       this.p_relDuration = speed * this.p_realDuration;
       
-      //var diff = geoJson.features[10].time / speed;
+      // var diff = geoJson.features[10].time / speed;
       
       this.displayScale();
 
@@ -1552,10 +1706,13 @@ this.parentContainer.append('\
       }      
     },
 
-    pause: function(){
+    pause: function(options) {
+
       this.playing = false;
-      var feature = this.locations[this.index];
-      this.interaction('highlight', feature.properties.ID || feature.id);
+      if( typeof(options) == 'undefined' ||  !options.hasOwnProperty('silent') || !options.silent  ) {
+        var feature = this.locations[this.index];
+        this.interaction('highlight', feature.properties.ID || feature.id);
+      }
       $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
       $('.js-timeline-current').css('transition', 'width .2s');
       clearInterval(this.autoNextTimer);

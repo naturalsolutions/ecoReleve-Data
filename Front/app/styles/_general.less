@@ -10,6 +10,11 @@ html, body{
   background-size: cover;
 }
 
+button{
+  outline: none;
+  box-shadow: none;
+}
+
 main{
   height: 100%;
   padding-top: 50px;
@@ -17,6 +22,9 @@ main{
 }
 .white{
   background: white;
+}
+.reneco .reneco-ecorelevesmall{
+  padding-bottom: 5px;
 }
 
 .black{
@@ -115,8 +123,12 @@ a{
 }
 
 .half-height{
-  height: 50%;
+  height: 60%;
   overflow: auto;
+}
+
+.half-height.individuals{
+  height: fit-content;
 }
 
 @media (max-width: @screen-lg){
@@ -310,6 +322,7 @@ a.btn{
   color: inherit;
   &:not([class*="btn-"]){
     background: rgb(221, 221, 221);
+    //margin-top : 4px;
   }
   &[class*="btn-"] {
     &:hover, &:focus, &:visited{
@@ -318,6 +331,10 @@ a.btn{
     }
     color: white;
   }
+}
+
+a.btn:hover, button.btn.pull-left:hover{
+  background-color: #c1c1c1;
 }
 
 .file-row.marg10{
@@ -338,4 +355,217 @@ a.btn{
 
 .swal2-popup {
  font-size : 1.6rem !important;
+}
+.camtrapSummary{
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.js-dateOk {
+  #js-fileDate {
+    color : green;
+  }
+}
+.js-dateOutOfRange {
+  #js-fileDate {
+    color : red;
+  }
+}
+.js-dateInRange {
+  #js-fileDate {
+    color : yellow;
+  }
+}
+
+input.form-control{
+  min-height: 34.4px;
+}
+
+/* SENSORS */
+#infos{
+  .half-height{
+    .ag-bl-full-height{
+      overflow: hidden !important;
+    }
+  }
+}
+.toolbar.top{
+  .pull-right {
+    float: right !important;
+    margin-left: 3px;
+  }
+  .pull-left{
+    margin-left: 3px;
+  }
+}
+
+
+/* INDIVIDUALS */
+.individual{
+  .btn{
+    border-radius : 25px !important;
+  }
+  
+  .pull-left{
+    a.btn:not([class*="btn-"]){
+      margin-top: 0px !important;
+    }
+  }
+  .individuals{
+    #formTab{
+      .js-form{
+        padding: 5px;
+      }
+      height : 40%;
+    }
+        form{
+          fieldset:last-child{
+          padding : 10px 0px;
+        }
+    }
+    .half-height{
+      .toolbar.bottom{
+        border-top: solid 1px transparent;
+        display: flex;
+        justify-content: space-around;
+        overflow: hidden;
+        padding : 10px;
+      }
+      .nav-tabs li a.tab-link{
+        border-bottom : solid 1px transparent !important;
+        padding: 5px 15px;
+        font-size: 18px;
+      }
+      .nav-tabs li.active a, .nav-tabs li.activeTab a{
+        font-weight: bold;
+      }
+      .grid-view .grid-legend{
+        display : none !important;
+      }
+      .ag-header-cell-sorted-asc, .ag-header-cell-sorted-desc{
+        background-color : #5cb85c !important;
+        color : #fff;
+        #agMenu{
+          background : linear-gradient(to right, rgba(199, 199, 199, 0) 0%, #5cb85c 30%, #5cb85c 100%) !important;
+        }
+        svg{
+          fill: #fff !important;
+        }
+      }
+      .ag-paging-page-summary-panel{
+        button{
+          background: transparent !important;
+          border: none;
+        }
+        button:hover{
+          span{
+             font-weight: bold;
+          }
+        }
+      }
+      .pull-left{
+        display: flex;
+        align-items: flex-end;
+        font-size: 18px;
+        color : #000;
+        select{
+          border: solid 1px transparent;
+          border-bottom: solid 1px #000;
+          box-shadow: none;
+          padding-bottom : 0px;
+          padding-left: 0px;
+          margin: 0 10px;
+        }
+      }
+    }
+  }
+  ::-webkit-scrollbar{
+    background: #888;
+  }
+  ::-webkit-scrollbar-thumb{
+    background: #fff;
+    border: solid 2px #888;
+    border-radius: 25px;
+  }
+}
+.individual{
+  .player{
+    .scale{
+      margin-bottom: 10px;
+    }
+    .timeline-total{
+      height: 10px;
+    }
+    .timeline-current{
+      background : rgb(53, 53, 53) !important;
+      top : -5px !important;
+    }
+    .cursor-timeline-current{
+      width: 20px;
+      height: 20px;
+      background: #5cb85c !important;
+      border: solid 1.5px #000;
+      margin-top: -5px;
+    }
+    .js-timeline-currentDate{
+      padding-top : 5px;
+    }
+  }
+}
+
+.btn-success:hover {
+  color: #ffffff;
+  background-color: #449d44 !important;
+  border-color: #398439 !important;
+}
+/* .input-group{
+  background-color : #fff !important;
+  border: solid 1px #000;
+}
+.input-group-addon{
+  background-color : #fff;
+  border-right : solid 1px #000;
+}
+input{
+  background-color : #fff !important;
+}
+.dateTimePicker{
+  border: solid 1px transparent;
+  border-bottom: solid 1px #000;
+}
+ */
+
+@media screen and (max-width: 992px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: auto !important;
+      }
+      .half-height{
+        height: auto !important;
+      }
+    }
+  }
+}
+@media screen and (max-width: 1600px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: 50%;
+        .js-form{
+          fieldset{
+            padding: 5px !important;
+          }
+        }
+      }
+      .half-height{
+        height: 50%;
+        .toolbar.bottom:first-child{
+          padding: 20px 10px 0px 10px !important;
+        }
+      }
+    }
+  }
 }

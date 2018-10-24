@@ -4,7 +4,7 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
 
     initialize: function(options) {
       this.dfd = $.Deferred();
-      if(config.instance == 'demo') {
+    //  if(config.instance == 'demo') {
         this.dfd = $.ajax({
           context: this,
           url: config.coreUrl + 'currentUser',
@@ -12,14 +12,14 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
           this.initi18n(data.Language);
         });
         return;
-      }
+   //   }
       this.dfd.resolve();
       this.initi18n();
     },
 
     initi18n: function(language){
       i18n.init({
-        resGetPath: window.location.origin+ window.location.pathname + 'app/locales/__lng__/__ns__.json',
+        resGetPath: window.location.origin+ window.location.pathname + 'app/locales/'+language+'/translation.json',
         getAsync: false,
         lng: language || 'en' //navigator.language || navigator.userLanguagenavigator.language || navigator.userLanguage
       });

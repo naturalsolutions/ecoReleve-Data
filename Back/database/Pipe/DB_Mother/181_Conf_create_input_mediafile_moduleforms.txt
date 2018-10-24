@@ -1,0 +1,50 @@
+INSERT INTO [dbo].[ModuleForms]
+           ([module_id]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[Required]
+           ,[FieldSizeEdit]
+           ,[FieldSizeDisplay]
+           ,[InputType]
+           ,[editorClass]
+           ,[FormRender]
+           ,[FormOrder]
+           ,[Legend]
+           ,[Options]
+           ,[Validators]
+           ,[displayClass]
+           ,[EditClass]
+           ,[Status]
+           ,[Locked]
+           ,[DefaultValue]
+           ,[Rules]
+           ,[Orginal_FB_ID])
+     VALUES
+           (1
+           ,(SELECT P.[ID] FROM [dbo].[ProtocoleType] P WHERE P.Name = 'Media files')
+           ,'mediaFile'
+           ,'add file'
+           ,1
+           ,12
+           ,12
+           ,'MediaFile'
+           ,'form-control'
+           ,7
+           ,1
+           ,NULL
+           ,NULL
+           ,'[{"type" :"MediaFile"}]'
+           ,NULL
+           ,NULL
+           ,NULL
+           ,NULL
+           ,NULL
+           ,NULL
+           ,NULL)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('181_Conf_create_input_mediafile_moduleforms',GETDATE(),(SELECT db_name()))
+
+
+GO

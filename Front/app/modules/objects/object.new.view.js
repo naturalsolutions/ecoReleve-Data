@@ -69,6 +69,7 @@ define([
     afterSaveSuccess: function(){
       var _this = this;
       Swal({
+        heightAuto: false,
         title: 'Succes',
         text: 'creating new ' + _this.model.get('single'),
         type: 'success',
@@ -77,7 +78,7 @@ define([
         confirmButtonText: 'create another ' + _this.model.get('single'),
         cancelButtonText: 'cancel'
       }).then( (result) => { 
-        if ('dismiss' in value) {
+        if ('dismiss' in result) {
           _this.cancel();
         } else {
           _this.nsForm.butClickClear();

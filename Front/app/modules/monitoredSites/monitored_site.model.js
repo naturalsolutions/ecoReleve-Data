@@ -4,8 +4,9 @@ define([
   'backbone',
   'ns_grid/customCellRenderer/decimal5Renderer',
   'ns_grid/customCellRenderer/dateTimeRenderer',
+  'config'
 ], function(
-  $, _, Backbone, Decimal5Renderer, DateTimeRenderer
+  $, _, Backbone, Decimal5Renderer, DateTimeRenderer, config
 ){
   'use strict';
 
@@ -46,6 +47,10 @@ define([
           name: 'stations',
           label: 'Stations'
         },
+        {
+          name: 'camera_trap',
+          label: 'Camera Trap'
+        },
       ],
 
       equipmentColumnDefs: [{
@@ -63,6 +68,99 @@ define([
         field: 'UnicIdentifier',
         headerName: 'Identifier',
       }],
+
+      cameraTrapColumnDefs: [{
+        field: 'sessionID',
+        headerName: 'ID',
+        minWidth: 70,
+      },{
+        field: 'UnicIdentifier',
+        headerName: 'IDENTIFIER',
+        minWidth: 90,
+      },{
+        field: 'StartDate',
+        headerName: 'START DATE',
+        minWidth: 155,
+      },{
+        field: 'EndDate',
+        headerName: 'END DATE',
+        minWidth: 155,
+      },{
+        field: 'nbPhotos',
+        headerName: 'NB PHOTOS',
+        minWidth: 60,
+      },
+      {
+        field : 'link',
+        headerName : '',
+        minWidth: 220,
+        headerCellTemplate: function (params) {
+          var eCell = document.createElement('span');
+          var eBtn = document.createElement('button');
+          eBtn.id = 'headerDownloadLink'
+          eBtn.className = 'js-btndetailssession btn btn-success start hide'
+          var eIcone = document.createElement('i');
+          eIcone.className = 'glyphicon glyphicon-download-alt'
+          var eSpan = document.createElement('span');
+          eSpan.innerText = " Download all sessions"
+          eIcone.appendChild(eSpan);
+          eBtn.appendChild(eIcone);
+
+          eCell.innerHTML =
+            // '<div class="ag-header-cell">'+
+            '<div id="agResizeBar" class="ag-header-cell-resize"></div>' +
+            '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
+            '<div id="agHeaderCellLabel" class="ag-header-cell-label">' +
+            eBtn.outerHTML +
+            '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
+            '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
+            '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
+            '<span id="agFilter" class="ag-header-icon ag-filter-icon"></span>' +
+            '<span id="agText" class="ag-header-cell-text"></span>' +
+            // '</div>'+
+            '</div>'
+            eBtn.onclick =  function () {
+              var _this = this;
+              // var siteID = _this.model.get('id');
+              var path = window.location.href.split('/');
+
+              var siteID = path[ path.length - 1 ];
+              var url = config.coreUrl + 'photos/export/?siteid='+siteID
+
+              window.open(url);
+          };
+          return eCell;
+        },
+        cellRenderer: function (params) {
+
+          if (params.api.rowModel.getRowCount() >= 1) {
+            var headerCol = document.getElementById('headerDownloadLink')
+            headerCol.className = headerCol.className.replace('hide','')
+          }
+          var eCell = document.createElement('span');
+          var eBtn = document.createElement('button');
+          eBtn.className = 'js-btndetailssession btn btn-success start'
+          var eIcone = document.createElement('i');
+          eIcone.className = 'glyphicon glyphicon-download-alt'
+          var eSpan = document.createElement('span');
+          eSpan.innerText = " Download session"
+          eIcone.appendChild(eSpan);
+          eBtn.appendChild(eIcone);
+          eCell.appendChild(eBtn);
+          eCell.onclick =  function () {
+            var path = window.location.href.split('/');
+            var siteID = path[ path.length - 1 ];
+            var sessionID = params.data['sessionID'];
+            var url = config.coreUrl + 'photos/export/?siteid='+siteID+'&sessionid='+sessionID;
+
+            window.open(url);
+          };
+
+          return eCell;
+        }
+      }
+
+    ],
 
       stationsColumnDefs: [{
         field: 'ID',

@@ -41,7 +41,7 @@ define([
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl+'sensors/argos/datas',
+        url: config.coreUrl+'sensorDatas/argos',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
 				autoQueue: false,
@@ -62,6 +62,7 @@ define([
         var ext = file.name.split('.');
         if (ext[ext.length - 1].toLowerCase() != 'txt') {
           Swal({
+            heightAuto: false,
               title: 'Wrong file type',
               text: 'The file should be a text file (.txt)',
               type: 'error',
@@ -77,6 +78,7 @@ define([
           for (_i = 0, _len = this.files.length; _i < _len; _i++) {
             if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
               Swal({
+                heightAuto: false,
                 title: 'Warning Duplicate Files',
                 text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
                 type: 'warning',
@@ -169,6 +171,7 @@ define([
 
         if (!this.errors) {
           Swal({
+            heightAuto: false,
             title: 'Well done',
             text: 'File(s) have been correctly imported\n\n'
             + '\t inserted Argos : ' + totalInsertedArgos + '\t existing Argos : ' + totalExistingArgos+','
@@ -210,6 +213,7 @@ define([
           //   });
         } else {
           Swal({
+            heightAuto: false,
             title: 'An error occured',
             text: 'Please verify your file',
             type: 'error',

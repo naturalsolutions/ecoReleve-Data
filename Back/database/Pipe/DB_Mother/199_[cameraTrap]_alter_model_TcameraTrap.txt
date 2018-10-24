@@ -1,0 +1,10 @@
+USE [ecoReleve_Sensor]
+
+ALTER TABLE [dbo].[TcameraTrap]
+ADD [databaseTarget] VARCHAR(255);
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('199_[cameraTrap]_alter_model_TcameraTrap',GETDATE(),(SELECT db_name()))
+
+
+GO

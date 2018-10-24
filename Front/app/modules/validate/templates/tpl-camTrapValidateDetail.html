@@ -1,0 +1,266 @@
+<div class="full-height col-md-4 no-padding">
+  <div class="clearfix toolbar top">
+    <a class="btn" href="#validate/camtrap">
+      <span class="reneco reneco-back"></span>
+      &nbsp;
+      <span data-i18n="button.back">Back</span>
+    </a>
+    <div class="js-rg-navbar pull-right"></div>
+  </div>
+  <div class="crop2" id="js_zoom_plus">
+    <br>
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#site" aria-controls="site" role="tab" data-toggle="tab">Site details</a>
+      </li>
+      <li role="presentation">
+        <a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a>
+      </li>
+      <li role="presentation">
+        <a href="#imageDetails" aria-controls="imageDetails" role="tab" data-toggle="tab">Image details</a>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" id="preview">
+      <div role="tabpanel" class="tab-pane active" id="site">
+        <div id="siteForm"></div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="sensor">
+        <div id="sensorForm"></div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="imageDetails">
+        <div id="imageDetails"></div>
+      </div>
+    </div>
+  </div>
+  <div class="clearfix toolbar bottom"></div>
+</div>
+
+<div class="full-height no-padding col-md-8 dark">
+  <div class="camTrap toolbar top clearfix">
+    <div id="rgToolsBarTop" class="col-md-12"></div>
+  </div>
+
+  <div id="gallery" class="crop2 crop-paginator">
+
+    <div class="shortcuts">
+      <i id="shortcuts" >
+        <span class="reneco reneco-ECORELEVE-shortcuts"></span>
+      </i>
+          <div class="shortcuts_infos col-md-12">
+        <h5>KEYBOARD SHORTCUTS</h5>
+
+      <div class="col-md-4">
+        <h6>PICTURES</h6>
+
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_left"></span>
+          </i>
+          <span>moving left (if possible)</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_UP"></span>
+          </i>
+          <span>moving up (if possible)</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_DOWN"></span>
+          </i>
+          <span>moving down (if possible)</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_right"></span>
+          </i>
+          <span>moving right (if possible)</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_ENTER"></span>
+          </i>
+          <span>validate picture</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_DELETE"></span>
+          </i>
+          <span>refuse picture</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_space"></span>
+          </i>
+          <span>full screen mode<br>for selected picture</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_ESCAPE"></span>
+          </i>
+          <span>leave full screen mode</span>
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <h6>STARS</h6>
+
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_PLUS"></span>
+          </i>
+          <span>add star (if possible)</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_LESS"></span>
+          </i>
+          <span>decrease (if possible)</span>
+        </p>
+        <p class="row tags_shortcut">
+          <span style="padding-left : 0px; max-width: 113px;">
+            <i id="shortcuts">
+              <span class="reneco reneco-ECORELEVE_1"></span>
+            </i>
+            <i id="shortcuts">
+              <span class="reneco reneco-ECORELEVE_2"></span>
+            </i>
+            <i id="shortcuts">
+              <span class="reneco reneco-ECORELEVE_3"></span>
+            </i>
+            <i id="shortcuts">
+              <span class="reneco reneco-ECORELEVE_4"></span>
+            </i>
+            <i id="shortcuts">
+              <span class="reneco reneco-ECORELEVE_5"></span>
+            </i>
+          </span>
+          <span>amount of stars</span>
+        </p>
+        <h6>TAGS</h6>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_TAB"></span>
+          </i>
+          <span>focus/unfocus on tag input</span>
+        </p>
+      </div>
+      <div class="col-md-4">
+        <h6>PAGES</h6>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_PAGEUP"></span>
+          </i>
+          <span>previous page</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_PAGEDOWN"></span>
+          </i>
+          <span>next page</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_HOME"></span>
+          </i>
+          <span>first page</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_END"></span>
+          </i>
+          <span>last page</span>
+        </p>
+        <h6>STATIONS</h6>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_INSERT"></span>
+          </i>
+          <span>create station</span>
+        </p>
+        <p class="row">
+          <i id="shortcuts">
+            <span class="reneco reneco-ECORELEVE_BACKSPACE"></span>
+          </i>
+          <span>delete station</span>
+        </p>
+      </div>
+    </div>
+    </div>
+
+
+  </div>
+  <div id="imageFullScreen"></div>
+  <div id="rgActionsContainer" class="actionsContainer"></div>
+  <div id="paginator" class="paginatorCamTrap"></div>
+  <!-- <div class="actionsContainer">
+    <div class="actionsBtn">
+        <div id="accepted">
+          <i id="acceptedBtn" class="btn">
+            <span class="reneco reneco-checked"></span>
+          </i>
+        </div>
+        <div id="createStation">
+          <i id="createStationBtn" class="btn">
+            <span class="reneco reneco-pin"></span>
+          </i>
+        </div>
+        <div id="editStation">
+          <i id="editStationBtn" class="btn">
+            <span class="reneco reneco-edit"></span>
+          </i>
+        </div>
+        <div id="deleteStation">
+          <i id="deleteStationBtn" class="btn">
+            <span class="reneco reneco-ECORELEVE-delete-station"></span>
+          </i>
+        </div>
+      <div id="refused">
+        <i id="refusedBtn" class="btn">
+          <span class="reneco reneco-close"></span>
+        </i>
+      </div>
+    </div>
+  </div> -->
+<!--   <div id="paginator" class="paginatorCamTrap"></div> -->
+
+  <!-- <div class="clearfix toolbar bottom col-md-12" style="background-color : #3d3d3d; border-color: #4d4d4d"> -->
+    <div id="rgToolsBar" class="toolbar"></div>
+  <!-- </div> -->
+  <!-- Modal -->
+</div>
+<div id="rgModal"></div>
+<div id="mySidenav" class="sidenav">
+  <i id="closeNav" class="closebtn">
+    <span class="reneco reneco-close icon-one right"></span>
+  </i>
+  <div class="col-md-12">
+    <h4>Filter On status</h4>
+
+    <div class="funkyradio">
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio1" class="allphotos" value="0" />
+        <label for="radio1">All Status</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio2" class="accepted" value="1" />
+        <label for="radio2">Accepted</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio3" class="refused" value="2" />
+        <label for="radio3">Rejected</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio4" class="checked" value="3" />
+        <label for="radio4">Unknown</label>
+      </div>
+      <div class="funkyradio-success">
+        <input type="radio" name="filterstatus" id="radio5" class="notchecked" value="4" />
+        <label for="radio5">Not seen</label>
+      </div>
+    </div>
+  </div>
+</div>
+

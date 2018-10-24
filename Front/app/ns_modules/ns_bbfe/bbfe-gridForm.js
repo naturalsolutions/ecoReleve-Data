@@ -33,7 +33,7 @@ define([
 
     template: '\
         <div class="btn-group-grid">\
-        <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-add"></span></button>\
+        <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-pin"></span></button>\
         <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
         </div>\
         <div class="js-rg-grid-subform col-xs-12 no-padding grid-margin" style="height: 400px">\
@@ -287,6 +287,7 @@ define([
 
       if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
         this.swal({
+          heightAuto: false,
           title : 'Rule error',
           text : errorMsg,
           type:'error',

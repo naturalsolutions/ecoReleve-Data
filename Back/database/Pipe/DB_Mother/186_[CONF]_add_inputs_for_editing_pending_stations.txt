@@ -1,0 +1,15 @@
+﻿INSERT INTO [dbo].[ModuleForms]
+([module_id],[TypeObj],[Name],[Label],[Required],[FieldSizeEdit],[FieldSizeDisplay],[InputType],[editorClass],[FormRender],[FormOrder],[Legend],[Options],[Validators],[displayClass],[EditClass],[Status],[Locked],[DefaultValue],[Rules],[Orginal_FB_ID])
+VALUES
+(2,6,'LAT','Latitude',1,3,3,'LatitudeEditor','form-control',7,10,'Location Infos',NULL,NULL,NULL,'position',NULL,1,NULL,NULL,NULL),
+(2,6,'LON','Longitude',1,3,3,'LongitudeEditor','form-control',7,20,'Location Infos',NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL),
+(2,6,'precision','Précision',0,3,3,'Number','form-control',7,35,'Location Infos',NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL),
+(2,6,'ELE','Elevation',0,3,3,'Number','form-control',7,30,'Location Infos',NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL),
+(2,6,'FK_MonitoredSite','Monitored Site',0,6,6,'ObjectPicker','form-control',7,31,'General Infos','{"usedLabel":"Name"}',NULL,NULL,'site',NULL,1,NULL,NULL,NULL)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('186_[CONF]_add_inputs_for_editing_pending_stations',GETDATE(),(SELECT db_name()))
+
+
+
+GO

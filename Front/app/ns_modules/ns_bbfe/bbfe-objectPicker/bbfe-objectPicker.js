@@ -308,6 +308,7 @@ define([
           break;
         case 'monitoredSites':
         Swal({
+          heightAuto: false,
           title: 'Careful, there is no coordinate for this monitored site at this date',
           text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
           type: 'warning',

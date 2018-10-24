@@ -129,7 +129,7 @@ define([
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        objectType: this.model.get('objectType'),
+        objectType: this.model.get('defaultTypeObj'),
         afterGetRows: afterGetRows,
         filters: this.defaultFilters,
         gridOptions: {

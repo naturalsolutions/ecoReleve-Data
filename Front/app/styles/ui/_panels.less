@@ -24,6 +24,8 @@
 	border-radius: 5px;
 }
 
+
+
 .panel-heading{
 	padding: 0px;
 	.btn-prevent-collapse{
@@ -40,21 +42,44 @@
 			&:hover{
 				background: #dff0d8;
 			}
-			&:not(.collapsed){
-				background: #dff0d8;
+			&:not(.collapsed):after{
+				/* symbol for "opening" panels */
+				font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+				content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+				float: right;        /* adjust as needed */
+				color: grey;         /* adjust as needed */
+				// background: #dff0d8;
 			}
 			i.glyphicon{
 				float: right;
 				&:after { content: "\e114"; }
 			}
 			&.collapsed{
+				
 				i.glyphicon{
 					float: right;
-					&:after { content: "\e080"; }
 				}	
+				&:after {
+				font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+				content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+				float: right;        /* adjust as needed */
+				color: grey;         /* adjust as needed */
+				 content: "\e080"; }
 			}
 		}
 	}
+}
+
+.panel-heading .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+.panel-heading .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
 

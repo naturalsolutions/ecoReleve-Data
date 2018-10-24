@@ -16,7 +16,7 @@ define([
       label: 'individuals',
       single: 'individual',
       type: 'individuals',
-
+      defaultTypeObj: 1,
       icon: 'reneco-bustard',
       subincon: 'reneco-bustard',
 
@@ -108,7 +108,7 @@ define([
         filter: 'date',
         pinned: 'left',
         sort: 'desc',
-        minWidth: 200,
+        minWidth: 160,
         cellRenderer: function(params){
           if(params.data.type_ === 'station'){
             //params.node.removeEventListener('rowSelected', params.node.eventService.allListeners.rowSelected[0]);
@@ -120,6 +120,9 @@ define([
       },{
         field: 'ID',
         headerName: 'ID',
+        suppressFilter: true,
+        suppressSorting: true,
+        minWidth: 80,
         cellRenderer: function(params){
           if(params.data.type_ === 'station'){
             //ex: sta_44960
@@ -133,16 +136,50 @@ define([
         field: 'LAT',
         headerName: 'latitude',
         filter: 'number',
+        minWidth: 90,
         cellRenderer: Decimal5Renderer
       },{
         field: 'LON',
         headerName: 'longitude',
         filter: 'number',
+        minWidth: 90,
         cellRenderer: Decimal5Renderer
       },{
         field: 'precision',
         headerName: 'Precision(m)',
         filter: 'number',
+        minWidth: 110,
+      },{
+        field: 'iconOnMap',
+        headerName: 'Icon',
+        suppressFilter: true,
+        suppressSorting: true,
+        hide: true,
+        minWidth: 50,
+        cellRenderer: function(params){
+          if( params.data.iconOnMap!= null) {
+            var span = document.createElement('span')
+            span.style.opacity = params.data.iconOnMap;
+            span.classList = 'marker marker-'+(params.data.type_).toLowerCase();
+            if(params.data.icon === 1.00 ){
+              span.classList = span.classList +' focus'
+            }
+            span.style.display = 'inline-block'
+            span.style.height = '18px'
+            span.style.width = '18px'
+            return span;
+          }
+          else {
+            return ''
+          }
+          // if(params.data.type_ === 'station'){
+          //   //ex: sta_44960
+          //   var id = params.data.ID.split('_')[1];
+          //   return id;
+          // } else {
+          //   return params.data.ID;
+          // }
+        }
       },{
         field: 'FieldworkArea',
         headerName: 'FieldWorkArea',

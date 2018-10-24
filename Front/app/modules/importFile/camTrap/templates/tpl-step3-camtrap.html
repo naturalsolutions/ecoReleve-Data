@@ -1,0 +1,54 @@
+<div class="importCamTrap">
+
+	<h2>
+		<span>Session infos</span>
+	</h2>
+	<div class="js-jetlag">
+		<h5>Jet lag (+/- hh:mm:ss)</h5>
+		<div class=" form-group">
+			<div class='input-group date'>
+				<span class="js-jetlagoperator input-group-addon">
+					<span class="glyphicon glyphicon-plus"></span>
+				</span>
+				<div class='input-group date' id='datetimepicker3'>
+					<input type='text' class="form-control" />
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-time"></span>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="js-rg-grid-session sessionGrid no-padding"></div>
+	<h2>
+		<span>Files infos</span>
+	</h2>
+	<div class="js-rg-grid-photos photosGrid full-height no-padding"></div>
+	<div class="filesInfos">
+		<%= resumable.files.length %> Files
+			<%= (_.reduce( resumable.files , function(sum,file) { 
+			return sum + file.size;},0)/(1024*1024)).toFixed(2) %> Mo
+	</div>
+</div>
+
+<div class="modal fade" id="myPleaseWait" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+	<div class="modal-dialog ">
+		<div class="modal-content js-camtrapProcessing">
+			<div class="modal-header">
+				<!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+				<h4 class="modal-title">
+					<span class="glyphicon glyphicon-time"></span>
+					Please wait will uploading data
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div class="progress">
+					<div class="progress-bar progress-bar-info
+					progress-bar-striped active"
+					style="width: 0%">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

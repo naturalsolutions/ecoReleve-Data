@@ -1,0 +1,32 @@
+CREATE TABLE [dbo].[Photos](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Path] [varchar](250) NOT NULL,
+	[FileName] [varchar](250) NOT NULL,
+	[Date] [datetime] NOT NULL,
+	[Fk_MonitoredSite] [int] NOT NULL,
+	[old_id] [int] NOT NULL,
+	[Statut] [tinyint] NULL,
+	[Note] [int] NOT NULL DEFAULT ((5)),
+ CONSTRAINT [PK_Photos] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[Photos]  WITH CHECK ADD  CONSTRAINT [FK_Photos_MonitoredSite] FOREIGN KEY([Fk_MonitoredSite])
+REFERENCES [dbo].[MonitoredSite] ([ID])
+GO
+
+ALTER TABLE [dbo].[Photos] CHECK CONSTRAINT [FK_Photos_MonitoredSite]
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('176_[cameraTrap]_CREATE_table_photos',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -88,7 +88,7 @@ define([
         url: 'release/individuals/',
         com: this.com,
         filterContainer: this.ui.filter,
-        objectType: 'individus',
+        objectType: 1,
         filtersValues: this.defaultFilters,
       });
     },
@@ -295,10 +295,12 @@ define([
         
       } else {
         if(error){
-          this.swal({text:'unavailable sensor or duplicated sensor is equiped',title:'sensor error'}, 'error',null);
+          this.swal({
+            heightAuto: false,text:'unavailable sensor or duplicated sensor is equiped',title:'sensor error'}, 'error',null);
         }
         if(visibleSelectedRows.length == 0){
-          this.swal({text:'No individual selected',title:'error'}, 'error',null);
+          this.swal({
+            heightAuto: false,text:'No individual selected',title:'error'}, 'error',null);
         }
         this.hideLoading();
         return;
@@ -329,6 +331,7 @@ define([
           break;
       }
       Swal({
+        heightAuto: false,
         title: opt.title || opt.responseText || 'error',
         text: opt.text || '',
         type: type,

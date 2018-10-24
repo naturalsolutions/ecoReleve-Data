@@ -39,7 +39,8 @@ GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
 DataRfidWithSite = Table('VRfidData_With_equipSite',
                          Base.metadata, autoload=True)
 DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
-
+DataCamTrapFile = Table('V_dataCamTrap_With_equipSite',
+                        Base.metadata, autoload=True)
 
 @view_config(route_name=route_prefix + 'uncheckedDatas',
              renderer='json',

@@ -1,0 +1,41 @@
+<%
+var vignetteClasses = []
+if (activeFront){
+  vignetteClasses = ['active','active_bl','active_br','active_bt','active_bb']
+}
+%>
+<div class="vignette <%= vignetteClasses.join(' ') %>">
+  <!-- <div class="camtrapItemViewHeader" <% if (stationId===null) { %> style="display : none" <% } %>>
+    <i class="reneco icon-two reneco-stations"></i>
+  </div> -->
+  <div class="camtrapItemViewHeader">
+  </div>
+  <% 
+  var classes = []
+  if(validated){
+    classes.push('checked')
+  }
+  switch( validated ) {
+    case 2 : {
+      classes.push('accepted')
+      break;
+    }
+    case 4: {
+      classes.push('rejected')
+      break;
+    }
+    default: {
+      break;
+    } 
+  }
+  if (stationId) { 
+    classes.push('stationed') 
+  } %>
+  <div class="camtrapItemViewContent <%= classes.join(' ') %>" >
+    <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >
+    <img id="zoom_<%=id%>" src =.<%= path %>thumbnails/<%= name %> class="<%= classes.join(' ') %>" tabindex="<%=id%>" alt="<%= name %>" data-zoom-image="<%= path %><%= name %>" />
+      <div class="dateexif text-center"><%= date_creation %></div>
+  </div>
+  <div class="camtrapItemViewFooter" style="display : none">
+  </div>
+</div>

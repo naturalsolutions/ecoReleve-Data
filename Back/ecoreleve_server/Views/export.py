@@ -9,7 +9,10 @@ import io
 from datetime import datetime
 from . import CustomView
 from ..controllers.security import RootCore
+from ..GenericObjets.SearchEngine import QueryEngine
 
+
+# TOODO Replace Generator by QueryEngine to Search in views
 
 class CustomExportView(CustomView):
 

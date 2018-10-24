@@ -1,0 +1,21 @@
+USE [ecoReleve_Sensor]
+
+CREATE TABLE [dbo].[MetaData](
+	[ID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FK_CamTrap] [int] NOT NULL,
+	[CommandLine] [nvarchar](max) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+ALTER TABLE [dbo].[MetaData]  WITH CHECK ADD FOREIGN KEY([FK_CamTrap])
+REFERENCES [dbo].[TcameraTrap] ([pk_id])
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('182_[cameraTrap]_Sensor_add_MetaData_simple_schem',GETDATE(),(SELECT db_name()))
+
+
+GO

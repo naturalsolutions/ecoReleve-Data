@@ -1,0 +1,70 @@
+USE [EcoReleve_DATABASENAME]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_unmountDisk] 
+	@diskLetter VARCHAR(2)
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+
+
+	DECLARE @rescmdShell INT
+	DECLARE @errorMessageMain VARCHAR(MAX)
+	DECLARE @cmd VARCHAR(1024)
+	DECLARE @options VARCHAR(512)
+	PRINT(CONCAT(
+	'We try to unmount disk (',
+	@diskLetter,
+	')')
+	)	
+	SET @options = 	' /delete /y'
+
+	SET @cmd = CONCAT('net use ',@diskLetter,@options)
+
+	EXECUTE @rescmdShell = xp_cmdshell @cmd, no_output
+			IF ( @rescmdShell = 0 ) 
+			BEGIN
+				PRINT(CONCAT(
+				'Disk (',
+				@diskLetter,
+				') unmount')
+				)
+			END
+			ELSE
+			BEGIN
+				PRINT(CONCAT(
+				'Error : No disk(',
+				@diskLetter,
+				') to unmount but it is not critical')
+				)
+			END
+
+	IF @@TRANCOUNT > 0 		
+			COMMIT TRAN
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED IN sp_unmountDisk')
+      
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+ 
+                   
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+                   
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+                   
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
