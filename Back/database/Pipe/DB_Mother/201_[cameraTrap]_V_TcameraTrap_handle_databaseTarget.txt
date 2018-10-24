@@ -1,0 +1,15 @@
+ALTER VIEW [dbo].[V_TcameraTrap]
+AS
+
+SELECT        
+*
+FROM            
+[ecoReleve_Sensor].[dbo].[TcameraTrap]
+WHERE [databaseTarget] = CONCAT((SELECT DB_NAME()), '.dbo')
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('201_[cameraTrap]_V_TcameraTrap_handle_databaseTarget',GETDATE(),(SELECT db_name()))
+
+
+GO

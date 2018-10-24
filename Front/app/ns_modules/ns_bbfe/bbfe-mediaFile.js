@@ -186,22 +186,22 @@ define([
         _this.cleanDom();
       })
       .done( function(resp) {
-
-        return false
+        return true
       })
       .fail( function(error) {
 
         console.log(error);
-        console.log("sniiffff erreur");
-        return true
-
+        return false
       });
 
       // return false;
     },
 
     cleanDom : function() {
-      $('#myPleaseWait').modal('hide');
+      setTimeout(function () {
+        $('#myPleaseWait').modal('hide');
+      }, 10);
+      // $('#myPleaseWait').modal('hide');
 
     },
 
@@ -252,22 +252,26 @@ define([
     },
 
     render: function() {
-        return this;
+        var elemModal = document.getElementsByClassName('modal-backdrop')[0];
+        if(elemModal) {
+          elemModal.parentElement.removeChild(elemModal);
+        }
+
+         return this;
+        //var modalPresent = this.el.get
     },
 
     onBeforeDestroy : function(e) {
-      console.log("51g68r4r56e0 5r6g10 ");
+
     },
     remove : function (e) {
-
-      console.log("on détruit hop hophop")
 
     },
     getValue: function() {
       var path = null;
       if( this.elems.fileInput.files.length ) {
         path = this.model.get('FK_Station') + '/' + this.elems.fileInput.files[0].name;
-        this.model.set('mediaFile' , path);
+        this.model.set('MediaFile' , path);
       }
       return path;
     },
