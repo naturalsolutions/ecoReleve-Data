@@ -35,6 +35,7 @@ RETURN
 	V_T.[checked] IS NULL
 )
 
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('203_[cameraTrap]_ALTER_function_session_camtrap_handle_context',GETDATE(),(SELECT db_name()))
 
