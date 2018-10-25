@@ -154,7 +154,7 @@ define([
           if(_this.url && !( _this.url.indexOf('sensors/') >= 0) ){
             _this.fetchGeoJson(_this.url);
           }else{
-            if ( _this.url.indexOf('sensors/') >= 0) {
+            if (_this.url &&  _this.url.indexOf('sensors/') >= 0) {
               _this.geoJson = {
                 "total" : 0 ,
                 "exceed" : false,
