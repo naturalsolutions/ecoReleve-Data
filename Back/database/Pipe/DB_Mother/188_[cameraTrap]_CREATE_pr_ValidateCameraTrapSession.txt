@@ -664,4 +664,6 @@ OUTPUT inserted.[Id],SRC.[camTrapID],SRC.[FK_Station] INTO #mergedInserted;
 	--select path,name,validated from V_TcameraTrap where pk_id in (select ID from #CamTrapID)
 END
 
+GO 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('188_[cameraTrap]_CREATE_pr_ValidateCameraTrapSession',GETDATE(),(SELECT db_name()))
+GO

@@ -615,7 +615,7 @@ BEGIN CATCH
 END CATCH
 END
 
-
+GO 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('196_[cameraTrap]_refact_pr_ValidateCameraTrapSession',GETDATE(),(SELECT db_name()))
 
 
