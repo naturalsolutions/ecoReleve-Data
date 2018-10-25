@@ -360,6 +360,8 @@ class SensorDatasByType(CustomResource):
 
     def retrieve(self):
         criteria = self.request.params.get('criteria', None)
+        if criteria == '[]' :
+            criteria = None
 
         queryStmt = self.queryType[self.type_]()
         queryStmt = self.handleCriteria(queryStmt, criteria)
