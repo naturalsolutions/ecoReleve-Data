@@ -59,7 +59,7 @@ def initialize_session(settings):
     settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
         quote_plus(settings['sqlalchemy.default.url'])
     engine = engine_from_config(
-        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True, implicit_returning=False)
 
     Base.metadata.bind = engine
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine, autoflush=False))
