@@ -50,7 +50,7 @@ define([
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
   LytCamTrapValidateDetail,
   LytImportHistory,
-  LytRedirect,
+  LytRedirect
 
 ) {
   'use strict';
