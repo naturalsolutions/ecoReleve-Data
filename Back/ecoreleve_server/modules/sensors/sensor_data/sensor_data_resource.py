@@ -208,6 +208,8 @@ class SensorDatasBySession(CustomResource):
             query = select([self.viewTable]
                            ).where(self.viewTable.c['sessionID'] == self.sessionID
                                    ).where(or_(self.viewTable.c['checked'] == 0, self.viewTable.c['checked'] == None))
+        if self.type_ in ['gsm', 'argos']:
+            query = query.order_by(self.viewTable.c['date'].desc())
         query = self.handleQuery(query)
         data = self.session.execute(query).fetchall()
         return self.handleResult(data)
@@ -226,7 +228,7 @@ class SensorDatasBySession(CustomResource):
                 geoJson = []
                 for row in data:
                     geoJson.append({'type': 'Feature', 'id': row['PK_id'], 'properties': {
-                                   'type': row['type'], 'date': row['date']}, 'geometry': {'type': 'Point', 'coordinates': [row['lat'], row['lon']]}})
+                                   'type': row['type'], 'Date': row['date']}, 'geometry': {'type': 'Point', 'coordinates': [row['lat'], row['lon']]}})
                 result = {'type': 'FeatureCollection', 'features': geoJson}
 
             else:
