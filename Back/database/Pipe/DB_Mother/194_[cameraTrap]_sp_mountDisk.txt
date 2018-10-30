@@ -76,7 +76,7 @@ BEGIN
     END CATCH
 END
 
-
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('194_[cameraTrap]_sp_mountDisk',GETDATE(),(SELECT db_name()))
 
