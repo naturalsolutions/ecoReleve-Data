@@ -1,11 +1,4 @@
-USE [EcoReleve_DATABASENAME]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE FUNCTION [dbo].[camTrapTableSession]
+ALTER FUNCTION [dbo].[camTrapTableSession]
 (	
 	-- Add the parameters for the function here
 	@fk_sensor INT,
@@ -38,11 +31,13 @@ RETURN
 	v_d.[FK_MonitoredSite] = @Fk_MonitoredSite
 	AND
 	V_D.[sessionID] = @SessionId
+	AND
+	V_T.[checked] IS NULL
 )
 
 GO
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('197_[cameraTrap]_function_camTrapTableSession',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('203_[cameraTrap]_ALTER_function_session_camtrap_handle_context',GETDATE(),(SELECT db_name()))
 
 
 GO

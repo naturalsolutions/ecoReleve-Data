@@ -193,6 +193,48 @@ define([
       }, {
         field: 'ele',
         headerName: 'ELE (m)',
+      },{
+        field: 'iconOnMap',
+        headerName: 'Icon',
+        suppressFilter: true,
+        suppressSorting: true,
+        hide: true,
+        minWidth: 50,
+        cellRenderer: function(params){
+          if( params.data.iconOnMap!= null) {
+            var span = document.createElement('span')
+            span.style.opacity = params.data.iconOnMap;
+            var trueType = params.data.type;
+            if (params.data.type_) {
+              trueType = params.data.type_
+            }
+            else {
+              if ( trueType == 'arg' ) {
+                trueType = 'argos'
+              }
+
+            }
+
+            span.classList = 'marker marker-'+(trueType).toLowerCase();
+            if(params.data.icon === 1.00 ){
+              span.classList = span.classList +' focus'
+            }
+            span.style.display = 'inline-block'
+            span.style.height = '18px'
+            span.style.width = '18px'
+            return span;
+          }
+          else {
+            return ''
+          }
+          // if(params.data.type_ === 'station'){
+          //   //ex: sta_44960
+          //   var id = params.data.ID.split('_')[1];
+          //   return id;
+          // } else {
+          //   return params.data.ID;
+          // }
+        }
       }, {
         field: 'dist',
         headerName: 'DIST (km)',

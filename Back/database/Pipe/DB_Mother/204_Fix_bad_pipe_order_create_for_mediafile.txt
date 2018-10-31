@@ -1,0 +1,11 @@
+UPDATE ModuleForms
+SET [TypeObj] = (select [id] FROM ProtocoleType where Name ='Media files')
+WHERE [Name] = 'mediaFile' AND [module_id] = 1
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('204_Fix_bad_pipe_order_create_for_mediafile',GETDATE(),(SELECT db_name()))
+
+
+GO

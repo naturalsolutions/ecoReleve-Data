@@ -37,7 +37,8 @@ class IndividualLocationsResource(CustomResource):
                 if geoJson_properties != None :
                     for col in geoJson_properties :
                         if col == 'Date':
-                            value = row[col].strftime('%Y-%m-%d %H:%M:%S')
+                            # value = row[col].strftime('%Y-%m-%d %H:%M:%S')
+                            value = row[col].strftime('%d/%m/%Y %H:%M:%S')
                         else:
                             value = row[col]
                         properties[col] = value
@@ -171,8 +172,8 @@ class IndividualLocationsResource(CustomResource):
                                  limit=optionsParams['per_page'],
                                  order_by=optionsParams['order_by'])
             for row in result:
-                row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
-                row['format'] = 'YYYY-MM-DD HH:mm:ss'
+                row['Date'] = row['Date'].strftime('%d/%m/%Y %H:%M:%S') #.strftime('%Y-%m-%d %H:%M:%S')
+                row['format'] = 'DD/MM/YYYY HH:mm:ss'
         res = {}
         if 'geo' not in data:
             res[0] = {'total_entries' : countAllPosition }

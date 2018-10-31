@@ -305,11 +305,14 @@ class StationsResource(DynamicObjectCollectionResource):
 
     def getFieldWorkers(self, data):
         params, history, startDate = self.formatParams({}, paging=True)
+        # params = {'selectable': ['ID'],
+        #           'filters':params.get('criteria', [])#,
+        #           #'offset':params.get('offset'),
+        #           #'limit':params.get('per_page')#,
+        #           #'order_by':params.get('order_by')
+        #         }
         params = {'selectable': ['ID'],
-                  'filters':params.get('criteria', []),
-                  'offset':params.get('offset'),
-                  'limit':params.get('per_page'),
-                  'order_by':params.get('order_by')
+                  'filters':params.get('criteria', [])
                 }
 
         queryCTE = self.collection.build_query(**params).cte()
@@ -326,7 +329,8 @@ class StationsResource(DynamicObjectCollectionResource):
         for row in data[1]:
             try:
                 row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
-            except:
+            except Exception as e:
+                print(e)
                 pass
         return data
 
