@@ -36,7 +36,7 @@ RETURN
 
 )
 
-
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('202_[cameraTrap]_ALTER_camTrapTableSession_handle_context',GETDATE(),(SELECT db_name()))
 
