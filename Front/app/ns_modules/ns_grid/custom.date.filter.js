@@ -283,17 +283,18 @@ define([
       return {
         getModel: function() {
           if (that.isFilterActive()) {
+            var formatBdd = 'YYYY-MM-DD HH:mm:ss';
             return {
               type: 1,
               filter: that.filterDate,
               strFilter: [
                  {
                     "Operator" : ">=",
-                    "Value" : that.dateFrom.value
+                    "Value" : moment(that.dateFrom.value,that.getDateFormat(that.dateFrom.value)).toISOString()
                   },
                   {
                     "Operator" : "<=",
-                    "Value" : that.dateTo.value
+                    "Value" : moment(that.dateTo.value,that.getDateFormat(that.dateTo.value)).toISOString()
                   }
                 ]
             };
