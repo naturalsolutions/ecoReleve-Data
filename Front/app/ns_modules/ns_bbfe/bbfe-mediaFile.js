@@ -42,7 +42,7 @@ define([
             <div class="modal-header">\
               <h4 class="modal-title">\
                 <span class="glyphicon glyphicon-time"></span>\
-                Please wait will processing data\
+                Please wait while processing data\
               </h4>\
             </div>\
             <div class="modal-body">\
