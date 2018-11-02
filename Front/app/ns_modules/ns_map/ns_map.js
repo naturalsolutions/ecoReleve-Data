@@ -164,6 +164,7 @@ define([
             }
             if (_this.cluster){
               _this.initClusters(_this.geoJson);
+              _this.fitBound();
               
             }else{
               _this.initLayer(_this.geoJson);
