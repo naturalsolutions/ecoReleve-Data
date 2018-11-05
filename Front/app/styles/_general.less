@@ -123,7 +123,6 @@ a{
 }
 
 .half-height{
-  height: 60%;
   overflow: auto;
 }
 
@@ -380,7 +379,7 @@ a.btn:hover, button.btn.pull-left:hover{
 }
 
 input.form-control{
-  min-height: 34.4px;
+  //min-height: 34.4px; DEL
 }
 
 /* SENSORS */
@@ -414,11 +413,13 @@ input.form-control{
     }
   }
   .individuals{
+    display: flex;
+    flex-direction: column;
     #formTab{
+     // flex-grow: 1;
       .js-form{
         padding: 5px;
       }
-      height : 40%;
     }
         form{
           fieldset:last-child{
@@ -426,12 +427,17 @@ input.form-control{
         }
     }
     .half-height{
+     // flex-grow: 2;
       .toolbar.bottom{
         border-top: solid 1px transparent;
         display: flex;
         justify-content: space-around;
         overflow: hidden;
-        padding : 10px;
+        padding : 0px;
+        height: 36px !important;
+      }
+      .crop1{
+       height: ~"calc(100% - 36px)" !important;
       }
       .nav-tabs li a.tab-link{
         border-bottom : solid 1px transparent !important;
@@ -541,10 +547,10 @@ input{
   .individual{
     .individuals{
         #formTab{
-        height: auto !important;
+        
       }
       .half-height{
-        height: auto !important;
+        
       }
     }
   }
@@ -553,7 +559,7 @@ input{
   .individual{
     .individuals{
         #formTab{
-        height: 50%;
+        
         .js-form{
           fieldset{
             padding: 5px !important;
@@ -561,9 +567,9 @@ input{
         }
       }
       .half-height{
-        height: 50%;
+        
         .toolbar.bottom:first-child{
-          padding: 20px 10px 0px 10px !important;
+          //padding: 20px 10px 0px 10px !important;
         }
       }
     }
