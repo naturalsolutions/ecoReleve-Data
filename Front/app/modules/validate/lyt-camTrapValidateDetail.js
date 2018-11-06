@@ -1588,7 +1588,7 @@ define([
       } else if (_this.nbPhotosRefused == 0) {
         text += _this.nbPhotosAccepted + ' picture(s) will be accepted<BR>';
       } else {
-        text += _this.nbPhotosAccepted + ' pictrure(s) will be accepted<BR>' + _this.nbPhotosRefused + ' picture(s) will be refused<BR>';
+        text += _this.nbPhotosAccepted + ' picture(s) will be accepted<BR>' + _this.nbPhotosRefused + ' picture(s) will be refused<BR>';
       }
       if( _this.nbPhotosStationed == 1) {
           text +=  _this.nbPhotosStationed+' station will be created <BR>'
@@ -1601,7 +1601,7 @@ define([
       Swal({
           heightAuto: false,
           title: 'Validation',
-          html: 'You have finish this session on ' + _this.nbPhotos + ' photos :<BR>' + text,
+          html: 'You have finished this session on ' + _this.nbPhotos + ' photos :<BR>' + text,
           type: 'success',
           showCancelButton: true,
           confirmButtonColor: '#5cb85c',
