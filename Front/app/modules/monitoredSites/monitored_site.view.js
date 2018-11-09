@@ -23,6 +23,8 @@ define([
   'use strict';
 
   return DetailView.extend({
+
+    className: 'individual full-height animated white',
     ModelPrototype: MonitoredSiteModel,
 
     displayGrids: function(){

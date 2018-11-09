@@ -15,6 +15,16 @@ button{
   box-shadow: none;
 }
 
+.btn{
+  border-radius: 25px;
+}
+
+.input-group-addon{
+  background-color: #fff;
+  border: solid 1px rgb(204, 204, 204) !important;
+  border-right: none !important;
+}
+
 main{
   height: 100%;
   padding-top: 50px;
@@ -143,17 +153,6 @@ span.bull-warn{
   padding: 5px;
   font-size: 1.3em;
 }
-
-//???
-/* .tab-content.all-stations {
-  height: 0;
-} */
-
-/* @media (max-width: @screen-md-min) {
-  .full-height{
-    height: auto;
-  }
-} */
 
 .pos-abs{
   position: absolute;
@@ -320,7 +319,7 @@ li.list-group-item{
 a.btn{
   color: inherit;
   &:not([class*="btn-"]){
-    background: rgb(221, 221, 221);
+    background: var(--basic-grey);
     //margin-top : 4px;
   }
   &[class*="btn-"] {
@@ -333,7 +332,7 @@ a.btn{
 }
 
 a.btn:hover, button.btn.pull-left:hover{
-  background-color: #c1c1c1;
+  background-color: var(--dark-grey);
 }
 
 .file-row.marg10{
@@ -376,10 +375,6 @@ a.btn:hover, button.btn.pull-left:hover{
   #js-fileDate {
     color : yellow;
   }
-}
-
-input.form-control{
-  //min-height: 34.4px; DEL
 }
 
 /* SENSORS */
@@ -435,6 +430,9 @@ input.form-control{
         overflow: hidden;
         padding : 0px;
         height: 36px !important;
+        button{
+          margin: 2px 0px;
+        }
       }
       .crop1{
        height: ~"calc(100% - 36px)" !important;
@@ -485,6 +483,14 @@ input.form-control{
           margin: 0 10px;
         }
       }
+      #historyTab{
+        .selectableTextInGrid{
+          overflow: hidden;
+          .ag-body-viewport{
+            overflow-x: hidden;
+          }
+        }
+      }
     }
   }
   ::-webkit-scrollbar{
@@ -521,9 +527,14 @@ input.form-control{
   }
 }
 
+button{
+  outline: none;
+  box-shadow: none;
+}
+
 .btn-success:hover {
   color: #ffffff;
-  background-color: #449d44 !important;
+  background-color: var(--first-color) !important;
   border-color: #398439 !important;
 }
 /* .input-group{
@@ -543,18 +554,98 @@ input{
 }
  */
 
-@media screen and (max-width: 992px){
-  .individual{
-    .individuals{
-        #formTab{
-        
+ /* xxxxxxxxxxxxxxxx STATIONS xxxxxxxxxxxxxxxx */
+
+.station{
+  //Left part
+  .stations{
+    #top{
+      .crop2{
+        .js-from-station{
+          .js-admin{
+            .input-group{
+              float: right;
+            }         
+          }
+          .col-md-3{
+            width: 50% !important;
+          }
+          .dateTimePicker{
+            width: 100%;
+          }
+        }
+        .input-group-btn{
+          
+          &:first-child{
+            .btn{
+              background-color: #fff !important;
+              border: solid 1px rgb(204, 204, 204);
+              margin: 0;
+            }
+          }
+        }
+          
       }
-      .half-height{
-        
+    }
+    #bottom{
+      #detailsTab{
+        #addFormBtn{
+          border: solid 2px #5cb85c;
+          background-color: #fff;
+          color: #5cb85c;
+          float: right;
+          &:hover{
+            border: solid 2px #70dd70;
+          }
+        }
+      }
+      #protocolsTab{
+        .badge{
+          background-color: transparent;
+          color: rgb(129, 129, 129);
+        }
+        .active{
+          .badge{
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
+  // Right part
+  .dark{
+    .toolbar.top{
+      background-color: var(--bg-dark-grey);
+      font-weight: bold;
+      legend{
+        color: #fff !important;
+      }
+    }
+    .crop1{
+      background-color: var(--bg-grey) !important;
+    }
+    .toolbar.bottom{
+      #NsFormButton{
+        display: flex;
+        justify-content: flex-end;
+        .NsFormModuleDelete{
+          border-top-right-radius: 0px;
+          border-bottom-right-radius: 0px;
+        }
+        .NsFormModuleClear{
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
+          margin-right: 15px;
+        }
       }
     }
   }
 }
+
+
+  /* xxxxxxxxxxxxxxxx MEDIAS QUERIES xxxxxxxxxxxxxxxx */
+
+
 @media screen and (max-width: 1600px){
   .individual{
     .individuals{
@@ -574,4 +665,8 @@ input{
       }
     }
   }
+}
+
+.js-rg-equipment-grid {
+  height: ~'calc(100% - 1px)' !important
 }
