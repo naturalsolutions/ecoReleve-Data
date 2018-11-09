@@ -57,6 +57,14 @@ define([
         if (this.format && (this.format.toLowerCase() == 'hh:mm:ss')) {
             this.classIcon = 'glyphicon-time glyphicon';
         }
+        if( this.key == 'From' || this.key == 'To') {
+            var valTmp = this.model.get(this.key);
+            if ( valTmp ) {
+                if ( valTmp ) {
+                    this.model.set('value',moment(valTmp,this.format).format(this.format))
+                }
+            }
+        }
     },
     
     handleDblClick : function(e){
@@ -64,7 +72,15 @@ define([
     },
 
     getValue: function() {
-        return this.$el.find('#' + this.id).val();
+        var tmpVal = this.$el.find('#' + this.id).val();
+        var dateTmp 
+        if( tmpVal ) {
+            dateTmp = moment(tmpVal,this.format).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+        }
+        else {
+            dateTmp = null;
+        }
+        return dateTmp;
     },
 
     remove : function() {
