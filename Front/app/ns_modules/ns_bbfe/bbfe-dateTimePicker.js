@@ -32,6 +32,9 @@ define([
 
         this.id = this.cid;
 
+        this.toBddFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'
+        this.fromBddFormat = 'DD/MM/YYYY HH:mm:ss'
+
         this.dictFormat = {
             'DD/MM/YYYY HH:mm:ss' : 'datetime',
             'DD/MM/YYYY' : 'date',
@@ -75,7 +78,7 @@ define([
         var tmpVal = this.$el.find('#' + this.id).val();
         var dateTmp 
         if( tmpVal ) {
-            dateTmp = moment(tmpVal,this.format).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+            dateTmp = moment(tmpVal,this.format).format(this.toBddFormat);
         }
         else {
             dateTmp = null;
@@ -102,24 +105,12 @@ define([
             required = options.schema.validators[0];
         }
 
-        if (options.model && this.format && this.format.toLowerCase() == 'hh:mm:ss') {
+        if (options.model) {
             var val = options.model.get(this.options.key);
-            if (val){
-              var tab = val.split(" ");
-              if (tab.length > 1){
-                value = tab[1];
-              } else {
-                value = val;
-              }
+            if (val) {
+                value = moment(val,this.fromBddFormat).format(this.format)
             }
-
-          }else {
-                if (options.model) {
-                  value = options.model.get(this.options.key);
-                }else {
-                  value = '';
-                }
-          }
+        }
 
          // _this.datetimepickerOptions.debug = true;
           _this.datetimepickerOptions.widgetParent ='body';
