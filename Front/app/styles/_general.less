@@ -15,16 +15,6 @@ button{
   box-shadow: none;
 }
 
-.btn{
-  border-radius: 25px;
-}
-
-.input-group-addon{
-  background-color: #fff;
-  border: solid 1px rgb(204, 204, 204) !important;
-  border-right: none !important;
-}
-
 main{
   height: 100%;
   padding-top: 50px;
@@ -133,6 +123,7 @@ a{
 }
 
 .half-height{
+  height: 60%;
   overflow: auto;
 }
 
@@ -153,6 +144,17 @@ span.bull-warn{
   padding: 5px;
   font-size: 1.3em;
 }
+
+//???
+/* .tab-content.all-stations {
+  height: 0;
+} */
+
+/* @media (max-width: @screen-md-min) {
+  .full-height{
+    height: auto;
+  }
+} */
 
 .pos-abs{
   position: absolute;
@@ -319,7 +321,7 @@ li.list-group-item{
 a.btn{
   color: inherit;
   &:not([class*="btn-"]){
-    background: var(--basic-grey);
+    background: rgb(221, 221, 221);
     //margin-top : 4px;
   }
   &[class*="btn-"] {
@@ -332,7 +334,7 @@ a.btn{
 }
 
 a.btn:hover, button.btn.pull-left:hover{
-  background-color: var(--dark-grey);
+  background-color: #c1c1c1;
 }
 
 .file-row.marg10{
@@ -412,13 +414,11 @@ input.form-control{
     }
   }
   .individuals{
-    display: flex;
-    flex-direction: column;
     #formTab{
-     // flex-grow: 1;
       .js-form{
         padding: 5px;
       }
+      height : 40%;
     }
         form{
           fieldset:last-child{
@@ -426,20 +426,12 @@ input.form-control{
         }
     }
     .half-height{
-     // flex-grow: 2;
       .toolbar.bottom{
         border-top: solid 1px transparent;
         display: flex;
         justify-content: space-around;
         overflow: hidden;
-        padding : 0px;
-        height: 36px !important;
-        button{
-          margin: 2px 0px;
-        }
-      }
-      .crop1{
-       height: ~"calc(100% - 36px)" !important;
+        padding : 10px;
       }
       .nav-tabs li a.tab-link{
         border-bottom : solid 1px transparent !important;
@@ -487,14 +479,6 @@ input.form-control{
           margin: 0 10px;
         }
       }
-      #historyTab{
-        .selectableTextInGrid{
-          overflow: hidden;
-          .ag-body-viewport{
-            overflow-x: hidden;
-          }
-        }
-      }
     }
   }
   ::-webkit-scrollbar{
@@ -531,14 +515,9 @@ input.form-control{
   }
 }
 
-button{
-  outline: none;
-  box-shadow: none;
-}
-
 .btn-success:hover {
   color: #ffffff;
-  background-color: var(--first-color) !important;
+  background-color: #449d44 !important;
   border-color: #398439 !important;
 }
 /* .input-group{
@@ -558,103 +537,23 @@ input{
 }
  */
 
- /* xxxxxxxxxxxxxxxx STATIONS xxxxxxxxxxxxxxxx */
-
-.station{
-  //Left part
-  .stations{
-    #top{
-      .crop2{
-        .js-from-station{
-          .js-admin{
-            .input-group{
-              float: right;
-            }         
-          }
-          .col-md-3{
-            width: 50% !important;
-          }
-          .dateTimePicker{
-            width: 100%;
-          }
-        }
-        .input-group-btn{
-          
-          &:first-child{
-            .btn{
-              background-color: #fff !important;
-              border: solid 1px rgb(204, 204, 204);
-              margin: 0;
-            }
-          }
-        }
-          
+@media screen and (max-width: 992px){
+  .individual{
+    .individuals{
+        #formTab{
+        height: auto !important;
       }
-    }
-    #bottom{
-      #detailsTab{
-        #addFormBtn{
-          border: solid 2px #5cb85c;
-          background-color: #fff;
-          color: #5cb85c;
-          float: right;
-          &:hover{
-            border: solid 2px #70dd70;
-          }
-        }
-      }
-      #protocolsTab{
-        .badge{
-          background-color: transparent;
-          color: rgb(129, 129, 129);
-        }
-        .active{
-          .badge{
-            color: #fff;
-          }
-        }
-      }
-    }
-  }
-  // Right part
-  .dark{
-    .toolbar.top{
-      background-color: var(--bg-dark-grey);
-      font-weight: bold;
-      legend{
-        color: #fff !important;
-      }
-    }
-    .crop1{
-      background-color: var(--bg-grey) !important;
-    }
-    .toolbar.bottom{
-      #NsFormButton{
-        display: flex;
-        justify-content: flex-end;
-        .NsFormModuleDelete{
-          border-top-right-radius: 0px;
-          border-bottom-right-radius: 0px;
-        }
-        .NsFormModuleClear{
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: 0px;
-          margin-right: 15px;
-        }
+      .half-height{
+        height: auto !important;
       }
     }
   }
 }
-
-
-  /* xxxxxxxxxxxxxxxx MEDIAS QUERIES xxxxxxxxxxxxxxxx */
-
-
 @media screen and (max-width: 1600px){
   .individual{
     .individuals{
         #formTab{
-        
+        height: 50%;
         .js-form{
           fieldset{
             padding: 5px !important;
@@ -662,15 +561,11 @@ input{
         }
       }
       .half-height{
-        
+        height: 50%;
         .toolbar.bottom:first-child{
-          //padding: 20px 10px 0px 10px !important;
+          padding: 20px 10px 0px 10px !important;
         }
       }
     }
   }
-}
-
-.js-rg-equipment-grid {
-  height: ~'calc(100% - 1px)' !important
 }
