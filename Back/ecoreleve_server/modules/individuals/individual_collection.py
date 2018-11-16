@@ -33,11 +33,15 @@ class IndividualCollection:
 
         self.selectable.append(StatusTable.c['Status_'].label('Status_'))
 
-        table_join = outerjoin(table_join, EquipmentTable,
-                              and_(Individual.ID == EquipmentTable.c['FK_Individual'],
-                                   and_(or_(EquipmentTable.c['EndDate'] >= startDate,
-                                            EquipmentTable.c['EndDate'] == None),
-                                        EquipmentTable.c['StartDate'] <= startDate)))
+        if self.from_history in [None,'all'] :
+            table_join = outerjoin(table_join, EquipmentTable,
+                                Individual.ID == EquipmentTable.c['FK_Individual'])
+        else :
+            table_join = outerjoin(table_join, EquipmentTable,
+                                and_(Individual.ID == EquipmentTable.c['FK_Individual'],
+                                    and_(or_(EquipmentTable.c['EndDate'] >= startDate,
+                                                EquipmentTable.c['EndDate'] == None),
+                                            EquipmentTable.c['StartDate'] <= startDate)))            
 
         table_join = outerjoin(table_join, Sensor,
                               Sensor.ID == EquipmentTable.c['FK_Sensor'])

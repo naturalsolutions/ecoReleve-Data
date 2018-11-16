@@ -42,15 +42,19 @@ data_schema = you Database schema
 sensor_schema = you Sensor Database schema
 
 # sql driver dialect (ex: for MS SQL Serveer)
-dialect = mssql
+cn.dialect = mssql+pyodbc:///?odbc_connect=
 
 # Thesaurus Configuration
 wsThesaurus.wsUrl = yourWebWervicesURL
 wsThesaurus.lng = fr
 
+jwtauth.master_secret = test
+init_exiftool = True
 camTrap.path = C:\Data\CameraTrap
 mediasFiles.path = C:\Data\mediasFiles
 
+dbLog.url = DRIVER={SQL Server};Server=.;Database=NSLog;UID=toto;PWD=totomdp;Trusted_Connection=Yes
+dbLog.schema = NSLog.dbo
 
 
 # By default, the toolbar only appears for clients from IP addresses

@@ -854,7 +854,7 @@ define([
     fillIconCol:function(idTop) {
       var firstRow; 
       this.gridOptions.api.forEachNode( function(node) {
-        if ( node.data.ID === idTop || node.data.id === idTop) {
+        if ( node.data.ID === idTop || node.data.id === idTop || node.data.PK_id == idTop) {
           firstRow = node;
         }
       })
@@ -892,7 +892,17 @@ define([
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.gridOptions.api.ensureIndexVisible(node.childIndex);
             setTimeout(function(){
-               var tmp = _this.idName || (node.data.id)? 'id' : 'ID';
+              var tmp;
+              if( node.data.id ) {
+                tmp = 'id'
+              }
+              else {
+                tmp = 'ID'
+              }
+              if( _this.idName ) {
+                tmp = _this.idName;
+              }
+              //  var tmp = _this.idName || (node.data.id)? 'id' : 'ID';
               _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
             },0);
           }

@@ -14,7 +14,7 @@ from ..permissions import context_permissions
 
 from .sensor_history import SensorValuesResource
 from .sensor_collection import SensorCollection
-
+from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
 SensorDynPropValue = Sensor.DynamicValuesClass
 
 
@@ -66,10 +66,10 @@ class SensorsResource(DynamicObjectCollectionResource):
 
     def insert(self):
         try:
-            response = DynamicObjectCollectionView.insert(self)
+            response = DynamicObjectCollectionResource.insert(self)
         except IntegrityError as e:
             self.session.rollback()
-            self.request.response.status_code = 520
+            self.request.response.status_code = 409
             response = self.request.response
             response.text = "This identifier is already used for another sensor"
             pass

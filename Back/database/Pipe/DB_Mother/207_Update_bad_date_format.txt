@@ -1,0 +1,15 @@
+UPDATE
+ModuleForms 
+SET [Options] = '{"format":"YYYY"}'
+WHERE 
+[options] = '{"format":"Y"}'
+AND 
+[InputType] = 'DateTimePickerEditor'
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('207_Update_bad_date_format',GETDATE(),(SELECT db_name()))
+
+
+GO

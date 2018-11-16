@@ -9,7 +9,9 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
           context: this,
           url: config.coreUrl + 'currentUser',
         }).done(function(data){
-          this.initi18n(data.Language);
+          //overwrite while trad is not completed
+          // this.initi18n(data.Language);
+          this.initi18n('en');
         });
         return;
    //   }

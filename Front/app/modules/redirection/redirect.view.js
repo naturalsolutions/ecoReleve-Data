@@ -24,13 +24,19 @@ define([
         fetchRessource: function () {
             var _this = this;
             $.ajax({
-                url: '/observations/' + this.idToFetch.toString(),
+                url: 'observations/' + this.idToFetch.toString(),
                 method: 'GET',
                 context: this
             }).done(function (resp) {
                 _this.obj = resp;
-                _this.buildUrl();
-                _this.navigateTo();
+                if( _this.obj['Parent_Observation'] ) {
+                    _this.idToFetch = _this.obj['Parent_Observation'];
+                    _this.fetchRessource();
+                }
+                else {
+                    _this.buildUrl();
+                    _this.navigateTo();
+                }
             }).fail(function (resp) {
                 _this.urlTarget = '/';
                 _this.navigateTo();
@@ -40,13 +46,12 @@ define([
         
         buildUrl: function() {
             var idStation = this.obj['FK_Station'];
-            var idProtoType = this.obj['FK_ProtocoleType'];
+            var idProtoType = this.obj['type_id'];
 
            this.urlTarget = ''.concat(
                 'stations',
                 '/',
                 idStation.toString(),
-                '/',
                 '?',
                 'proto',
                 '=',

@@ -164,6 +164,7 @@ define([
             }
             if (_this.cluster){
               _this.initClusters(_this.geoJson);
+              _this.fitBound();
               
             }else{
               _this.initLayer(_this.geoJson);
@@ -619,13 +620,23 @@ define([
 
     getMarkerIconClassName: function(feature){
       var className = 'marker';
-      switch(feature.properties.type_.toLowerCase()) {
+
+      var typeTmp = feature.properties.type_
+      if( !typeTmp) {
+        typeTmp = feature.properties.type;
+      }
+      if( typeTmp ) {
+        typeTmp = typeTmp.toLowerCase();
+      }
+
+      switch(typeTmp) {
         case 'station':
           className += ' marker-station';
           break;
         case 'gps':
           className += ' marker-gps';
           break;
+        case 'arg':
         case 'argos':
           className += ' marker-argos';
           break;
@@ -1224,12 +1235,13 @@ define([
     //Player
     sortByDate: function(geoJson){
       
-      geoJson.features.sort( function(a, b) {
+      var format = 'DD/MM/YYYY HH:mm:ss'
+      geoJson.features.sort( function(a, b) {    
         // for refact opti moment no more needed perf X10
         // var jsDateA = new Date(a.properties.Date || a.properties.date);
         // var jsDateB = new Date(b.properties.Date || b.properties.date);
         // return jsDateA - jsDateB;
-        return moment(a.properties.Date || a.properties.date) - moment(b.properties.Date || b.properties.date)
+        return moment(a.properties.Date || a.properties.date,format) - moment(b.properties.Date || b.properties.date,format)
       });
 
     },
@@ -1445,9 +1457,22 @@ this.parentContainer.append('\
         this.disablePlayer({silent:true});
         return;
       }
+      this.firstDate = undefined;
+      this.lastDate = undefined;
 
       this.sortByDate(geoJson);
 
+
+      var maxPos = (geoJson.features.length ) - 1 ;
+      var formatWithSec = 'DD/MM/YYYY HH:mm:ss'
+      if( moment(geoJson.features[0].properties.Date,formatWithSec) > moment(geoJson.features[maxPos].properties.Date,formatWithSec) ) {
+        this.firstDate = geoJson.features[maxPos].properties.Date;
+        this.lastDate = geoJson.features[0].properties.Date;
+
+      }else {
+        this.firstDate = geoJson.features[0].properties.Date;
+        this.lastDate = geoJson.features[maxPos].properties.Date;
+      }
       this.playerInitialized = true;
       this.index = 0;
       this.time = 0;
@@ -1528,20 +1553,33 @@ this.parentContainer.append('\
       var speed = relDayInMs / dayInMs;
       this.speedForUi = speed;
 
-      var firstDate = geoJson.features[0].properties.Date || geoJson.features[0].properties.date;
-      var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date || geoJson.features[geoJson.features.length - 1].properties.date;
+      // var firstDate = geoJson.features[0].properties.Date || geoJson.features[0].properties.date;
+      // var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date || geoJson.features[geoJson.features.length - 1].properties.date;
       
-      var format = 'DD/MM/YYYY HH:mm:ss';
+      var firstDate = this.firstDate;
+      var lastDate = this.lastDate;
 
+      var format = 'DD/MM/YYYY';
+      var formatForDiff = 'DD/MM/YYYY HH:mm:ss'
+      // if (geoJson.features[0].)
+
+      /* No more needed
       $('.js-player-first-date').html(moment(firstDate).format(format));
       $('.js-player-last-date').html(moment(lastDate).format(format));
+
+      */
 
       /*      
       if(geoJson.features[0].properties.format){
         format = geoJson.features[0].properties.format;
       }*/
+      // first Date = DD/MM/YYYY 00:00:00
+      // last Date = DD/MM/YYYY 23:59:59
 
-      this.p_realDuration = moment(lastDate).diff(moment(firstDate));
+      var firstMomentDate = moment(firstDate,format);
+      var lastMomentDate = moment(lastDate,format).add(1,'days');
+
+      this.p_realDuration = moment(lastMomentDate,formatForDiff).diff( moment(firstMomentDate,formatForDiff) );
 
       var ms;
       var _date2;
@@ -1550,7 +1588,8 @@ this.parentContainer.append('\
 
         _date2 = geoJson.features[i].properties.Date || geoJson.features[i].properties.date;
 
-        ms = moment(_date2).diff(moment(firstDate));
+       // ms = moment(_date2,formatForDiff).diff(moment(firstDate,formatForDiff));
+        ms = moment(_date2,formatForDiff).diff( moment(firstMomentDate,formatForDiff) );
         ms = speed * ms;
         ms = Math.floor(ms / 10) * 10;
 
@@ -1560,7 +1599,7 @@ this.parentContainer.append('\
       this.locations = geoJson.features;
 
       this.p_relDuration = speed * this.p_realDuration;
-      
+
       // var diff = geoJson.features[10].time / speed;
       
       this.displayScale();
@@ -1572,16 +1611,18 @@ this.parentContainer.append('\
     displayScale: function(){
       
       var format = 'DD/MM/YYYY';
+      var formatSegment = 'DD/MM/YYYY HH:mm:ss'
 
-      var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
-      firstDate = moment(firstDate);
+      // var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
+      var firstDate = this.firstDate;
+      firstDate = moment(firstDate,format); // .format(format);
       $('.js-player-scale').html('');
       $('.js-player-scale').append('<span class="note" style="left:0%">' + firstDate.format(format) + '</span>');
 
       for (var i = 0.25; i < 1; i+=0.25) {
         var diff = Math.floor(this.p_realDuration * 0.25);
         firstDate.add(diff, 'ms');
-        $('.js-player-scale').append('<span class="js-mid-scale note" style="left:'+((i)*100)+'%">' + firstDate.format(format) + '</span>');
+        $('.js-player-scale').append('<span class="js-mid-scale note" style="left:'+((i)*100)+'%">' + firstDate.format(formatSegment) + '</span>');
       }
 
       var diff = Math.floor(this.p_realDuration * 0.25);
@@ -1675,7 +1716,17 @@ this.parentContainer.append('\
     },
 
     travel: function(e){
-      var rapport =  e.offsetX / e.currentTarget.clientWidth;
+
+      var cursorElem = $('.cursor-timeline-current')[0];
+      var rapport;
+      if(e.target == cursorElem ) { //case when click on cursor (cursor is above timeline)
+        // offsetLeft = left border from timeline to left border of current timeline
+        // offsetX =  mouse pointer click on cursor in px from left border
+        rapport = ( e.target.offsetLeft + e.offsetX ) / e.currentTarget.clientWidth;
+      }
+      else {
+        rapport = e.offsetX / e.currentTarget.clientWidth;
+      }
 
       this.clearMarkers();
       this.clearLines();
@@ -1698,12 +1749,30 @@ this.parentContainer.append('\
       this.updateInfos();
     },
 
-    findClosestFloorPositionIndex: function(time){
-      for (var i = this.locations.length - 1; i >= 0; i--) {
-        if(time > this.locations[i].time){
-          return i;
+    findClosestFloorPositionIndex: function(time) {
+
+      var maxLocation = this.locations.length;
+      var dateMax = this.locations[maxLocation-1].properties.date;
+      var maxPos = maxLocation-1;
+      var prevPos = 0;
+
+      for (var i = 0  ; i < this.locations.length ; i++ ) {
+        if(this.locations[i].time > time ) {
+          maxPos = i;
+          break
         }
-      }      
+      }  
+
+      if ( ( maxPos - 1 ) >= 0 ) {
+        prevPos = maxPos - 1;
+      }
+
+      if( Math.abs( ( this.locations[prevPos].time - time ) ) > Math.abs( ( this.locations[maxPos].time - time ) ) ) {
+        return maxPos;
+      }
+      else {
+        return prevPos;
+      }
     },
 
     pause: function(options) {
@@ -1747,11 +1816,15 @@ this.parentContainer.append('\
         }
 
         elemCursorTimeline.style.left = 'calc('+width+'% - 7px)';
+        // elemCursorTimeline.style.top = '20px;'
         var format = 'DD/MM/YYYY';
-        var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
-        firstDate = moment(firstDate);
-        firstDate.add(this.time/this.speedForUi , 'ms');
-        elemTimeLineCurrentDate.innerHTML = firstDate.format(format);
+        var formatWithSec = 'DD/MM/YYYY HH:mm:ss'
+        // var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
+        var firstDate = this.firstDate
+
+        firstDate = moment(firstDate,format);
+        firstDate = firstDate.add(this.time/this.speedForUi , 'ms');
+        elemTimeLineCurrentDate.innerHTML = firstDate.format(formatWithSec);
 
         //invert ?
         var widthTotal = elemTimeLineTotal.getBoundingClientRect().width;
@@ -1905,13 +1978,26 @@ this.parentContainer.append('\
     displayDate : function(e) {
 
       var _this = this;
-      var rapport =  e.offsetX / e.currentTarget.clientWidth;
+      // var rapport =  e.offsetX / e.currentTarget.clientWidth;
+
+      var cursorElem = $('.cursor-timeline-current')[0];
+      var rapport;
+      if(e.target == cursorElem ) { //case when click on cursor (cursor is above timeline)
+        // offsetLeft = left border from timeline to left border of current timeline
+        // offsetX =  mouse pointer click on cursor in px from left border
+        rapport = ( e.target.offsetLeft + e.offsetX ) / e.currentTarget.clientWidth;
+      }
+      else {
+        rapport = e.offsetX / e.currentTarget.clientWidth;
+      }
+
       var time = Math.floor(( _this.p_relDuration * rapport) / 10) * 10;
       var format = 'DD/MM/YYYY';
-      var firstDate = _this.locations[0].properties.Date || _this.locations[0].properties.date;
-      firstDate = moment(firstDate);
+      // var firstDate = _this.locations[0].properties.Date || _this.locations[0].properties.date;
+      var firstDate = this.firstDate
+      firstDate = moment(firstDate,format);
       firstDate.add(time/this.speedForUi , 'ms');
-      _this.myTooltipElem.innerHTML = firstDate.format(format);
+      _this.myTooltipElem.innerHTML = firstDate.format('DD/MM/YYYY HH:mm:ss');
       var y = (_this.timelineTotalElem.getBoundingClientRect().y - 25) +'px';
       var dim = _this.myTooltipElem.getBoundingClientRect();
       _this.myTooltipElem.style.top = y;
