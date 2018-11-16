@@ -245,7 +245,7 @@ define([
                 <div id="formContainer"   class="clearfix"></div>\
                 <div>\
                     <div id="addDiv" class="col-md-6" ></div>\
-                    <button type="button" id="addFormBtn" class="<%= hidden %> btn <%= addButtonClass %>" style="margin-top:10px">Add new fieldworker</button>\
+                    <button type="button" id="addFormBtn" class="<%= hidden %> btn <%= addButtonClass %>" style="margin-top:10px">+</button>\
                 </div>\
             </div>\
             ', null, Form.templateSettings),

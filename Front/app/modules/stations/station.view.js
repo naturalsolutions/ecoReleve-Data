@@ -156,16 +156,6 @@ define([
       this.displayNavbar();
     },
 
-    adaptForm: function(){
-      var element = document.getElementById('top');
-      var firstdiv = element.offsetHeight;
-      var element2 = document.getElementById('full');
-      var container = element2.offsetHeight;
-      var scddiv = document.getElementById('bottom');
-      var finalHeight = container-firstdiv;
-      scddiv.style.height = finalHeight + "px";
-    },
-
     displayNavbar: function(){
       this.rgNavbar.show(this.navbarView = new NavbarView({
         parent: this
@@ -201,7 +191,7 @@ define([
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
           });
         }
-        _this.adaptForm();
+
       };
 
       this.nsForm.afterSaveSuccess = function() {
