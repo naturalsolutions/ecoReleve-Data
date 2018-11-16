@@ -27,15 +27,24 @@ class StationCollection:
 
 @Query_engine.add_filter(StationCollection, 'FK_Individual')
 def individual_filter(self, query, criteria):
+    curProp = 'FK_Individual'
     if criteria['Operator'].lower() in ['is null', 'is not null']:
         subSelect = select([Observation]).where(
             and_(Station.ID == Observation.FK_Station,
-                 Observation.__table__.c[curProp] != None)
+                    Observation.__table__.c[curProp] != None)
         )
-        if criteria['Operator'].lower() == 'is':
+        if criteria['Operator'].lower() == 'is not null':
             query = query.where(~exists(subSelect))
         else:
             query = query.where(exists(subSelect))
+    else:
+        subSelect = select([Observation]
+                            ).where(
+            and_(Station.ID == Observation.FK_Station,
+                    eval_.eval_binary_expr(Observation.__table__.c[curProp],
+                                        criteria['Operator'],
+                                        criteria['Value'])))
+        query = query.where(exists(subSelect))
     return query
 
 @Query_engine.add_filter(StationCollection, 'FK_FieldWorker')
