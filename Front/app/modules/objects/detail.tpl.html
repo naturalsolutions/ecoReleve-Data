@@ -11,7 +11,7 @@
     <div class="js-form-btns pull-right"></div>
   </div>
 
-  <div class="crop1 no-padding individuals">
+  <div class="crop1 no-padding individuals" id="indiv">
     
     <div id="formTab" class=""><!-- half-height-->
         <div class="js-form"></div>
@@ -20,7 +20,7 @@
         </div>-->
     </div>
 
-    <div class="half-height">
+    <div class="half-height" id="details">
       <ul class="nav nav-tabs toolbar bottom">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
           <li class="tab-ele <%= (index == 0)? 'active' : '' %>">

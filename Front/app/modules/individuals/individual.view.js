@@ -54,6 +54,7 @@ define([
          if(this.displayMode.toLowerCase() == 'edit'){
            this.bindChanges(_this.ui.form);
          }
+         _this.adaptForm();
        };
 
       formConfig.afterSaveSuccess = function() {

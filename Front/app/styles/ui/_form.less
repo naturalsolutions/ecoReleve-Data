@@ -155,7 +155,7 @@ border-color : red;
 }
 .form-control[disabled], fieldset[disabled] .form-control{
 	cursor: auto;
-	background: rgba(150,150,150,0.1);
+	background: var(--light-grey);
 
 
 }
@@ -196,28 +196,31 @@ border-color : red;
 			background-color: transparent;
 			border: 0px;
 			border-bottom: 2px solid #ddd;
-			&:hover, &:visited{
+			font-weight: normal;
+			&:hover{
 				cursor: pointer;
 				color:#3A3939;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #ddd;
+				border-bottom: 2px solid var(--first-color-light);
 			}
 		}
 		&.active, &.activeTab{
 			a{
 				cursor: pointer;
+				color:#3A3939;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #3A3939;
+				border-bottom: 2px solid var(--first-color-light);
+				font-weight: bold;
 				&:hover, &:focus{
 					background: transparent!important;
 					background-color: transparent!important;
 					cursor: pointer;
 					border: 0px;
-					border-bottom: 2px solid #3A3939;
+					border-bottom: 2px solid var(--first-color-light);
 					background: transparent;
 				}
 			}

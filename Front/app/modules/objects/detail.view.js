@@ -58,6 +58,17 @@ define([
       this.displayForm();
       this.displayGrids();
       this.displayNavbar();
+      this.adaptForm();
+    },
+
+    adaptForm: function(){
+      var container = document.getElementById('indiv');
+      var totalHeight = container.offsetHeight;
+      var firstDiv = document.getElementById('formTab');
+      var topHeight = firstDiv.offsetHeight;
+      var scdDiv = document.getElementById('details');
+      var finalHeight = totalHeight-topHeight;
+      scdDiv.style.height = finalHeight + "px";
     },
 
     initRegions: function(){
