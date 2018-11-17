@@ -184,6 +184,10 @@ define([
         //     _this.ready();
         //   }
       });
+      if( !this.player ) {
+        L.control.scale().addTo(this.map);
+      }
+
     },
 
     refreshGeoJsonWithRowGrid: function(refView) {
