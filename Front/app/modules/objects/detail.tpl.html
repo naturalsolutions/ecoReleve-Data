@@ -10,8 +10,8 @@
     <div class="js-rg-navbar pull-left"></div>
     <div class="js-form-btns pull-right"></div>
   </div>
-
-  <div class="crop1 no-padding individuals">
+<% var classObject ='crop1 no-padding'; if(type) { classObject += ' '+type ; console.log(classObject) }%> 
+  <div class= "<%= classObject %>">
     
     <div id="formTab" class=""><!-- half-height-->
         <div class="js-form"></div>
