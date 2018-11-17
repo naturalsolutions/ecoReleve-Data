@@ -553,7 +553,7 @@ input{
   .individual{
     .individuals{
         #formTab{
-        height: 50%;
+        height: 40%;
         .js-form{
           fieldset{
             padding: 5px !important;
@@ -561,11 +561,31 @@ input{
         }
       }
       .half-height{
-        height: 50%;
+        height: 60%;
         .toolbar.bottom:first-child{
           padding: 20px 10px 0px 10px !important;
         }
       }
     }
   }
+}
+
+.no-overflow-y {
+  overflow-y: hidden;
+  // overflow: hidden;
+}
+.height-40 {
+  height: 40%;
+  // height:auto;
+}
+.height-60 {
+  height: 60%;
+  // height:auto;
+}
+.sensors,.monitoredSites{
+  #formTab{
+    height: 40%;
+    overflow: auto;
+  }
+
 }
