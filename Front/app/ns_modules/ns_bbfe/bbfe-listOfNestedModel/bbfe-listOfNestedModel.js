@@ -56,7 +56,7 @@ define([
 
         addEmptyForm: function() {
             // addEmptyForm
-            // two case if no form we add or if instanciate form is valid
+            // two case if no form we add or if instanciate forms are valid
             if (this.getValue() || this.forms.length === 0 ){
                 var mymodel = Backbone.Model.extend({
                     defaults : this.options.schema.subschema.defaultValues
