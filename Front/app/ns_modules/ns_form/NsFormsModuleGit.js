@@ -598,7 +598,7 @@ define([
                 confirmButtonText: 'OK'
               });
           }
-          else if( response.status === 500) {
+          else if( response.status === 400) {
             var opts = {
               title : 'Error',
               html : response.responseText + '.<BR> An error from sqlserver occured. Please contact an administrator.',
@@ -709,7 +709,7 @@ define([
           confirmButtonText: 'OK'
         });
     }
-    else if ( response.status === 500) {
+    else if ( response.status === 400) {
       var opts = {
         title : 'Critical Error',
         html : '<span style="color: red;font-weight: bold;">'+response.responseText + '</span>.<BR> An error from <span style="color: red;font-weight: bold;">sqlserver</span> occured. Please contact an administrator.',

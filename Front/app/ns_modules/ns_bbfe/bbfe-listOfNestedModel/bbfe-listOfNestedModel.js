@@ -14,13 +14,6 @@ define([
         },
         initialize: function(options) {
 
-            if (options.schema.validators.length) {
-                this.defaultRequired = true;
-            } else {
-                options.schema.validators.push('required');
-                this.defaultRequired = false;
-            }
-
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.template = options.template || this.constructor.template;
@@ -36,7 +29,20 @@ define([
             this.hasNestedForm = true;
 
             this.key = this.options.key;
-            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
+
+            //if required nbdefault = 1
+            if( this.validators.indexOf('required') > -1 ) {
+                this.nbByDefault = 1;
+            }
+            //check if exist and convert it to int
+            if ( this.options.model.schema[this.key]['nbByDefault'] ) {
+                var nbDef = Number(this.options.model.schema[this.key]['nbByDefault']);
+            }
+            //nbDef overload nbByDefault if sup
+            if (nbDef > this.nbByDefault) {
+                this.nbByDefault = nbDef;
+            }
+            // this.nbByDefault = Number(this.options.model.schema[this.key]['nbByDefault']);
             this.addButtonClass = 'pull-right';
             if (this.options.schema.editorClass == 'nested-unstyled'){
                 this.addButtonClass = '';
@@ -49,7 +55,9 @@ define([
         },
 
         addEmptyForm: function() {
-            if (this.getValue()){
+            // addEmptyForm
+            // two case if no form we add or if instanciate forms are valid
+            if (this.getValue() || this.forms.length === 0 ){
                 var mymodel = Backbone.Model.extend({
                     defaults : this.options.schema.subschema.defaultValues
                 });
@@ -170,13 +178,10 @@ define([
             })));
             this.setElement($el);
             var data = this.options.model.attributes[this.key];
-            if (data) {
+            if (data && typeof(data) === 'object' && data.length) {
                 //data
                 if (data.length) {
                     for (var i = 0; i < data.length; i++) {
-                        if(i >= this.nbByDefault) {
-                            this.defaultRequired = false;
-                        }
                         var model = new Backbone.Model();
                         model.schema = this.options.schema.subschema;
                         model.fieldsets = this.options.schema.fieldsets;
@@ -189,7 +194,6 @@ define([
                           this.addForm(model);
                         }
                     }
-                    this.defaultRequired = false;
                 }
             } else {
                 //no data
@@ -197,7 +201,6 @@ define([
                     for (var i = 0; i < this.nbByDefault; i++) {
                         this.addEmptyForm();
                     }
-                    this.defaultRequired = false;
                 }
             }
             return this;
@@ -208,6 +211,9 @@ define([
 
         getValue: function() {
             var errors = false;
+            if( this.forms.length === 0 && this.validators.indexOf('required') > -1 ) {
+                return true;
+            }
             for (var i = 0; i < this.forms.length; i++) {
                 if (this.forms[i].commit()) {
                     errors = true;
