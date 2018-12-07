@@ -1,0 +1,66 @@
+UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'SensorType@Name'
+      ,[QueryName] = NULL
+ WHERE 
+ [Module_ID] = 14
+ AND
+ [TypeObj] IS NULL
+ AND
+ [Name] = 'FK_SensorType'
+
+
+ UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'fieldActivity@Name'
+      ,[QueryName] = NULL
+ WHERE 
+ [Module_ID] = 3
+ AND
+ [TypeObj] IS NULL
+ AND
+ [Name] = 'fieldActivityId'
+
+
+  UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'FieldworkArea@Name'
+      ,[QueryName] = NULL
+	  ,[IsSearchable] = 0
+ WHERE 
+ [Module_ID] = 3
+ AND
+ [TypeObj] IS NULL
+ AND
+ [Name] = 'FieldworkArea_Name'
+ AND
+ [IsSearchable] = 1
+
+
+  UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'MonitoredSite@Name'
+      ,[QueryName] = NULL
+ WHERE 
+ [Module_ID] = 3
+ AND
+ [TypeObj] IS NULL
+ AND
+ [Name] = 'FK_MonitoredSite'
+
+UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'FK_SensorType_Name'
+      ,[QueryName] = 'SELECT Distinct Name as label, Name as val FROM SensorType'
+ WHERE 
+ [Module_ID] = 8
+ AND
+ [TypeObj] = 1
+ AND
+ [Name] = 'FK_SensorType'
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('206_update_moduleGrids_for_filters_conf',GETDATE(),(SELECT db_name()))
+
+
+GO

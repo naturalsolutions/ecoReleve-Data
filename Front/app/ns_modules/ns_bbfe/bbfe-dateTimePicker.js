@@ -32,6 +32,9 @@ define([
 
         this.id = this.cid;
 
+        this.toBddFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'
+        this.fromBddFormat = 'DD/MM/YYYY HH:mm:ss'
+
         this.dictFormat = {
             'DD/MM/YYYY HH:mm:ss' : 'datetime',
             'DD/MM/YYYY' : 'date',
@@ -57,6 +60,14 @@ define([
         if (this.format && (this.format.toLowerCase() == 'hh:mm:ss')) {
             this.classIcon = 'glyphicon-time glyphicon';
         }
+        if( this.key == 'From' || this.key == 'To') {
+            var valTmp = this.model.get(this.key);
+            if ( valTmp ) {
+                if ( valTmp ) {
+                    this.model.set('value',moment(valTmp,this.format).format(this.format))
+                }
+            }
+        }
     },
     
     handleDblClick : function(e){
@@ -64,7 +75,15 @@ define([
     },
 
     getValue: function() {
-        return this.$el.find('#' + this.id).val();
+        var tmpVal = this.$el.find('#' + this.id).val();
+        var dateTmp 
+        if( tmpVal ) {
+            dateTmp = moment(tmpVal,this.format).format(this.toBddFormat);
+        }
+        else {
+            dateTmp = null;
+        }
+        return dateTmp;
     },
 
     remove : function() {
@@ -86,24 +105,12 @@ define([
             required = options.schema.validators[0];
         }
 
-        if (options.model && this.format && this.format.toLowerCase() == 'hh:mm:ss') {
+        if (options.model) {
             var val = options.model.get(this.options.key);
-            if (val){
-              var tab = val.split(" ");
-              if (tab.length > 1){
-                value = tab[1];
-              } else {
-                value = val;
-              }
+            if (val) {
+                value = moment(val,this.fromBddFormat).format(this.format)
             }
-
-          }else {
-                if (options.model) {
-                  value = options.model.get(this.options.key);
-                }else {
-                  value = '';
-                }
-          }
+        }
 
          // _this.datetimepickerOptions.debug = true;
           _this.datetimepickerOptions.widgetParent ='body';

@@ -642,8 +642,9 @@ class HasDynamicProperties(HasStaticProperties):
         values = self.getLatestDynamicValues()
         for value in values:
             property_ = self.get_property_by_name(value['Name'])
-            valueName = self.ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
-            dictValues[property_.get('Name')] = value.get(valueName)
+            if property_ is not None:
+                valueName = self.ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
+                dictValues[property_.get('Name')] = value.get(valueName)
         dictValues.update(self.as_dict())
         self.__values__.update(dictValues)
         return self.__values__

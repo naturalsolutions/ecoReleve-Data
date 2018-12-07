@@ -285,3 +285,4 @@ class ObservationsResource(DynamicObjectCollectionResource):
 
 
 RootCore.children.append(('protocols', ObservationsResource))
+RootCore.children.append(('observations',ObservationsResource))

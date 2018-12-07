@@ -7,6 +7,7 @@ from pyramid import threadlocal
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from sqlalchemy import create_engine, text, bindparam
+from sqlalchemy.exc import SQLAlchemyError
 
 from .init_db import dbConfig
 
@@ -63,8 +64,8 @@ def sendLog(logLevel, domaine, msg_number=500, scope='Pyramid', errorDict=None, 
 @view_config(context=Exception, permission=NO_PERMISSION_REQUIRED)
 def error_view(exc, request):
     sendLog(logLevel=5, domaine=3)
-    if exc and exc.orig and exc.orig.args and '[Microsoft][ODBC SQL Server Driver][SQL Server]' in exc.orig.args[1]:
-        request.response.status_code = 500
+    if isinstance(exc, SQLAlchemyError): #  and 'orig' in exc exc.orig and exc.orig.args and '[Microsoft][ODBC SQL Server Driver][SQL Server]' in exc.orig.args[1]:
+        request.response.status_code = 400
         request.response.text = exc.orig.args[1]
     else:
         request.response.status_code = 500

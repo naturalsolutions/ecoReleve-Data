@@ -1,0 +1,14 @@
+UPDATE [ModuleForms]
+SET [Required] = 1
+WHERE 
+[TypeObj] = (SELECT ID FROM [ProtocoleType] WHERE [Name] = 'Release_Individual')
+AND 
+[Name] = 'FK_individual' 
+AND
+[InputType] = 'ObjectPicker'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('209_CONF_proto_release_individual_set_input_required',GETDATE(),(SELECT db_name()))
+
+
+GO

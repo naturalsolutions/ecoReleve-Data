@@ -1,0 +1,15 @@
+  UPDATE [ModuleGrids] 
+  SET [GridSize] = '{"width":170,"maxWidth":350,"minWidth":100}'
+  WHERE 
+  [Module_ID] = 3
+  AND
+  [GridSize] = '{"width":120,"maxWidth":350,"minWidth":100}'
+  AND 
+  [Name] = 'StationDate'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('208_CONF_increase_width_stationdate_in_grid',GETDATE(),(SELECT db_name()))
+
+
+GO

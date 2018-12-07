@@ -283,20 +283,27 @@ define([
       return {
         getModel: function() {
           if (that.isFilterActive()) {
-            var formatBdd = 'YYYY-MM-DD HH:mm:ss';
+            var formatBdd = 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]';
+            var dateFrom = moment(that.dateFrom.value,that.getDateFormat(that.dateFrom.value)).format(formatBdd);
+            var dateTo = moment(that.dateTo.value,that.getDateFormat(that.dateTo.value)).format(formatBdd);
+
+            var tmpStrFilter= []
+            if(dateFrom != 'Invalid date') {
+              tmpStrFilter.push( {
+                "Operator" : ">=",
+                "Value" : dateFrom
+              })
+            }
+            if( dateTo != 'Invalid date') {
+              tmpStrFilter.push( {
+                "Operator" : "<=",
+                "Value" : dateTo
+              })
+            }
             return {
               type: 1,
               filter: that.filterDate,
-              strFilter: [
-                 {
-                    "Operator" : ">=",
-                    "Value" : moment(that.dateFrom.value,that.getDateFormat(that.dateFrom.value)).toISOString()
-                  },
-                  {
-                    "Operator" : "<=",
-                    "Value" : moment(that.dateTo.value,that.getDateFormat(that.dateTo.value)).toISOString()
-                  }
-                ]
+              strFilter: tmpStrFilter
             };
           }
           else {
