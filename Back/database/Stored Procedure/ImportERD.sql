@@ -21,7 +21,7 @@ BEGIN
 		INSERT INTO [Individual]
 			   (
 			   [creationDate]
-			   ,[Age]
+			   --,[Age]
 			   ,[Birth_date]
 			   ,[Death_date]
 			   ,[FK_IndividualType]
@@ -29,7 +29,8 @@ BEGIN
 			   ,Original_ID
 			   ,Caisse_ID)
 			  OUTPUT inserted.ID into @TInsetedId
-		SELECT distinct Getdate(),NULL,CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,m.Provenance +'_'+CONVERT(VARCHAR,M.objectID),NULL
+		--SELECT distinct Getdate(),NULL,CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,m.Provenance +'_'+CONVERT(VARCHAR,M.objectID),NULL
+		SELECT distinct Getdate(),CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,m.Provenance +'_'+CONVERT(VARCHAR,M.objectID),NULL
 		FROM  TMessageReceived M 
 	--	JOIN  TMessageReceivedDetail S ON M.pk_MessageReceived=S.fk_MessageReceived and S.PropName = 'TInd_Sexe'
 		JOIN  TMessageReceivedDetail BD ON M.pk_MessageReceived=BD.fk_MessageReceived and BD.PropName = 'TInd_DateNaissance'
@@ -39,7 +40,7 @@ BEGIN
 		
 
 		print 'Inserting DYnPropValues'
-		-- INserttion  des propriétées dynamiques 
+		-- INserttion  des propriï¿½tï¿½es dynamiques 
 		INSERT INTO [IndividualDynPropValue]
 			   ([StartDate]
 			   ,[ValueInt]

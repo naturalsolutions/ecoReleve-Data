@@ -132,7 +132,7 @@ class ReleaseIndividualsView(IndividualsView):
         """
         def MoF_AoJ(obj):
             curSex = None
-            curAge = None
+            #curAge = None
             binP = 0
             if obj['Sex'] is not None and obj['Sex'].lower() == 'male':
                 curSex = 'male'
@@ -144,6 +144,7 @@ class ReleaseIndividualsView(IndividualsView):
                 curSex == 'Indeterminate'
                 binP += 1
 
+            """
             if obj['Age'] is not None and obj['Age'].lower() == 'Adult':
                 curAge = 'Adult'
                 binP += 8
@@ -153,6 +154,7 @@ class ReleaseIndividualsView(IndividualsView):
             else:
                 curAge == 'Indeterminate'
                 binP += 32
+            """
             return binaryDict[binP]
 
         try:

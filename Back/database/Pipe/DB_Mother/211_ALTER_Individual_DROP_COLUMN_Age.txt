@@ -1,0 +1,7 @@
+ALTER TABLE [dbo].[Individual] DROP COLUMN Age ;  
+
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('211_ALTER_Individual_DROP_COLUMN_Age',GETDATE(),(SELECT db_name()))
+
+GO
