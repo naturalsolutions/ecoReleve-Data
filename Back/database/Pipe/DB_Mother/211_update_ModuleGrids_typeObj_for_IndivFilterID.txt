@@ -1,0 +1,9 @@
+UPDATE [dbo].[ModuleGrids]
+SET [TypeObj] = NULL
+WHERE [Module_ID] = 8 and [Name] = 'ID';
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('211_update_ModuleGrids_typeObj_for_IndivFilterID',GETDATE(),(SELECT db_name()))
+
+
+GO
