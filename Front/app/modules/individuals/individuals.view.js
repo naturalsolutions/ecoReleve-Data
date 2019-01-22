@@ -1,7 +1,8 @@
 define([
   'modules/objects/manager.view',
   './individual.model',
-], function(ManagerView, IndividualModel) {
+  'moment'
+], function(ManagerView, IndividualModel,moment) {
 
   'use strict';
 
@@ -68,7 +69,13 @@ define([
     },
 
     filter: function() {
-      this.gridView.dataSource.startDate = this.$date.val();
+      this.gridView.dataSource.startDate = moment( this.$date.val(), 'DD/MM/YYY HH:mm:ss');
+      if( !this.gridView.dataSource.startDate.isValid() ) {
+        this.gridView.dataSource.startDate = null
+      }
+      else {
+        this.gridView.dataSource.startDate = this.gridView.dataSource.startDate.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]') ;
+      }
 
       if (this.$chk.prop('checked')){
         this.gridView.dataSource.history = 1;
