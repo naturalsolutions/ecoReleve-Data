@@ -33,7 +33,7 @@ class IndividualCollection:
 
         self.selectable.append(StatusTable.c['Status_'].label('Status_'))
 
-        if self.from_history in [None,'all'] :
+        if self.from_history in ['all'] :
             table_join = outerjoin(table_join, EquipmentTable,
                                 Individual.ID == EquipmentTable.c['FK_Individual'])
         else :
@@ -100,8 +100,7 @@ def status_filter(self, query, criteria):
 @Query_engine.add_filter(IndividualCollection, 'frequency')
 def frequency_VHF_filter(self, query, criteria):
     startDate = datetime.now()
-
-    if self.from_history not in [None, 'all']:
+    if self.from_history not in ['all']:
         startDate = self.startDate
 
     freq = criteria['Value']
