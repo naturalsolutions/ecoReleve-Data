@@ -1,0 +1,28 @@
+INSERT INTO [ModuleGrids]
+([Module_ID]
+,[TypeObj]
+,[Name]
+,[Label]
+,[GridRender]
+,[GridSize]
+,[CellType]
+,[GridOrder]
+,[QueryName]
+,[Options]
+,[FilterOrder]
+,[FilterSize]
+,[FilterClass]
+,[IsSearchable]
+,[FilterDefaultValue]
+,[FilterRender]
+,[FilterType]
+,[Status]
+,[ColumnParams])
+VALUES
+(8,2,'ID','Id',1,'{"width":120,"maxWidth":350,"minWidth":100}','string',0,NULL,NULL,10,2,NULL,0,NULL,4,'Text',NULL,'{ "pinned" : "left" }');
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('213_Insert_ModuleGrids_Filter_ID_For_Undentified',GETDATE(),(SELECT db_name()))
+
+
+GO
