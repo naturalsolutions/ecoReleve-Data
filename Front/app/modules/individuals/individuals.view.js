@@ -69,7 +69,7 @@ define([
     },
 
     filter: function() {
-      this.gridView.dataSource.startDate = moment( this.$date.val(), 'DD/MM/YYY HH:mm:ss');
+      this.gridView.dataSource.startDate = moment( this.$date.val(), 'DD/MM/YYYY HH:mm:ss');
       if( !this.gridView.dataSource.startDate.isValid() ) {
         this.gridView.dataSource.startDate = null
       }
