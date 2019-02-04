@@ -185,13 +185,18 @@ define([
         _this.ui.formStation.html(globalEl);
         
         if(this.displayMode.toLowerCase() == 'edit'){
+          _this.$el[0].children[0].className = _this.$el[0].children[0].className + ' editionMode';
           this.bindChanges(_this.ui.formStation);
           $(".datetime").attr('placeholder','DD/MM/YYYY');
           $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
           });
         }
-
+        else {
+          if(_this.$el[0].children[0].className.indexOf(' editionMode') > -1 ) {
+            _this.$el[0].children[0].className = _this.$el[0].children[0].className.replace(' editionMode','')
+          }
+        }
       };
 
       this.nsForm.afterSaveSuccess = function() {

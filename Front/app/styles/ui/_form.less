@@ -20,7 +20,7 @@ button:focus {
 
 fieldset{
 	border: 1px solid #e5e5e5;
-	padding: 15px 0px;
+	padding: 10px 0px; //15px 0px
 	margin-top: 0px;
 	width: 100%;
 	&>div{
@@ -30,7 +30,9 @@ fieldset{
 	legend{
 		margin: -10px 5px;
 		padding: 5px 10px;
-		font-size: 18px;
+		font-size: 16px;
+		color: #999;
+		font-weight: 500;
 
 	}
 	label{
@@ -55,7 +57,7 @@ label{
 	font-weight: 300;
 }
 textarea.form-control{
-	height: 70px;
+	height: 35px; //70px
 	max-width: 100%;
 	&:disabled{
 		resize: none;
@@ -66,6 +68,9 @@ input, select, textarea{
 	font-weight: 600;
 	&.required{
 		border-bottom: 1px solid rgba(255, 165, 0, 0.5);
+		/* border: none;
+		outline: none !important;
+		border-bottom: 1px solid #777; */
 	}
 }
 
@@ -101,7 +106,7 @@ select:disabled {
 
 
 .form-control{
-	padding: 5px 10px;
+	padding: 5px 5px; //5px 10px
 	font-weight: 600;
 }
 .form-control.statebox[type='checkbox']:indeterminate + label:before{
@@ -196,13 +201,18 @@ border-color : red;
 			background-color: transparent;
 			border: 0px;
 			border-bottom: 2px solid #ddd;
-			&:hover, &:visited{
+			padding-left: 0px;
+			padding-right: 20px;
+			margin-right: 10px;
+			padding-top: 5px;
+			font-size: 18px;
+			&:hover{
 				cursor: pointer;
 				color:#3A3939;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #ddd;
+				border-bottom: 2px solid #449d44 !important;
 			}
 		}
 		&.active, &.activeTab{
@@ -211,13 +221,14 @@ border-color : red;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #3A3939;
+				border-bottom: 2px solid #449d44;
+				font-weight: bold;
 				&:hover, &:focus{
 					background: transparent!important;
 					background-color: transparent!important;
 					cursor: pointer;
 					border: 0px;
-					border-bottom: 2px solid #3A3939;
+					border-bottom: 2px solid #449d44;
 					background: transparent;
 				}
 			}

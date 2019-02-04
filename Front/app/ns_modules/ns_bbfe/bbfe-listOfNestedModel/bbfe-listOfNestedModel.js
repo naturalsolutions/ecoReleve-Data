@@ -251,7 +251,7 @@ define([
                 <div id="formContainer"   class="clearfix"></div>\
                 <div>\
                     <div id="addDiv" class="col-md-6" ></div>\
-                    <button type="button" id="addFormBtn" class="<%= hidden %> btn <%= addButtonClass %>" style="margin-top:10px">+</button>\
+                    <button type="button" id="addFormBtn" class="<%= hidden %> btn <%= addButtonClass %>" style="margin-top:10px"><span class="reneco reneco-add"></span></button>\
                 </div>\
             </div>\
             ', null, Form.templateSettings),

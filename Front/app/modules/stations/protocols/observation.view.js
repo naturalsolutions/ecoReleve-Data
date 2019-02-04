@@ -23,10 +23,18 @@ define([
 
     onShow: function(){
       var _this = this;
+      var elem = $('.js-rg-protocol')[0]
+
       if(this.model.get('id') == 0){
         this.displayMode = 'edit';
+        if( elem.className.indexOf(' editionMode') <= -1 ) {
+          elem.className =  elem.className +' editionMode'
+        }
       } else {
         this.displayMode = 'display';
+        if( elem.className.indexOf(' editionMode') > -1 ) {
+          elem.className = elem.className.replace(' editionMode', '');
+        }
       }
       this.model.fetch({
         data: { FormName: 1, ObjectType: _this.model.get('ID')},
@@ -88,6 +96,20 @@ define([
           Backbone.history.navigate(url, {trigger: true});
         }
       });
+
+      this.form.afterShow = function () {
+        var elem = $('.js-rg-protocol')[0]
+        if( this.displayMode == 'edit') {
+          if( elem.className.indexOf(' editionMode') <= -1 ) {
+            elem.className =  elem.className +' editionMode'
+          }
+       }
+        else {
+          if( elem.className.indexOf(' editionMode') > -1 ) {
+            elem.className = elem.className.replace(' editionMode', '');
+          }
+        }
+      }
     },
 
     handleErrors: function(response){

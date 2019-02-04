@@ -15,6 +15,10 @@ button{
   box-shadow: none;
 }
 
+.reneco-THE-thesaurus:before{
+  content: '\e921' !important;
+}
+
 main{
   height: 100%;
   padding-top: 50px;
@@ -394,10 +398,10 @@ input.form-control{
 .toolbar.top{
   .pull-right {
     float: right !important;
-    margin-left: 3px;
+    margin-left: 5px;
   }
   .pull-left{
-    margin-left: 3px;
+    margin-left: 5px;
   }
 }
 
@@ -588,4 +592,287 @@ input{
     overflow: auto;
   }
 
+}
+
+/* STATIONS */
+
+.station{
+  // Partie gauche
+  .right{
+    .btn{
+      border-radius: 25px;
+    }
+    .switcher{
+      font-weight: bold;
+      font-size: 15px;
+    }
+    .toolbar{
+      &.top{
+        height: 40px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0px 10px;
+        align-items: center;
+        .js-prev, .js-next{
+          padding: 6px 2px !important;
+          border-radius: 5px;
+        }
+        .reneco{
+          font-weight: bold;
+          font-size: 10px;
+        }
+        .btn{
+          padding: 4px 12px;
+        }
+      }
+
+      #NsFormButton{
+        display: inline-flex;
+        button{
+          border-radius: 0px;
+        }
+        .NsFormModuleDelete {
+          border-top-left-radius: 25px;
+          border-bottom-left-radius: 25px;
+        }
+        .NsFormModuleCancel {
+         border-top-right-radius: 25px;
+         border-bottom-right-radius: 25px;
+         border-left: none;
+        }
+        .NsFormModuleSave, .NsFormModuleEdit {
+          border-radius: 25px;
+        }
+      }
+    }
+    ul.toolbar{
+      height: 40px;
+      padding: 0px 10px;
+      li.tab-ele{
+        padding: 0px;
+        height: 100%;
+        a{
+          padding: 0px 25px 0px 0px;
+          height: 100%;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+    .crop2{
+      height :  ~"calc(100% - 79px)" !important;
+    }
+    .height-60{
+      form{
+        padding: 0px 15px;
+      }
+    }
+    /* MODE EDITION */
+    &.editionMode{
+      fieldset{
+        .form-control{
+          border: none;
+          box-shadow: none;
+          border-bottom: solid 1px #777;
+          &[disabled]{
+            background-color: transparent !important;
+            border-bottom: solid 1px transparent;
+          }
+        }
+
+        .input-group{
+          button, .input-group-addon{
+            background-color: transparent !important;
+            border: solid 1px #777;
+            &.btn-success{
+              background-color: #5cb85c !important;
+              border-color: #4cae4c !important;
+            }
+          }
+          &.picker{
+            input{
+              border: solid 1px #777;
+            }
+          }
+        }
+      }
+      #detailsTab{
+        #remove{
+          display: none;
+        }
+        #addFormBtn{
+          border: solid 1px #449d44;
+          background-color: transparent;
+          color: #449d44;
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          transform: translateX(-50%);
+        }
+      }
+    }
+  }
+  // Partie droite
+  .dark{
+    .btn{
+      border-radius: 25px;
+    }
+    .protocol{
+      
+      .crop1{
+        padding: 0px;
+        background-color: #737373;
+        height : ~"calc(100% - 40px)" !important;
+        form{
+          background-color: #737373;
+          height: 100%;
+         /*  display: flex;
+          flex-direction: column;
+          justify-content: space-between; */
+          fieldset{
+            border: none;
+            color: #fff;
+            position: relative;
+            margin-top: 20px;
+            //&:first-child{
+              -webkit-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
+              -moz-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
+              box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);              
+            //}
+            legend{
+              color: #fff;
+              position: absolute;
+              top: -12px;
+            }
+            label{
+              color : #ccc; 
+            }
+            input, select{
+              background-color: transparent;
+              border: solid 1px #fff;
+              color: #fff;
+              option{
+                color: #000;
+              }
+            }
+            textarea{
+              background-color: transparent;
+              border: none;
+              border-bottom: solid 1px #fff;
+              color: #fff;
+              box-shadow: none;
+            }
+            fieldset{
+              padding-top: 0px;
+            }
+            .js_container_index_subForm{
+              min-height: 34px !important;
+              max-height: 34px !important;
+              top: 0px !important;
+            }
+            .col-xs-12{
+              /* .btn-group-grid{
+                background-color: #606060;
+              } */
+              #borderLayout_eRootPanel{
+                .ag-header{
+                  background-color : #525252;
+                  color: #fff;
+                }
+                .ag-row:nth-child(even){
+                  background-color: #7e7e7e;
+                }
+                .ag-row:nth-child(odd){
+                  background-color: #6e6e6e;
+                }
+              }
+            }
+          }
+          #addFormBtn{
+            background-color: #449d44;
+            color: #fff;
+            padding: 6px 9px;
+          }
+        }
+      }
+      .toolbar{
+        height: 40px;
+        padding: 0px 10px;
+       
+        legend{
+          color: #fff !important;
+        }
+        &.top{
+        background-color: #525252;
+        border-bottom: none;
+        }
+        &.bottom{
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          .NsFormModuleEdit {
+            float: right;
+          }
+          .btn{
+            padding: 4px 12px;
+          }
+        }
+      }
+    }
+    /* MODE EDITION */
+    &.editionMode{
+      fieldset{
+        background-color: #656565 !important;
+        -webkit-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
+        -moz-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
+        box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
+        input:focus, select:focus, textarea:focus{
+          border: solid 2px #449d44 !important;
+          box-shadow: none ;
+        }
+      }
+      .input-group-addon{
+        background-color: transparent;
+        border: solid 1px #fff;
+        border-right: none;
+        color: #fff;
+        &:before{
+          color: #fff !important;
+        }
+      }
+      .input-group-btn{
+        button{
+          background-color: transparent !important;
+          border: solid 1px #fff;
+        }
+      }
+      #remove{
+        display: none;
+      }
+      .toolbar.bottom{
+        #NsFormButton{
+          width: fit-content;
+          float: right;
+          display: inline-flex;
+          .NsFormModuleCancel{
+            display: none;
+          }
+          .NsFormModuleDelete{
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+          }
+          .NsFormModuleClear{
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
+          }
+          button{
+            border-radius: 25px;
+          }
+          .pull-right{
+            margin-left: 5px;
+          }
+        }
+      }
+    }
+  }
 }
