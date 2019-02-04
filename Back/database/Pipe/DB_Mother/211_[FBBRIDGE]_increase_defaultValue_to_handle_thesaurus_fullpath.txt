@@ -1,0 +1,9 @@
+ALTER TABLE [ModuleForms]
+ALTER COLUMN [DefaultValue] VARCHAR(255) NULL
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('211_[FBBRIDGE]_increase_defaultValue_to_handle_thesaurus_fullpath',GETDATE(),(SELECT db_name()))
+
+
+GO
