@@ -1,10 +1,10 @@
-@toolbarHeight : 53px;
+@toolbarHeight : 40px;
 @paginatorHeight: 45px;
 
 .toolbar{
   height: @toolbarHeight;
   // height: 50px;
-  overflow: auto;
+  overflow: hidden; // auto
   padding: 10px;
   // padding-top: 3px;
   padding-bottom: 0px;
@@ -14,9 +14,87 @@
   &.bottom{
     z-index: 10;
     border-top: 1px solid #ddd;
+    padding : 0px 10px;
+    height: 40px;
+    padding: 0px 10px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center;
+    li.tab-ele{
+      padding: 0px;
+      height: 100%;
+      a{
+        padding: 0px 25px 0px 0px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+    }
   }
   &.top{
     border-bottom: 1px solid #ddd;
+    padding : 0px 10px;
+    height: 40px;
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 0px 10px;
+    align-items: center;
+    .pull-right, .pull-left {
+      margin-left: 5px;
+    }
+    .js-prev{
+      padding: 6px 2px !important;
+      border-radius: 0px;
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+      padding: 6px 2px !important;
+    }
+    .js-next{
+      padding: 6px 2px !important;
+      border-radius: 0px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      padding: 6px 2px !important;
+    }
+    .switcher{
+      font-weight: bold;
+      font-size: 15px;
+    }
+    .reneco{
+      font-weight: bold;
+      font-size: 10px;
+    }
+    #NsFormButton{
+      display: inline-flex;
+      button{
+        border-radius: 0px;
+      }
+      .NsFormModuleDelete {
+        border-top-left-radius: 25px;
+        border-bottom-left-radius: 25px;
+      }
+      .NsFormModuleCancel {
+        border-top-right-radius: 25px;
+        border-bottom-right-radius: 25px;
+        border-left: none;
+      }
+      .NsFormModuleSave, .NsFormModuleEdit {
+        border-radius: 25px;
+      }
+    }
+    ul.nav-tabs{
+      height: 40px;
+      li{
+        height: 100%;
+        margin-bottom: 0px !important;
+      }
+      li a {
+        padding: 0px;
+        display: flex;
+        align-items: center;
+        height: 99%;
+      }
+    }
   }
   & legend{
     display: inline-block;
@@ -29,7 +107,7 @@
 
 .crop1{
   position: relative;
-  height: ~"calc(100% - @{toolbarHeight})";
+  height: ~"calc(100% - 41px)";//~"calc(100% - @{toolbarHeight})";
   padding: 0px 15px;
   overflow-y: auto;
   &.overflowXH{
@@ -40,7 +118,7 @@
 .crop2{
   position: relative;
   @crop: @toolbarHeight*2;
-  height: ~"calc(100% - @{crop})";
+  height: ~"calc(100% - 80px)";//~"calc(100% - @{crop})";
   // height: ~"calc(100% - 100px)";
   padding: 0px 15px;
   overflow-y: auto;

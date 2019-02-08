@@ -1,35 +1,39 @@
-<div id="infos"  class="col-xs-12 col-md-5 full-height no-padding">
-  <div class="toolbar top">
-    <div class="pull-left">    
-      <a class="btn" href="#<%= type %>">
-          <span class="reneco reneco-back"></span>
-          &nbsp;
-          <span data-i18n="button.back">Back</span>
-      </a>
+<div id="infos"  class="left-part col-xs-12 col-md-5 full-height no-padding">
+  <div class="height-40">
+    <div class="toolbar top">
+      <div class="pull-left">    
+        <a class="btn" href="#<%= type %>">
+            <span class="reneco reneco-leftarrow"></span>
+            &nbsp;
+            <span data-i18n="button.back">Back</span>
+        </a>
+      </div>
+      <div class="js-rg-navbar pull-left"></div>
+      <div class="js-form-btns pull-right"></div>
     </div>
-    <div class="js-rg-navbar pull-left"></div>
-    <div class="js-form-btns pull-right"></div>
-  </div>
-<% var classObject ='crop1 no-padding'; if(type) { classObject += ' '+type ; console.log(classObject) }%> 
-  <div class= "<%= classObject %>">
-    
-    <div id="formTab" class=""><!-- half-height-->
-        <div class="js-form"></div>
-        <!--<div class="toolbar bottom">
-          <div class="js-form-btns"></div>
-        </div>-->
+    <% var classObject ='crop2 no-padding'; if(type) { classObject += ' '+type ; console.log(classObject) }%> 
+    <div class= "<%= classObject %>">
+      
+      <div id="formTab" class=""><!-- half-height-->
+          <form class="js-form"></form>
+          <!--<div class="toolbar bottom">
+            <div class="js-form-btns"></div>
+          </div>-->
+      </div>
     </div>
-
-    <div class="half-height">
       <ul class="nav nav-tabs toolbar bottom">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
           <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
             <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
           </li>
       <% }); %>
-      
       </ul>
-      <div class="tab-content crop1 no-padding">
+  </div>
+    
+
+<div class="height-60">
+      
+      <div class="tab-content full-height no-padding">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
         <div id="<%= uiGridConf.name %>Tab" class="tab-pane full-height fade <%= (index == 0)? 'in active' : '' %>">
         <% if(uiGridConf.name === "locations") { %>
