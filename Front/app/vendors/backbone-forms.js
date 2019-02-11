@@ -992,8 +992,12 @@ Form.Field = Backbone.View.extend({
 
   template: _.template('\
     <div>\
-    <% if (title) { %>\
-      <label for="<%= editorId %>"><%= title %></label>\
+    <% var className = "notRequiredLabel";\
+    if(this.schema && this.schema.validators && this.schema.validators.indexOf("required") > -1 ) {\
+      className = "requiredLabel";\
+    }\
+    if (title) { %>\
+      <label for="<%= editorId %>" class=<%= className %> ><%= title %></label>\
       <% } %>\
       <div>\
         <span data-editor></span>\
