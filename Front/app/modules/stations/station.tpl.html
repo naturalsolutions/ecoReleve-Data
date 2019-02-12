@@ -16,9 +16,18 @@
     <div class="">
       <ul class="nav nav-tabs toolbar bottom">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
+        <% if( uiGridConf.name === 'protocols') { %>
+          <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
+            <button class="js-btn-add-protocols btn btn-xs btn-prevent-collapse btn-success" value="">
+                <span class="reneco reneco-add">ADD</span>
+            </button>
+            <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
+          </li>
+        <% } else { %>
           <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
             <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
           </li>
+          <% }%>
       <% }); %>
       <li class="tab-ele ">
         <a href="#mapTab" class="tab-link">Map</a>

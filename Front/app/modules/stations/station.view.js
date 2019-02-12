@@ -30,7 +30,8 @@ define([
     ModelPrototype: StationModel,
     
     events: {
-      'click .tab-link': 'displayTab',
+      'click .tab-link': 'handlerClickTab',
+      'click .js-btn-add-protocols': 'modalProtocols'
     },
 
     ui: {
@@ -55,6 +56,13 @@ define([
         proto: options.proto,
         obs: options.obs
       });
+    },
+
+   modalProtocols: function(event) {
+      event.preventDefault()
+      var elemNext = event.currentTarget.nextElementSibling;
+      this.displayTab(elemNext);
+      this.rgProtocols.currentView.openModal()
     },
 
     getRegion: function(val){
@@ -133,17 +141,21 @@ define([
       this.getRegion(this.nsForm.model.get('FK_FieldworkArea'));
     
     },
-    displayTab: function(e) {
+    handlerClickTab: function(e) {
       e.preventDefault();
+      var elemClicked = e.currentTarget;
+      this.displayTab(elemClicked);
+    },
+    displayTab: function(elem) {
       this.$el.find('.nav-tabs>li').each(function(){
         $(this).removeClass('active in');
       });
-      $(e.currentTarget).parent().addClass('active in');
+      $(elem).parent().addClass('active in');
 
       this.$el.find('.tab-content>.tab-pane').each(function(){
         $(this).removeClass('active in');
       });
-      var id = $(e.currentTarget).attr('href');
+      var id = $(elem).attr('href');
       this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
 
       if(id === '#mapTab' && !this.map){

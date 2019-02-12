@@ -1,6 +1,20 @@
 <div class="js-protocols-menu crop1 no-padding"></div>
-<div class="toolbar bottom">
-	<select name="" id="" class="js-proto-picker form-control flex2">
-		<option value="" disabled selected>Add a protocol</option>
-	</select>
+<div class="modal fade" id="chooseProtoModal" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content js-modal-protocols">
+			<div class="modal-header">
+				<h4 class="modal-title">
+				<span class="reneco reneco-sheet2"></span>
+				</h4>
+			</div>
+			<div class="modal-body">
+				<select name="" id="" class="js-proto-picker form-control flex2">
+					<option value="" disabled selected>Add a protocol</option>
+				</select>
+				<button class="js-btn-add-protocol-from-modal btn btn-xs btn-prevent-collapse btn-success" value="">
+					<span >Add this protocol</span>
+				</button>
+			</div>
+		</div>
+	</div>
 </div>

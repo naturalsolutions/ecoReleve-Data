@@ -22,12 +22,17 @@ define([
     },
 
     events: {
-      'change .js-proto-picker': 'addProtoFromList' 
+      'click .js-btn-add-protocol-from-modal' :'addProtoFromList'
+      // 'change .js-proto-picker': 'addProtoFromList' 
     },
 
     initialize: function(options){
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
+    },
+
+    openModal: function() {
+      $('#chooseProtoModal').modal('show');
     },
 
     onShow: function(){
@@ -209,6 +214,7 @@ define([
     },
 
     addProtoFromList: function() {
+      $('#chooseProtoModal').modal('hide');
       //could be better (cf back)
       var name = this.ui.protoPicker.find(':selected').text();
       var objectType = parseInt(this.ui.protoPicker.val());
