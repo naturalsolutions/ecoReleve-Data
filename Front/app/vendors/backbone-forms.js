@@ -1339,13 +1339,42 @@ Form.editors.Text = Form.Editor.extend({
  */
 Form.editors.TextArea = Form.editors.Text.extend({
 
-  tagName: 'textarea',
-
+  tagName: 'div',
+  events: _.extend({}, Form.editors.Text.prototype.events, {
+    'keyup': 'onKeyUp'
+  }),
   /**
    * Override Text constructor so type property isn't set (issue #261)
    */
   initialize: function(options) {
     Form.editors.Base.prototype.initialize.call(this, options);
+    var maxlength = 250;
+
+    this.textAreaInput = document.createElement('textarea')
+    this.textAreaInput.setAttribute('maxlength',maxlength);
+    this.textAreaInput.setAttribute('id',this.id);
+    this.textAreaInput.setAttribute('name',this.key);
+    this.textAreaInput.className = this.schema.editorClass;
+    if( this.schema.editorAttrs && this.schema.editorAttrs.disabled === true) {
+      this.textAreaInput.setAttribute('disabled','disabled');
+    }
+
+    this.divCounter = document.createElement('div');
+    this.spanCount = document.createElement('span');
+    this.spanTotal = document.createElement('span'); 
+    this.divCounter.append(this.spanCount);
+    this.spanCount.innerHTML = '0';
+    this.divCounter.append(this.spanTotal);
+    this.spanTotal.innerHTML = '/' + maxlength;
+
+  },
+  onKeyUp: function(event) {
+    this.spanCount.innerHTML = this.textAreaInput.value.length;
+  },
+  render: function() {
+    this.el.append(this.textAreaInput);
+    this.el.append(this.divCounter);
+    return this;
   }
 
 });
