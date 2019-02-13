@@ -138,11 +138,11 @@ define([
             if (form.$el.hasClass('nested-unstyled')){
                 buttonClass = '';
             }
-            form.$el.find('fieldset').append('\
+            /* form.$el.find('fieldset').append('\
                 <div class="' + this.hidden + ' control">\
                     <button type="button" class="btn btn-warning '+buttonClass+'" id="remove">-</button>\
                 </div>\
-            ');
+            '); */
 
             form.$el.find('button#remove').on('click', function() {
               _this.$el.find('#formContainer').find(form.el).remove();

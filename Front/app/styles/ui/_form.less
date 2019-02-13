@@ -2,21 +2,148 @@ input:focus,
 select:focus,
 textarea:focus,
 button:focus {
-  border-color: rgb(102, 175, 233);
+  /* border-color: rgb(102, 175, 233);
   outline: 0;
   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6); */
+	outline: none;
+	box-shadow: none !important;
 }
 
+ input:disabled, textarea:disabled {
+	background-color: transparent !important;
+	border-bottom: solid 1px #777;
+ }
 
+ select.form-control, select{
+	border: solid 1px #777;
+  background-color: #fff;
+	&:disabled{
+	background-color: transparent !important;
+	border: solid 1px #777;
+	}
+	&:focus{
+    outline: none !important;
+    box-shadow: none !important;
+    border: solid 2px;
+  }
+ }
+ 
+ /* GENERAL */
+.input-group{
+	height: 34px;
+	input{
+    border: solid 1px #777;
+    margin-left: -1px;
+    &:focus{
+      border: solid 2px #64dc17 !important;
+    }
+    &.required:focus{
+      border: solid 2px red !important;
+    }
+  }
+	.input-group-btn{
+		margin-right: 0px !important;
+    min-width: 40px;
+		button{
+			height: 34px;
+		}
+	}
+	.input-group-btn{
+		&:first-child > .btn, &:last-child > .btn{
+			border-radius: 0;
+		}
+	}
+	span button, .input-group-addon{
+    background-color: transparent !important;
+		border: solid 1px #777;
+	}
+	.input-group-addon{
+		border-radius: 0px;
+	}
+	.form-control {
+		z-index: inherit;
+	}
+}
+
+ /* EDITION MODE (LEFT PART) */
+ .left-part.editionMode{
+	input, textarea {
+		border-bottom: solid 1px #777;
+		&:disabled{
+			border: none;
+		}
+		&:focus{
+			border-bottom: solid 2px #64dc17;
+		}
+		&.required:focus{
+			border-bottom: solid 2px red;
+		}
+	}
+	select{
+		&.required:focus{
+			border: solid 2px red;
+		}
+	}
+ }
+
+ /* RIGHT PART */
+.dark{
+	// Input, select & textarea styles
+	input, textarea{
+		background-color: transparent !important;
+		border: none;
+		border-bottom: solid 1px #fff;
+		color: #fff;
+		&:focus{
+			border-bottom: solid 2px #64dc17 !important;
+		}
+		&.required:focus{
+			border-bottom: solid 2px red !important;
+		}
+	}
+	.input-group-addon, select {
+		background-color: transparent;
+		border: solid 1px #fff !important;
+		color: #fff;
+		&:focus{
+			border: solid 2px #64dc17 !important;
+		}
+		&.required:focus{
+			border: solid 2px red !important;
+		}
+	}
+	.input-group{
+		input{
+			border: solid 1px #fff;
+			&:focus{
+				border: solid 2px #64dc17 !important;
+			}
+			&.required:focus{
+				border: solid 2px red !important;
+			}
+		}
+	}
+	select{
+		color: #fff;
+		option{
+			color: #000;
+		}
+	}
+}
+ 
 .form-control{
-  border-radius: 0px!important;
+	border-radius: 0px !important;
+	border: inherit;
+	box-shadow: none;
+	min-height: 34px;
+} 
+.input-group-btn:last-child > .btn, .input-group-btn:last-child > .btn-group{
+	margin-left: -2px !important;
 }
-
 .bootstrap-tagsinput {
     width: 100%;
 }
-
 
 fieldset{
 	border: 1px solid #e5e5e5;
@@ -33,7 +160,6 @@ fieldset{
 		font-size: 16px;
 		color: #999;
 		font-weight: 500;
-
 	}
 	label{
 		display: inline-block;
@@ -66,16 +192,10 @@ textarea.form-control{
 
 input, select, textarea{
 	font-weight: 600;
-	&.required{
-		border-bottom: 1px solid rgba(255, 165, 0, 0.5);
-		/* border: none;
-		outline: none !important;
-		border-bottom: 1px solid #777; */
-	}
 }
 
 .form-control:disabled{
-	border: 1px solid transparent;
+	//border: 1px solid transparent;
 	box-shadow: none;
 	//background: transparent;
 	//padding-left: 0px;
@@ -102,8 +222,6 @@ select:disabled {
 .tooltip.bottom .tooltip-arrow{
 	border-bottom-color: red
 }
-
-
 
 .form-control{
 	padding: 5px 5px; //5px 10px
@@ -161,22 +279,6 @@ border-color : red;
 .form-control[disabled], fieldset[disabled] .form-control{
 	cursor: auto;
 	background: rgba(150,150,150,0.1);
-
-
-}
-
-.input-group{
-	.input-group-btn{
-		&:first-child > .btn, &:last-child > .btn{
-			border-radius: 0;
-		}
-	}
-	.input-group-addon{
-		border-radius: 0px;
-	}
-	.form-control {
-		z-index: inherit;
-	}
 }
 
 .nested-model{
@@ -190,7 +292,6 @@ border-color : red;
 	}
 }
 
-
 .nav-tabs{
 	border: none;
 	li{
@@ -200,7 +301,7 @@ border-color : red;
 			background: transparent;
 			background-color: transparent;
 			border: 0px;
-			border-bottom: 2px solid #ddd;
+			border-bottom: 3px solid #ddd;
 			padding-left: 0px;
 			padding-right: 20px;
 			margin-right: 10px;
@@ -212,7 +313,7 @@ border-color : red;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #449d44 !important;
+				border-bottom: 3px solid #449d44 !important;
 			}
 		}
 		&.active, &.activeTab{
@@ -221,14 +322,14 @@ border-color : red;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #449d44;
+				border-bottom: 3px solid #449d44;
 				font-weight: bold;
 				&:hover, &:focus{
 					background: transparent!important;
 					background-color: transparent!important;
 					cursor: pointer;
 					border: 0px;
-					border-bottom: 2px solid #449d44;
+					border-bottom: 3px solid #449d44;
 					background: transparent;
 				}
 			}
@@ -311,12 +412,9 @@ border-color : red;
 	}
 }
 
-
-
 div.form-control{
   height: auto;
 }
-
 
 div.fancytreeview{
   border: 1px solid rgb(153, 153, 153);
@@ -361,7 +459,6 @@ div.fancytreeview{
 	}
 }
 
-
 .wrapper-grid-from{
 	position: relative;
 }
@@ -372,7 +469,6 @@ div.fancytreeview{
 	#formContainer{
 		display: block;
 	}
-
 
 	#formContainer,.tbody>.form-row>form>fieldset,#formContainer>form>fieldset{
 		background: #eee;
@@ -393,12 +489,6 @@ div.fancytreeview{
 		&>.fixedCol{
 			background: #eee;
 		}
-
-/*
-		input{
-			border-radius: 0px;
-			padding: 8px 5px;
-		}*/
 	}
 
 	.grid-field{
@@ -432,7 +522,6 @@ div.fancytreeview{
 		width: 50px;
 	}
 
-
 	.form-control[disabled] {
 		cursor: auto;
 		background: transparent;
@@ -455,7 +544,6 @@ div.fancytreeview{
 			margin: 0px;
 		}
 	}
-
 
 	.control{
 		width: auto;
@@ -486,11 +574,9 @@ div.fancytreeview{
 	margin-right: 16.66666667%;
 }
 
-
 .fixedCol {
 	position:absolute;
 	//z-index:1000;
-
 }
 
 .js-col-row-number{
@@ -524,68 +610,53 @@ div.fancytreeview{
 
 .firstCol-1{
 	margin-left : 25px !important;
-
 }
 .firstCol-2{
 	margin-left : 50px !important;
-
 }
 
 .firstCol-4{
 	margin-left : 100px !important;
-
 }
 
 .firstCol-6{
 	margin-left : 150px !important;
-
 }
-
 
 .firstCol-8{
 	margin-left : 200px !important;
-
 }
 
 .firstCol-10{
 	margin-left : 250px !important;
-
 }
 
 .firstCol-12{
 	margin-left : 300px !important;
-
 }
 
 .firstCol-14{
 	margin-left : 350px !important;
-
 }
 
 .firstCol-16{
 	margin-left : 400px !important;
-
 }
 
 .firstCol-18{
 	margin-left : 450px !important;
-
 }
 
 .firstCol-20{
 	margin-left : 500px !important;
-
 }
 
 .firstCol-22{
 	margin-left : 550px !important;
-
 }
 .firstCol-24{
 	margin-left : 600px !important;
-
 }
-
 
 .col-md-3.grid-field{
 		width: 75px;
@@ -615,7 +686,6 @@ textarea {
 .grid-field .fancytree-container {
 	max-height:49px !important;
 }
-
 
 .fixed-filter{
 	position:fixed;

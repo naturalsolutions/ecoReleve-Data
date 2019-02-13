@@ -25,7 +25,7 @@ define([
 
   return DetailView.extend({
     template: 'app/modules/stations/station.tpl.html',
-    className: 'full-height white station',
+    className: 'full-height station',
 
     ModelPrototype: StationModel,
     
