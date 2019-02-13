@@ -127,10 +127,12 @@ define([
               if (_this.schema.editorClass.indexOf("form-control") != -1 ) {
                 _this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'})
               }
-              _this.form.$el.find(".js_badge").html(_this.forms.length);
+              _this.form.$el.find(".js_badge").html('(' + _this.forms.length + ')');
             },0);
             if (this.schema.editorClass.indexOf("form-control") != -1 ) {
-              form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
+                var fieldsetElem = form.$el.find('fieldset')[0]
+                fieldsetElem.insertAdjacentHTML('beforebegin','<div class="col-md-1 js_container_index_subForm"><a role="button"  class="js_index_subForm" ><span class="indexSubForm">'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</span><span class="totalSubForm">/'+ (this.forms.length + 1) +'</span></button></div>')
+                fieldsetElem.className = fieldsetElem.className + ' ' + 'col-md-11'
             }
             var buttonClass = 'pull-right';
             if (form.$el.hasClass('nested-unstyled')){
@@ -147,7 +149,7 @@ define([
               var i = _this.forms.indexOf(form);
               if (i > -1) {
                 _this.forms.splice(i, 1);
-                _this.form.$el.find(".js_badge").html(_this.forms.length);
+                _this.form.$el.find(".js_badge").html('(' + _this.forms.length + ')');
               }
               _this.subFormChange();
               if(!_this.forms.length){
