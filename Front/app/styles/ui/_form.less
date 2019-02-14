@@ -32,6 +32,7 @@ button:focus {
  /* GENERAL */
 .input-group{
 	height: 34px;
+	width: 100%;
 	input{
     border: solid 1px #777;
     margin-left: -1px;
@@ -47,6 +48,9 @@ button:focus {
     min-width: 40px;
 		button{
 			height: 34px;
+			&:hover{
+				color: inherit;
+			}
 		}
 	}
 	.input-group-btn{
@@ -181,6 +185,15 @@ legend{
 label{
 	margin: 0px;
 	font-weight: 300;
+	position: relative;
+	&.requiredLabel:after{
+		content : '*';
+		position: absolute;
+		top: 0;
+		right: 0;
+		color: red;
+		font-size: 16px;
+	}
 }
 textarea.form-control{
 	height: 35px; //70px
@@ -278,7 +291,7 @@ border-color : red;
 }
 .form-control[disabled], fieldset[disabled] .form-control{
 	cursor: auto;
-	background: rgba(150,150,150,0.1);
+	background: none; //rgba(150,150,150,0.1)
 }
 
 .nested-model{
@@ -301,7 +314,7 @@ border-color : red;
 			background: transparent;
 			background-color: transparent;
 			border: 0px;
-			border-bottom: 3px solid #ddd;
+			border-bottom: 3px solid transparent;
 			padding-left: 0px;
 			padding-right: 20px;
 			margin-right: 10px;
@@ -313,7 +326,7 @@ border-color : red;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 3px solid #449d44 !important;
+				border-bottom: 3px solid #5cb85c !important;
 			}
 		}
 		&.active, &.activeTab{
@@ -322,14 +335,14 @@ border-color : red;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 3px solid #449d44;
+				border-bottom: 3px solid #5cb85c;
 				font-weight: bold;
 				&:hover, &:focus{
 					background: transparent!important;
 					background-color: transparent!important;
 					cursor: pointer;
 					border: 0px;
-					border-bottom: 3px solid #449d44;
+					border-bottom: 3px solid #5cb85c;
 					background: transparent;
 				}
 			}
@@ -413,7 +426,13 @@ border-color : red;
 }
 
 div.form-control{
-  height: auto;
+	height: auto;
+	padding-top: 0px;
+	background-color: transparent;
+  text-align: right;
+}
+.dark div.form-control{
+	color: #fff;
 }
 
 div.fancytreeview{
@@ -443,6 +462,7 @@ div.fancytreeview{
 	}
 	span.fancytree-title:hover {
 		background: rgba(0,0,0, 0.1);
+		color: #000;
 	}
 }
 
@@ -734,7 +754,7 @@ textarea {
 	top: -15px;
 	margin-bottom: 0 !important;
 	a{
-		background-color: #777777;
+		//background-color: #777777;
 		height: 34px;
 		width: 34px;
 		text-align: center;

@@ -23,11 +23,23 @@
     li.tab-ele{
       padding: 0px;
       height: 100%;
+      display: inline-flex;
       a{
-        padding: 0px 25px 0px 0px;
+        padding: 0px 25px 0px 5px;
         height: 100%;
         display: flex;
         align-items: center;
+      }
+      button{
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+        padding: 2px 10px;
+        opacity: 0.7;
+      }
+      &.active{
+        button{
+           opacity: 1;
+        }
       }
     }
   }

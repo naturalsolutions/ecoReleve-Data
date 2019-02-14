@@ -72,6 +72,17 @@
 
 .station-protocols-panel{
     box-shadow: inset 1px -1px 15px 0px rgba(107, 107, 107, 0.5);
+    button#addFormBtn{
+      background: transparent;
+      border: solid 2px #5cb85c;
+      color: #5cb85c;
+      transform: translate(50%, -150%);
+      span:before{
+        content: 'Add new fieldworker';
+        font-family: 'Exo2', sans-serif !important;
+        font-size: 13px;
+      }
+    }
 }
 
 
@@ -84,23 +95,43 @@
       form{
         background-color: #737373;
         height: 100%;
+        position: relative;
         fieldset{
           border: none;
           color: #fff;
           position: relative;
           margin: 20px 10px 0px 10px;
           width: ~"calc(100% - 20px)";
-          background-color: #6c6c6c;
+          background-color: #737373;
           -webkit-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
           -moz-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
           box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);              
           form{
             margin-top: 10px;
             width: 100%;
+            .col-md-1{
+              transform: translateX(6px);
+              z-index: 999;
+              overflow: visible;
+              max-height: 1px !important;
+              min-height: 1px !important;       
+              .indexSubForm{
+                font-weight: bold;
+                font-size: 16px;
+              }      
+              .totalSubForm{
+                font-size: 13px;
+              }
+            }
             fieldset{
               margin: 0px;
+              margin-bottom: 15px;
+              padding-top: 15px;
               width: 100%;
               background-color: #6c6c6c;
+              &.col-md-11{
+                padding-left: 35px;
+              }
             }
           }
           legend{
