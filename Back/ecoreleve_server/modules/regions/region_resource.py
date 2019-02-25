@@ -96,8 +96,8 @@ class RegionsResource(CustomResource):
                 pass
 
         if not existingGeoJson:
-            results = session.query(GeomaticLayer).filter(
-                GeomaticLayer.type_ == params['type'])
+            results = session.query(FieldworkArea).filter(
+                FieldworkArea.type_ == params['type'])
             curStyle = self.colorByTypes.get(params['type'], {}).copy()
             curStyle.update({
                 'fillOpacity': 0.2,
@@ -109,7 +109,7 @@ class RegionsResource(CustomResource):
                 criterias = params.get('criteria')
                 for crit in criteria:
                     results = results.filter(
-                        getattr(Region, crit['Column']) == crit['Value'])
+                        getattr(FieldworkArea, crit['Column']) == crit['Value'])
             results = results.all()
             response = {
                 'geojson': [r.geom_json for r in results],
