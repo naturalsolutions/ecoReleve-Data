@@ -92,6 +92,8 @@ define([
 
     this.lastImported = false;
 
+    this.regionFetched = false;
+
     this.init();
   }
 
@@ -473,17 +475,21 @@ define([
     initOverlayRegions: function(){
       this.RegionLayers = {};
       var _this = this;
-      $.ajax({
-        url:'regions/getTypes',
-        context: this
-      }).done(function(response){
-        response.forEach(function(layerName) {
-          _this.fetchRegionsLayers(layerName);
-        }, this);
-      }).fail(function(response){
-        console.log('error fetch region Types', response)
-        
-      });
+      if (!_this.regionFetched) {
+        _this.regionFetched = true; //fix for fetching only one time need refact process
+        $.ajax({
+          url:'regions/getTypes',
+          context: this
+        }).done(function(response){
+          _this.regionFetched = true;
+          response.forEach(function(layerName) {
+            _this.fetchRegionsLayers(layerName);
+          }, this);
+        }).fail(function(response) {
+          _this.regionFetched = false;
+          console.log('error fetch region Types', response)
+        });
+      }
     },
 
     eachPolygon: function(feature, layer){
