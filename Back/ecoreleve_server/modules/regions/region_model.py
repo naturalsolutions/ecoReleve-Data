@@ -107,12 +107,13 @@ class FieldworkArea(Base):
     def geom_json(self):
         return Feature(
             id=self.ID,
-            geometry=loads(self.valid_geom),
+            geometry=loads(self.valid_geom) if self.valid_geom else None,
             properties={'FieldworkArea': self.fullpath,
                         'Country': self.Country,
                         'Working_area': self.Working_Area,
                         'Working_region': self.Working_Region,
-                        'Management_unit': self.Management_Unit
+                        'Management_unit': self.Management_Unit,
+                        'name' :self.Name
                         }
         )
 
