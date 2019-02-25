@@ -107,7 +107,7 @@ class RegionsResource(CustomResource):
 
             if params and params.get('criteria', None):
                 criterias = params.get('criteria')
-                for crit in criteria:
+                for crit in criterias:
                     results = results.filter(
                         getattr(FieldworkArea, crit['Column']) == crit['Value'])
             results = results.all()
