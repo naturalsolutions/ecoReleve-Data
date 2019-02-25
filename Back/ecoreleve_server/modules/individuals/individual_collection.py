@@ -25,6 +25,7 @@ class IndividualCollection:
         if self.from_history not in [None, 'all']:
             startDate = self.from_history
 
+        self.startDate = startDate
         StatusTable = Base.metadata.tables['IndividualStatus']
         EquipmentTable = Base.metadata.tables['IndividualEquipment']
 
@@ -99,9 +100,7 @@ def status_filter(self, query, criteria):
 
 @Query_engine.add_filter(IndividualCollection, 'frequency')
 def frequency_VHF_filter(self, query, criteria):
-    startDate = datetime.now()
-    if self.from_history not in ['all']:
-        startDate = self.startDate
+    startDate = self.startDate
 
     freq = criteria['Value']
     e2 = aliased(Equipment)
