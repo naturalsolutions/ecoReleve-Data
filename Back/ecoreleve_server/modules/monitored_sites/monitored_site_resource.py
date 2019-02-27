@@ -31,7 +31,7 @@ class MonitoredSiteResource(DynamicObjectResource):
 
     def update(self):
         try:
-            response = DynamicObjectView.update(self)
+            response = DynamicObjectResource.update(self)
         except IntegrityError as e:
             self.session.rollback()
             response = self.request.response
