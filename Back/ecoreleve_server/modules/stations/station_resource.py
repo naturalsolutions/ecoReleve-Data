@@ -182,7 +182,8 @@ class StationsResource(DynamicObjectCollectionResource):
             if data.get('Name', None):
                 del data['Name']
             currentMonitoredSite = session.query(MonitoredSite).get(data['FK_MonitoredSite'])
-            currentMonitoredSite.updateFromJSON(data)
+            currentMonitoredSite.values = data
+            # currentMonitoredSite.updateFromJSON(data)
             return 'Monitored site position was updated'
         except IntegrityError as e:
             session.rollback()
