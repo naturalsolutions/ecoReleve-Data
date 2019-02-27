@@ -128,7 +128,7 @@ class MonitoredSite (HasDynamicProperties, Base):
     def setPosition(self, DTOObject):
         if self.positionChanged:
             sameDatePosition = list(filter(lambda x: x.StartDate == datetime.strptime(
-                DTOObject['StartDate'], '%d/%m/%Y %H:%M:%S'), self.MonitoredSitePositions))
+                DTOObject['StartDate'], '%Y-%m-%dT%H:%M:%S.%fZ'), self.MonitoredSitePositions))
             if len(sameDatePosition) > 0:
                 sameDatePosition[0].LAT = DTOObject['LAT']
                 sameDatePosition[0].LON = DTOObject['LON']
