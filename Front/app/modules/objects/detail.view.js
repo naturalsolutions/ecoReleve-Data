@@ -184,7 +184,7 @@ define([
       formConfig.id = this.model.get('id');
       formConfig.formRegion = this.ui.form;
       formConfig.buttonRegion = [this.ui.formBtns];
-      formConfig.parent = this.parent;
+      formConfig.parent = this;
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
