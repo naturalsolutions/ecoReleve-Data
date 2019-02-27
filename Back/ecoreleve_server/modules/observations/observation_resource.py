@@ -5,6 +5,7 @@ from sqlalchemy import select, and_, join, func
 from traceback import print_exc
 
 from ecoreleve_server.core import RootCore, DynamicObjectResource, DynamicObjectCollectionResource
+from ecoreleve_server.core.log_view import sendLog
 from .observation_model import Observation
 from .observation_collection import ObservationCollection
 from ..field_activities import FieldActivity_ProtocoleType
