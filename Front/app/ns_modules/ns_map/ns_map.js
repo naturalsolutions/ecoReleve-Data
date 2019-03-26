@@ -148,7 +148,7 @@ define([
       L.control.zoom({
         position:'topright'
       }).addTo(this.map);
-
+      
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
@@ -1348,7 +1348,7 @@ define([
         $('#map').find('.js-toggle-ctrl-player').remove();
         $('#map').find('#player').remove();
         
-        var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend');
+        var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend fixedBottom');
         
         div.innerHTML = '<button class="js-player-toggle btn"><i class="js-player-chevron reneco reneco-chevron_top"></i> location player</button>';
         return div;
@@ -1366,6 +1366,9 @@ define([
       });
       this.parentContainer = $($('#map').parent());
       this.parentContainer.css('overflow', 'hidden');
+      if(this.player) {
+        L.control.scale().addTo(this.map);
+      }
 
 
       /*
