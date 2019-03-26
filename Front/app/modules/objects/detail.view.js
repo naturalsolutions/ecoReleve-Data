@@ -82,23 +82,11 @@ define([
 
       this.model.set('id', options.id);
 
-      if(this.map.player){
-        this.map.hidePlayer({silent : true});
-        // this.map.clearPlayer();
-      }
-
-      this.com.addModule(this.map);
-      if ( this.model.get('type') != 'sensors') {
-        this.locationsGrid.com = this.com;
-      }
-      this.map.com = this.com;
-      this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
-      this.map.updateFromServ();
-      this.map.url = false;
-
-
+      this.map.destroy();
+      this.map.map._container.innerHTML = null
       this.displayForm();
       this.displayGrids();
+      this.displayMap();
     },
 
     displayMap: function() {
