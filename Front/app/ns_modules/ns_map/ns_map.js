@@ -186,9 +186,6 @@ define([
         //     _this.ready();
         //   }
       });
-      if( !this.player ) {
-        L.control.scale().addTo(this.map);
-      }
 
     },
 
@@ -304,19 +301,19 @@ define([
         }
 
 
-          if (this.cluster){
-            this.initClusters(this.geoJson);
+        if (this.cluster){
+          this.initClusters(this.geoJson);
 
-            if(this.player){
-              this.firstInit();
-            }
-          } else {
+          if(this.player){
+            this.firstInit();
+          }    
+        } 
+        else {
             // this.geoJson = geoJson;
             this.initLayer(geoJson);
-          }
-          this.ready();
-          this.fitBound();
-
+        } 
+        this.ready();
+        this.fitBound();
       }).fail(function(msg) {
           console.error( msg );
       });
@@ -425,6 +422,7 @@ define([
 
 
     ready: function(displayLegend = true){
+      L.control.scale().addTo(this.map); // display leaflet scale
       this.setTotal(this.geoJson);
 
       if(this.legend && displayLegend){
@@ -1366,9 +1364,6 @@ define([
       });
       this.parentContainer = $($('#map').parent());
       this.parentContainer.css('overflow', 'hidden');
-      if(this.player) {
-        L.control.scale().addTo(this.map);
-      }
 
 
       /*
