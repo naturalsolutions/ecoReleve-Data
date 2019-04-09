@@ -422,7 +422,9 @@ define([
 
 
     ready: function(displayLegend = true){
-      L.control.scale().addTo(this.map); // display leaflet scale
+      if( !('legendDisplayed' in this && this.legendDisplayed ) ) {
+        this.legendDisplayed = L.control.scale().addTo(this.map); // display leaflet scale
+      }
       this.setTotal(this.geoJson);
 
       if(this.legend && displayLegend){
