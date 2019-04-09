@@ -1,0 +1,10 @@
+UPDATE [dbo].[ModuleGrids]
+SET [IsSearchable] = 1,
+[TypeObj] = 1
+WHERE [Module_ID] = 8 AND [Name] = 'ID' AND [TypeObj] IS NULL;
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('212_update_ModuleGrids_isSearchable_for_IndivFilterID',GETDATE(),(SELECT db_name()))
+
+
+GO

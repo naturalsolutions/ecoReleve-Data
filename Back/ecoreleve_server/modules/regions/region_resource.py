@@ -73,7 +73,8 @@ class RegionsResource(CustomResource):
         query = select([FieldworkArea.fullpath.label('label'),
                         FieldworkArea.ID.label('value'),
                         FieldworkArea.Name.label('displayLabel'),
-                        ]).where(FieldworkArea.fullpath.like('%'+params['term']+'%'))
+                        ]).where(FieldworkArea.fullpath.like('%'+params['term']+'%')
+                        ).order_by(FieldworkArea.fullpath)
 
         return [dict(row) for row in self.session.execute(query).fetchall()]
 
@@ -96,8 +97,8 @@ class RegionsResource(CustomResource):
                 pass
 
         if not existingGeoJson:
-            results = session.query(GeomaticLayer).filter(
-                GeomaticLayer.type_ == params['type'])
+            results = session.query(FieldworkArea).filter(
+                FieldworkArea.type_ == params['type'])
             curStyle = self.colorByTypes.get(params['type'], {}).copy()
             curStyle.update({
                 'fillOpacity': 0.2,
@@ -107,9 +108,9 @@ class RegionsResource(CustomResource):
 
             if params and params.get('criteria', None):
                 criterias = params.get('criteria')
-                for crit in criteria:
+                for crit in criterias:
                     results = results.filter(
-                        getattr(Region, crit['Column']) == crit['Value'])
+                        getattr(FieldworkArea, crit['Column']) == crit['Value'])
             results = results.all()
             response = {
                 'geojson': [r.geom_json for r in results],

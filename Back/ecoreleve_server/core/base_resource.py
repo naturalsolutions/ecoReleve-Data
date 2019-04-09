@@ -330,7 +330,7 @@ class DynamicObjectCollectionResource(CustomResource):
 
         if 'startDate' in params and params['startDate'] != '':
             startDate = datetime.strptime(params['startDate'],
-                                          '%d/%m/%Y %H:%M:%S')
+                                          '%Y-%m-%dT%H:%M:%S.%fZ')
 
         if paging:
             self.pagingSearch(searchInfo, params)

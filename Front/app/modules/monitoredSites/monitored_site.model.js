@@ -27,6 +27,9 @@ define([
         modelurl: 'monitoredSites',
         displayMode: 'display',
         reloadAfterSave: true,
+        afterSaveSuccess : function() {
+          this.parent.reloadHistoryGrid();
+        },
         afterShow: function() {
           $('#dateTimePicker').on('dp.change', function(e) {
             $('#dateTimePicker').data('DateTimePicker').maxDate(e.date);

@@ -55,6 +55,19 @@ define([
       });
     },
 
+    reloadHistoryGrid: function() {
+      if ( this.historyGrid ) {
+        this.rgHistoryGrid.show(this.historyGrid = new GridView({
+          //columns: this.model.get('historyColumnsDefs'),
+          name: 'MonitoredSiteGridHistory',
+          type: this.model.get('type'),
+          url: this.model.get('type') + '/' + this.model.get('id')  + '/history/',
+          clientSide: true,
+        }));
+      }
+
+    },
+
     displayHistoryGrid: function() {
       this.rgHistoryGrid.show(this.historyGrid = new GridView({
         //columns: this.model.get('historyColumnsDefs'),

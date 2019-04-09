@@ -1,0 +1,12 @@
+UPDATE [dbo].[ModuleForms]
+   SET [DefaultValue] = 'True'
+ WHERE 
+ [module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+ AND 
+ [Name] = 'Active'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('214_UPDATE_ModuleForms_set_defaultValue_active_true_form_monitoredSite',GETDATE(),(SELECT db_name()))
+
+
+GO

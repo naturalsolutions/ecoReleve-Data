@@ -1,0 +1,81 @@
+UPDATE [ModuleForms]
+SET 
+[FieldSizeEdit] = 4,
+[FieldSizeDisplay] = 4,
+[FormOrder] = 1
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'Name'
+
+UPDATE [ModuleForms]
+SET 
+[FieldSizeEdit] = 6,
+[FieldSizeDisplay] = 6,
+[FormOrder] = 2
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'Category'
+
+UPDATE [ModuleForms]
+SET 
+[FieldSizeEdit] = 2,
+[FieldSizeDisplay] = 2,
+[FormOrder] = 3
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'Active'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 4 
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'StartDate'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 5
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'LAT'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 6
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'LON'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 7
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'ELE'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 8
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'Precision'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 9
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'Place'
+
+UPDATE [ModuleForms]
+SET 
+[FormOrder] = 10
+WHERE 
+[module_id] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'MonitoredSiteForm')
+AND [Name] = 'Comments'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('215_Update_conf_monitoredSite_form_change_fieldSize_and_order',GETDATE(),(SELECT db_name()))
+
+
+GO
