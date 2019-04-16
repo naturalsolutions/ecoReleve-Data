@@ -278,19 +278,31 @@ define([
               context: this,
               url: 'monitoredSites/'+id_+'/history',
             }).done(function(positions) {
-              var positions = positions[1];
-              var minPosition = positions.reduce(function(min, next){
-                var minDate = new moment(min.StartDate, 'DD/MM/YYYY HH:mm:ss').valueOf();
-                var nextDate = new moment(next.StartDate, 'DD/MM/YYYY HH:mm:ss').valueOf();
-                return minDate < nextDate ? min : next;
-              });
-              if(data.StartDate){
-                var stationDate = new moment(data.StartDate, 'DD/MM/YYYY HH:mm:ss');
-                var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
-                if (stationDate.valueOf() < minPositionDate.valueOf()){
-                  _this.ruleOnchange(minPosition);
+                var positions = positions[1];
+                var minDate,curDate,minPosition;
+                if (positions.length > 0 ) {
+                  minDate = new moment( positions[0].StartDate , 'DD/MM/YYYY HH:mm:ss' );
+                  minPosition = positions [0];
+                  
+                  for (var i = 1 ; i < positions.length ; i++) {
+                    curDate = new moment( positions [i].StartDate , 'DD/MM/YYYY HH:mm:ss' );
+                    if( curDate.valueOf() < minDate.valueOf() ) {
+                      minDate = curDate;
+                      minPosition = positions [i];
+                    }
+                  }    
                 }
-              }
+                else {
+                  minDate = new Date(); //should not happen
+                }
+
+                if(data.StartDate){
+                  var stationDate = new moment(data.StartDate, 'YYYY-MM-DDTHH:mm:ss.sssZ');
+                  var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
+                  if (stationDate.valueOf() < minPositionDate.valueOf()){
+                    _this.ruleOnchange(minPosition);
+                  }
+                }
               }).fail(function() {
                 // console.error('an error occured');
                 // _this.histoMonitoredSite.error = true;
@@ -316,9 +328,15 @@ define([
           confirmButtonColor: 'rgb(147, 14, 14)',
           confirmButtonText: 'OK'
          }).then( (result) => {
-           var stationDate = _this.loadData().StartDate;
+           var stationData = _this.loadData();
            if( 'value' in result ) {
-            data.StartDate = stationDate;
+             
+            data.StartDate = stationData.StartDate;
+            data.LAT = stationData.LAT;
+            data.LON = stationData.LON;
+            data.ELE = stationData.ELE;
+            data.Precision = stationData.Precision;
+
             $.ajax({
               context: _this,
               url: 'monitoredSites/'+_this.getValue(),
