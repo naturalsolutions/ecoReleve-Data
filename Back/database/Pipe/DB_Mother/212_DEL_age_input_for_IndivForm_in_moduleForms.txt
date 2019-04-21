@@ -1,0 +1,19 @@
+DELETE
+FROM [dbo].[ModuleForms]
+WHERE [module_id] = (SELECT ID
+					 FROM [dbo].[FrontModules]
+					 WHERE [Name] = 'IndivForm')
+AND [TypeObj] is null
+AND [Name] = 'Age';
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('212_DEL_age_input_for_IndivForm_in_moduleForms',GETDATE(),(SELECT db_name()))
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('212_DEL_age_input_for_IndivForm_in_moduleForms',GETDATE(),(SELECT db_name()))
+
+
+GO
