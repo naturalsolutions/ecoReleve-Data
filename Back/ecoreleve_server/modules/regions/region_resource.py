@@ -73,7 +73,8 @@ class RegionsResource(CustomResource):
         query = select([FieldworkArea.fullpath.label('label'),
                         FieldworkArea.ID.label('value'),
                         FieldworkArea.Name.label('displayLabel'),
-                        ]).where(FieldworkArea.fullpath.like('%'+params['term']+'%'))
+                        ]).where(FieldworkArea.fullpath.like('%'+params['term']+'%')
+                        ).order_by(FieldworkArea.fullpath)
 
         return [dict(row) for row in self.session.execute(query).fetchall()]
 

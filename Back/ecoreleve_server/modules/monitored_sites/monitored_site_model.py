@@ -19,6 +19,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
+import copy
 
 from ecoreleve_server.core import Base
 from ecoreleve_server.core.base_model import HasDynamicProperties
@@ -92,7 +93,7 @@ class MonitoredSite (HasDynamicProperties, Base):
                               propertyName].type).split('(')[0]
 
             if 'date'.lower() in curTypeAttr.lower():
-                value = parse(value.replace(' ', ''))
+                value = parse(str(value).replace(' ', ''))
                 setattr(self.newPosition, propertyName, value)
             else:
                 setattr(self.newPosition, propertyName, value)
@@ -102,6 +103,8 @@ class MonitoredSite (HasDynamicProperties, Base):
 
     @HasDynamicProperties.values.setter
     def values(self, dict_):
+        myDict = copy.deepcopy(dict_)
+
         '''parameters:
             - data (dict)
         set object properties (static and dynamic), 
@@ -109,21 +112,23 @@ class MonitoredSite (HasDynamicProperties, Base):
         self.newPosition = MonitoredSitePosition()
         self.positionChanged = False
         self.previousState = self.values
-        if dict_.get('ID', None):
-            del dict_['ID']
-        if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
+        if myDict.get('ID', None):
+            del myDict['ID']
+        if self.fk_table_type_name not in myDict and 'type_id' not in myDict and not self.type_id:
             raise Exception('object type not exists')
         else:
-            type_id = dict_.get(self.fk_table_type_name, None) or dict_.get(
-                'type_id', None) or self.type_id
+            type_id = myDict.get(self.fk_table_type_name, None) or myDict.get(
+                'type_id', None)
+            if self.type_id:
+                type_id = self.type_id
             self._type = self.session.query(self.TypeClass).get(type_id)
-            useDate = parser(dict_.get('__useDate__', None)
+            useDate = parser(myDict.get('__useDate__', None)
                              ) or self.linkedFieldDate()
-            for prop, value in dict_.items():
+            for prop, value in myDict.items():
                 self.setValue(prop, value, useDate)
 
-            self.setPosition(dict_)
-            self.updateLinkedField(dict_, useDate=useDate)
+            self.setPosition(myDict)
+            self.updateLinkedField(myDict, useDate=useDate)
 
     def setPosition(self, DTOObject):
         if self.positionChanged:

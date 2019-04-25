@@ -5,6 +5,8 @@ import pandas as pd
 from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 
+import copy
+
 from ecoreleve_server.core import RootCore
 from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
 from .station_model import Station, Station_FieldWorker
@@ -16,6 +18,7 @@ from .station_collection import StationCollection
 from ..permissions import context_permissions
 from ..sensors.sensor_data import CamTrap
 
+from ...utils.datetime import parse
 
 class StationResource(DynamicObjectResource):
 
@@ -182,12 +185,25 @@ class StationsResource(DynamicObjectCollectionResource):
             if data.get('Name', None):
                 del data['Name']
             currentMonitoredSite = session.query(MonitoredSite).get(data['FK_MonitoredSite'])
-            currentMonitoredSite.values = data
+            tmpVal = copy.deepcopy(currentMonitoredSite.values)
+            # tmpVal = currentMonitoredSite.values
+            tmpVal['LAT'] = data['LAT']
+            tmpVal['LON'] = data['LON']
+            tmpVal['ELE'] = data['ELE']
+            tmpVal['Comments'] = data['Comments']
+            tmpVal['StartDate'] = data['StationDate']
+            if tmpVal['creationDate'] > parse(data['StationDate'] ) :
+                tmpVal['creationDate'] = data['StationDate']
+            # print("on a fetch le site monitoré",currentMonitoredSite.values)
+            # print("on va mettre les valeurs",data)
+            currentMonitoredSite.values = tmpVal
             # currentMonitoredSite.updateFromJSON(data)
             return 'Monitored site position was updated'
         except IntegrityError as e:
             session.rollback()
             return 'This location already exists'
+        except Exception as e:
+            print(e)
 
     def getFormImportGPX(self):
         return self.getForm(objectType=1, moduleName='ImportFileForm')

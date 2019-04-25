@@ -774,7 +774,10 @@ class HasDynamicProperties(HasStaticProperties):
 
     @property
     def properties_by_name(self):
-        return {prop.as_dict().get('Name'): prop.as_dict() for prop in self._type._properties}
+        if self and hasattr(self,'_type') and hasattr(self._type,'_properties') :
+            return {prop.as_dict().get('Name'): prop.as_dict() for prop in self._type._properties}
+        else :
+            return {}
 
     def get_property_by_id(self, id_):
         return self.properties_by_id.get(id_, None)
