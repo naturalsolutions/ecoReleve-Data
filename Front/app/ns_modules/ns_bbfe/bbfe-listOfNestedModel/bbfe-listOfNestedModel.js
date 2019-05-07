@@ -2,10 +2,10 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'marionette',
   'backbone-forms',
+  'sweetAlert'
 
-  ], function ($, _, Backbone, Marionette, Form, List, tpl) {
+  ], function ($, _, Backbone, Form, Swal) {
 
     'use strict';
     return Form.editors.ListOfNestedModel = Form.editors.Base.extend({
@@ -47,6 +47,7 @@ define([
             if (this.options.schema.editorClass == 'nested-unstyled'){
                 this.addButtonClass = '';
             }
+            this.subProto = false;
 
 
         },
@@ -125,15 +126,37 @@ define([
 
             setTimeout( function() { //
               if (_this.schema.editorClass.indexOf("form-control") != -1 ) {
-                _this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'})
+                _this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'});
+
+                _this.form.$el.find(".js_subproto_wrapper").css({'display' : ''});
+                _this.subProto = true;
               }
               _this.form.$el.find(".js_badge").html('(' + _this.forms.length + ')');
             },0);
+
             if (this.schema.editorClass.indexOf("form-control") != -1 ) {
                 var fieldsetElem = form.$el.find('fieldset')[0]
-                fieldsetElem.insertAdjacentHTML('beforebegin','<div class="col-md-1 js_container_index_subForm"><a role="button"  class="js_index_subForm" ><span class="indexSubForm">'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</span><span class="totalSubForm">/'+ (this.forms.length + 1) +'</span></button></div>')
+                fieldsetElem.insertAdjacentHTML('beforebegin','\
+                <div class="col-md-1 js_container_index_subForm">\
+                    <div class="js_index_subForm" >\
+                        <span class="indexSubForm">'+ parseInt(this.indexPresent(form,0,this.forms)+1) +'</span>\
+                        /\
+                        <span class="totalSubForm">'+ (this.forms.length) +'</span>\
+                    </div>\
+                </div>\
+                <div class="js_checkbox_subform">\
+                    <input type="checkbox" class="js_subform_selected" value="'+ parseInt(this.indexPresent(form,0,this.forms)+1) +'" >\
+                </div>')
                 fieldsetElem.className = fieldsetElem.className + ' ' + 'col-md-11'
+                form.$el[ 0 ].onclick = function() {
+                    var checkboxStatus = this.getElementsByClassName('js_subform_selected') [0].checked;
+                    this.getElementsByClassName('js_subform_selected') [0].checked = !checkboxStatus;
+                }
             }
+
+            
+
+
             var buttonClass = 'pull-right';
             if (form.$el.hasClass('nested-unstyled')){
                 buttonClass = '';
@@ -168,10 +191,231 @@ define([
             this.$el.find('#formContainer').append(form.el);
             this.bindChanges(form);
             form.$el.find('input:enabled,select:enabled,textarea:enabled').first().focus();
+            this.renumberSubObsAndCheckboxValue();
+        },
+
+        removeSubProto: function(tab) {
+
+            var newFormsTab = []
+            for( var i = 0 ; i < this.forms.length ; i ++ ) {
+                if ( !( i in tab ) ) {
+                    newFormsTab.push( this.forms[ i ] )
+                }
+                else {
+                    this.forms[ i ].remove()           
+                }
+            }
+            this.forms = newFormsTab;
+            this.form.$el.find(".js_badge").html('(' + this.forms.length + ')');
+            this.subFormChange();
+            if(!this.forms.length){
+              this.addEmptyForm();
+            }
+
+        },
+
+        renumberSubObsAndCheckboxValue : function() {
+            var indexSubForm = this.el.getElementsByClassName('indexSubForm');
+            for (var i = 0 ; i < indexSubForm.length ; i ++) {
+                indexSubForm[i].innerHTML = i + 1;
+            }
+            var totalSubForm = this.el.getElementsByClassName('totalSubForm');
+            for( var i = 0 ; i < totalSubForm.length ; i ++ ){
+                totalSubForm[i].innerHTML = this.forms.length;
+            }
+            var checkboxValue = this.el.getElementsByClassName('js_subform_selected');
+            for ( var i = 0 ; i < checkboxValue.length ; i ++ ) {
+                checkboxValue[i].value = parseInt ( i );
+            }
+        },
+
+        selectPrev : function() {
+            var curIndex = parseInt(this.js_record_index.value);
+            var maxIndex = this.forms.length;
+            if(  1 <= curIndex - 1 ) {
+                this.js_record_index.value = parseInt(curIndex - 1) ;
+            }
+            else {
+                this.js_record_index.value = parseInt(maxIndex) ;
+            }
+
+        },
+
+        scrollToSubProto : function() {
+
+            var index = this.js_record_index.value - 1 ;
+            this.forms[ index ].$el[ 0 ].scrollIntoView();
+            this.selectedClassOnly(index);
+        },
+
+        selectedClassOnly: function(value) {
+            for ( var i = 0 ; i < this.forms.length ; i ++ ) {
+                if( i != value ) {
+                    this.forms[ i ].$el[ 0 ].getElementsByClassName('js_subform_selected') [0].checked = false;
+                }
+            }
+            this.forms[ value ].$el[ 0 ].getElementsByClassName('js_subform_selected') [0].checked = true;
+        },
+
+        selectNext : function() {
+            var curIndex = parseInt(this.js_record_index.value);
+            var maxIndex = this.forms.length;
+            if( curIndex + 1  <= maxIndex ) {
+                this.js_record_index.value = parseInt(curIndex + 1) ;
+            }
+            else {
+                this.js_record_index.value = 1 ;
+            }
+
+
+        },
+
+        getListSelected: function() {
+
+            var allCheckboxElem = this.$el[0].getElementsByClassName("js_subform_selected");
+            var arrCheckbox = Array.from(allCheckboxElem);
+            var tabIndexReturned = []
+
+            for( var i = 0 ; i < arrCheckbox.length ; i ++ ) {
+                var item = arrCheckbox[i]
+                if( item.checked == true ) {
+                    tabIndexReturned.push(i)
+                }
+            }
+            return tabIndexReturned
+        },
+
+        bindPagination : function() {
+            var _this = this;
+
+            var listKeys = [
+                'js_prev_sub_proto',
+                'js_next_sub_proto',
+                'js_record_index',
+                'js_total_records',
+                'js_delete_sub_proto'
+            ]
+
+            if( this.subProto) {
+                //find and bind elem in dom just once
+                for ( var i = 0 ; i < listKeys.length ; i++ ) {
+                    var key = listKeys[i];
+                    if ( !(key in this) ) {
+                        this[key] = this.form.el.getElementsByClassName(key)[0];
+                        
+                        if ( this[key] ) {
+                            switch(key) {
+
+                                case 'js_prev_sub_proto': {
+                                    this.js_prev_sub_proto.onclick = function(event) {
+                                        console.log(event)
+                                        _this.selectPrev();
+                                        _this.scrollToSubProto();
+                                    }
+                                    break;
+                                }
+
+                                case 'js_next_sub_proto': {
+                                    this.js_next_sub_proto.onclick = function(event) {
+                                        console.log(event)
+                                        _this.selectNext();
+                                        _this.scrollToSubProto();
+                                    }
+                                    break;
+                                }
+
+                                case 'js_record_index' : {
+                                    this.js_record_index.value = 1;
+                                    this.js_record_index.onfocus = function(event) {
+                                        console.log(event)
+                                        this.oldValue = this.value;
+                                    }
+                                    this.js_record_index.onfocusout = function(event) {
+                                        console.log(event)
+                                        console.log("focus out ")
+                                    };
+                                    this.js_record_index.onchange = function(event) {
+                                        console.log(event)
+                                        if (this.value > _this.forms.length || this.value <= 0) {
+                                            this.value = parseInt(this.oldValue);
+                                        }
+                                        else {
+                                            _this.scrollToSubProto();
+                                        }
+                                    }
+                                    break;
+                                }
+
+                                case 'js_total_records' : {
+                                    this.js_total_records.innerHTML = this.forms.length ; 
+                                    break;
+                                }
+
+                                case 'js_delete_sub_proto' : {
+                                    this.js_delete_sub_proto.onclick = function() {
+
+                                        var tabIndexToDelete = _this.getListSelected();
+                                        _this.displayAlert(tabIndexToDelete);
+
+                                    }
+                                    break;
+                                }
+
+                                default : {
+                                    //do nothing
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        displayAlert: function(tab) {
+            var _this = this;
+            var tabDisplay = [];
+            for( var i = 0 ; i < tab.length ; i ++ ) {
+                tabDisplay[i] = tab[i] + 1;
+            }             
+            if(!tab.length){
+                Swal({
+                    heightAuto: false,
+                    title: 'Delete Sub protocol',
+                    text: 'No sub protocol seleted',
+                    type: 'info',
+                    showCancelButton: false,
+                    confirmButtonColor: 'rgb(218, 146, 15)',
+                    confirmButtonText: 'OK'
+                  });
+            }
+            else {
+                var title = 'Delete sub protocol'
+                var text =  'You will delete sub protocol number :' + tabDisplay[0] 
+                if (tab.length > 1 ) {
+                    var title = 'Delete sub protocols'
+                    var text =  'You will delete sub protocols number :' + tabDisplay.join(',') 
+                }
+                Swal({
+                    heightAuto: false,
+                    title: title,
+                    text: text,
+                    showCancelButton: true,
+                    confirmButtonColor: 'rgb(218, 146, 15)',
+                    confirmButtonText: 'Ok',
+                    cancelButtonText: 'No'
+                  }).then((result) => {
+                    if('value' in result) {
+                        _this.removeSubProto(tab)
+                      console.log("on supprime")
+                    }
+                  });
+            }
         },
 
         render: function() {
             //Backbone.View.prototype.initialize.call(this, options);
+            var _this= this;
             var $el = $($.trim(this.template({
                 hidden: this.hidden,
                 id: this.id,
@@ -205,6 +449,9 @@ define([
                     }
                 }
             }
+            setTimeout(function() {
+                _this.bindPagination();
+            },0)
             return this;
         },
 
