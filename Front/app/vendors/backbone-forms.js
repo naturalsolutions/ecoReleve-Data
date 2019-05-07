@@ -692,8 +692,30 @@ Form.Fieldset = Backbone.View.extend({
 
   template: _.template('\
     <fieldset data-fields>\
-      <% if (legend) { %>\
-        <legend><%= legend %><span class="js_badge badge" style="display:none !important;">0</span></legend>\
+      <% if (legend)  { %>\
+        <div class="js_subproto_wrapper" style="display:none">\
+          <legend class="js_sub_protocol"><%= legend %><span class="js_badge badge">0</span></legend>\
+          <button type="button" class="js_delete_sub_proto btn btn-danger pull-left">\
+            <span class="reneco reneco-trash">\
+            </span>\
+            Delete selected protocol\
+          </button>\
+          <div class="js_sub_proto_pagination pull-right">\
+          <button type="button" class="js_prev_sub_proto btn pull-left">\
+            <span class="reneco reneco-leftarrow">\
+            </span>\
+          </button>\
+          <span class="text-center switcher pull-left">\
+          <input class="js_record_index" style ="text-align:right"></input>\
+            /\
+            <span class="js_total_records">0</span>\
+          </span>\
+          <button type="button" class="js_next_sub_proto btn pull-left">\
+            <span class="reneco reneco-rightarrow">\
+            </span>\
+          </button>\
+          </div>\
+        </div>\
       <% } %>\
     </fieldset>\
   ', null, Form.templateSettings)
