@@ -55,26 +55,28 @@
       margin-left: 5px;
     }
     .js-prev{
-      padding: 6px 2px !important;
+      padding: 8px 2px !important;
       border-radius: 0px;
       border-top-left-radius: 5px;
       border-bottom-left-radius: 5px;
-      padding: 6px 2px !important;
+      font-size: 10px;
     }
     .js-next{
-      padding: 6px 2px !important;
+      padding: 8px 2px !important;
       border-radius: 0px;
       border-top-right-radius: 5px;
       border-bottom-right-radius: 5px;
-      padding: 6px 2px !important;
+      font-size: 10px;
     }
     .switcher{
       font-weight: bold;
       font-size: 15px;
+      .reneco{
+        font-size: 10px;
+      }
     }
     .reneco{
       font-weight: bold;
-      font-size: 10px;
     }
     #NsFormButton{
       display: inline-flex;
@@ -181,4 +183,19 @@
 }
 .tooltipster-content ul li:active {
   background-color: rgb(200, 200, 200);
+}
+
+.dark{
+  .toolbar.top{
+    .switcher{
+      color: #fff;
+    }
+  }
+}
+.white{
+  .toolbar.top{
+    .switcher{
+      color: #111;
+    }
+  }
 }

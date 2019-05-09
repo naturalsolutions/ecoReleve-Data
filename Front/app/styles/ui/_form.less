@@ -120,6 +120,7 @@ button:focus {
 	.input-group{
 		input{
 			border: solid 1px #fff;
+			height: 36px;
 			&:focus{
 				border: solid 2px #64dc17 !important;
 			}
@@ -142,8 +143,12 @@ button:focus {
 	box-shadow: none;
 	min-height: 34px;
 } 
-.input-group-btn:last-child > .btn, .input-group-btn:last-child > .btn-group{
+.white .input-group-btn:last-child > .btn, .white .input-group-btn:last-child > .btn-group{
 	margin-left: -2px !important;
+}
+.dark .input-group-btn:last-child > .btn, .dark .input-group-btn:last-child > .btn-group{
+	border: none;
+	width: 100%;
 }
 .bootstrap-tagsinput {
     width: 100%;
@@ -161,7 +166,7 @@ fieldset{
 	legend{
 		margin: -10px 5px;
 		padding: 5px 10px;
-		font-size: 16px;
+		font-size: 18px;
 		color: #999;
 		font-weight: 500;
 	}

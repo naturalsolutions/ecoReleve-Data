@@ -1,7 +1,24 @@
+// STATION LEFT PART / BOTTOM
+.station-protocols-panel{
+  box-shadow: inset 1px -1px 15px 0px rgba(107, 107, 107, 0.5);
+  button#addFormBtn{
+    background: transparent;
+    border: solid 2px #5cb85c;
+    color: #5cb85c;
+    transform: translate(50%, -150%);
+    span:before{
+      content: 'Add new fieldworker';
+      font-family: 'Exo2', sans-serif !important;
+      font-size: 13px;
+    }
+  }
+}
+
 .protocols{
   &>.toolbar{
     z-index: 10;
   }
+  // LIST PROTOS
   .js-proto-item{
     padding-bottom: 15px;
     padding-top: 15px;
@@ -15,8 +32,6 @@
       .reneco-add{
         line-height: 1.5;
       }
-    }
-    span.reneco-sheet2{
     }
     &.active{
       background: #737373;
@@ -43,20 +58,6 @@
   }
 }
 
-.protocol{
-  .osbservations-container{
-    padding: 0px;
-  }
-  .js-obs-form{
-    padding: 15px;
-    background: rgba(170,170,170,1);
-    &>form{
-      //background: white;
-    }
-  }
-}
-
-
 .proto-form{
   background: #aaa;
   padding: 15px;
@@ -69,46 +70,45 @@
   }
 }
 
-
-.station-protocols-panel{
-    box-shadow: inset 1px -1px 15px 0px rgba(107, 107, 107, 0.5);
-    button#addFormBtn{
-      background: transparent;
-      border: solid 2px #5cb85c;
-      color: #5cb85c;
-      transform: translate(50%, -150%);
-      span:before{
-        content: 'Add new fieldworker';
-        font-family: 'Exo2', sans-serif !important;
-        font-size: 13px;
+// RIGHT PART
+.protocol{
+  .osbservations-container{
+    padding: 0px !important;
+    background-color: #999999;
+    height : ~"calc(100% - 40px)" !important;
+    .observation{
+      .crop1{
+        padding: 0px !important;
+        > form{
+          padding: 2px 0px;
+        }
       }
-    }
-}
-
-
-.dark{
-  .protocol{
-    .crop1{
-      padding: 0px;
-      background-color: #737373;
-      height : ~"calc(100% - 40px)" !important;
       form{
-        background-color: #737373;
-        height: 100%;
-        position: relative;
+        background-color: #626262;
+        min-height: 100%;
+        /* position: relative; */
         fieldset{
           border: none;
           color: #fff;
           position: relative;
-          margin: 20px 10px 0px 10px;
+          margin: 10px;
           width: ~"calc(100% - 20px)";
-          background-color: #737373;
-          -webkit-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
-          -moz-box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);
-          box-shadow: -1px 4px 24px -9px rgba(0,0,0,0.75);              
+          /* margin: 0px;
+          width: 100%; */
+          background-color: #626262;
+          -webkit-box-shadow: -1px 4px 20px -9px rgba(0,0,0,0.75);
+          -moz-box-shadow: -1px 4px 20px -9px rgba(0,0,0,0.75);
+          box-shadow: -1px 4px 20px -9px rgba(0,0,0,0.75); 
+          // INDEX CHECKBOX
           form{
             margin-top: 10px;
             width: 100%;
+            input[type="checkbox"]{
+              &.js_subform_selected{
+                display: none;
+              }
+            }
+            // INDEX FORM (1/2)
             .col-md-1{
               transform: translateX(6px);
               z-index: 999;
@@ -122,7 +122,11 @@
               .totalSubForm{
                 font-size: 13px;
               }
+              div{
+                top: 15px;
+              }
             }
+            // SOUS-PROTO
             fieldset{
               margin: 0px;
               margin-bottom: 15px;
@@ -131,6 +135,58 @@
               background-color: #6c6c6c;
               &.col-md-11{
                 padding-left: 35px;
+              }
+            }
+          }
+          // TITRE SOUS PROTO
+          .js_subproto_wrapper{
+            display: flex;
+            flex-direction: row;
+            height: fit-content;
+            padding: 10px 0px;
+            align-items: center;
+            min-height: inherit !important;
+            background-color: #525252;
+            margin-top: -10px;
+            .badge{
+              background: transparent;
+            }
+            .btn-danger:hover{
+              background-color: #d9534f;
+            }
+            legend{
+              position: inherit;
+            }
+            // SOUS PROTO PAGINATION
+            .js_sub_proto_pagination {
+              margin-left: auto;
+              margin-right: 20px;
+              display: flex;
+              align-items: center;
+              .btn{
+                color: #111;
+                font-size: 10px !important;
+                span:before{
+                  font-weight: bold;
+                }
+              }
+              .js_prev_sub_proto{
+                border-radius: 0px;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+                padding: 7px 1px;
+              }
+              .js_next_sub_proto{
+                border-radius: 0px;
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
+                padding: 7px 1px;
+              }
+              span.switcher{
+                margin: 0px 5px;
+                input{
+                  width: 20px;
+                }
               }
             }
           }
@@ -172,10 +228,23 @@
         }
       }
     }
+  }
+/*   .js-obs-form{
+    padding: 15px;
+    background: rgba(170,170,170,1);
+    &>form{
+      //background: white;
+    }
+  } */
+
+}
+
+.dark{
+  .protocol{
+    // TOOLBARS
     .toolbar{
       height: 40px;
       padding: 0px 10px;
-     
       legend{
         color: #fff !important;
       }
@@ -187,6 +256,29 @@
         display: flex;
         justify-content: flex-end !important;
         align-items: center;
+        #NsFormButton{
+          width: fit-content;
+          float: right;
+          display: inline-flex;
+          .NsFormModuleCancel{
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
+            border-left: none;
+          }
+          .NsFormModuleDelete{
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+          }
+          .NsFormModuleClear{
+            border-radius: 0px;
+          }
+          button{
+            border-radius: 25px;
+          }
+          .pull-right{
+            margin-left: 5px;
+          }
+        }
         .NsFormModuleEdit {
           float: right;
         }
@@ -196,45 +288,29 @@
       }
     }
   }
-  
   .input-group-addon{
-    background-color: transparent;
-    border: solid 1px #fff;
-    color: #fff;
     &:before{
       color: #fff !important;
     }
   }
   .input-group-btn{
-    button{
-      background-color: transparent !important;
-      border: solid 1px #fff;
-    }
+    background-color: transparent !important;
+    border: solid 1px #fff !important;
+    color: #fff !important;
   }
   #remove{
     display: none;
   }
-  .toolbar.bottom{
-    #NsFormButton{
-      width: fit-content;
-      float: right;
-      display: inline-flex;
-      .NsFormModuleCancel{
-        display: none;
-      }
-      .NsFormModuleDelete{
-        border-top-right-radius: 0px;
-        border-bottom-right-radius: 0px;
-      }
-      .NsFormModuleClear{
-        border-top-left-radius: 0px;
-        border-bottom-left-radius: 0px;
-      }
-      button{
-        border-radius: 25px;
-      }
-      .pull-right{
-        margin-left: 5px;
+}
+
+// MODE EDITION
+.editionMode{
+  .protocol{
+    form{
+      input[type="checkbox"]{
+        &.js_subform_selected{
+          display: block !important;
+        }
       }
     }
   }

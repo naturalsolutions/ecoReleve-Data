@@ -702,7 +702,7 @@ Form.Fieldset = Backbone.View.extend({
           </button>\
           <div class="js_sub_proto_pagination pull-right">\
           <button type="button" class="js_prev_sub_proto btn pull-left">\
-            <span class="reneco reneco-leftarrow">\
+            <span class="reneco reneco-chevron_left">\
             </span>\
           </button>\
           <span class="text-center switcher pull-left">\
@@ -711,7 +711,7 @@ Form.Fieldset = Backbone.View.extend({
             <span class="js_total_records">0</span>\
           </span>\
           <button type="button" class="js_next_sub_proto btn pull-left">\
-            <span class="reneco reneco-rightarrow">\
+            <span class="reneco reneco-chevron_right">\
             </span>\
           </button>\
           </div>\
