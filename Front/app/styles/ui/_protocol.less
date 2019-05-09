@@ -86,28 +86,37 @@
       form{
         background-color: #626262;
         min-height: 100%;
-        /* position: relative; */
+        position: relative;
         fieldset{
           border: none;
           color: #fff;
           position: relative;
           margin: 10px;
           width: ~"calc(100% - 20px)";
-          /* margin: 0px;
-          width: 100%; */
           background-color: #626262;
           -webkit-box-shadow: -1px 4px 20px -9px rgba(0,0,0,0.75);
           -moz-box-shadow: -1px 4px 20px -9px rgba(0,0,0,0.75);
           box-shadow: -1px 4px 20px -9px rgba(0,0,0,0.75); 
-          // INDEX CHECKBOX
-          form{
-            margin-top: 10px;
-            width: 100%;
+          #formContainer{
+            display: flex;
+            flex-direction: column;
+          }
+          // INPUT CHECKBOX
+          .js_checkbox_subform{
+            position: absolute;
+            top: 40px;
+            left: 15px;
+            z-index: 99;
             input[type="checkbox"]{
               &.js_subform_selected{
                 display: none;
               }
             }
+          }
+          // INDEX CHECKBOX
+          form{
+            margin-top: 10px;
+            width: 100%;
             // INDEX FORM (1/2)
             .col-md-1{
               transform: translateX(6px);
@@ -151,8 +160,8 @@
             .badge{
               background: transparent;
             }
-            .btn-danger:hover{
-              background-color: #d9534f;
+            button.js_delete_sub_proto{
+              display: none;
             }
             legend{
               position: inherit;
@@ -310,6 +319,12 @@
       input[type="checkbox"]{
         &.js_subform_selected{
           display: block !important;
+        }
+      }
+      button.js_delete_sub_proto{
+        display: block !important;
+        &:hover{
+          background-color: #d9534f;
         }
       }
     }
