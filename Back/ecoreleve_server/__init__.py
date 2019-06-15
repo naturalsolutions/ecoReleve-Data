@@ -10,7 +10,7 @@ from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from .core import SecurityRoot
-from .core.init_db import Base, BaseExport, initialize_session, initialize_session_export, dbConfig
+from .core.init_db import Base, BaseExport, initialize_engines, dbConfig
 from .core.security import include_jwt_policy
 from .utils import loadThesaurusTrad
 from .utils.callback import add_cors_headers_response_callback, session_callback
@@ -57,18 +57,21 @@ def initialize_exiftool():
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
+    # ENTRY POINT
+    # settings = Python dictionnary representing deployment settings
+    config = Configurator(settings=settings)  
 
-    config = Configurator(settings=settings)
+    # include mandatory packages for the application
+    # 1)transaction_manager
     config.include('pyramid_tm')
+    # 2)for jwt security (maybe need to be replace)
     config.include('pyramid_jwtauth')
 
-    engine = initialize_session(settings)
-    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
+    # will create engine and add it to registry 
+    engines = initialize_engines(settings, config)
 
-    engineExport = initialize_session_export(settings)
-    if engineExport is not None:
-        config.registry.dbmakerExport = scoped_session(
-                sessionmaker(bind=engineExport))
+    # use engine for model 
+    config.include('.ModelDB')
 
     config.add_request_method(session_callback, name='dbsession', reify=True)
 
@@ -90,11 +93,11 @@ def main(global_config, **settings):
     config.set_root_factory(SecurityRoot)
 
     dbConfig['init_exiftool'] = settings.get('init_exiftool', None)
-    if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
-        print('Exiftool not initialized')
-        pass
-    else:
+    if 'init_exiftool' in settings and settings['init_exiftool'] == 'True':
         initialize_exiftool()
+    else:
+        print('Exiftool not initialized')
+        
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
     initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
