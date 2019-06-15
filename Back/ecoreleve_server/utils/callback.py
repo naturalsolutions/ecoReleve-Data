@@ -17,13 +17,14 @@ def add_cors_headers_response_callback(event):
     event.request.add_response_callback(cors_headers)
 
 
-def cache_callback(request, session):
-    if isinstance(request.exception, TimeoutError):
-        session.get_bind().dispose()
+# def cache_callback(request, session):
+#     if isinstance(request.exception, TimeoutError):
+#         session.get_bind().dispose()
 
 
 def session_callback(request):
-    makerDefault = request.registry.dbmaker
+    # makerDefault = request.registry.MAIN_DBmaker
+    makerDefault = request.registry.SessionFactory
     session = makerDefault()
 
     @event.listens_for(session, 'before_flush')
@@ -35,9 +36,9 @@ def session_callback(request):
     def cleanup(request):
         if request.exception is not None:
             session.rollback()
-            cache_callback(request, session)
+            # cache_callback(request, session) ??? FOR WHAT
             session.close()
-            makerDefault.remove()
+            # makerDefault.remove() USELESS
         else:
             try:
                 session.commit()
@@ -51,7 +52,7 @@ def session_callback(request):
                 request.response.status_code = 500
             finally:
                 session.close()
-                makerDefault.remove()
+                # makerDefault.remove() I SAID USELESS
 
     request.add_finished_callback(cleanup)
     return session
