@@ -9,7 +9,7 @@ userOAuthDict = {}
 
 
 def loadThesaurusTrad(config):
-    session = config.registry.dbmaker()
+    session = config.registry.MAIN_DBmaker()
     thesTable = Base.metadata.tables['ERDThesaurusTerm']
     query = select(thesTable.c)
 
