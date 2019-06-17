@@ -18,7 +18,8 @@ class CustomExportResource(CustomResource):
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
         try:
-            self.session = self.request.registry.dbmakerExport
+            # self.session = self.request.registry.dbmakerExport
+            self.session = self.request.registry.EXPORT_DBmaker()
         except:
             ''' occures when DB export is not loaded, see development.ini :: loadDBExport '''
             pass

@@ -148,9 +148,9 @@ def uncheckedDatas_graph(request):
                        ).where(Rfid.checked == 0)
     data = []
 
-    session1 = threadlocal.get_current_registry().dbmaker()
-    session2 = threadlocal.get_current_registry().dbmaker()
-    session3 = threadlocal.get_current_registry().dbmaker()
+    session1 = request.registry.MAIN_DBmaker()
+    session2 = request.registry.MAIN_DBmaker()
+    session3 = request.registry.MAIN_DBmaker()
 
     global graphDataDate
     global pendingSensorData
