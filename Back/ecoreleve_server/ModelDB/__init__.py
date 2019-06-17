@@ -27,7 +27,17 @@ def configureSessionFactory(config, dbUsed):
     for item in dbUsed:
         dictEngines[eval(item)] = getattr(config.registry, item + 'engine')
     TheSession.configure(binds=dictEngines)
+    ## test connectiont
+    test = TheSession()
+    from ecoreleve_server.ModelDB.SENSOR_DB.GPX import GPX
+    from ecoreleve_server.ModelDB.MAIN_DB.Station import Station
+    rows1 = test.query(GPX).all()
+    test.flush()
+    rows2 = test.query(Station).limit(10).all()
+    test.flush()
+
     setattr(config.registry, 'SessionFactory', TheSession)
+    test.close()
 
 
 def createall(config, dbUsed):
