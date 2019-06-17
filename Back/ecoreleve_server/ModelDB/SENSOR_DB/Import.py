@@ -10,6 +10,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from ecoreleve_server.ModelDB import SENSOR_DB
 
 
+# class Import(HasStaticProperties, Base):
 class Import(SENSOR_DB):
     moduleGridName = 'ImportHistoryFilter'
 
