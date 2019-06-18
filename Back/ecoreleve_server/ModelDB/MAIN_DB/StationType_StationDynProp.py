@@ -29,3 +29,6 @@ class StationType_StationDynProp(MAIN_DB):
     FK_StationDynProp = Column(Integer,
                                ForeignKey('StationDynProp.ID'),
                                nullable=False)
+
+    stationType = relationship("StationType",back_populates="Schema")
+    stationDynProp = relationship("StationDynProp",back_populates="StationTypes")                  

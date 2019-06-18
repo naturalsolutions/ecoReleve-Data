@@ -21,3 +21,7 @@ class StationType(MAIN_DB):
     ID = Column(Integer, Sequence('StationType__id_seq'), primary_key=True)
     Name = Column(String(250), nullable=True)
     Status = Column(Integer, nullable=True)
+
+    Schema = relationship("StationType_StationDynProp", 
+                          back_populates="stationType")
+

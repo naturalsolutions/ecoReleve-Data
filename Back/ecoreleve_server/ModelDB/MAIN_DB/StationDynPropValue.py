@@ -38,3 +38,6 @@ class StationDynPropValue(MAIN_DB):
     FK_Station = Column(Integer,
                         ForeignKey('Station.ID'),
                         nullable=False)
+
+    station = relationship("Station",back_populates="dynPropsValues")
+    dynProp = relationship("StationDynProp",back_populates="Stations")   

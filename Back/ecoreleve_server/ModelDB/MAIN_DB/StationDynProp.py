@@ -21,3 +21,10 @@ class StationDynProp(MAIN_DB):
     ID = Column(Integer, Sequence('StationDynProp__id_seq'), primary_key=True)
     Name = Column(String(250), nullable=True)
     TypeProp = Column(String(250), nullable=True)
+
+    StationTypes = relationship("StationType_StationDynProp",
+                          back_populates="stationDynProp")
+    
+    Stations = relationship("StationDynPropValue",
+                            back_populates="dynProp")
+ 

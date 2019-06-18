@@ -33,7 +33,7 @@ def configureSessionFactory(config, dbUsed):
     from ecoreleve_server.ModelDB.MAIN_DB.Station import Station
     rows1 = test.query(GPX).all()
     test.flush()
-    rows2 = test.query(Station).limit(10).all()
+    rows2 = test.query(Station).limit(1).all()
     test.flush()
 
     setattr(config.registry, 'SessionFactory', TheSession)

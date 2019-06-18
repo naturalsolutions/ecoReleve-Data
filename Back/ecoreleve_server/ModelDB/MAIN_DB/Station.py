@@ -13,6 +13,10 @@ from ecoreleve_server.ModelDB import MAIN_DB
 # from ecoreleve_server.core.base_model import HasDynamicProperties
 from sqlalchemy.ext.hybrid import hybrid_property
 from .Station_FieldWorker import Station_FieldWorker
+from .StationDynPropValue import StationDynPropValue
+
+from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.ext.associationproxy import association_proxy
 
 
 class Station(MAIN_DB):
@@ -40,18 +44,33 @@ class Station(MAIN_DB):
         'MonitoredSite.ID'), nullable=True)
     Comments = Column(String(250))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+    FK_StationType = Column(Integer, ForeignKey('StationType.ID'), nullable=False)
 
-    Observations = relationship(
-        'Observation', back_populates='Station', cascade="all, delete-orphan")
-    # FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
-    FK_FieldworkArea = Column(Integer, ForeignKey('FieldworkArea.ID'),
-                              nullable=True)
 
-    Station_FieldWorkers = relationship(
-        'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
+    Type = relationship('StationType')
 
-    MediasFiles = relationship(
-        'MediasFiles', back_populates='Station', cascade="all, delete-orphan")
+
+    # Observations = relationship(
+    #     'Observation', back_populates='Station', cascade="all, delete-orphan")
+    # # FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+    # FK_FieldworkArea = Column(Integer, ForeignKey('FieldworkArea.ID'),
+    #                           nullable=True)
+
+    # Station_FieldWorkers = relationship(
+    #     'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
+
+    # MediasFiles = relationship(
+    #     'MediasFiles', back_populates='Station', cascade="all, delete-orphan")
+
+    dynPropsValues = relationship("StationDynPropValue", 
+                            back_populates="station")
+
+    # _proxied = association_proxy(
+    #     "dynProps",
+    #     "value",
+    #     creator=lambda key, value: StationDynPropValue(ID=key,
+    #                                                    ValueString=value),
+    # )
 
     ''' hybrid property on relationship '''
     @hybrid_property
