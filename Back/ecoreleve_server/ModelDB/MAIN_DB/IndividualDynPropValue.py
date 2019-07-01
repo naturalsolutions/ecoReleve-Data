@@ -15,29 +15,26 @@ from ecoreleve_server.ModelDB.meta import MAIN_DB_BASE
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
-class StationDynPropValue(MAIN_DB_BASE):
+class IndividualPropValue(MAIN_DB_BASE):
 
-    __tablename__ = 'StationDynPropValue'
+    __tablename__ = 'IndividualPropValue'
 
     ID = Column(Integer,
-                Sequence('StationDynPropValue__id_seq'),
+                Sequence('IndividualPropValue__id_seq'),
                 primary_key=True)
     StartDate = Column(DateTime,
                        nullable=False)
     ValueInt = Column(Integer,
                       nullable=True)
-    ValueString = Column(String(255),
+    ValueString = Column(String(500),
                          nullable=True)
     ValueDate = Column(DateTime,
                        nullable=True)
     ValueFloat = Column(Float,
                         nullable=True)
-    FK_StationDynProp = Column(Integer,
-                               ForeignKey('StationDynProp.ID'),
+    FK_IndividualDynProp = Column(Integer,
+                               ForeignKey('IndividualDynProp.ID'),
                                nullable=False)
-    FK_Station = Column(Integer,
-                        ForeignKey('Station.ID'),
+    FK_Individual = Column(Integer,
+                        ForeignKey('Individual.ID'),
                         nullable=False)
-
-    station = relationship("Station",back_populates="dynPropsValues")
-    dynProp = relationship("StationDynProp",back_populates="Stations")   

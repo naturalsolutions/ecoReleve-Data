@@ -31,8 +31,8 @@ from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
 
-from . import dbConfig
-from .configuration_model import BusinessRules, ConfiguredObjectResource
+# from . import dbConfig
+# from .configuration_model import BusinessRules, ConfiguredObjectResource
 # from ..GenericObjets.DataBaseObjects import ConfiguredObjectResource
 from ecoreleve_server.utils.parseValue import parser, formatValue, isEqual
 

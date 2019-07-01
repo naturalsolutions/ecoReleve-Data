@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from ..core import Base
+from ecoreleve_server.ModelDB.meta import MAIN_DB_BASE
 
 
 thesaurusDictTraduction = {}
@@ -9,8 +9,8 @@ userOAuthDict = {}
 
 
 def loadThesaurusTrad(config):
-    session = config.registry.MAIN_DBmaker()
-    thesTable = Base.metadata.tables['ERDThesaurusTerm']
+    session = config.registry.SessionFactory()
+    thesTable = MAIN_DB.metadata.tables['ERDThesaurusTerm']
     query = select(thesTable.c)
 
     results = session.execute(query).fetchall()

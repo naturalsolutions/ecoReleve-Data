@@ -8,11 +8,11 @@ from sqlalchemy import (
     func
 )
 from sqlalchemy.orm import relationship
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 from sqlalchemy.inspection import inspect
 
 
-class MediasFiles(MAIN_DB):
+class MediasFiles(MAIN_DB_BASE):
 
     __tablename__ = 'MediasFiles'
     Id = Column(Integer, Sequence('MediasFiles__id_seq'), primary_key=True)

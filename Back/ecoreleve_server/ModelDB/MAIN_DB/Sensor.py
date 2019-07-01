@@ -5,26 +5,23 @@ from sqlalchemy import (
     Integer,
     Sequence,
     String,
+    Unicode,
     func
 )
 
-from ecoreleve_server.ModelDB import MAIN_DB
-from ecoreleve_server.core.base_model import HasDynamicProperties
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 
 
-class Sensor (HasDynamicProperties, MAIN_DB):
+class Sensor (MAIN_DB_BASE):
 
     __tablename__ = 'Sensor'
 
-    moduleFormName = 'SensorForm'
-    moduleGridName = 'SensorFilter'
-
     ID = Column(Integer, Sequence('Sensor__id_seq'), primary_key=True)
-    UnicIdentifier = Column(String(250))
-    Model = Column(String(250))
-    Compagny = Column(String(250))
-    SerialNumber = Column(String(250))
+    UnicIdentifier = Column(Unicode(250), nullable=True)
+    Model = Column(Unicode(255), nullable=True)
+    Compagny = Column(Unicode(255), nullable=True)
+    SerialNumber = Column(Unicode(255), nullable=True)
     creationDate = Column(DateTime, nullable=False, default=func.now())
-    FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'))
+    FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'), nullable=True)
     OldID = Column(Integer, nullable=True)
-    Original_ID = Column(String(50), nullable=True)
+    Original_ID = Column(Unicode(50), nullable=True)

@@ -3,10 +3,10 @@ from sqlalchemy import (Column,
                         Sequence,
                         Unicode
                         )
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 
 
-class fieldActivity(MAIN_DB):
+class fieldActivity(MAIN_DB_BASE):
 
     __tablename__ = 'fieldActivity'
 

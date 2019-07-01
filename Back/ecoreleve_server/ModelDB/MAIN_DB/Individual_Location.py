@@ -10,10 +10,10 @@ from sqlalchemy import (
     )
 from sqlalchemy.ext.hybrid import hybrid_property
 from ecoreleve_server.core.base_types import IntegerDateTime
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 
 
-class Individual_Location(MAIN_DB):
+class Individual_Location(MAIN_DB_BASE):
     __tablename__ = 'Individual_Location'
 
     ID = Column(Integer, Sequence(

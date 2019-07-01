@@ -16,15 +16,7 @@ def get_redis_con():
         localRedis = None
     return localRedis
 
-
-class myBase:
-    __table_args__ = {'implicit_returning': False}
-
-#TODO should remove this global variable not safe 
-Base = declarative_base(cls=myBase) 
-BaseExport = declarative_base()
 dbConfig = {'dialect': 'mssql'}
-
 
 def initialize_engines(settings, config):
     # CHECK DB WILL USE
@@ -43,16 +35,6 @@ def initialize_engines(settings, config):
         enginetmp = engines[key]
         init_session_factory_and_bind_it(enginetmp, key, config)
     
-
-    # Base.metadata.bind = engines['MAIN_DB']
-    # dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engines['MAIN_DB'], autoflush=False))
-    # import_submodule()
-    # Base.metadata.create_all(engines['MAIN_DB'])
-    # Base.metadata.reflect(views=True, extend_existing=False)
-
-    # BaseExport.metadata.bind = engines['EXPORT_DB']
-    # BaseExport.metadata.create_all(engines['EXPORT_DB'])
-    # BaseExport.metadata.reflect(views=True, extend_existing=False)
 
     return engines
 

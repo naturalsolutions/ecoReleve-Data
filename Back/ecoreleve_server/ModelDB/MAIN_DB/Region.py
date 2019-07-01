@@ -3,17 +3,17 @@ from sqlalchemy import func
 from sqlalchemy.ext.hybrid import hybrid_property
 from geojson import Feature
 from ecoreleve_server.core.base_types import Geometry
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 from shapely.wkt import loads
 
 
-class Region(MAIN_DB):
+class Region(MAIN_DB_BASE):
 
     __tablename__ = 'Region'
     ID = Column(Integer, Sequence(
         'Region__id_seq'), primary_key=True)
-    fullpath = Column(String(255))
     Country = Column(String(255))
+    fullpath = Column(String(255))
     Area = Column(String(255))
     Region = Column(String(255))
     Subregion = Column(String(255))

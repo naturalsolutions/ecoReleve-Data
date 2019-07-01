@@ -9,12 +9,12 @@ from sqlalchemy import (
     func
     )
 from sqlalchemy.orm import relationship
-from ecoreleve_server.ModelDB import MAIN_DB
-from ecoreleve_server.core.base_model import HasDynamicProperties
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
+
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
-class StationType(MAIN_DB):
+class StationType(MAIN_DB_BASE):
 
     __tablename__ = 'StationType'
 

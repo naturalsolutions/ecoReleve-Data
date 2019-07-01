@@ -1,4 +1,4 @@
-from ..core.configuration_model.Business import BusinessRuleError
+# from ..core.configuration_model.Business import BusinessRuleError
 from traceback import print_exc
 from sqlalchemy import event 
 
@@ -42,10 +42,10 @@ def session_callback(request):
         else:
             try:
                 session.commit()
-            except BusinessRuleError as e:
-                session.rollback()
-                request.response.status_code = 409
-                request.response.text = e.value
+            # except BusinessRuleError as e:
+            #     session.rollback()
+            #     request.response.status_code = 409
+            #     request.response.text = e.value
             except Exception as e:
                 print_exc()
                 session.rollback()

@@ -6,21 +6,18 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
-    Sequence,
-    func
+    Sequence
     )
-from sqlalchemy.orm import relationship
 from ecoreleve_server.ModelDB.meta import MAIN_DB_BASE
 
-from sqlalchemy.ext.hybrid import hybrid_property
 
 
-class StationDynPropValue(MAIN_DB_BASE):
+class ObservationPropValue(MAIN_DB_BASE):
 
-    __tablename__ = 'StationDynPropValue'
+    __tablename__ = 'ObservationPropValue'
 
     ID = Column(Integer,
-                Sequence('StationDynPropValue__id_seq'),
+                Sequence('ObservationPropValue__id_seq'),
                 primary_key=True)
     StartDate = Column(DateTime,
                        nullable=False)
@@ -32,12 +29,9 @@ class StationDynPropValue(MAIN_DB_BASE):
                        nullable=True)
     ValueFloat = Column(Float,
                         nullable=True)
-    FK_StationDynProp = Column(Integer,
-                               ForeignKey('StationDynProp.ID'),
+    FK_ObservationDynProp = Column(Integer,
+                               ForeignKey('ObservationDynProp.ID'),
                                nullable=False)
-    FK_Station = Column(Integer,
-                        ForeignKey('Station.ID'),
+    FK_Observation = Column(Integer,
+                        ForeignKey('Observation.ID'),
                         nullable=False)
-
-    station = relationship("Station",back_populates="dynPropsValues")
-    dynProp = relationship("StationDynProp",back_populates="Stations")   

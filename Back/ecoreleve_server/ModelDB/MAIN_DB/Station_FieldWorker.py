@@ -6,10 +6,10 @@ from sqlalchemy import (
     )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB.meta import MAIN_DB_BASE
 
 
-class Station_FieldWorker (MAIN_DB):
+class Station_FieldWorker (MAIN_DB_BASE):
 
     __tablename__ = 'Station_FieldWorker'
 
@@ -18,18 +18,18 @@ class Station_FieldWorker (MAIN_DB):
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     FK_FieldWorker = Column(Integer, ForeignKey('User.ID'))
 
-    FieldWorker = relationship('User')
+    # FieldWorker = relationship('User')
 
-    @hybrid_property
-    def FieldWorkerName(self):
-        if self.FieldWorker:
-            return self.FieldWorker.Login
-        else:
-            return None
+    # @hybrid_property
+    # def FieldWorkerName(self):
+    #     if self.FieldWorker:
+    #         return self.FieldWorker.Login
+    #     else:
+    #         return None
 
-    @hybrid_property
-    def FieldWorkerID(self):
-        if self.FieldWorker:
-            return self.FieldWorker.id
-        else:
-            return None
+    # @hybrid_property
+    # def FieldWorkerID(self):
+    #     if self.FieldWorker:
+    #         return self.FieldWorker.id
+    #     else:
+    #         return None

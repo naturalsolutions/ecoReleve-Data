@@ -7,10 +7,10 @@ from sqlalchemy import (
     String,
     Sequence
     )
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 
 
-class MonitoredSitePosition(MAIN_DB):
+class MonitoredSitePosition(MAIN_DB_BASE):
 
     __tablename__ = 'MonitoredSitePosition'
     ID = Column(Integer, Sequence(

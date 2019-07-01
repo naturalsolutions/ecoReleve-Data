@@ -7,12 +7,13 @@ from sqlalchemy import (
     String,
     func
 )
-from ecoreleve_server.ModelDB import MAIN_DB
+from ecoreleve_server.ModelDB import MAIN_DB_BASE
 from sqlalchemy.ext.hybrid import hybrid_property
 from ecoreleve_server.core.init_db import dbConfig
 
 
-class User(MAIN_DB):
+class User(MAIN_DB_BASE):
+    __abstract__ = True
     __tablename__ = 'User'
     id = Column('ID', Integer, Sequence('seq_user_pk_id'), primary_key=True)
     Lastname = Column(String(50), nullable=False)

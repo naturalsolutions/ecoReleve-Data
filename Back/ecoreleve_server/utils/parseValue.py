@@ -3,7 +3,7 @@ from sqlalchemy import select
 from datetime import datetime
 
 from .thesaurusLoad import thesaurusDictTraduction
-from ..core import Base
+# from ..core import Base
 
 
 dictVal = {
@@ -123,19 +123,19 @@ def formatThesaurus(data, nodeID=None):
     return data
 
 
-def formatObjetPicker(data, key, label):
-    autcompResult = getAutcompleteValues(data, key.replace('FK_', ''), label)
-    return {'displayValue': autcompResult,
-            'value': data
-            }
+# def formatObjetPicker(data, key, label):
+#     autcompResult = getAutcompleteValues(data, key.replace('FK_', ''), label)
+#     return {'displayValue': autcompResult,
+#             'value': data
+#             }
 
 
-def getAutcompleteValues(ID, objName, NameValReturn):
-    session = threadlocal.get_current_request().dbsession
-    table = Base.metadata.tables[objName]
+# def getAutcompleteValues(ID, objName, NameValReturn):
+#     session = threadlocal.get_current_request().dbsession
+#     table = Base.metadata.tables[objName]
 
-    query = select([table.c[NameValReturn]]).where(table.c['ID'] == ID)
-    return session.execute(query).scalar()
+#     query = select([table.c[NameValReturn]]).where(table.c['ID'] == ID)
+#     return session.execute(query).scalar()
 
 
 def integerOrDefault(val,defaultVal,positive):
