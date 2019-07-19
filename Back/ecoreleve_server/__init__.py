@@ -100,5 +100,11 @@ def main(global_config, **settings):
     loadThesaurusTrad(config)
     add_routes(config)
     config.scan()
+    
+    app = config.make_wsgi_app()
+    from paste.translogger import TransLogger
+    app = TransLogger(app, setup_console_handler=False)
+    return app
 
-    return config.make_wsgi_app()
+
+    # return config.make_wsgi_app()

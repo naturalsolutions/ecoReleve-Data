@@ -3,7 +3,7 @@
 # http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
 ###
 
-[app:main]
+[app:mypyramidapp]
 use = egg:ecoreleve_server
 
 pyramid.reload_templates = true
@@ -57,6 +57,7 @@ dbLog.url = DRIVER={SQL Server};Server=.;Database=NSLog;UID=toto;PWD=totomdp;Tru
 dbLog.schema = NSLog.dbo
 
 
+
 # By default, the toolbar only appears for clients from IP addresses
 # '127.0.0.1' and '::1'.
 # debugtoolbar.hosts = 127.0.0.1 ::1
@@ -75,14 +76,21 @@ port = 6545
 # http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/logging.html
 ###
 
+[filter:translogger]
+use = egg:Paste#translogger
+setup_console_handler = False
+
+[pipeline:main]
+pipeline = mypyramidapp
+
 [loggers]
-keys = root, ecoreleve_server, sqlalchemy
+keys = root, ecoreleve_server, sqlalchemy, wsgi
 
-[handlers]
-keys = console
-
-[formatters]
-keys = generic
+[logger_wsgi]
+level = INFO
+handlers = accesslog
+qualname = wsgi
+propagate = 0 
 
 [logger_root]
 level = INFO
@@ -101,11 +109,27 @@ qualname = sqlalchemy.engine
 # "level = DEBUG" logs SQL queries and results.
 # "level = WARN" logs neither.  (Recommended for production systems.)
 
+[handlers]
+keys = console, accesslog
+
 [handler_console]
 class = StreamHandler
 args = (sys.stderr,)
 level = NOTSET
-formatter = generic
+formatter = accesslog
+
+[handler_accesslog]
+class = handlers.TimedRotatingFileHandler
+args = ('%(here)s/../logs/request.log','midnight',)
+level = INFO
+formater = accesslog
+
+[formatters]
+keys = generic, accesslog
 
 [formatter_generic]
 format = %(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
+
+[formatter_accesslog]
+format = %(message)s
+
