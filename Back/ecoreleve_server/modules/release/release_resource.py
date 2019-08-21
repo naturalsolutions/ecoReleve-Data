@@ -9,7 +9,7 @@
 import json
 from datetime import datetime
 import pandas as pd
-from sqlalchemy import select, text
+from sqlalchemy import select, text, and_
 import operator
 from traceback import print_exc
 from collections import Counter
@@ -25,13 +25,24 @@ from ..stations import Station
 from ..observations.equipment_model import checkEquip, set_equipment
 from ..individuals.individual_resource import IndividualsResource
 
+from ecoreleve_server.core.configuration_model.frontmodules import ModuleGrids,FrontModules,ModuleForms
+
 ProtocoleType = Observation.TypeClass
 
 
 class ReleaseIndividualsResource(IndividualsResource):
 
-    moduleGridName = 'IndivReleaseGrid'
+    moduleGridName = 'IndivReleaseGrid' # will be used for fetching conf
     __acl__ = context_permissions['release']
+    listProtosNameToInstanciate = [
+                'Vertebrate_group',
+                'Vertebrate_individual',
+                'Bird_Biometry',
+                'Release_Group',
+                'Release_Individual',
+                'Individual_equipment'
+                ]
+    objProtoToInstanciate = {}
 
     def getFilter(self, type_=None, moduleName=None):
         return []
@@ -55,6 +66,64 @@ class ReleaseIndividualsResource(IndividualsResource):
     def retrieve(self):
         return self.search(paging=False)
 
+    def createObjProtoToInstanciate(self,listProtosName):
+        self.objProtoToInstanciate = {} # reset the object
+        for item in listProtosName:
+            self.objProtoToInstanciate[item] = {
+                'id' : None,
+                'propsList' : []
+            }
+
+    def getConfForProtocole(self):
+
+        
+        self.createObjProtoToInstanciate(self.listProtosNameToInstanciate)
+  
+        rows = self.session.query(
+                                ProtocoleType.ID.label("idProto"),
+                                ProtocoleType.Name.label("nameProto"),
+                                ModuleForms.Name.label("nameDynProp")
+                                ).join(
+                                        ProtocoleType,
+                                        ProtocoleType.ID == ModuleForms.TypeObj
+                                ).join(
+                                        FrontModules,
+                                        FrontModules.ID == ModuleForms.Module_ID
+                                ).filter(
+                                        ProtocoleType.Name.in_(self.listProtosNameToInstanciate)
+                                ).order_by(
+                                        ProtocoleType.ID,
+                                        ModuleForms.Name
+                                ).all()
+        for item in rows:
+            if self.objProtoToInstanciate[item.nameProto]['id'] is None and item.idProto is not None:
+                self.objProtoToInstanciate[item.nameProto]['id'] = item.idProto
+            if item.nameDynProp not in self.objProtoToInstanciate[item.nameProto]['propsList']:
+                self.objProtoToInstanciate[item.nameProto]['propsList'].append(item.nameDynProp)
+
+
+
+    def getConfForValidate(self):
+
+        self.confInDB = self.session.query(ModuleGrids).join(FrontModules).filter( and_( ModuleGrids.Module_ID == FrontModules.ID, FrontModules.Name == self.moduleGridName ) ).all()
+
+        if len(self.confInDB) <= 0:
+            print("someting goes wrong")
+
+        self.keysUpdatable = []
+        self.defaultKeys = ['ID']
+
+        self.keysUpdatable.extend(self.defaultKeys)
+
+        for item in self.confInDB:
+            if item.GridRender > 2 :
+                self.keysUpdatable.append(item.Name)
+
+        # self.keysUpdatable = list( filter( lambda x['Name'] : ( x.GridRender > 2 ), self.confInDB ) )
+
+        if len(self.keysUpdatable) <= 0 :
+            print("nothing to update")
+
     def updateAllStartDate(self, indiv, date, properties):
         for prop in properties:
             existingDynPropValues = list(filter(lambda p: p.fk_property == prop['ID'],
@@ -63,6 +132,7 @@ class ReleaseIndividualsResource(IndividualsResource):
                 curValueProperty = max(
                     existingDynPropValues, key=operator.attrgetter('StartDate'))
                 curValueProperty.StartDate = date
+                
 
     def create(self):
         session = self.session
@@ -76,6 +146,8 @@ class ReleaseIndividualsResource(IndividualsResource):
                 return isavailableSensor(request, data)
             return
 
+        self.getConfForValidate()
+
         sta_id = int(data['StationID'])
         indivListFromData = json.loads(data['IndividualList'])
         releaseMethod = data['releaseMethod']
@@ -85,8 +157,13 @@ class ReleaseIndividualsResource(IndividualsResource):
         userLang = request.authenticated_userid['userlanguage']
         indivList = []
         for row in indivListFromData:
-            row = dict(map(lambda k: getFullpath(k, userLang), row.items()))
-            indivList.append(row)
+            rowTmp = {}
+
+            for key,value in row.items():
+                if key in self.keysUpdatable:
+                    rowTmp[key] = value
+
+            indivList.append(rowTmp)
 
         def getnewObs(typeID):
             newObs = Observation()
@@ -94,20 +171,9 @@ class ReleaseIndividualsResource(IndividualsResource):
             newObs.FK_Station = sta_id
             return newObs
 
-        protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(
-        ), columns=ProtocoleType.__table__.columns.keys())
-        vertebrateGrpID = int(
-            protoTypes.loc[protoTypes['Name'] == 'Vertebrate_group', 'ID'].values[0])
-        vertebrateIndID = int(
-            protoTypes.loc[protoTypes['Name'] == 'Vertebrate_individual', 'ID'].values[0])
-        biometryID = int(
-            protoTypes.loc[protoTypes['Name'] == 'Bird_Biometry', 'ID'].values[0])
-        releaseGrpID = int(
-            protoTypes.loc[protoTypes['Name'] == 'Release_Group', 'ID'].values[0])
-        releaseIndID = int(
-            protoTypes.loc[protoTypes['Name'] == 'Release_Individual', 'ID'].values[0])
-        equipmentIndID = int(
-            protoTypes.loc[protoTypes['Name'] == 'Individual_equipment', 'ID'].values[0])
+        
+        
+        self.getConfForProtocole()
 
         vertebrateIndList = []
         biometryList = []
@@ -160,64 +226,96 @@ class ReleaseIndividualsResource(IndividualsResource):
             errorEquipment = None
             binList = []
             for indiv in indivList:
+                tmpIndiv = indiv
                 curIndiv = session.query(Individual).get(indiv['ID'])
                 if not taxon:
                     taxon = curIndiv.Species
                 try:
-                    indiv['taxon'] = curIndiv.Species
-                    del indiv['species']
+                    tmpIndiv['taxon'] = curIndiv.Species
+                    if 'species' in tmpIndiv:
+                        del tmpIndiv['species']
                 except:
-                    indiv['taxon'] = curIndiv.Species
-                    del indiv['Species']
+                    tmpIndiv['taxon'] = curIndiv.Species
+                    if 'species' in tmpIndiv:
+                        del tmpIndiv['Species']
                     pass
 
-                indiv['__useDate__'] = curStation.StationDate
+                tmpIndiv['__useDate__'] = curStation.StationDate
+                curIndiv.values = tmpIndiv
                 self.updateAllStartDate(
                     curIndiv, curStation.StationDate, curIndiv.properties)
-                curIndiv.values = indiv
+                
 
                 curIndiv.enable_business_ruler = False
-                binList.append(MoF_AoJ(indiv))  
-                for k in indiv.keys():
-                    v = indiv.pop(k)
-                    k = k.lower()
-                    indiv[k] = v
+                binList.append(MoF_AoJ(curIndiv.values))  
 
-                indiv['FK_Individual'] = curIndiv.ID
-                indiv['FK_Station'] = sta_id
+                curIndiv.values['FK_Individual'] = curIndiv.ID
+                curIndiv.values['FK_Station'] = sta_id
                 try:
-                    indiv['weight'] = indiv['poids']
+                    curIndiv.values['weight'] = curIndiv.values['poids']
                 except:
-                    indiv['weight'] = indiv['Poids']
+                    curIndiv.values['weight'] = curIndiv.values['Poids']
                     pass
                 try:
-                    indiv['Comments'] = indiv['release_comments']
+                    curIndiv.values['Comments'] = curIndiv.values['Release_Comments']
                 except:
                     print_exc()
                     pass
 
-                curVertebrateInd = getnewObs(vertebrateIndID)
-                curVertebrateInd.values = indiv
+                listPropsCurIndiv = [x for x in list(curIndiv.values) ]
+                curIndivDict = curIndiv.values
+
+                curProtoID = self.objProtoToInstanciate['Vertebrate_individual']['id']
+                listPropsCurProto = self.objProtoToInstanciate['Vertebrate_individual']['propsList']
+
+                curVertebrateInd = getnewObs(curProtoID)
+                curValues = {}
+                for propsProto in listPropsCurProto:
+                    for propsIndiv in listPropsCurIndiv:
+                      if propsProto.lower() == propsIndiv.lower():
+                        curValues[propsProto] = curIndivDict[propsIndiv]
+                    
+                curVertebrateInd.values = curValues
                 curVertebrateInd.Comments = None
                 vertebrateIndList.append(curVertebrateInd)
 
-                curBiometry = getnewObs(biometryID)
-                curBiometry.values = indiv
+
+                curProtoID = self.objProtoToInstanciate['Bird_Biometry']['id']
+                listPropsCurProto = self.objProtoToInstanciate['Bird_Biometry']['propsList']
+                curBiometry = getnewObs(curProtoID)
+
+                curValues = {}
+                for propsProto in listPropsCurProto:
+                    for propsIndiv in listPropsCurIndiv:
+                      if propsProto.lower() == propsIndiv.lower():
+                        curValues[propsProto] = curIndivDict[propsIndiv]
+                    
+                curBiometry.values = curValues
                 curBiometry.Comments = None
                 biometryList.append(curBiometry)
 
-                curReleaseInd = getnewObs(releaseIndID)
-                curReleaseInd.values = indiv
+
+                curProtoID = self.objProtoToInstanciate['Release_Individual']['id']
+                listPropsCurProto = self.objProtoToInstanciate['Release_Individual']['propsList']
+                curReleaseInd = getnewObs(curProtoID)
+
+                curValues = {}
+                for propsProto in listPropsCurProto:
+                    for propsIndiv in listPropsCurIndiv:
+                      if propsProto.lower() == propsIndiv.lower():
+                        curValues[propsProto] = curIndivDict[propsIndiv]
+
+                curReleaseInd.values = curValues
                 releaseIndList.append(curReleaseInd)
 
-                sensor_id = indiv.get(
-                    'FK_Sensor', None) or indiv.get('fk_sensor', None)
+                sensor_id = curIndiv.values.get(
+                    'FK_Sensor', None) or  curIndiv.values.get('fk_sensor', None)
 
                 if sensor_id:
                     try:
                         curEquipmentInd = getnewObs(equipmentIndID)
                         equipInfo = {
-                            'FK_Individual': indiv['FK_Individual'],
+                            'FK_Individual': curIndiv.values['FK_Individual'],
                             'FK_Sensor': sensor_id,
                             'Survey_type': 'post-relâcher',
                             'Monitoring_Status': 'suivi',
@@ -246,24 +344,28 @@ class ReleaseIndividualsResource(IndividualsResource):
             dictVertGrp['nb_total'] = len(releaseIndList)
             dictVertGrp['taxon'] = taxon
 
-            obsVertGrpFiltered = list(filter(
-                lambda o: o.type_id == vertebrateGrpID, curStation.Observations))
-            obsReleaseGrpFiltered = list(
-                filter(lambda o: o.type_id == releaseGrpID, curStation.Observations))
+            obsVertGrpFilteredId = list(filter(
+                lambda o: o.type_id == self.objProtoToInstanciate['Vertebrate_group']['id'], curStation.Observations))
+            obsReleaseGrpFilteredId = list(
+                filter(lambda o: o.type_id == self.objProtoToInstanciate['Release_Group']['id'], curStation.Observations))
 
-            if len(obsVertGrpFiltered) > 0:
-                for obs in obsVertGrpFiltered:
-                    if obs.values.get('taxon') == taxon:
-                        vertebrateGrp = obs
+            if len(obsVertGrpFilteredId) > 0:
+                for obsId in obsVertGrpFilteredId:
+                    curObs = session.query(Observation).get(obsId.ID)
+                    if curObs.values.get('taxon') == taxon:
+                        vertebrateGrp = curObs
+                        break
                     else:
                         vertebrateGrp = None
             else:
                 vertebrateGrp = None
 
-            if len(obsReleaseGrpFiltered) > 0:
-                for obs in obsReleaseGrpFiltered:
-                    if obs.values.get('taxon') == taxon and obs.values.get('release_method') == releaseMethod:
-                        releaseGrp = obs
+            if len(obsReleaseGrpFilteredId) > 0:
+                for obsId in obsReleaseGrpFilteredId:
+                    curObs = session.query(Observation).get(obsId.ID)
+                    if curObs.values.get('taxon') == taxon and curObs.values.get('release_method') == releaseMethod:
+                        releaseGrp = curObs
+                        break
                     else:
                         releaseGrp = None
             else:
@@ -277,16 +379,16 @@ class ReleaseIndividualsResource(IndividualsResource):
             else:
                 vertebrateGrp = Observation()
                 vertebrateGrp.session = session
-                dictVertGrp.update({'FK_Station':sta_id, 'type_id': vertebrateGrpID})
+                dictVertGrp.update({'FK_Station':sta_id, 'type_id': self.objProtoToInstanciate['Vertebrate_group']['id']})
                 vertebrateGrp.values = dictVertGrp
 
             if releaseGrp:
                 releaseGrp.setValue('nb_individuals', int(
-                    obs.values.get('nb_individuals')) + len(releaseIndList))
+                    curObs.values.get('nb_individuals')) + len(releaseIndList))
             else:
                 releaseGrp = Observation()
                 releaseGrp.session = session
-                releaseGrp.values = {'type_id':releaseGrpID,
+                releaseGrp.values = {'type_id':self.objProtoToInstanciate['Release_Group']['id'],
                                     'FK_Station':sta_id,
                                     'taxon': taxon,
                                     'release_method': releaseMethod,
