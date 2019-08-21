@@ -92,6 +92,8 @@ define([
 
     this.lastImported = false;
 
+    this.regionFetched = false;
+
     this.init();
   }
 
@@ -146,7 +148,7 @@ define([
       L.control.zoom({
         position:'topright'
       }).addTo(this.map);
-
+      
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
@@ -184,9 +186,6 @@ define([
         //     _this.ready();
         //   }
       });
-      if( !this.player ) {
-        L.control.scale().addTo(this.map);
-      }
 
     },
 
@@ -302,19 +301,19 @@ define([
         }
 
 
-          if (this.cluster){
-            this.initClusters(this.geoJson);
+        if (this.cluster){
+          this.initClusters(this.geoJson);
 
-            if(this.player){
-              this.firstInit();
-            }
-          } else {
+          if(this.player){
+            this.firstInit();
+          }    
+        } 
+        else {
             // this.geoJson = geoJson;
             this.initLayer(geoJson);
-          }
-          this.ready();
-          this.fitBound();
-
+        } 
+        this.ready();
+        this.fitBound();
       }).fail(function(msg) {
           console.error( msg );
       });
@@ -423,6 +422,9 @@ define([
 
 
     ready: function(displayLegend = true){
+      if( !('legendDisplayed' in this && this.legendDisplayed ) ) {
+        this.legendDisplayed = L.control.scale().addTo(this.map); // display leaflet scale
+      }
       this.setTotal(this.geoJson);
 
       if(this.legend && displayLegend){
@@ -473,17 +475,21 @@ define([
     initOverlayRegions: function(){
       this.RegionLayers = {};
       var _this = this;
-      $.ajax({
-        url:'regions/getTypes',
-        context: this
-      }).done(function(response){
-        response.forEach(function(layerName) {
-          _this.fetchRegionsLayers(layerName);
-        }, this);
-      }).fail(function(response){
-        console.log('error fetch region Types', response)
-        
-      });
+      if (!_this.regionFetched) {
+        _this.regionFetched = true; //fix for fetching only one time need refact process
+        $.ajax({
+          url:'regions/getTypes',
+          context: this
+        }).done(function(response){
+          _this.regionFetched = true;
+          response.forEach(function(layerName) {
+            _this.fetchRegionsLayers(layerName);
+          }, this);
+        }).fail(function(response) {
+          _this.regionFetched = false;
+          console.log('error fetch region Types', response)
+        });
+      }
     },
 
     eachPolygon: function(feature, layer){
@@ -1342,7 +1348,7 @@ define([
         $('#map').find('.js-toggle-ctrl-player').remove();
         $('#map').find('#player').remove();
         
-        var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend');
+        var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend fixedBottom');
         
         div.innerHTML = '<button class="js-player-toggle btn"><i class="js-player-chevron reneco reneco-chevron_top"></i> location player</button>';
         return div;

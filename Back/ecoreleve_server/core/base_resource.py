@@ -330,7 +330,7 @@ class DynamicObjectCollectionResource(CustomResource):
 
         if 'startDate' in params and params['startDate'] != '':
             startDate = datetime.strptime(params['startDate'],
-                                          '%d/%m/%Y %H:%M:%S')
+                                          '%Y-%m-%dT%H:%M:%S.%fZ')
 
         if paging:
             self.pagingSearch(searchInfo, params)
@@ -351,7 +351,7 @@ class DynamicObjectCollectionResource(CustomResource):
     @timing
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
-        if params.get('offset', 0) > 0:
+        if int(params.get('offset', 0)) > 0:
             if not params.get('order_by', []):
                 params['order_by'] = [inspect(self.model).primary_key[0].name+':asc']
 
@@ -388,10 +388,15 @@ class DynamicObjectCollectionResource(CustomResource):
         return self.handleResult(result)
 
     def pagingSearch(self, searchInfo, params):
-        searchInfo['offset'] = json.loads(params['offset'], None)
-        searchInfo['per_page'] = json.loads(params['per_page'], None)
-        searchInfo['order_by'] = json.loads(params['order_by'], [])
-        return params
+        listKeys = ['offset','per_page','order_by']
+
+        for key in listKeys:
+            if key in params:
+                searchInfo[key] = json.loads(params[key])
+            else :
+                searchInfo[key] = None
+
+        return searchInfo
 
     def create(self):
         data = self.request.json_body
