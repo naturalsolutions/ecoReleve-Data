@@ -201,20 +201,20 @@ class ReleaseIndividualsResource(IndividualsResource):
             curSex = None
             curAge = None
             binP = 0
-            if obj['Sex'] is not None and obj['Sex'].lower() == 'male':
+            if obj['Sex'] is not None and ( obj['Sex'].lower() == 'male' or obj['Sex'].lower() == 'mâle'):
                 curSex = 'male'
                 binP += 2
-            elif obj['Sex'] is not None and obj['Sex'].lower() == 'female':
+            elif obj['Sex'] is not None and (obj['Sex'].lower() == 'female' or obj['Sex'].lower() == 'femelle'):
                 curSex = 'female'
                 binP += 4
             else:
                 curSex == 'Indeterminate'
                 binP += 1
 
-            if obj['Age'] is not None and obj['Age'].lower() == 'Adult':
+            if obj['Age'] is not None and (obj['Age'].lower() == 'adult' or obj['Age'].lower() == 'adulte'):
                 curAge = 'Adult'
                 binP += 8
-            elif obj['Age'] is not None and obj['Age'].lower() == 'juvenile':
+            elif obj['Age'] is not None and (obj['Age'].lower() == 'juvenile' or obj['Age'].lower() == 'juvénile'):
                 curAge = 'Juvenile'
                 binP += 16
             else:
