@@ -139,6 +139,9 @@ class DATAcacaDatasBySession(CustomResource):
     def patch(self):
         pass
 
+    def create(self):
+        return self.__parent__.create()
+
 
 class SensorDatasBySession(CustomResource):
 
