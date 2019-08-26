@@ -27,6 +27,8 @@ def uploadFileGPX(request):
     inserted_raw_dataFrame = insertRawData(
         session, GPXdata, existing_dataFrame)
 
+    dataFrame_to_insert['StationDate'] = pd.to_datetime(dataFrame_to_insert['StationDate'], utc = True)
+
     dataFrame_to_insert = pd.merge(
         dataFrame_to_insert, inserted_raw_dataFrame, on=['Name', 'StationDate'])
     # dataFrame_to_insert = dataFrame_to_insert.join(inserted_raw_dataFrame, on=['Name', 'StationDate'])
@@ -50,6 +52,7 @@ def formatData(data, request):
 
     dateNow = datetime.now()
     GPXdata = []
+    #format_dt = "%Y-%m-%dT%H:%M:%S.%fZ"
     format_dt = '%d/%m/%Y %H:%M'
 
     for row in data:

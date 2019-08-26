@@ -247,6 +247,7 @@ class QueryEngine(object):
         self.filters = filters
         query = self.build_query(filters, selectable, order_by, limit, offset)
         self.before_exec_query()
+        # print (query.compile(compile_kwargs={"literal_binds": True}) )
         queryResult = self.session.execute(query).fetchall()
         return [dict(row) for row in queryResult]
 
