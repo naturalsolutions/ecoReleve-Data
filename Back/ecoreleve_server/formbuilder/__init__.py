@@ -3,4 +3,4 @@ from ecoreleve_server.formbuilder.formbuilder_ressource import FormBuilderRessou
 
 def root_factory_formbuilder(request):
 
-    return MetaRootRessource('',None,request)
+    return FormBuilderRessource('',None,request)
