@@ -182,7 +182,7 @@
  	},
  	"swal" : {
  		"savingForm-title" : "Exit form",
- 		"savingForm-content" : "Current form is not yet saved. Are you sure to quit without saving it?"
+ 		"savingForm-content" : "The current form has not been saved yet. Are you sure to quit without saving it?"
  	}
 
 }
