@@ -5,6 +5,8 @@ from zope.interface import implementer
 from ecoreleve_server.core.base_view import IRestCommonView
 from pyramid.traversal import find_root
 
+from pyramid.httpexceptions import HTTPClientError
+
 
 class MetaRootRessource (dict):
     __acl__ = context_permissions['formbuilder']
@@ -332,7 +334,42 @@ class FieldActivityProtocoleTypeCollection (MetaCollectionRessource,unflatListOf
         
         print("on va delete")
         return 'ok on delete'
+
         ##need to clarify if we delete a large number or id maybe we should give some int in the front and call a patch
+    
+    def patch(self):
+        try:
+            bodyJson = self.__request__.json
+        except :
+            return HTTPClientError()
+        session = self.__request__.dbsession
+        idToDelete = []
+
+        for item in bodyJson:
+            if item.get('op') == 'add':
+                value = item.get('value')
+                if value is not None:
+                    newFieldActivity_ProtocoleType = FieldActivity_ProtocoleType()
+                    newFieldActivity_ProtocoleType.FK_fieldActivity = value.get('FK_fieldActivity')
+                    newFieldActivity_ProtocoleType.FK_ProtocoleType = value.get('FK_ProtocoleType')
+                    session.add(newFieldActivity_ProtocoleType)
+            if item.get('op') == 'remove':
+                pathCur = item.get('path')
+                if pathCur is not None:
+                    pathCur = pathCur.replace('/','')
+                    try:
+                        newId = int(pathCur)
+                        session.query(FieldActivity_ProtocoleType).filter(FieldActivity_ProtocoleType.ID==newId).delete(synchronize_session=False)       
+                    except ValueError:
+                        pass
+
+        # if len(idToDelete):
+        #     session.query(FieldActivity_ProtocoleType).filter(FieldActivity_ProtocoleType.ID.in_(idToDelete)).delete()
+
+        
+        session.commit()
+
+        return "ok on  a patch"
 
 
 
