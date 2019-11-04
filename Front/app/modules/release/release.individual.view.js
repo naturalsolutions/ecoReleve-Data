@@ -382,6 +382,7 @@ define([
     },
 
     toolTipShow: function(e) {
+      this.gridView.gridOptions.api.stopEditing(false)
       var _this = this;
       var ulElem = document.createElement("ul");
       var tabLength = this.releaseMethodList.length;

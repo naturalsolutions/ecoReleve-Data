@@ -42,6 +42,8 @@ class ImportHistoryResource(DynamicObjectCollectionResource):
             per_page = None
 
         order_by = json.loads(data['order_by'])
+        if order_by is None or order_by == []:
+            order_by = ['ID:asc']
         result = import_collection.search(filters=criteria,
                                 offset=offset,
                                 limit=per_page,

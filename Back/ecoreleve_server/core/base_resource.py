@@ -13,7 +13,7 @@ from zope.interface import implementer
 from . import Base
 from ..core import get_redis_con
 from .base_view import IRestCommonView, IRestCollectionView, IRestItemView
-from .configuration_model.FrontModules import FrontModules
+from .configuration_model.frontmodules import FrontModules
 from ..utils.decorator import timing
 
 localRedis = get_redis_con()

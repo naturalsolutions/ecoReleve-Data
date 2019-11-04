@@ -7,7 +7,7 @@ import json
 
 from ..core import Base
 from ..GenericObjets import BusinessRules
-from .FrontModules import FrontModules, ModuleForms, ModuleGrids
+from .frontmodules import FrontModules, ModuleForms, ModuleGrids
 from ..utils.parseValue import parser, formatValue
 
 

@@ -14,7 +14,7 @@ import pandas as pd
 from pyramid import threadlocal
 
 
-from .FrontModules import ModuleGrids
+from .frontmodules import ModuleGrids
 from ..utils.datetime import parse
 from ..utils import Eval
 from ..core import Base

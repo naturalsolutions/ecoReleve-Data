@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_, asc, orm, event
 from sqlalchemy_utils import get_hybrid_properties
 from sqlalchemy.ext.declarative import declared_attr
 
-from .FrontModules import FrontModules, ModuleForms, ModuleGrids
+from .frontmodules import FrontModules, ModuleForms, ModuleGrids
 from ecoreleve_server.utils.parseValue import parser, formatValue
 
 
