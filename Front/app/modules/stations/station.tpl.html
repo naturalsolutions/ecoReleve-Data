@@ -1,9 +1,9 @@
-<div class="white scroll-auto col-xs-12 col-md-4 no-padding full-height no-overflow-y">
+<div class="left-part white scroll-auto col-xs-12 col-md-4 no-padding full-height no-overflow-y">
 
   <div class="js-rg-station height-40">
     <div class="toolbar top">
       <a class="btn pull-left" href="#<%= type %>">
-          <span class="reneco reneco-back"></span>
+          <span class="reneco reneco-leftarrow"></span>
           &nbsp;
           <span data-i18n="button.back">Back</span>
       </a>
@@ -11,14 +11,23 @@
       <div class="js-from-btns pull-right"></div>
     </div>
     <div class="crop2">
-      <div class="js-from-station"></div>
+      <form class="js-from-station"></form>
     </div>
     <div class="">
       <ul class="nav nav-tabs toolbar bottom">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
+        <% if( uiGridConf.name === 'protocols') { %>
+          <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
+            <button class="js-btn-add-protocols btn btn-xs btn-prevent-collapse btn-success" value="">
+                <span>+ ADD</span>
+            </button>
+            <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
+          </li>
+        <% } else { %>
           <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
             <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
           </li>
+          <% }%>
       <% }); %>
       <li class="tab-ele ">
         <a href="#mapTab" class="tab-link">Map</a>

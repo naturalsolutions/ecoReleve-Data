@@ -178,6 +178,6 @@
  	},
  	"swal" : {
  		"savingForm-title" : "Enregistrement du formulaire",
- 		"savingForm-content" : "Ce formulaire n'est pas encore enregistré. Voulez vous continuer sans le sauvegarder?"
+ 		"savingForm-content" : "Ce formulaire n'est pas encore été enregistré. Voulez vous continuer sans le sauvegarder?"
  	}
 }

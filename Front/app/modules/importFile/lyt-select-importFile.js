@@ -67,7 +67,7 @@ define([
             Swal({
               
               heightAuto: false,
-              title: 'Warning Duplicate Files',
+              title: 'Warning Duplicated Files',
               text: this.dropzone.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
               type: 'warning',
               showCancelButton: false,

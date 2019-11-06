@@ -1168,7 +1168,7 @@ define([
         Swal({
           heightAuto: false,
           title: 'Error',
-          html: 'No stations to remove',
+          html: 'There are no stations to remove',
           type: 'error',
           confirmButtonColor: 'rgb(218, 146, 15)',
           confirmButtonText: 'Ok',

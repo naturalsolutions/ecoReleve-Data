@@ -191,7 +191,7 @@ define([
         Swal({
           heightAuto: false,
           title: 'Fieldworker name error',
-          text: 'Already selected ! ',
+          text: 'This fieldworker is already selected ! ',
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',

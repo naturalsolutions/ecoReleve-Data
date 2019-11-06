@@ -1,6 +1,6 @@
 header{
 	background: @header-bg;
-	z-index: 10;
+	z-index: 11;
 	color: white;
 	position: fixed;
 	width: 100%;
@@ -11,7 +11,7 @@ header{
 		cursor: pointer;
 	}
 	a{
-		transition: all .1s;
+		transition: all 0.5s ease-in-out;
 	}
 
 	nav.navbar{
@@ -20,12 +20,23 @@ header{
 	}
 	.nav > li > a{
 		color: white;
-		// font-size: 14px;		
+		text-transform: uppercase;	
+		background: @header-bg;
 		&:focus, &:hover{
 			background: @header-hover;
 			color: white;
 			// padding-top: 10px;
 			// padding-bottom: 10px;
+		}
+		&.disabled{
+			opacity: 0.7;
+			&:hover{
+				background-color: inherit;
+				cursor: not-allowed;
+			}
+		}
+		i{
+			margin-right: 10px;
 		}
 	}
 	.navbar-brand{
@@ -53,13 +64,21 @@ header{
 			}
 		}
 		ul.dropdown-menu{
-			background: @header-bg;
+			background: #fff;
 			border: none;
 			& a{
-				color: white;
+				color: #111;
+				font-size: 16px;
 				&:hover, &:focus{
-					background: @header-hover;
+					color: @header-bg;
+					background: inherit;
 				}
+				i{
+					font-size: 20px;
+				}
+			}
+			hr{
+				margin: 2px 0px;
 			}
 		}
 		// .header{

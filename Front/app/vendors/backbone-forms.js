@@ -692,8 +692,30 @@ Form.Fieldset = Backbone.View.extend({
 
   template: _.template('\
     <fieldset data-fields>\
-      <% if (legend) { %>\
-        <legend><%= legend %><span class="js_badge badge" style="display:none !important;">0</span></legend>\
+      <% if (legend)  { %>\
+        <div class="js_subproto_wrapper" style="display:none">\
+          <legend class="js_sub_protocol"><%= legend %><span class="js_badge badge">0</span></legend>\
+          <button type="button" class="js_delete_sub_proto btn btn-danger pull-left">\
+            <span class="reneco reneco-trash">\
+            </span>\
+            Delete selected protocol\
+          </button>\
+          <div class="js_sub_proto_pagination pull-right">\
+          <button type="button" class="js_prev_sub_proto btn pull-left">\
+            <span class="reneco reneco-chevron_left">\
+            </span>\
+          </button>\
+          <span class="text-center switcher pull-left">\
+          <input class="js_record_index" style ="text-align:right"></input>\
+            /\
+            <span class="js_total_records">0</span>\
+          </span>\
+          <button type="button" class="js_next_sub_proto btn pull-left">\
+            <span class="reneco reneco-chevron_right">\
+            </span>\
+          </button>\
+          </div>\
+        </div>\
       <% } %>\
     </fieldset>\
   ', null, Form.templateSettings)
@@ -992,8 +1014,12 @@ Form.Field = Backbone.View.extend({
 
   template: _.template('\
     <div>\
-    <% if (title) { %>\
-      <label for="<%= editorId %>"><%= title %></label>\
+    <% var className = "notRequiredLabel";\
+    if(this.schema && this.schema.validators && this.schema.validators.indexOf("required") > -1 ) {\
+      className = "requiredLabel";\
+    }\
+    if (title) { %>\
+      <label for="<%= editorId %>" class=<%= className %> ><%= title %></label>\
       <% } %>\
       <div>\
         <span data-editor></span>\
@@ -1335,13 +1361,42 @@ Form.editors.Text = Form.Editor.extend({
  */
 Form.editors.TextArea = Form.editors.Text.extend({
 
-  tagName: 'textarea',
-
+  tagName: 'div',
+  events: _.extend({}, Form.editors.Text.prototype.events, {
+    'keyup': 'onKeyUp'
+  }),
   /**
    * Override Text constructor so type property isn't set (issue #261)
    */
   initialize: function(options) {
     Form.editors.Base.prototype.initialize.call(this, options);
+    var maxlength = 250;
+
+    this.textAreaInput = document.createElement('textarea')
+    this.textAreaInput.setAttribute('maxlength',maxlength);
+    this.textAreaInput.setAttribute('id',this.id);
+    this.textAreaInput.setAttribute('name',this.key);
+    this.textAreaInput.className = this.schema.editorClass;
+    if( this.schema.editorAttrs && this.schema.editorAttrs.disabled === true) {
+      this.textAreaInput.setAttribute('disabled','disabled');
+    }
+
+    this.divCounter = document.createElement('div');
+    this.spanCount = document.createElement('span');
+    this.spanTotal = document.createElement('span'); 
+    this.divCounter.append(this.spanCount);
+    this.spanCount.innerHTML = '0';
+    this.divCounter.append(this.spanTotal);
+    this.spanTotal.innerHTML = '/' + maxlength;
+
+  },
+  onKeyUp: function(event) {
+    this.spanCount.innerHTML = this.textAreaInput.value.length;
+  },
+  render: function() {
+    this.el.append(this.textAreaInput);
+    this.el.append(this.divCounter);
+    return this;
   }
 
 });

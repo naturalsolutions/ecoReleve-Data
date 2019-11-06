@@ -146,7 +146,7 @@ define([
       if(this.model.get('FK_Individual') === null){
         this.swal({
           heightAuto: false,title: 'No individual attached'}, 'warning');
-        this.ui.individualForm.html('<br /><span class="bull-warn">●</span>No individual is attached');
+        this.ui.individualForm.html('<br /><span class="bull-warn">●</span>There is no attached individual');
         return;
       }
 

@@ -25,12 +25,13 @@ define([
 
   return DetailView.extend({
     template: 'app/modules/stations/station.tpl.html',
-    className: 'full-height white station',
+    className: 'full-height station',
 
     ModelPrototype: StationModel,
     
     events: {
-      'click .tab-link': 'displayTab',
+      'click .tab-link': 'handlerClickTab',
+      'click .js-btn-add-protocols': 'modalProtocols'
     },
 
     ui: {
@@ -55,6 +56,13 @@ define([
         proto: options.proto,
         obs: options.obs
       });
+    },
+
+   modalProtocols: function(event) {
+      event.preventDefault()
+      var elemNext = event.currentTarget.nextElementSibling;
+      this.displayTab(elemNext);
+      this.rgProtocols.currentView.openModal()
     },
 
     getRegion: function(val){
@@ -133,17 +141,21 @@ define([
       this.getRegion(this.nsForm.model.get('FK_FieldworkArea'));
     
     },
-    displayTab: function(e) {
+    handlerClickTab: function(e) {
       e.preventDefault();
+      var elemClicked = e.currentTarget;
+      this.displayTab(elemClicked);
+    },
+    displayTab: function(elem) {
       this.$el.find('.nav-tabs>li').each(function(){
         $(this).removeClass('active in');
       });
-      $(e.currentTarget).parent().addClass('active in');
+      $(elem).parent().addClass('active in');
 
       this.$el.find('.tab-content>.tab-pane').each(function(){
         $(this).removeClass('active in');
       });
-      var id = $(e.currentTarget).attr('href');
+      var id = $(elem).attr('href');
       this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
 
       if(id === '#mapTab' && !this.map){
@@ -185,13 +197,18 @@ define([
         _this.ui.formStation.html(globalEl);
         
         if(this.displayMode.toLowerCase() == 'edit'){
+          _this.$el[0].children[0].className = _this.$el[0].children[0].className + ' editionMode';
           this.bindChanges(_this.ui.formStation);
           $(".datetime").attr('placeholder','DD/MM/YYYY');
           $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
           });
         }
-
+        else {
+          if(_this.$el[0].children[0].className.indexOf(' editionMode') > -1 ) {
+            _this.$el[0].children[0].className = _this.$el[0].children[0].className.replace(' editionMode','')
+          }
+        }
       };
 
       this.nsForm.afterSaveSuccess = function() {

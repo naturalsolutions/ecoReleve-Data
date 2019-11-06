@@ -79,7 +79,7 @@ define([
             if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
               Swal({
                 heightAuto: false,
-                title: 'Warning Duplicate Files',
+                title: 'Warning Duplicated Files',
                 text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
                 type: 'warning',
                 showCancelButton: false,
