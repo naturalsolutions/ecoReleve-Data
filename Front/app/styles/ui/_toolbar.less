@@ -80,20 +80,19 @@
     }
     #NsFormButton{
       display: inline-flex;
-      button{
+      > button{
         border-radius: 0px;
-      }
-      .NsFormModuleDelete {
-        border-top-left-radius: 25px;
-        border-bottom-left-radius: 25px;
-      }
-      .NsFormModuleCancel {
-        border-top-right-radius: 25px;
-        border-bottom-right-radius: 25px;
-        border-left: none;
-      }
-      .NsFormModuleSave, .NsFormModuleEdit {
-        border-radius: 25px;
+        &:first-of-type{
+          border-top-left-radius: 25px;
+          border-bottom-left-radius: 25px;
+        }
+        &:last-of-type{
+          border-top-right-radius: 25px;
+          border-bottom-right-radius: 25px;
+        }
+        &.NsFormModuleEdit{
+          border-radius: 25px;
+        }
       }
     }
     ul.nav-tabs{
@@ -118,6 +117,82 @@
   }
 }
 
+.dark .toolbar{
+  /*  */
+  legend{
+    color: #fff;
+  }
+  &.top{
+    background: #6E6E6E;
+    .switcher{
+      color: #fff;
+    }
+  }
+}
+.dark .protocol{
+  .toolbar{
+    height: 40px;
+    padding: 0px 10px;
+    legend{
+      color: #fff !important;
+    }
+    &.top{
+    background-color: #525252;
+    border-bottom: none;
+    position: relative;
+    padding-left: 25px;
+      &:before{
+        content: '\e66b';
+        font-family: reneco !important;
+        position: absolute;
+        left: 13px;
+        top: 5px;
+        font-size: 1.5em;
+        color: #fff;
+      }
+    }
+    &.bottom{
+      display: flex;
+      justify-content: flex-end !important;
+      align-items: center;
+      #NsFormButton{
+        width: fit-content;
+        float: right;
+        display: inline-flex;
+        > button{
+          border-radius: 0px;
+          &:first-of-type{
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+          }
+          &:last-of-type{
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+          }
+          &.NsFormModuleEdit{
+            border-radius: 25px;
+          }
+        }
+        .pull-right{
+          margin-left: 5px;
+        }
+      }
+      .NsFormModuleEdit {
+        float: right;
+      }
+      .btn{
+        padding: 4px 12px;
+      }
+    }
+  }
+}
+.white{
+  .toolbar.top{
+    .switcher{
+      color: #111;
+    }
+  }
+}
 
 .crop1{
   position: relative;
@@ -183,19 +258,4 @@
 }
 .tooltipster-content ul li:active {
   background-color: rgb(200, 200, 200);
-}
-
-.dark{
-  .toolbar.top{
-    .switcher{
-      color: #fff;
-    }
-  }
-}
-.white{
-  .toolbar.top{
-    .switcher{
-      color: #111;
-    }
-  }
 }
