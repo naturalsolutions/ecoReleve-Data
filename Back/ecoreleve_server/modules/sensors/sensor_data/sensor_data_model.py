@@ -19,9 +19,17 @@ from sqlalchemy.orm import relationship
 from ecoreleve_server.core import Base, dbConfig
 from ecoreleve_server.core.base_model import ORMUtils
 
-
-sensor_schema = dbConfig['sensor_schema']
-dialect = dbConfig['cn.dialect']
+### TODO fetch ALL config  in one method
+if 'sensor_schema' in dbConfig:
+    sensor_schema = dbConfig['sensor_schema']
+else:
+    dbConfig['sensor_schema']  = 'ecoReleve_Sensor.dbo'
+    sensor_schema = 'ecoReleve_Sensor.dbo'
+if 'cn.dialect' in dbConfig:
+    dialect = dbConfig['cn.dialect']
+else:
+    dbConfig['cn.dialect'] = 'mssql+pyodbc:///?odbc_connect='
+    dialect = 'mssql+pyodbc:///?odbc_connect='
 
 
 class GPX(Base):

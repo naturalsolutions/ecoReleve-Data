@@ -125,7 +125,7 @@ class SensorDatasBySessionItem(CustomResource):
         return XMLTags
 
 
-class DATAcacaDatasBySession(CustomResource):
+class DATASubDatasBySession(CustomResource):
     children = [('{int}', SensorDatasBySessionItem)]
 
     def __init__(self, ref, parent):
@@ -146,7 +146,7 @@ class DATAcacaDatasBySession(CustomResource):
 class SensorDatasBySession(CustomResource):
 
     item = SensorDatasBySessionItem
-    children = [('datas', DATAcacaDatasBySession)]
+    children = [('datas', DATASubDatasBySession)]
 
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
@@ -337,7 +337,7 @@ class SensorDatasBySession(CustomResource):
             msg = err.args[0] if err.args else ""
             response = 'Problem occurs : ' + str(type(err)) + ' = ' + msg
         else:
-            response = 'No induvidual equiped'
+            response = 'No individual equiped'
         self.request.response.status_code = 500
         return response
 

@@ -64,7 +64,12 @@ context_permissions = {
         (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUsers', ('create', 'update', 'read')),
         (Allow, 'group:users', 'read')
-    ]
+    ],
+    'formbuilder' : [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ('create', 'update', 'read')),
+        (Allow, 'group:users', 'read')
+    ],
 }
 
 
@@ -141,4 +146,10 @@ routes_permission = {
         'PUT': 'admin',
         'DELETE': 'admin'
     },
+    'formbuilder': {
+        'GET': 'all',
+        'POST': 'admin',
+        'PUT': 'admin',
+        'DELETE': 'admin'
+    }
 }
