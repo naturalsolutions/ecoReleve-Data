@@ -21,7 +21,7 @@ from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 
-from .formbuilder.formbuilder_view import FormBuilderView
+from ecoreleve_server.traversal import TraversalRESTView
 # mySubExif = exiftool.ExifTool()
 # mySubExif.start()
 
@@ -99,9 +99,11 @@ def main(global_config, **settings):
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
     initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
-    config.add_route('myFormbuilder', 'ecoReleve-Core/formbuilder*traverse',
-                    factory = 'ecoreleve_server.formbuilder.root_factory_formbuilder' )
-    config.add_view( FormBuilderView , route_name='myFormbuilder')
+    config.add_route('myTraversal',
+                    'ecoReleve-Core/traversal*traverse',
+                    factory='ecoreleve_server.traversal.root_factory_traversal'
+                    )
+    config.add_view(TraversalRESTView, route_name='myTraversal')
     add_routes(config)
     config.scan()
 
