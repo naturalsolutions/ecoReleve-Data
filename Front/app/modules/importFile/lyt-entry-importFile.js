@@ -103,7 +103,7 @@ define([
 				case 'gsm':
 					var Step0GSM = StepSelectFile.extend({
 						name : 'GSM file selection',
-						url:config.coreUrl+'sensors/gsm/datas',
+						url:config.coreUrl+'traversal/import/gsm',
 						acronymType: 'GSM',
 						extension:'.txt',
 						uploadOnly:true,
@@ -114,7 +114,7 @@ define([
 				case 'argos':
 					var Step0Argos = StepSelectFile.extend({
 						name : 'Argos file selection',
-						url:config.coreUrl+'sensors/argos/datas',
+						url:config.coreUrl+'traversal/import/argos',
 						acronymType: 'Argos',
 						extension:'.txt',
 						uploadOnly:true,
