@@ -1,13 +1,9 @@
-from pyramid.view import view_config, view_defaults
+from pyramid.view import  view_config, view_defaults
 
-from ecoreleve_server.core.base_view import CRUDCommonView
-from .formbuilder_ressource import FormBuilderRessource, FieldActivityCollection
-
-# @view_defaults(context=FieldActivityCollection)
-@view_defaults(route_name='myFormbuilder')
-class FormBuilderView(object):
+@view_defaults(route_name='myTraversal')
+class TraversalRESTView(object):
     def __init__(self, context, request):
-        self.request = request
+        self.__request__ = request
         self.context = context
 
     @view_config(request_method='GET', renderer='json', permission='read')

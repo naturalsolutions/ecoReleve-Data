@@ -1,108 +1,34 @@
 from ecoreleve_server.modules.permissions import context_permissions
-from ecoreleve_server.modules.field_activities.field_activity_model import *
+from ecoreleve_server.traversal.core import MetaRootRessource, MetaCollectionRessource, MetaItemRessource
+from ecoreleve_server.modules.field_activities.field_activity_model import fieldActivity, FieldActivity_ProtocoleType, ProtocoleType
 from sqlalchemy import asc
-from zope.interface import implementer
-from ecoreleve_server.core.base_view import IRestCommonView
-from pyramid.traversal import find_root
 
 from pyramid.httpexceptions import HTTPClientError
 
 
-class MetaRootRessource (dict):
-    __acl__ = context_permissions['formbuilder']
-    __name__ = ''
-    __parent__ = None
-
-    def __init__ (self, name, ref, request):
-        self.__name__ = name
-        self.__parent__ = ref
-        self.__request__ = request
-
-    def __getitem__ (self, name):
-        if name:
-            return MetaCollectionRessource(name,self)
-        else:
-            raise KeyError
-
-    def retrieve (self):
-        print('retrieve from Ressource(type: '+str(self.__class__.__name__)+'):' +str(self.__name__))
-        return 'retrieve from Ressource:' +str(self.__name__)
-
-    def create (self):
-        print('create from :' +str(self.__name__))
-        return 'create from :' +str(self.__name__)
-
-    def delete (self):
-        print('delete from :' +str(self.__name__))
-        return 'delete from :' +str(self.__name__)
-
-    def patch (self):
-        print('patch from :' +str(self.__name__))
-        return 'patch from :' +str(self.__name__)
-
-    def update (self):
-        print('update from :' +str(self.__name__))
-        return 'update from :' +str(self.__name__)
-
-
-class MetaCollectionRessource (MetaRootRessource):
-    __acl__ = context_permissions['formbuilder']
-    __name__ = ''
-    __parent__ = None
-
-    def __init__ (self, name, ref):
-        self.__name__ = name
-        self.__parent__ = ref
-        self.__request__ = ref.__request__
-
-    def __getitem__ (self, name):
-        if name:
-            return MetaItemRessource(name,self)
-        else:
-            raise KeyError
-
-class MetaItemRessource (MetaCollectionRessource):
-    __acl__ = context_permissions['formbuilder']
-    __name__ = ''
-    __parent__ = None
-
-    def __init__ (self, name, ref):
-        self.__name__ = name
-        self.__parent__ = ref
-        self.__request__ = ref.__request__
+# class FormBuilderRessource (MetaRootRessource):
     
-    def __getitem__ (self, name):
-        print("it's the __getitem__ from Meta CLASS you should implement you own ressource")
-        if name:
-            return MetaCollectionRessource(name,self)
-        else:
-            raise KeyError
+#     __acl__ = context_permissions['formbuilder']
+#     __name__ = ''
+#     __parent__ = None
 
+#     def __init__(self, name, ref, request):
+#         self.__name__ = name
+#         self.__parent__ = ref
+#         self.__request__ = request
 
+#     def __getitem__(self, name):
+#         if name == 'FieldActivity':
+#             return FieldActivityCollection(name, self)
+#         elif name == 'FieldActivity_ProtocoleType':
+#             return FieldActivityProtocoleTypeCollection(name, self)
+#         elif name == 'ProtocoleType':
+#             return ProtocoleTypeCollection(name, self)
+#         else:
+#             raise KeyError
 
-class FormBuilderRessource (MetaRootRessource):
-    
-    __acl__ = context_permissions['formbuilder']
-    __name__ = ''
-    __parent__ = None
-
-    def __init__(self, name, ref, request):
-        self.__name__ = name
-        self.__parent__ = ref
-        self.__request__ = request
-
-    def __getitem__(self, name):
-        if name == 'FieldActivity':
-            return FieldActivityCollection(name, self)
-        elif name == 'FieldActivity_ProtocoleType':
-            return FieldActivityProtocoleTypeCollection(name, self)
-        elif name == 'ProtocoleType':
-            return ProtocoleTypeCollection(name, self)
-        else:
-            raise KeyError
-
-    def retrieve(self):
-        return 'Formbuilder Ressource(root node)'
+#     def retrieve(self):
+#         return 'Formbuilder Ressource(root node)'
 
 
 class FieldActivityCollection (MetaCollectionRessource):
@@ -115,25 +41,19 @@ class FieldActivityCollection (MetaCollectionRessource):
         }
     }
 
-    def __init__(self, name, ref):
-        self.__name__ = name
-        self.__parent__ = ref
-        self.__request__ = ref.__request__
-        # self.dbModel = FieldActivity
-
     def __getitem__ (self,name):
         print("getitem de fieldActivityCollection")
         try:
             val = int(name)
             print("name is an int we gonna return a ressource", name, val)
-            return FieldActivityRessource(val,self)
+            return FieldActivityRessource(name=name, parent=self, request=self.__request__)
         except ValueError:
             print("WE GONNA RAISE ERROR")
             raise KeyError
 
 
     def parseQueryString(self):
-        multiDictParams = self.request.GET
+        multiDictParams = self.__request__.GET
 
         if 'protocoleType.ID' in multiDictParams:
             #should raise warning if len > 2
@@ -159,11 +79,12 @@ class FieldActivityCollection (MetaCollectionRessource):
 
         return toRet
 
+
 class ProtocoleTypeCollection (MetaCollectionRessource):
     def __getitem__ (self,name):
         try:
             val = int(name)
-            return ProtocoleTypeRessource(val,self)
+            return ProtocoleTypeRessource(name=name, parent=self, request=self.__request__)
         except ValueError:
             print("WE GONNA RAISE ERROR")
             raise KeyError
@@ -181,7 +102,6 @@ class ProtocoleTypeCollection (MetaCollectionRessource):
         return toRet
 
         
-
 class ProtocoleTypeRessource (MetaItemRessource):
 
     def retrieve (self):
@@ -194,15 +114,9 @@ class FieldActivityRessource (MetaItemRessource):
 
     __acl__ = context_permissions['formbuilder']
    
-    
-    def __init__(self, name, ref):
-        self.__name__ = name
-        self.__parent__ = ref
-        self.__request__ = ref.__request__
-
     def __getitem__(self, name):
         if name == 'FieldActivity_ProtocoleType':
-            return FieldActivityProtocoleTypeCollection(name,self)
+            return FieldActivityProtocoleTypeCollection(name=name, parent=self, request=self.__request__)
         else:
             raise KeyError
 
@@ -215,8 +129,9 @@ class FieldActivityRessource (MetaItemRessource):
                 'Name': getattr(item, 'Name')
                 }
 
+
 class unflatListOfDict(dict):
-         ### could be more generic but headache ....
+    ### could be more generic but headache ....
     def unflatListOfDict(self, listOfDict ):
         toRet = []
         for a in listOfDict:
@@ -263,11 +178,11 @@ class unflatListOfDict(dict):
         return toRet
 
 
-class FieldActivityProtocoleTypeCollection (MetaCollectionRessource,unflatListOfDict):
+class FieldActivityProtocoleTypeCollection (MetaCollectionRessource, unflatListOfDict):
 
     def __getitem__ (self, name):
         if name:
-            return FieldActivityProtocoleTypeRessource(name,self)
+            return FieldActivityProtocoleTypeRessource(name=name, parent=self, request=self.__request__)
         else:
             raise KeyError
   
@@ -372,8 +287,7 @@ class FieldActivityProtocoleTypeCollection (MetaCollectionRessource,unflatListOf
         return "ok on  a patch"
 
 
-
-class FieldActivityProtocoleTypeRessource (MetaItemRessource,unflatListOfDict):
+class FieldActivityProtocoleTypeRessource (MetaItemRessource, unflatListOfDict):
     
     def retrieve (self):
         res = self.__request__.dbsession.\
