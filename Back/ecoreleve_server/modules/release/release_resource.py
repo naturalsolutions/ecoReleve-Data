@@ -117,7 +117,10 @@ class ReleaseIndividualsResource(IndividualsResource):
 
         for item in self.confInDB:
             if item.GridRender > 2 :
-                self.keysUpdatable.append(item.Name)
+                propsName = item.Name
+                if propsName.lower() == 'Unicidentifier'.lower():
+                    propsName = 'FK_Sensor'
+                self.keysUpdatable.append(propsName)
 
         # self.keysUpdatable = list( filter( lambda x['Name'] : ( x.GridRender > 2 ), self.confInDB ) )
 
@@ -143,6 +146,8 @@ class ReleaseIndividualsResource(IndividualsResource):
             if data == {}:
                 data = request.json_body
             if 'FK_Sensor' in data and data['FK_Sensor'] not in (None, ''):
+                # TODO pls remove POST Logic from front for checking if sensor is avaiable .... this should be an endpoint or 
+                # a GET on sensors/ID ressource with search options
                 return isavailableSensor(request, data)
             return
 
@@ -201,25 +206,55 @@ class ReleaseIndividualsResource(IndividualsResource):
             curSex = None
             curAge = None
             binP = 0
-            if obj['Sex'] is not None and ( obj['Sex'].lower() == 'male' or obj['Sex'].lower() == 'mâle'):
-                curSex = 'male'
-                binP += 2
-            elif obj['Sex'] is not None and (obj['Sex'].lower() == 'female' or obj['Sex'].lower() == 'femelle'):
-                curSex = 'female'
-                binP += 4
-            else:
+            #find key case
+            sexKey = None
+            ageKey = None
+            ##
+            # need to fix this , all config must be the same ....
+            ##
+            if 'sex' in obj and 'Sex' in obj:
+                raise Exception('INDERTERMINATE KEYs sex and Sex check your config')
+            if 'age' in obj and 'Age' in obj:
+                raise Exception('INDERTERMINATE KEYs age and Age check your config')
+            
+            if 'sex' in obj:
+                sexKey = 'sex'
+            if 'Sex' in obj:
+                sexKey = 'Sex'
+            
+            if 'age' in obj:
+                ageKey = 'age'
+            if 'Age' in obj:
+                ageKey = 'Age'
+            
+            if sexKey is None :
                 curSex == 'Indeterminate'
                 binP += 1
-
-            if obj['Age'] is not None and (obj['Age'].lower() == 'adult' or obj['Age'].lower() == 'adulte'):
-                curAge = 'Adult'
-                binP += 8
-            elif obj['Age'] is not None and (obj['Age'].lower() == 'juvenile' or obj['Age'].lower() == 'juvénile'):
-                curAge = 'Juvenile'
-                binP += 16
             else:
-                curAge == 'Indeterminate'
+                if obj[sexKey].lower() == 'male' or obj[sexKey].lower() == 'mâle':
+                    curSex = 'male'
+                    binP += 2
+                elif obj[sexKey].lower() == 'female' or obj[sexKey].lower() == 'femelle':
+                    curSex = 'female'
+                    binP += 4
+                else: # if sex is not (male/mâle or female/femelle)
+                    curSex == 'Indeterminate'
+                    binP += 1
+
+            if ageKey is None :
+                curSex == 'Indeterminate'
                 binP += 32
+            else:
+                if obj[ageKey].lower() == 'adult' or obj[ageKey].lower() == 'adulte':
+                    curSex = 'Adult'
+                    binP += 8
+                elif obj[ageKey].lower() == 'juvenile' or obj[ageKey].lower() == 'juvénile':
+                    curSex = 'Juvenile'
+                    binP += 16
+                else: # if sex is not (adult/adulte or juvenile/juvénile)
+                    curSex == 'Indeterminate'
+                    binP += 32
+
             return binaryDict[binP]
 
         try:
@@ -241,6 +276,7 @@ class ReleaseIndividualsResource(IndividualsResource):
                     pass
 
                 tmpIndiv['__useDate__'] = curStation.StationDate
+                tmpIndiv['type_id'] = curIndiv.values['type_id']
                 curIndiv.values = tmpIndiv
                 self.updateAllStartDate(
                     curIndiv, curStation.StationDate, curIndiv.properties)
@@ -251,16 +287,12 @@ class ReleaseIndividualsResource(IndividualsResource):
 
                 curIndiv.values['FK_Individual'] = curIndiv.ID
                 curIndiv.values['FK_Station'] = sta_id
-                try:
+                if 'poids' in curIndiv.values:
                     curIndiv.values['weight'] = curIndiv.values['poids']
-                except:
+                if 'Poids' in curIndiv.values:
                     curIndiv.values['weight'] = curIndiv.values['Poids']
-                    pass
-                try:
+                if 'Release_Comments' in curIndiv.values:
                     curIndiv.values['Comments'] = curIndiv.values['Release_Comments']
-                except:
-                    print_exc()
-                    pass
 
                 listPropsCurIndiv = [x for x in list(curIndiv.values) ]
                 curIndivDict = curIndiv.values
@@ -313,19 +345,37 @@ class ReleaseIndividualsResource(IndividualsResource):
 
                 if sensor_id:
                     try:
-                        curEquipmentInd = getnewObs(equipmentIndID)
-                        equipInfo = {
-                            'FK_Individual': curIndiv.values['FK_Individual'],
-                            'FK_Sensor': sensor_id,
+                        curProtoID = self.objProtoToInstanciate['Individual_equipment']['id']
+                        listPropsCurProto = self.objProtoToInstanciate['Individual_equipment']['propsList']
+                        curEquipmentInd = getnewObs(curProtoID)
+
+                        # TODO we should fetch it as default conf or create 'special rules' for release
+                        #      if we have to fill input with spécific values for automatique instanciate protocole with release
+                        curValues = { 
                             'Survey_type': 'post-relâcher',
                             'Monitoring_Status': 'suivi',
-                            'Sensor_Status': 'sortie de stock>mise en service',
-                            'FK_Station': curStation.ID,
-                            '__useDate__': curStation.StationDate
+                            'Sensor_Status': 'sortie de stock>mise en service'
                         }
-                        curEquipmentInd.values = equipInfo
+                        for propsProto in listPropsCurProto:
+                            for propsIndiv in listPropsCurIndiv:
+                                if propsProto.lower() == propsIndiv.lower():
+                                    curValues[propsProto] = curIndivDict[propsIndiv]
+
+                        curEquipmentInd.values = curValues
                         set_equipment(curEquipmentInd, curStation)
                         equipmentIndList.append(curEquipmentInd)
+                        # equipInfo = {
+                        #     'FK_Individual': curIndiv.values['FK_Individual'],
+                        #     'FK_Sensor': sensor_id,
+                        #     'Survey_type': 'post-relâcher',
+                        #     'Monitoring_Status': 'suivi',
+                        #     'Sensor_Status': 'sortie de stock>mise en service',
+                        #     'FK_Station': curStation.ID,
+                        #     '__useDate__': curStation.StationDate
+                        # }
+                        # curEquipmentInd.values = equipInfo
+                        # set_equipment(curEquipmentInd, curStation)
+                        # equipmentIndList.append(curEquipmentInd)
                     except Exception as e:
                         if e.__class__.__name__ == 'ErrorAvailable':
                             sensor_available = 'is' if e.value[
