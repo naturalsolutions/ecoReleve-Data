@@ -231,29 +231,29 @@ class ReleaseIndividualsResource(IndividualsResource):
                 curSex == 'Indeterminate'
                 binP += 1
             else:
-                if obj[sexKey].lower() == 'male' or obj[sexKey].lower() == 'mâle':
+                if obj[sexKey] is None or ( obj[sexKey] not in ['male','mâle','female','femelle']  ):
+                    curSex == 'Indeterminate'
+                    binP += 1
+                elif obj[sexKey].lower() == 'male' or obj[sexKey].lower() == 'mâle':
                     curSex = 'male'
                     binP += 2
                 elif obj[sexKey].lower() == 'female' or obj[sexKey].lower() == 'femelle':
                     curSex = 'female'
                     binP += 4
-                else: # if sex is not (male/mâle or female/femelle)
-                    curSex == 'Indeterminate'
-                    binP += 1
 
             if ageKey is None :
                 curSex == 'Indeterminate'
                 binP += 32
             else:
-                if obj[ageKey].lower() == 'adult' or obj[ageKey].lower() == 'adulte':
+                if obj[ageKey] is None or ( obj[ageKey] not in ['adult','adulte','junévile','juvenile'] ):
+                    curSex == 'Indeterminate'
+                    binP += 32
+                elif obj[ageKey].lower() == 'adult' or obj[ageKey].lower() == 'adulte':
                     curSex = 'Adult'
                     binP += 8
                 elif obj[ageKey].lower() == 'juvenile' or obj[ageKey].lower() == 'juvénile':
                     curSex = 'Juvenile'
                     binP += 16
-                else: # if sex is not (adult/adulte or juvenile/juvénile)
-                    curSex == 'Indeterminate'
-                    binP += 32
 
             return binaryDict[binP]
 
