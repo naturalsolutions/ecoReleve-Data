@@ -21,7 +21,7 @@ class Sensor (HasDynamicProperties, Base):
     moduleFormName = 'SensorForm'
     moduleGridName = 'SensorFilter'
 
-    # ID = Column(Integer, Sequence('Sensor__id_seq'), primary_key=True)
+    ID = Column(Integer, Sequence('Sensor__id_seq'), primary_key=True)
     UnicIdentifier = Column(String(250))
     Model = Column(String(250))
     Compagny = Column(String(250))
