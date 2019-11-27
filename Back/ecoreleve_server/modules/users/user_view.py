@@ -1,12 +1,11 @@
 import json
 from sqlalchemy import select
-from pyramid.security import NO_PERMISSION_REQUIRED, remember
+from pyramid.security import NO_PERMISSION_REQUIRED #,  remember
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.interfaces import IAuthenticationPolicy
 
 from .user_model import User
-from ecoreleve_server.core.security import groupfinder
 
 
 @view_config(
@@ -32,14 +31,17 @@ def users(request):
 def current_user(request, user_id=None):
     """Return the list of all the users with their ids.
     """
+    
+    print("TODO Take time and refact this s...")
     session = request.dbsession
 
     if user_id is not None:
         userid = user_id
     else:
         userid = int(request.authenticated_userid['iss'])
-    currentUserRole = groupfinder(userid, request)
 
+    TIns_Label = request.registry.settings.get('RENECO.SECURITE.TINS_LABEL').encode('latin1').decode('utf-8') 
+    currentUserRole = request.effective_principals
     query = select([
         User.id.label('PK_id'),
         User.Login.label('fullname'),
@@ -48,22 +50,22 @@ def current_user(request, user_id=None):
         User.Lastname.label('Lastname')
     ]).where(User.id == userid)
     response = dict(session.execute(query).fetchone())
-    response['role'] = currentUserRole[0].replace('group:', '')
-
-    if 'app_roles' not in request.authenticated_userid:
-        response = setRoleInCookie(request, response, currentUserRole)
+    if 'group:' in currentUserRole[-1:] :
+        response['role'] = currentUserRole[-1:].replace('group:', '')
+    else:
+        response['role'] = 'user'
     return response
 
 
-def setRoleInCookie(request, body, role):
-    user_infos = request.authenticated_userid
+# def setRoleInCookie(request, body, role):
+#     user_infos = request.authenticated_userid
 
-    claims = user_infos
-    claims['app_roles'] = {'ecoreleve': role}
-    jwt = make_jwt(request, claims)
-    response = Response(body=json.dumps(body), content_type='text/plain')
-    remember(response, jwt)
-    return response
+#     claims = user_infos
+#     claims['app_roles'] = {'ecoreleve': role}
+#     jwt = make_jwt(request, claims)
+#     response = Response(body=json.dumps(body), content_type='text/plain')
+#     remember(response, jwt)
+#     return response
 
 def make_jwt(request, claims):
     policy = request.registry.queryUtility(IAuthenticationPolicy)
