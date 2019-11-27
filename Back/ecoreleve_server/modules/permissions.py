@@ -5,6 +5,26 @@ from pyramid.security import (
     Everyone,
     Deny
 )
+###
+# RTFM!!!!!!!
+# https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html#elements-of-an-acl
+#
+# SO and acl = (A,B,C)
+# A could be Allow or Deny
+# B is a principal 
+# C is the persmission or sequence of permissions
+# example:
+# (Allow, 'group:admin' , ('create','update','read') )
+# means IF your principal is 'group:admin' you are ALLOWED to (create, update, read)
+###
+
+
+## NEED A TRUE REFACT (
+# that's not just autorization access for ressources we need a global vision 
+# for now we gonna create a "special" action 'fixForOld'
+# )
+## but for now we g
+
 
 context_permissions = {
     'regions': [
