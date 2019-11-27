@@ -24,7 +24,7 @@ stationData = []
 graphDataDate = {'indivLocationData': None, 'pendingSensorData': None}
 
 
-@view_config(route_name='weekData', renderer='json')
+@view_config(route_name='weekData', renderer='json', permission='fixForOld')
 def weekData(request):
     session = request.dbsession
     today = datetime.date.today()
@@ -74,7 +74,7 @@ def weekData(request):
     return data
 
 
-@view_config(route_name='station_graph', renderer='json')
+@view_config(route_name='station_graph', renderer='json', permission='fixForOld')
 def station_graph(request):
     session = request.dbsession
     result = OrderedDict()
@@ -101,7 +101,7 @@ def station_graph(request):
     return result
 
 
-@view_config(route_name='location_graph', renderer='json')
+@view_config(route_name='location_graph', renderer='json', permission='fixForOld')
 def location_graph(request):
     session = request.dbsession
     data = []
@@ -132,7 +132,7 @@ def location_graph(request):
     return indivLocationData
 
 
-@view_config(route_name='uncheckedDatas_graph', renderer='json')
+@view_config(route_name='uncheckedDatas_graph', renderer='json', permission='fixForOld')
 def uncheckedDatas_graph(request):
     viewArgos = Base.metadata.tables['VArgosData_With_EquipIndiv']
     queryArgos = select([viewArgos.c['type'].label('type'),
@@ -185,7 +185,7 @@ def uncheckedDatas_graph(request):
     return pendingSensorData
 
 
-@view_config(route_name='individual_graph', renderer='json')
+@view_config(route_name='individual_graph', renderer='json', permission='fixForOld')
 def individual_graph(request):
     session = request.dbsession
     result = OrderedDict()
@@ -207,7 +207,7 @@ def individual_graph(request):
     return result
 
 
-@view_config(route_name='individual_monitored', renderer='json')
+@view_config(route_name='individual_monitored', renderer='json', permission='fixForOld')
 def individual_monitored(request):
     session = request.dbsession
     table = Base.metadata.tables['IndividualDynPropValuesNow']

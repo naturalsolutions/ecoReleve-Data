@@ -1,6 +1,6 @@
 import json
 from sqlalchemy import select
-from pyramid.security import NO_PERMISSION_REQUIRED #,  remember
+from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.interfaces import IAuthenticationPolicy
@@ -26,7 +26,8 @@ def users(request):
 
 @view_config(
     route_name='core/currentUser',
-    renderer='json'
+    renderer='json',
+    permission= 'fixForOld'
 )
 def current_user(request, user_id=None):
     """Return the list of all the users with their ids.
@@ -50,8 +51,8 @@ def current_user(request, user_id=None):
         User.Lastname.label('Lastname')
     ]).where(User.id == userid)
     response = dict(session.execute(query).fetchone())
-    if 'group:' in currentUserRole[-1:] :
-        response['role'] = currentUserRole[-1:].replace('group:', '')
+    if 'group:' in currentUserRole[-1] :
+        response['role'] = currentUserRole[-1].replace('group:', '')
     else:
         response['role'] = 'user'
     return response
