@@ -106,11 +106,11 @@ class MyAuthenticationPolicy(CallbackAuthenticationPolicy):
         return principals
 
 
-    def authenticated_userid(self, request, activated=False):
+    def authenticated_userid(self, request):
         ''' this function will check if datas (sub and role ) in cookie's payload in request
-            match with what we have in database when you do the request
+            match datas in database when you do the request
 
-            for later maybe of if needed you should do the request 
+            for later or specific case
         '''
 
         verifedClaims = None
@@ -119,7 +119,8 @@ class MyAuthenticationPolicy(CallbackAuthenticationPolicy):
             effectiveClaimsOnRequestTime = self.getClaims(userCookieClaims, request)
             if effectiveClaimsOnRequestTime is None:
                 return verifedClaims
-            #DUMB TEST (we trust cookie payload )!!!! that's not really "verfiedClaims" if you really want to "verify"" claims role in cookie match TRUE roles in database when request is invoked
+            #DUMB TEST (we trust cookie payload )!!!! that's not really "verfiedClaims" 
+            # if you really want to "verify"" claims role in cookie match TRUE roles in database when request is invoked
             # you should make a request to database and implement your own check :) dunno if it's really possible with import scaffold for now and sqlachemy dbsession 
             if userCookieClaims.get('roles').get(self.TIns_Label) == effectiveClaimsOnRequestTime.get('roles').get(self.TIns_Label):
                 verifedClaims = effectiveClaimsOnRequestTime
@@ -137,7 +138,11 @@ class MyAuthenticationPolicy(CallbackAuthenticationPolicy):
     def extractClaimsFromCookie(self, jwt):
         claims = None
         
-        token = jwtcrypto.JWT(header= {"alg" : "HS256", "typ" : "JWT" },key=self.key, jwt=jwt)
+        token = jwtcrypto.JWT(
+                            header= {"alg" : "HS256", "typ" : "JWT" }, # must match alg of portal!!!!
+                            key=self.key, 
+                            jwt=jwt
+                        )
         claims = json.loads(token.claims)
         return claims
 
@@ -180,7 +185,7 @@ class MyAuthenticationPolicy(CallbackAuthenticationPolicy):
     def forget(self, request):
         '''
         Delete a cookie from the client.  Note that ``path`` and ``domain``
-        must match how the cookie was originally set.
+        must match path and domain the cookie was originally set.
 
         Will sets the cookie to the empty string, and ``max_age=0`` so
         that it should expire immediately.
