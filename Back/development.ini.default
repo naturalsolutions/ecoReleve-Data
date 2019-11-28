@@ -30,7 +30,6 @@ pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
 pyramid.includes =
-    pyramid_debugtoolbar
     pyramid_tm
 
 
@@ -41,8 +40,7 @@ pyramid.includes =
 #                                STARTING CONFIG BDD ACCESS                                                                  #
 #                                                                                                                            #
 
-# or (for MS SQL Server)
-sqlalchemy.default.url = DRIVER={SQL Server};Server= yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
+sqlalchemy.default.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
 sqlalchemy.default.implicit_returning = False
 sqlalchemy.default.pool_reset_on_return = commit
 sqlalchemy.default.pool_size = 30
@@ -51,10 +49,7 @@ sqlalchemy.default.max_overflow = 10
 sqlalchemy.default.case_sensitive= False
 
 
-#### connection for Export Database
-sqlalchemy.Export.url = mssql+pyodbc://username:password@host\instance/initialDB
-# or (for MS SQL Server)
-sqlalchemy.Export.url = DRIVER={SQL Server};Server= yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
+sqlalchemy.Export.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
 sqlalchemy.Export.implicit_returning = False
 sqlalchemy.Export.pool_reset_on_return = commit
 sqlalchemy.Export.pool_size = 30
@@ -70,7 +65,7 @@ sensor_schema = you Sensor Database schema
 cn.dialect = mssql+pyodbc:///?odbc_connect=
 
 
-dbLog.url = DRIVER={SQL Server};Server=.;Database=NSLog;UID=toto;PWD=totomdp;Trusted_Connection=Yes
+dbLog.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
 dbLog.schema = NSLog.dbo
 
 #                           ENDING CONFIG BDD ACESS                                                                          #
@@ -128,14 +123,16 @@ JWTSECURITY.COOKIENAME      =   ecoReleve-Core
 
 RENECO.SECURITE.TINS_LABEL = ecoRelevé
 
+# Thesaurus Configuration
+wsThesaurus.wsUrl = yourWebWervicesURL
+wsThesaurus.lng = fr
+
 #                           ENDING RENECO CONTEXT                                                                            #
 #                                                                                                                            #
 ##############################################################################################################################
 
 
-# Thesaurus Configuration
-wsThesaurus.wsUrl = yourWebWervicesURL
-wsThesaurus.lng = fr
+
 
 
 
