@@ -18,7 +18,7 @@ function(Marionette, TransitionRegion, LytHeader,config) {
     },
 
     regions: {
-      rgHeader: 'header',
+      //rgHeader: 'header',
       rgMain: new Marionette.TransitionRegion({
         el: 'main'
       }),
@@ -27,7 +27,7 @@ function(Marionette, TransitionRegion, LytHeader,config) {
 
     onRender: function() {
        var isDomoInstance = config.instance ;
-       this.rgHeader.show(new LytHeader);
+       //this.rgHeader.show(new LytHeader);
        if(isDomoInstance == 'demo') {
             this.insertForm();
        }

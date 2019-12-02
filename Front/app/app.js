@@ -32,6 +32,99 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
 
     var app = {};
     var JST = window.JST = window.JST || {};
+    // HEADER STENCIL
+    function initHeader() {
+      var header = document.getElementsByTagName('reneco-header')[0];
+      header.options = {
+        appTitle: "EcoRelevé",
+        appIcon: "ECO-ecorelevesmall", //ne pas mettre "reneco-"
+        langCode: 'fr',
+        user: {
+          nickname: 'User name'
+        },
+        menu: {
+          items: [{
+            label: {
+              en: "Home",
+              fr: "Accueil"
+            },
+            icon: 'reneco-home',
+            link: '#'
+          }, {
+            label: {
+              en: "Manual import",
+              fr: "Import manuel"
+            },
+            icon: 'reneco-import',
+            link: ''
+          }, {
+            label: {
+              en: "Imports history",
+              fr: "Historique imports"
+            },
+            icon: 'reneco-story',
+            link: ''
+          }, {
+            label: {
+              en: "New station",
+              fr: "Nouvelle station"
+            },
+            icon: 'reneco-stations',
+            link: ''
+          }, {
+            label: {
+              en: "Release",
+              fr: "Relaché"
+            },
+            icon: 'reneco-TRACK-released',
+            link: ''
+          }, {
+            label: {
+              en: "Validation",
+              fr: "Validation"
+            },
+            icon: 'reneco-validate',
+            link: ''
+          }, {
+            label: {
+              en: "Stations",
+              fr: "Stations"
+            },
+            icon: 'reneco-stations',
+            link: ''
+          }, {
+            label: {
+              en: "Individuals",
+              fr: "Individus"
+            },
+            icon: 'reneco-individuals',
+            link: ''
+          }, {
+            label: {
+              en: "Sensors",
+              fr: "Capteurs"
+            },
+            icon: 'reneco-sensors',
+            link: ''
+          }, {
+            label: {
+              en: "Monitored sites",
+              fr: "Sites monitorés"
+            },
+            icon: 'reneco-sites',
+            link: ''
+          }, {
+            label: {
+              en: "Export",
+              fr: "Export"
+            },
+            icon: 'reneco-export',
+            link: ''
+          }
+          ]
+        }
+      };
+    };
     window.xhrPool = [];
 
     window.onkeydown = function (e) {
@@ -62,6 +155,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     app.controller = new Controller();
     app.router = new Router({controller: app.controller});
     app.rootView.render();
+    initHeader();
     Backbone.history.start();
   });
 
