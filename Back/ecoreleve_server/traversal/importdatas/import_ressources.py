@@ -722,19 +722,23 @@ class ARGOSImport(ImportWithFileLikeCSV):
     def findNewData(self,futurAnnotated, curSession, identifier, columns, dataType): 
         # result gives all 
         # dataSensorNotImported = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0).order_by(desc(Gsm.date)).all()
-        dataSensorNotImportedQuery1 = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 1, ArgosGps.type_ == dataType).order_by(desc(ArgosGps.date))
+        dataSensorNotImportedQuery1 = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 1).order_by(desc(ArgosGps.date))
         dataSensorNotImportedRes1 = dataSensorNotImportedQuery1.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind())
         if len(dataSensorNotImportedDf1) > 0:
             lastValidData =  dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
             lastValidDate = lastValidData['date'].isoformat()
-            dataSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'ok', ArgosGps.type_ == dataType).order_by(desc(ArgosGps.date))
-            dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'Future', ArgosGps.type_ == dataType).order_by(desc(ArgosGps.date))     
+            dataSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'ok').order_by(desc(ArgosGps.date))
+            dataTypeSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'ok',ArgosGps.type_==dataType).order_by(desc(ArgosGps.date))
+            dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'Future').order_by(desc(ArgosGps.date))     
         else:
-            dataSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.Status == 'ok', ArgosGps.type_ == dataType).order_by(desc(ArgosGps.date))
-            dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.Status == 'Future', ArgosGps.type_ == dataType).order_by(desc(ArgosGps.date))
+            dataSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.Status == 'ok').order_by(desc(ArgosGps.date))
+            dataTypeSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.Status == 'ok',ArgosGps.type_==dataType).order_by(desc(ArgosGps.date))
+            dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.Status == 'Future').order_by(desc(ArgosGps.date))
         dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind())
+        dataTypeSensorNotImportedRes = dataTypeSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
+        dataTypeSensorNotImportedDf = pd.read_sql_query(dataTypeSensorNotImportedRes,curSession.get_bind())
         dataFutureAnnotatedRes = dataFutureAnnotatedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind())
         dataFutureAnnotatedDf['date'] = pd.to_datetime(dataFutureAnnotatedDf['date']).dt.strftime('%Y-%m-%dT%H:%M:%S')
@@ -747,7 +751,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         getDataForSpeed = []
         newDatatmpID = []
         if len(dataSensorNotImportedDf) > 0:
-            lastDataNotImported = dataSensorNotImportedDf.loc[0]
+            lastDataNotImported = dataTypeSensorNotImportedDf.loc[0]
             lastDataNotImportedDate = lastDataNotImported['date'].isoformat()
             # firstDataNotImportedDate = dataSensorNotImportedDf.loc[len(dataSensorNotImportedDf)-1,'DateTime'].isoformat()
             if len(dataSensorNotImportedDf1) > 0:
@@ -902,7 +906,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
     def setQuality(self, speedQualityNewData):
         for i in speedQualityNewData.index:
             # there is no quality indication in MTI_ARGOS_g, Reneco decided quality on metadata would be 1 by default in that case 
-            if np.isnan(speedQualityNewData.loc[i,'lc']):
+            if speedQualityNewData.loc[i,'type']=='GPS':
                 speedQualityNewData.loc[i,'Quality_On_Metadata'] = 1
             else:
                 if speedQualityNewData.loc[i,'lc'] == '2' or speedQualityNewData.loc[i,'lc'] == '3':
