@@ -16,6 +16,7 @@ import io
 class ImportWithFileLikeCSV(MetaEndPointNotREST):
     __acl__ = context_permissions['formbuilder']
 
+    print("test")
     def create(self):
         filePosted = self.getFile()
         if filePosted is not None:
