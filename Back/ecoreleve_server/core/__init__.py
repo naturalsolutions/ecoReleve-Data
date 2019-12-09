@@ -15,6 +15,7 @@ from .configuration_model import *
 
 class SecurityRoot(Resource):
     __acl__ = [
+        (Allow, Authenticated, 'fixForOld'),
         (Allow, Authenticated, 'read'),
         (Allow, Authenticated, 'all'),
         (Allow, 'group:admin', 'admin'),
