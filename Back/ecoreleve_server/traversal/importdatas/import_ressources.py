@@ -11,6 +11,17 @@ from  ecoreleve_server.modules.sensors.sensor_data.sensor_data_model import Gsm,
 from ecoreleve_server.core import Base, dbConfig
 from  ecoreleve_server.modules.individuals.individual_model import Individual_Location
 import io 
+import uuid
+import os
+import shutil
+import subprocess
+from time import sleep
+import win32gui
+import win32con
+from win32 import win32api
+import psutil
+import ecoreleve_server
+
 
 
 class ImportWithFileLikeCSV(MetaEndPointNotREST):
@@ -461,7 +472,7 @@ class GSMImport(ImportWithFileLikeCSV):
                 speedQualityNewData.loc[i,'Quality_On_Metadata']= 3
             if float(speedQualityNewData.loc[i,'HDOP']) == 0:
                     speedQualityNewData.loc[i,'Quality_On_Metadata'] = 0
-        return speedQualityNewData            
+        return speedQualityNewData
 
     def convertDataset(self, qualityAnnotated,dataForAfterQuality,identifier,individualID):
         # Final dataset = dataset with 'quality' + 'test' and future data
@@ -480,11 +491,84 @@ class ARGOSImport(ImportWithFileLikeCSV):
     def retrieve(self):
         return 'youhouuo ARGOSImport'
 
+    def storeDIAGandDSFiles(self):
+        workDir = os.path.dirname(os.path.abspath(ecoreleve_server.__package__))
+        tempDir = os.path.join(workDir,
+                                "ecoReleve_import",
+                                "Argos",
+                                "NightJob")
+        listFile = []
+        for item in self.__request__.POST._items:
+            name = item[1].filename
+            if name.lower() == 'DIAG.TXT'.lower() or name.lower() == 'DS.TXT'.lower():
+                suffix  = str(uuid.uuid4())
+                fileExt = name.split('.')
+                pathToStore = os.path.join(tempDir,str(fileExt[0]) + str(suffix) + str('.')+str(fileExt[1]) )
+
+                try:
+                    with open(pathToStore,'wb') as curFile:
+                        shutil.copyfileobj(item[1].file, curFile)
+                    listFile.append(pathToStore)
+                except Exception as e:
+                    raise(e)
+        return  listFile
+
+
+    def callMTIParser(self,listFile):
+        workDir = os.path.dirname(os.path.abspath(ecoreleve_server.__package__))
+
+        con_file = os.path.join(workDir, 'init.txt')
+        MTI_path = os.path.join(workDir, 'MTIwinGPS.exe')
+        out_path = os.path.join(workDir,
+                                "ecoReleve_import",
+                                "Argos")
+
+        if not os.path.exists(out_path):
+            os.makedirs(out_path)
+        try:
+            os.remove(con_file)
+        except:
+            pass
+
+        with open(con_file, 'w') as f:
+            f.write("-eng\n")
+            f.write("-argos\n")
+            f.write("-title\n")
+            f.write("-out\n")
+            f.write(""+out_path+"\n")
+            f.write("\n".join(listFile))
+
+        # execute MTI-Parser
+        args = [MTI_path]
+        proc = subprocess.Popen([args[0]])
+        hwnd = 0
+        while hwnd == 0:
+            sleep(0.3)
+            hwnd = win32gui.FindWindow(0, "MTI Argos-GPS Parser")
+
+        btnHnd = win32gui.FindWindowEx(hwnd, 0, "Button", "Run")
+        win32api.SendMessage(btnHnd, win32con.BM_CLICK, 0, 0)
+        filenames = [os.path.join(out_path, fn)
+                    for fn in next(os.walk(out_path))[2]]
+        win32api.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+
+        # kill process Mti-Parser
+        pid = proc.pid
+        parent = psutil.Process(pid)
+        try:
+            # or parent.children() for recursive=False
+            for child in parent.children(recursive=True):
+                child.kill()
+            parent.kill()
+        except:
+            pass
+
+
     def create(self):
         providers = {
-        'MTI_ARGOS_a': ['Date Time','Fix','Lat1(N)','Long1(E)','Lat2(N)','Long2(E)','MsgCount','Frequency','Average TI','Satellite','Max Str','Swapped'],
-        'MTI_ARGOS_g':['Date/Time','Latitude(N)','Longitude(E)','Speed','Course','Altitude(m)'],
-        'MTI_ARGOS_e':['Tx Date/Time','Int Date/Time','Satellite ID','Activity','Tx Count','Temperature (°C)','Battery Voltage (V)','GPS fix time','Satellite Count','Hours Since Reset','Hours since GPS fix','Season','Shunt','Mortality GT','Season GT','Latest Latitude(N)','Latest Longitude(E)']
+            'MTI_ARGOS_a': ['Date Time','Fix','Lat1(N)','Long1(E)','Lat2(N)','Long2(E)','MsgCount','Frequency','Average TI','Satellite','Max Str','Swapped'],
+            'MTI_ARGOS_g':['Date/Time','Latitude(N)','Longitude(E)','Speed','Course','Altitude(m)'],
+            'MTI_ARGOS_e':['Tx Date/Time','Int Date/Time','Satellite ID','Activity','Tx Count','Temperature (°C)','Battery Voltage (V)','GPS fix time','Satellite Count','Hours Since Reset','Hours since GPS fix','Season','Shunt','Mortality GT','Season GT','Latest Latitude(N)','Latest Longitude(E)']
         }
 
         variables = {
@@ -525,6 +609,21 @@ class ARGOSImport(ImportWithFileLikeCSV):
 
         first_time = datetime.now() # juste pour avoir temps d'exécution
         curSession = self.__request__.dbsession
+
+        ## on est pour l'instant supposé ne recevoir que des fichiers DIAG ou DS pour l'import SAT
+        flagOK = False
+        for item in self.__request__.POST._items:
+            name = item[1].filename
+            if name.lower() == 'DIAG.txt'.lower() or name.lower() == 'DS.txt'.lower():
+                flagOK = True
+                # self.callMTIParser()
+                break
+
+        if flagOK:
+            listFile = self.storeDIAGandDSFiles()
+            self.callMTIParser(listFile=listFile)
+            return 'ok'
+
         for item in self.__request__.POST._items:
             if item is not None:
                 print(item)
@@ -855,7 +954,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         return timeDataClean, pastOutliers
 
     def findTimeDuplicates(self, timeDataClean):
-    # Dataframe with duplicates with same date
+        # Dataframe with duplicates with same date
         allDuplicatesDf = timeDataClean[timeDataClean.duplicated(['date'],keep=False)].copy()
         allDuplicatesDf['Status']='duplicate'
         duplicateCleanData = timeDataClean.loc[(~timeDataClean['PK_id'].isin(allDuplicatesDf.PK_id))].copy()
