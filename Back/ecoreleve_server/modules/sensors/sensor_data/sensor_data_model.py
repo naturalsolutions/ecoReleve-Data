@@ -23,8 +23,8 @@ from ecoreleve_server.core.base_model import ORMUtils
 if 'sensor_schema' in dbConfig:
     sensor_schema = dbConfig['sensor_schema']
 else:
-    dbConfig['sensor_schema']  = 'ecoReleve_Sensor.dbo'
-    sensor_schema = 'ecoReleve_Sensor.dbo'
+    dbConfig['sensor_schema']  = 'ecoReleve_Sensor_new.dbo'
+    sensor_schema = 'ecoReleve_Sensor_new.dbo'
 if 'cn.dialect' in dbConfig:
     dialect = dbConfig['cn.dialect']
 else:
@@ -44,7 +44,7 @@ class GPX(Base):
     timeZone = Column(String(250))
     Place = Column(String(250))
     imported = Column('imported', Boolean, nullable=False, default=False)
-
+    
     FK_Import = Column('FK_Import', Integer, ForeignKey(
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='GPXrawDatas')
@@ -77,11 +77,17 @@ class ArgosGps(Base):
     passDuration = Column(Integer)
     nopc = Column('nopc', Integer)
     frequency = Column('freq', Float)
-    checked = Column('checked', Boolean, nullable=False, default=False)
-    imported = Column('imported', Boolean, nullable=False, default=False)
+    checked = Column('checked', Boolean, nullable=False, server_default='0')
+    imported = Column('imported', Boolean, nullable=False, server_default='0')
     FK_Import = Column('FK_Import', Integer, ForeignKey(
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='ArgosGPSRawDatas')
+    Status = Column(String(50))
+    Calculated_Speed = Column(Integer)
+    Quality_On_Speed = Column(Integer)
+    Quality_On_Metadata = Column(Integer)
+    Data_Quality = Column(Integer)
+    Fk_individual_location = Column(Integer)
 
     if 'mssql' in dialect:
         __table_args__ = (
@@ -119,6 +125,13 @@ class Gsm(Base):
     FK_Import = Column('FK_Import', Integer, ForeignKey(
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='GSMrawDatas')
+    Status = Column(String(50))
+    Calculated_Speed = Column(Integer)
+    Quality_On_Speed = Column(Integer)
+    Quality_On_Metadata = Column(Integer)
+    Data_Quality = Column(Integer)
+    Fk_individual_location = Column(Integer)
+    ShowInKML = Column(Integer)
 
     if 'mssql' in dialect:
         __table_args__ = (

@@ -1,4 +1,3 @@
-from ecoreleve_server.modules.stations.station_model import Station
 
 class MetaRootRessource (dict):
     __acl__ = []
@@ -56,8 +55,6 @@ class MetaCollectionRessource (MetaRootRessource):
 
 
 class MetaItemRessource (MetaCollectionRessource):
-
-    dbModel = Station
 
     def __getitem__(self, name):
         print("it's the __getitem__ from Meta CLASS you should implement you own ressource")

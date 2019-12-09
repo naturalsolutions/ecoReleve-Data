@@ -16,12 +16,12 @@ route_prefix = 'security/'
 
 @view_config(
     route_name=route_prefix+'logout',
-    permission=NO_PERMISSION_REQUIRED,)
+    permission=NO_PERMISSION_REQUIRED)
 def logout(request):
     forget(request)
     return request.response
 
 
-@view_config(route_name=route_prefix+'has_access')
+@view_config(route_name=route_prefix+'has_access', permission='fixForOld' )
 def has_access(request):
     return request.response
