@@ -23,8 +23,8 @@ from ecoreleve_server.core.base_model import ORMUtils
 if 'sensor_schema' in dbConfig:
     sensor_schema = dbConfig['sensor_schema']
 else:
-    dbConfig['sensor_schema']  = 'ecoReleve_Sensor_new.dbo'
-    sensor_schema = 'ecoReleve_Sensor_new.dbo'
+    dbConfig['sensor_schema']  = 'ecoReleve_Sensor.dbo'
+    sensor_schema = 'ecoReleve_Sensor.dbo'
 if 'cn.dialect' in dbConfig:
     dialect = dbConfig['cn.dialect']
 else:
