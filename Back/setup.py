@@ -29,7 +29,8 @@ requires = [
     # 'shapely',
     'SQLAlchemy==1.3.3',
     'SQLAlchemy-Utils==0.33.1',
-    'waitress==1.3.0'
+    'waitress==1.3.0',
+    'vincenty==0.1.4'
     ]
 
 dependency_links=[
