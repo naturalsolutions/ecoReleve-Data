@@ -498,6 +498,9 @@ class ARGOSImport(ImportWithFileLikeCSV):
                                 "ecoReleve_import",
                                 "Argos",
                                 "NightJob")
+        if not os.path.exists(tempDir):
+            os.makedirs(tempDir)
+            
         listFile = []
         for item in self.__request__.POST._items:
             name = item[1].filename
