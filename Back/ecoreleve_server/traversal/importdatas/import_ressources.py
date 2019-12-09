@@ -27,7 +27,6 @@ import ecoreleve_server
 class ImportWithFileLikeCSV(MetaEndPointNotREST):
     __acl__ = context_permissions['formbuilder']
 
-    print("test")
     def create(self):
         filePosted = self.getFile()
         if filePosted is not None:
@@ -500,7 +499,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                                 "NightJob")
         if not os.path.exists(tempDir):
             os.makedirs(tempDir)
-            
+
         listFile = []
         for item in self.__request__.POST._items:
             name = item[1].filename
@@ -626,30 +625,57 @@ class ARGOSImport(ImportWithFileLikeCSV):
         if flagOK:
             listFile = self.storeDIAGandDSFiles()
             self.callMTIParser(listFile=listFile)
-            return 'ok'
 
-        for item in self.__request__.POST._items:
+
+        workDir = os.path.dirname(os.path.abspath(ecoreleve_server.__package__))
+        out_path = os.path.join(workDir,
+                                "ecoReleve_import",
+                                "Argos")
+
+        def listFilesFromDirectory(pathDirectory):
+            fileList = []
+            print(f"from HERE WE LIST {pathDirectory}")
+            for (dirpath, dirnames, filenames) in os.walk(pathDirectory):        
+                curListFiles = []
+                print(f"dirpath {dirpath} pathdirectectory {pathDirectory}")
+                if dirpath == pathDirectory:
+                    for files in filenames:
+                        if files[-5:].lower() in ['a.txt','e.txt','g.txt'] :
+                            curListFiles.append(files)
+                    fileList.extend(curListFiles)
+            return fileList    
+
+        listFiles = listFilesFromDirectory(pathDirectory=out_path)                    
+
+        print(f"{listFiles}")
+        for item in listFiles:
+        #     print(f"{item}")
+
+        # return 'ok'
+        # for item in self.__request__.POST._items:
             if item is not None:
                 print(item)
-                name = item[1].filename
-                if name == 'DIAG.TXT':
-                    f = open('DIAG.TXT','r')
-                    content = f.read()
-                    # renvoie dictionnaire de config "diagInfo"
-                diagInfo = {
-                    'Program':'03416'
-                }
-                path = item[1].file
+                # if name == 'DIAG.TXT':
+                #     f = open('DIAG.TXT','r')
+                #     content = f.read()
+                #     # renvoie dictionnaire de config "diagInfo"
+                # diagInfo = {
+                #     'Program':'03416'
+                # }
+                name = item
+                path = os.path.join(out_path, name)
                 # File that contains very few data is considered as BytesIO file instead of temporary file. BytesIO needs a particular decoding step
-                if type(item[1].file) is io.BytesIO:
-                    data = repr( self.__request__.POST._items[0][1].file.getvalue().decode('latin1') )
-                    data = data[1:-1]
-                    rawData = pd.DataFrame( [ line.split('\\t') for line in data.split('\\r\\n') ])
-                    headers = rawData.iloc[0]
-                    rawData = rawData[1:-1]
-                    rawData = rawData.rename(columns = headers)
-                else:
-                    rawData = pd.read_csv(path, sep='\t', dtype=str)
+
+                #TODO a deplacer quand on reçoit le fichier
+                # if type(item[1].file) is io.BytesIO:
+                #     data = repr( self.__request__.POST._items[0][1].file.getvalue().decode('latin1') )
+                #     data = data[1:-1]
+                #     rawData = pd.DataFrame( [ line.split('\\t') for line in data.split('\\r\\n') ])
+                #     headers = rawData.iloc[0]
+                #     rawData = rawData[1:-1]
+                #     rawData = rawData.rename(columns = headers)
+                # else:
+                rawData = pd.read_csv(path, sep='\t', dtype=str, encoding = "ISO-8859-1")
                 identifier = name[0:5]
                 columns = []
                 if name[5] == 'g':
@@ -729,7 +755,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         dataForSpeed, newData = self.findNewData(futurAnnotated, curSession, identifier, columns, dataType)
                         if len(newData) == 0:
                             print('deso deja importées dans Sensor')
-                            return 'Ces données ont déjà été importées'
+                            continue 
                         else:  
                             # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
                             geoOutliers, geoDataClean = self.findGeoOutliers(newData, dataType)
@@ -853,7 +879,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         # list from database
         getDataForSpeed = []
         newDatatmpID = []
-        if len(dataSensorNotImportedDf) > 0:
+        if len(dataTypeSensorNotImportedDf) > 0:
             lastDataNotImported = dataTypeSensorNotImportedDf.loc[0]
             lastDataNotImportedDate = lastDataNotImported['date'].isoformat()
             # firstDataNotImportedDate = dataSensorNotImportedDf.loc[len(dataSensorNotImportedDf)-1,'DateTime'].isoformat()
