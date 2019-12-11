@@ -244,7 +244,11 @@ define([
       },{
         field: 'type',
         headerName: 'Type',
+      },{
+        field: 'Data_Quality',
+        headerName: 'Quality',
       }];
+
 
       this.rgGrid.show(this.gridView = new GridView({
         columns: columnDefs,

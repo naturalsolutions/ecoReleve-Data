@@ -134,6 +134,7 @@ class DATASubDatasBySession(CustomResource):
         self.viewTable = parent.viewTable        
 
     def retrieve(self):
+        print("KEYYYYY")
         return self.__parent__.getDatas()
     
     def patch(self):
@@ -198,6 +199,7 @@ class SensorDatasBySession(CustomResource):
         return self.request.response
 
     def getDatas(self):
+        ###METHODE POUR LA VALIDATION DES SENSORS
         if self.type_ == 'camtrap':
             if self.request.method == 'GET':
                 joinTable = join(CamTrap, self.viewTable,
@@ -226,12 +228,17 @@ class SensorDatasBySession(CustomResource):
         return newQuery
 
     def handleResult(self, data):
+        ## POUR LA POPUP DE LA CARTE
         if self.type_ in ['gsm', 'argos']:
             if 'geo' in self.request.params:
                 geoJson = []
                 for row in data:
                     geoJson.append({'type': 'Feature', 'id': row['PK_id'], 'properties': {
-                                   'type': row['type'], 'Date': row['date']}, 'geometry': {'type': 'Point', 'coordinates': [row['lat'], row['lon']]}})
+                                   'type': row['type'],
+                                    'Date': row['date']},
+                                    'geometry': {'type': 'Point', 'coordinates': [row['lat'], row['lon']]}
+
+                                    })
                 result = {'type': 'FeatureCollection', 'features': geoJson}
 
             else:
