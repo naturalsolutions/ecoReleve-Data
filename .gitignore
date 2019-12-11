@@ -40,7 +40,7 @@ Back/init.txt
 Back/.vscode/settings.json
 Back/.vscode/launch.json
 Back/init.txt
-Back/ecoReleve_import/*
+ecoReleve_import/
 Front/package-lock.json
 
 erdenv
