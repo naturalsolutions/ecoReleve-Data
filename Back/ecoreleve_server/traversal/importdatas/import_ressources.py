@@ -106,12 +106,12 @@ class GSMImport(ImportWithFileLikeCSV):
                 report = {
                     'file': name,
                     'SentData': sentData,
-                    'AlreadyImportedData': '',
-                    'GeoOutliers': '',
-                    'Duplicates': '',
-                    'DataInsertedInSensorDB': '',
-                    'TestAnnotated': '',
-                    'FutureAnnotated': '',
+                    'AlreadyImportedData': 0,
+                    'GeoOutliers': 0,
+                    'Duplicates': 0,
+                    'DataInsertedInSensorDB': 0,
+                    'TestAnnotated': 0,
+                    'FutureAnnotated': 0,
                 }
                 # #Gets database info about sensor 
                 sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
@@ -169,6 +169,9 @@ class GSMImport(ImportWithFileLikeCSV):
                     if dataType == 'locations':
                         # #Dataset management
                         rawData.insert(0, 'PK_id', range(0, 0 + len(rawData)))
+                        datefile = datetime.strptime(datefile,'%Y-%m-%d')
+                        file_date = (datefile+timedelta(hours=0,minutes=00,seconds=00)).strftime('%Y-%m-%dT%H:%M:%S')
+                        rawData.insert(len(rawData.columns),'file_date',file_date)
                         rawData.insert(len(rawData.columns),'Status','ok')
                         rawData.insert(len(rawData.columns),'Quality_On_Speed','')
                         rawData.insert(len(rawData.columns),'Quality_On_Metadata','')
@@ -182,11 +185,7 @@ class GSMImport(ImportWithFileLikeCSV):
                         report['AlreadyImportedData'] = oldData
                         if len(newData) == 0:
                             print('deso deja importées dans Sensor')   
-                            report = {
-                                'file': name,
-                                'SentData': sentData,
-                                'AlreadyImportedData': sentData,
-                            }
+                            report['AlreadyImportedData'] = sentData
                             print(report)  
                             finalReport.append(report)
                             print(finalReport)                                             
@@ -261,7 +260,6 @@ class GSMImport(ImportWithFileLikeCSV):
         # date import 
         # currentDate = (datetime.now()+timedelta(hours=timeDifference)).strftime('%Y-%m-%dT%H:%M:%S')
         # Date in filename at 23:59:59 
-        datefile = datetime.strptime(datefile,'%Y-%m-%d')
         datefile = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
         countFuture = 0
         for i in rawData.index:
@@ -467,7 +465,7 @@ class GSMImport(ImportWithFileLikeCSV):
         # ici prefilteredData contient bien toutes les données jusqu'à la dernière validée (donc dans ERD) s'il y en a une
         eliminatedSpeed =[]
         pointsfiltered = []
-        prefilteredData[0]['distance'] = 0
+        prefilteredData[0]['Distance'] = 0
         prefilteredData[0]['Calculated_Speed'] = 0
         i=0
         L = len(prefilteredData)
@@ -475,12 +473,12 @@ class GSMImport(ImportWithFileLikeCSV):
         while i < L-1:
             for j in range (1,L-i):
                 # Calcul de la distance
-                prefilteredData[i+j]['distance'] = vincenty((float(prefilteredData[i]['Latitude_N']),float(prefilteredData[i]['Longitude_E'])),(float(prefilteredData[i+j]['Latitude_N']),float(prefilteredData[i+j]['Longitude_E'])))
+                prefilteredData[i+j]['Distance'] = vincenty((float(prefilteredData[i]['Latitude_N']),float(prefilteredData[i]['Longitude_E'])),(float(prefilteredData[i+j]['Latitude_N']),float(prefilteredData[i+j]['Longitude_E'])))
                 # Calcul de la durée
                 diftimeS=datetime.strptime(prefilteredData[i+j]['DateTime'],'%Y-%m-%dT%H:%M:%S') - datetime.strptime(prefilteredData[i]['DateTime'],'%Y-%m-%dT%H:%M:%S')
                 diftimeH=diftimeS.total_seconds()/3600
                 # Calcul de la vitesse
-                speed=prefilteredData[i+j]['distance']/float(diftimeH)
+                speed=prefilteredData[i+j]['Distance']/float(diftimeH)
                 prefilteredData[i+j]['Calculated_Speed'] = speed
                 # prefilteredData[i+j]['speed'] = speed
                 # Comparaison à la vitesse maximale entrée en paramètre,
@@ -523,7 +521,7 @@ class GSMImport(ImportWithFileLikeCSV):
         # Final dataset = dataset with 'quality' + 'test' and future data
         frames = [qualityAnnotated, dataForAfterQuality]
         finalDataset = pd.concat(frames)
-        finalDataset = finalDataset.drop(['distance'],axis = 1)
+        # finalDataset = finalDataset.drop(['distance'],axis = 1)
         finalDataset = finalDataset.drop(['PK_id'],axis = 1)
         date = 'DateTime'
         finalDataset = finalDataset.sort_values(by=date,ascending=True)
@@ -726,12 +724,12 @@ class ARGOSImport(ImportWithFileLikeCSV):
                 report = {
                     'file': name,
                     'SentData': sentData,
-                    'AlreadyImportedData': '',
-                    'GeoOutliers': '',
-                    'Duplicates': '',
-                    'DataInsertedInSensorDB': '',
-                    'TestAnnotated': '',
-                    'FutureAnnotated': '',
+                    'AlreadyImportedData': 0,
+                    'GeoOutliers': 0,
+                    'Duplicates': 0,
+                    'DataInsertedInSensorDB': 0,
+                    'TestAnnotated': 0,
+                    'FutureAnnotated': 0,
                 }
                 columns = []
                 if name[5] == 'g':
@@ -813,11 +811,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         report['AlreadyImportedData'] = oldData
                         if len(newData) == 0:
                             print('deso deja importées dans Sensor')
-                            report = {
-                                'file': name,
-                                'SentData': sentData,
-                                'AlreadyImportedData': sentData,
-                            }
+                            report['AlreadyImportedData'] = sentData
                             print(report)
                             finalReport.append(report)
                             print(finalReport)
