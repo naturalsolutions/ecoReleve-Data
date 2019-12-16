@@ -234,10 +234,12 @@ class SensorDatasBySession(CustomResource):
                 geoJson = []
                 for row in data:
                     geoJson.append({'type': 'Feature', 'id': row['PK_id'], 'properties': {
-                                   'type': row['type'],
-                                    'Date': row['date']},
+                                   'Type': row['type'],
+                                    'Date': row['date'],
+                                    'QualityOnSpeed': row['Quality_On_Speed'],
+                                    'QualityOnMetadata': row['Quality_On_Metadata']
+                                    },
                                     'geometry': {'type': 'Point', 'coordinates': [row['lat'], row['lon']]}
-
                                     })
                 result = {'type': 'FeatureCollection', 'features': geoJson}
 
@@ -246,10 +248,10 @@ class SensorDatasBySession(CustomResource):
                     data, columns=data[0].keys(), coerce_float=True)
                 X1 = df.iloc[:-1][['lat', 'lon']].values
                 X2 = df.iloc[1:][['lat', 'lon']].values
-                df['dist'] = np.append(haversine(X1, X2), 0).round(3)
+                # df['dist'] = np.append(haversine(X1, X2), 0).round(3)
                 # Compute the speed
-                df['speed'] = (df['dist'] / ((df['date'] - df['date'].shift(-1)
-                                              ).fillna(1) / np.timedelta64(1, 'h'))).round(3)
+                # df['speed'] = (df['dist'] / ((df['date'] - df['date'].shift(-1)
+                #                               ).fillna(1) / np.timedelta64(1, 'h'))).round(3)
                 df['date'] = df['date'].apply(
                     lambda row: np.datetime64(row).astype(datetime.datetime))
                 # Fill NaN
@@ -423,7 +425,7 @@ class SensorDatasByType(CustomResource):
     def queryWithIndiv(self):
         selectStmt = select([self.viewTable.c['FK_Individual'],
                              self.viewTable.c['sessionID'],
-                             self.viewTable.c['Survey_type'],
+                            #  self.viewTable.c['Survey_type'],
                              self.viewTable.c['FK_ptt'],
                              self.viewTable.c['FK_Sensor'],
                              self.viewTable.c['StartDate'],
@@ -435,7 +437,7 @@ class SensorDatasByType(CustomResource):
 
         queryStmt = selectStmt.where(self.viewTable.c['checked'] == 0
                                      ).group_by(self.viewTable.c['FK_Individual'],
-                                                self.viewTable.c['Survey_type'],
+                                                # self.viewTable.c['Survey_type'],
                                                 self.viewTable.c['FK_ptt'],
                                                 self.viewTable.c['StartDate'],
                                                 self.viewTable.c['EndDate'],
