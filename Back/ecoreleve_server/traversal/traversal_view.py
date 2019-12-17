@@ -3,7 +3,7 @@ from pyramid.view import  view_config, view_defaults
 @view_defaults(route_name='myTraversal')
 class TraversalRESTView(object):
     def __init__(self, context, request):
-        self.__request__ = request
+        self.request = request
         self.context = context
 
     @view_config(request_method='GET', renderer='json', permission='read')

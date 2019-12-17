@@ -15,7 +15,7 @@ from pyramid.httpexceptions import HTTPClientError
 #     def __init__(self, name, ref, request):
 #         self.__name__ = name
 #         self.__parent__ = ref
-#         self.__request__ = request
+#         self.request = request
 
 #     def __getitem__(self, name):
 #         if name == 'FieldActivity':
@@ -46,35 +46,35 @@ class FieldActivityCollection (MetaCollectionRessource):
         try:
             val = int(name)
             print("name is an int we gonna return a ressource", name, val)
-            return FieldActivityRessource(name=name, parent=self, request=self.__request__)
+            return FieldActivityRessource(name=name, parent=self, request=self.request)
         except ValueError:
             print("WE GONNA RAISE ERROR")
             raise KeyError
 
 
     def parseQueryString(self):
-        multiDictParams = self.__request__.GET
+        multiDictParams = self.request.GET
 
         if 'protocoleType.ID' in multiDictParams:
             #should raise warning if len > 2
             self.params['protcoleType']['ID'] = multiDictParams['protocoleType.ID'][0]
         if 'protocoleType.Name' in multiDictParams:
             self.params['protocoleType']['Name'] = multiDictParams['protocoleType.Name'][0]
-            
+
     def retrieve (self):
-        # res = self.__request__.dbsession.\
+        # res = self.request.dbsession.\
         #     query(fieldActivity.ID,fieldActivity.Name).\
         #     join(FieldActivity_ProtocoleType, fieldActivity.ID == FieldActivity_ProtocoleType.FK_fieldActivity).\
         #     join(ProtocoleType, FieldActivity_ProtocoleType.FK_ProtocoleType == ProtocoleType.ID).\
         #     order_by(asc(fieldActivity.ID)).\
         #     all()
-        res = self.__request__.dbsession.\
+        res = self.request.dbsession.\
             query(fieldActivity.ID,fieldActivity.Name).\
             order_by(asc(fieldActivity.ID)).\
-            all()    
+            all()
 
         toRet = []
-        for item in res: 
+        for item in res:
             toRet.append(item._asdict())
 
         return toRet
@@ -84,28 +84,28 @@ class ProtocoleTypeCollection (MetaCollectionRessource):
     def __getitem__ (self,name):
         try:
             val = int(name)
-            return ProtocoleTypeRessource(name=name, parent=self, request=self.__request__)
+            return ProtocoleTypeRessource(name=name, parent=self, request=self.request)
         except ValueError:
             print("WE GONNA RAISE ERROR")
             raise KeyError
-    
+
     def retrieve (self):
-        res = self.__request__.dbsession.\
+        res = self.request.dbsession.\
             query(ProtocoleType.ID,ProtocoleType.Name).\
             order_by(asc(ProtocoleType.ID)).\
-            all()    
+            all()
 
         toRet = []
-        for item in res: 
+        for item in res:
             toRet.append(item._asdict())
 
         return toRet
 
-        
+
 class ProtocoleTypeRessource (MetaItemRessource):
 
     def retrieve (self):
-        item = self.__request__.dbsession.query(ProtocoleType.ID,ProtocoleType.Name).filter(ProtocoleType.ID == self.__name__).first()
+        item = self.request.dbsession.query(ProtocoleType.ID,ProtocoleType.Name).filter(ProtocoleType.ID == self.__name__).first()
 
         return item._asdict()
 
@@ -113,16 +113,16 @@ class ProtocoleTypeRessource (MetaItemRessource):
 class FieldActivityRessource (MetaItemRessource):
 
     __acl__ = context_permissions['formbuilder']
-   
+
     def __getitem__(self, name):
         if name == 'FieldActivity_ProtocoleType':
-            return FieldActivityProtocoleTypeCollection(name=name, parent=self, request=self.__request__)
+            return FieldActivityProtocoleTypeCollection(name=name, parent=self, request=self.request)
         else:
             raise KeyError
 
 
     def retrieve (self):
-        item = self.__request__.dbsession.query(fieldActivity).get(self.__name__)
+        item = self.request.dbsession.query(fieldActivity).get(self.__name__)
 
         return {
                 'ID' : getattr(item, 'ID'),
@@ -151,9 +151,9 @@ class unflatListOfDict(dict):
                         if toRet[i]['Protocols'][j]['ID'] == idProto and toRet[i]['Protocols'][j]['Name'] == nameProto:
                             protocoleIsPresent = True
                             break
-                        
+
                     if not protocoleIsPresent :
-                        toRet[i]['Protocols'].append({       
+                        toRet[i]['Protocols'].append({
                                                         'ID': idProto,
                                                         'Name' : nameProto,
                                                         'FieldActivity_ProtocoleType': {
@@ -163,11 +163,11 @@ class unflatListOfDict(dict):
 
             if not fieldActivityIsPresent:
                 toRet.append({
-                    'FieldActivity' : { 
+                    'FieldActivity' : {
                                         'ID': idFieldactivity,
                                         'Name': nameFieldactivity
                                     },
-                    'Protocols' : [{       
+                    'Protocols' : [{
                                         'ID': idProto,
                                         'Name' : nameProto,
                                         'FieldActivity_ProtocoleType': {
@@ -182,17 +182,16 @@ class FieldActivityProtocoleTypeCollection (MetaCollectionRessource, unflatListO
 
     def __getitem__ (self, name):
         if name:
-            return FieldActivityProtocoleTypeRessource(name=name, parent=self, request=self.__request__)
+            return FieldActivityProtocoleTypeRessource(name=name, parent=self, request=self.request)
         else:
             raise KeyError
-  
-   
+
 
     # CRUD IS OK but endpoint for front is not this ressource, need some params for grouped by fieldactivity or protocole
     def retrieve (self):
-        # if self.__parent__.dbModel == 
+        # if self.__parent__.dbModel ==
 
-        res = self.__request__.dbsession.\
+        res = self.request.dbsession.\
             query(FieldActivity_ProtocoleType.ID.label('FieldActivity_ProtocoleType.ID'),fieldActivity.ID.label('fieldActivity.ID'), fieldActivity.Name.label('fieldActivity.Name'), ProtocoleType.ID.label('ProtocoleType.ID'), ProtocoleType.Name.label('ProtocoleType.Name') ).\
             join(FieldActivity_ProtocoleType, fieldActivity.ID == FieldActivity_ProtocoleType.FK_fieldActivity).\
             join(ProtocoleType, FieldActivity_ProtocoleType.FK_ProtocoleType == ProtocoleType.ID).\
@@ -200,27 +199,27 @@ class FieldActivityProtocoleTypeCollection (MetaCollectionRessource, unflatListO
             all()
 
         '''
-          [{
-             ID: idFa,
-             Name : nameFA
-             protocols : [
-                 { id : idProto ,name : nameProto }
-             ]
-         }]
+        [{
+            ID: idFa,
+            Name : nameFA
+            protocols : [
+                    { id : idProto ,name : nameProto }
+            ]
+        }]
         '''
 
         ###becarefull you must order by id the res in your query or the next will fail
 
         return self.unflatListOfDict(res)
-    
+
     def create (self):
 
-        fieldActivity_ProtocoleTypeSend = self.__request__.json_body
+        fieldActivity_ProtocoleTypeSend = self.request.json_body
         protocoleListSend = fieldActivity_ProtocoleTypeSend['Protocols']
-        session = self.__request__.dbsession
+        session = self.request.dbsession
 
         fK_fieldActivity = fieldActivity_ProtocoleTypeSend['ID']
-        
+
         for proto in protocoleListSend:
             fK_ProtocoleType = proto['ID']
             newFieldActivity_ProtocoleType = FieldActivity_ProtocoleType()
@@ -230,34 +229,33 @@ class FieldActivityProtocoleTypeCollection (MetaCollectionRessource, unflatListO
             session.add(newFieldActivity_ProtocoleType)
 
         session.commit()
-        
-        print(self.__request__)
+
+        print(self.request)
         return 'ok'
 
     def delete (self):
-        paramsParsed = self.__request__.GET
+        paramsParsed = self.request.GET
         listIdToDelete = []
 
         for param in paramsParsed:
             if param.lower() == 'id':
                 listIdToDelete = paramsParsed[param].split(',')
 
-        res = self.__request__.dbsession.\
+        res = self.request.dbsession.\
             query(FieldActivity_ProtocoleType).filter(FieldActivity_ProtocoleType.ID.in_(listIdToDelete) ).\
             delete()
-        
-        
+
         print("on va delete")
         return 'ok on delete'
 
         ##need to clarify if we delete a large number or id maybe we should give some int in the front and call a patch
-    
+
     def patch(self):
         try:
-            bodyJson = self.__request__.json
+            bodyJson = self.request.json
         except :
             return HTTPClientError()
-        session = self.__request__.dbsession
+        session = self.request.dbsession
         idToDelete = []
 
         for item in bodyJson:
@@ -274,23 +272,23 @@ class FieldActivityProtocoleTypeCollection (MetaCollectionRessource, unflatListO
                     pathCur = pathCur.replace('/','')
                     try:
                         newId = int(pathCur)
-                        session.query(FieldActivity_ProtocoleType).filter(FieldActivity_ProtocoleType.ID==newId).delete(synchronize_session=False)       
+                        session.query(FieldActivity_ProtocoleType).filter(FieldActivity_ProtocoleType.ID==newId).delete(synchronize_session=False)
                     except ValueError:
                         pass
 
         # if len(idToDelete):
         #     session.query(FieldActivity_ProtocoleType).filter(FieldActivity_ProtocoleType.ID.in_(idToDelete)).delete()
 
-        
+
         session.commit()
 
         return "ok on  a patch"
 
 
 class FieldActivityProtocoleTypeRessource (MetaItemRessource, unflatListOfDict):
-    
+
     def retrieve (self):
-        res = self.__request__.dbsession.\
+        res = self.request.dbsession.\
             query(fieldActivity.ID.label('fieldActivity.ID'), fieldActivity.Name.label('fieldActivity.Name'), ProtocoleType.ID.label('ProtocoleType.ID'), ProtocoleType.Name.label('ProtocoleType.Name')).\
             join(FieldActivity_ProtocoleType, fieldActivity.ID == FieldActivity_ProtocoleType.FK_fieldActivity).\
             join(ProtocoleType, FieldActivity_ProtocoleType.FK_ProtocoleType == ProtocoleType.ID).\

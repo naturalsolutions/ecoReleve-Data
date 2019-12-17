@@ -8,6 +8,9 @@ import importlib
 from ecoreleve_server.modules import import_submodule
 
 
+# from ecoreleve_server.traversal.database.MAIN_DB.Views import individualequipment
+
+
 def get_redis_con():
     try:
         import redis

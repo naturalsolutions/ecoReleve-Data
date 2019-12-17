@@ -15,9 +15,24 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
 
 from ecoreleve_server.core import Base, dbConfig
 from ecoreleve_server.core.base_model import ORMUtils
+from webargs import fields
+from marshmallow import Schema, validate
+
+
+class FilterSchema(Schema):
+    tableName   = fields.String(required=True)
+    columnName  = fields.String(required=True)
+    operator    = fields.String(required=True)
+    value       = fields.String(required=True)
+
+class Filter(Schema):
+    filters = fields.Nested(FilterSchema)
+
+
 
 ### TODO fetch ALL config  in one method
 if 'sensor_schema' in dbConfig:
@@ -32,6 +47,9 @@ else:
     dialect = 'mssql+pyodbc:///?odbc_connect='
 
 
+
+
+
 class GPX(Base):
     __tablename__ = 'Tgpx'
     pk_id = Column('PK_id', Integer, primary_key=True)
@@ -44,7 +62,7 @@ class GPX(Base):
     timeZone = Column(String(250))
     Place = Column(String(250))
     imported = Column('imported', Boolean, nullable=False, default=False)
-    
+
     FK_Import = Column('FK_Import', Integer, ForeignKey(
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='GPXrawDatas')
@@ -53,9 +71,10 @@ class GPX(Base):
     def date(self):
         return self.StationDate
 
-    __table_args__ = ({'schema': sensor_schema,
-                       'implicit_returning': False
-                       })
+    __table_args__ = ({
+                    'schema': sensor_schema,
+                    'implicit_returning': False
+                    })
 
 
 class ArgosGps(Base):
@@ -82,12 +101,12 @@ class ArgosGps(Base):
     FK_Import = Column('FK_Import', Integer, ForeignKey(
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='ArgosGPSRawDatas')
-    Status = Column(String(50))
-    Calculated_Speed = Column(Integer)
-    Quality_On_Speed = Column(Integer)
-    Quality_On_Metadata = Column(Integer)
-    Data_Quality = Column(Integer)
-    Fk_individual_location = Column(Integer)
+    # Status = Column(String(50))
+    # Calculated_Speed = Column(Integer)
+    # Quality_On_Speed = Column(Integer)
+    # Quality_On_Metadata = Column(Integer)
+    # Data_Quality = Column(Integer)
+    # Fk_individual_location = Column(Integer)
 
     if 'mssql' in dialect:
         __table_args__ = (
@@ -104,6 +123,16 @@ class ArgosGps(Base):
             Index('idx_Targosgps_checked_ptt', checked, ptt),
             # {'schema': sensor_schema, 'implicit_returning': False}
         )
+
+    @declared_attr
+    def queryStringAllowedParams(cls):
+        return {
+                'ptt': fields.DelimitedList(fields.Int())
+        }
+
+
+    def getQueryStringParsing(self):
+        return self.queryStringParams
 
 
 class Gsm(Base):

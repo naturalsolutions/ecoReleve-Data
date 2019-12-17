@@ -10,7 +10,7 @@ from  ecoreleve_server.modules.sensors.sensor_model import Sensor
 from  ecoreleve_server.modules.sensors.sensor_data.sensor_data_model import Gsm, GsmEngineering, ArgosGps, ArgosEngineering
 from ecoreleve_server.core import Base, dbConfig
 from  ecoreleve_server.modules.individuals.individual_model import Individual_Location
-import io 
+import io
 import uuid
 import os
 import shutil
@@ -39,8 +39,8 @@ class ImportWithFileLikeCSV(MetaEndPointNotREST):
         "haaaaaaaaaa on veut poster du gsm"
 
     def getFile(self):
-        if 'file' in self.__request__.POST:
-            return self.__request__.POST['file']
+        if 'file' in self.request.POST:
+            return self.request.POST['file']
         else:
             return None
 
@@ -52,7 +52,7 @@ class ImportWithFileLikeCSV(MetaEndPointNotREST):
 class GSMImport(ImportWithFileLikeCSV):
 
     __acl__ = context_permissions['formbuilder']
-    
+
     def retrieve(self):
         return 'youhouuo GSMImport'
 
@@ -78,19 +78,19 @@ class GSMImport(ImportWithFileLikeCSV):
             'ActivityCount': ['ActivityCount']
         }
         first_time = datetime.now() # juste pour avoir temps d'exécution
-        curSession = self.__request__.dbsession
+        curSession = self.request.dbsession
         #filePosted = self.getFile()
         # if filePosted is not None:
         # name = filePosted.filename
         # path = filePosted.file
-        #multifile self.__request__.POST['file']
-        for item in self.__request__.POST._items:
+        #multifile self.request.POST['file']
+        for item in self.request.POST._items:
             if item is not None:
                 print(item)
                 name = item[1].filename
                 path = item[1].file
                 if type(item[1].file) is io.BytesIO:
-                    data = repr( self.__request__.POST._items[0][1].file.getvalue().decode('latin1') )
+                    data = repr( self.request.POST._items[0][1].file.getvalue().decode('latin1') )
                     data = data[1:-1]
                     rawData = pd.DataFrame( [ line.split('\\t') for line in data.split('\\r\\n') ])
                     headers = rawData.iloc[0]
@@ -502,7 +502,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
             os.makedirs(tempDir)
             
         listFile = []
-        for item in self.__request__.POST._items:
+        for item in self.request.POST._items:
             name = item[1].filename
             if name.lower() == 'DIAG.TXT'.lower() or name.lower() == 'DS.TXT'.lower():
                 suffix  = str(uuid.uuid4())
@@ -612,11 +612,11 @@ class ARGOSImport(ImportWithFileLikeCSV):
         }
 
         first_time = datetime.now() # juste pour avoir temps d'exécution
-        curSession = self.__request__.dbsession
+        curSession = self.request.dbsession
 
         ## on est pour l'instant supposé ne recevoir que des fichiers DIAG ou DS pour l'import SAT
         flagOK = False
-        for item in self.__request__.POST._items:
+        for item in self.request.POST._items:
             name = item[1].filename
             if name.lower() == 'DIAG.txt'.lower() or name.lower() == 'DS.txt'.lower():
                 flagOK = True
@@ -628,7 +628,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
             self.callMTIParser(listFile=listFile)
             return 'ok'
 
-        for item in self.__request__.POST._items:
+        for item in self.request.POST._items:
             if item is not None:
                 print(item)
                 name = item[1].filename
@@ -642,7 +642,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                 path = item[1].file
                 # File that contains very few data is considered as BytesIO file instead of temporary file. BytesIO needs a particular decoding step
                 if type(item[1].file) is io.BytesIO:
-                    data = repr( self.__request__.POST._items[0][1].file.getvalue().decode('latin1') )
+                    data = repr( self.request.POST._items[0][1].file.getvalue().decode('latin1') )
                     data = data[1:-1]
                     rawData = pd.DataFrame( [ line.split('\\t') for line in data.split('\\r\\n') ])
                     headers = rawData.iloc[0]
