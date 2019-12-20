@@ -1,6 +1,12 @@
 from ecoreleve_server.modules.permissions import context_permissions
 from ecoreleve_server.traversal.core import MetaRootRessource, MetaCollectionRessource, MetaItemRessource
-from ecoreleve_server.modules.field_activities.field_activity_model import fieldActivity, FieldActivity_ProtocoleType, ProtocoleType
+
+from ecoreleve_server.database.main_db import (
+    fieldActivity,
+    FieldActivity_ProtocoleType,
+    ProtocoleType
+)
+# from ecoreleve_server.modules.field_activities.field_activity_model import
 from sqlalchemy import asc
 
 from pyramid.httpexceptions import HTTPClientError

@@ -1,22 +1,22 @@
 from ecoreleve_server.modules.permissions import context_permissions
 from pyramid.httpexceptions import HTTPBadRequest
 from ecoreleve_server.traversal.core import (
-                                            MetaCollectionRessource,
-                                            MetaItemRessource,
-                                            MetaEmptyNodeRessource
-                                            )
-
-from  ecoreleve_server.modules.sensors.sensor_data.sensor_data_model import (
-                                                                            Gsm,
-                                                                            ArgosGps
-                                                                            )
-from ecoreleve_server.modules.sensors.sensor_model import Sensor
-from ecoreleve_server.modules.observations import Equipment
+    MetaCollectionRessource,
+    MetaItemRessource,
+    MetaEmptyNodeRessource
+)
+from ecoreleve_server.database.sensor_db import (
+    Gsm,
+    ArgosGps
+)
+from ecoreleve_server.database.main_db import (
+    Sensor,
+    Equipment
+)
 from sqlalchemy import asc, and_, exists
 from sqlalchemy.orm import aliased
 from webargs.pyramidparser import parser
 from ecoreleve_server.utils.decorator import timing
-
 
 
 class Validate(MetaEmptyNodeRessource):

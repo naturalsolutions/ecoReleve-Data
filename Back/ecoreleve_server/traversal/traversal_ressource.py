@@ -1,38 +1,37 @@
 from ecoreleve_server.traversal.core import (
-                                            MetaRootRessource,
-                                            MetaCollectionRessource,
-                                            MetaItemRessource,
-                                            MetaEmptyNodeRessource
-                                            )
+    MetaRootRessource,
+    MetaCollectionRessource,
+    MetaItemRessource,
+    MetaEmptyNodeRessource
+)
 from ecoreleve_server.traversal.formbuilder import (
-                                                    FieldActivityCollection,
-                                                    FieldActivityProtocoleTypeCollection,
-                                                    ProtocoleTypeCollection
-                                                    )
+    FieldActivityCollection,
+    FieldActivityProtocoleTypeCollection,
+    ProtocoleTypeCollection
+)
 from ecoreleve_server.traversal.importdatas import (
-                                                    GSMImport,
-                                                    ARGOSImport
-                                                    )
+    GSMImport,
+    ARGOSImport
+)
 
 from ecoreleve_server.traversal.validate import (
-                                                Validate,
-                                                ARGOSValidate,
-                                                GSMValidate
-                                                )
+    Validate
+)
+
 
 class TraversalRessource(MetaRootRessource):
     __acl__ = []
 
     def __getitem__(self, name):
-        routes={
-            'formbuilder'   : FormBuilderRessource,
-            'import'        : ImportRessource,
-            'stations'      : StationsCollection,
-            'validate'      : Validate
+        routes = {
+            'formbuilder': FormBuilderRessource,
+            'import': ImportRessource,
+            'stations': StationsCollection,
+            'validate': Validate
         }
 
         toRet = None
-        toRet = routes.get(name.lower(),None)
+        toRet = routes.get(name.lower(), None)
 
         if toRet is None:
             raise KeyError

@@ -1,4 +1,5 @@
-from pyramid.view import  view_config, view_defaults
+from pyramid.view import view_config, view_defaults
+
 
 @view_defaults(route_name='myTraversal')
 class TraversalRESTView(object):

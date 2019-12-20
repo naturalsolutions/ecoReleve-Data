@@ -6,10 +6,18 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from vincenty import vincenty
-from  ecoreleve_server.modules.sensors.sensor_model import Sensor
-from  ecoreleve_server.modules.sensors.sensor_data.sensor_data_model import Gsm, GsmEngineering, ArgosGps, ArgosEngineering
-from ecoreleve_server.core import Base, dbConfig
-from  ecoreleve_server.modules.individuals.individual_model import Individual_Location
+from ecoreleve_server.database.main_db import (
+    Sensor,
+    Individual_Location
+)
+from ecoreleve_server.database.sensor_db import (
+    Gsm,
+    GsmEngineering,
+    ArgosGps,
+    ArgosEngineering
+)
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.meta import Main_Db_Base
 import io
 import uuid
 import os
@@ -244,7 +252,7 @@ class GSMImport(ImportWithFileLikeCSV):
         return maxDateData, rawData
 
     def IndividualID_deployementDate(self, sensor, curSession, maxDateData):
-        equipmentView = Base.metadata.tables['IndividualEquipment']
+        equipmentView = Main_Db_Base.metadata.tables['IndividualEquipment']
         Sessions = []
         if sensor.ID:
             equipment = curSession.query(equipmentView).filter(equipmentView.columns.FK_Sensor == sensor.ID).all()
@@ -797,7 +805,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         return maxDateData, rawData
 
     def IndividualID_deployementDate(self, sensor, curSession, maxDateData):
-        equipmentView = Base.metadata.tables['IndividualEquipment']
+        equipmentView = Main_Db_Base.metadata.tables['IndividualEquipment']
         Sessions = []
         if sensor.ID:
             equipment = curSession.query(equipmentView).filter(equipmentView.columns.FK_Sensor == sensor.ID).all()
