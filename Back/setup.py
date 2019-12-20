@@ -27,7 +27,8 @@ requires = [
     'SQLAlchemy-Utils==0.36',
     'waitress==1.3.0',
     'webargs==5.5.2',
-    'vincenty==0.1.4'
+    'vincenty==0.1.4',
+    'pyramid_retry==2.1'
     ]
 
 dependency_links = [
