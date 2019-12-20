@@ -4,9 +4,12 @@ from collections import OrderedDict
 
 from ecoreleve_server.core import Base, RootCore
 from ecoreleve_server.core.base_resource import *
-from ..sensors.sensor_model import Sensor
-from ..stations.station_model import Station
-from .individual_model import Individual, ErrorCheckIndividualCodes
+from ecoreleve_server.database.main_db import (
+    Sensor,
+    Station,
+    Individual,
+    ErrorCheckIndividualCodes
+)
 from .individual_collection import IndividualCollection
 from .individual_history import IndividualValuesResource
 from .individual_locations import IndividualLocationsResource
@@ -127,4 +130,4 @@ class IndividualsResource(DynamicObjectCollectionResource):
         return existingID
 
 
-RootCore.children.append(('individuals', IndividualsResource))
+

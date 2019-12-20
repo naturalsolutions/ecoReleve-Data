@@ -2,7 +2,7 @@ from sqlalchemy import select, join, not_, desc
 
 from ecoreleve_server.core.base_resource import *
 from ecoreleve_server.core import Base
-from ..individual_model import Individual
+from ecoreleve_server.database.main_db import Individual
 from ecoreleve_server.modules.permissions import context_permissions
 
 IndividualDynPropValue = Individual.DynamicValuesClass
@@ -28,12 +28,12 @@ class IndividualValuesResource(DynamicValuesResource):
         FK_property_name = self.__parent__.objectDB.fk_table_DynProp_name
 
         tableJoin = join(dynamicValuesTable, propertiesTable,
-                         dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
+                        dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
         query = select([dynamicValuesTable, propertiesTable.c['Name']]
-                       ).select_from(tableJoin).where(
+                    ).select_from(tableJoin).where(
                                             dynamicValuesTable.c[FK_name] == self.__parent__.objectDB.ID
                                                         )
-        
+
         query = query.where(not_(propertiesTable.c['Name'].in_(['Release_Comments',
                                                                 'Breeding ring kept after release',
                                                                 'Box_ID',
