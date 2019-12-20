@@ -8,8 +8,7 @@ from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from sqlalchemy import create_engine, text, bindparam
 from sqlalchemy.exc import SQLAlchemyError
-
-from .init_db import dbConfig
+from ecoreleve_server.dependencies import dbConfig
 
 
 def sendLog(logLevel, domaine, msg_number=500, scope='Pyramid', errorDict=None, logMsg=None):

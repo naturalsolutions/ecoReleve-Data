@@ -3,7 +3,7 @@ from sqlalchemy import select
 from datetime import datetime
 
 from .thesaurusLoad import thesaurusDictTraduction
-from ..core import Base
+from ecoreleve_server.database.meta import Base
 
 
 dictVal = {

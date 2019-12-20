@@ -19,8 +19,8 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from pyramid import threadlocal
 from pyramid.view import view_config
+from ecoreleve_server.database.meta import Base
 
-from .. import Base
 
 class BusinessRuleError(Exception):
 

@@ -3,7 +3,7 @@ from pyramid.security import (
     Authenticated
 )
 
-from .init_db import Base, BaseExport, dbConfig, get_redis_con
+from .init_db import get_redis_con
 from .base_model import *
 from .base_view import *
 from .base_resource import *

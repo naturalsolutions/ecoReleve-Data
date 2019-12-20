@@ -31,8 +31,13 @@ from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
 
-from . import dbConfig
-from .configuration_model import BusinessRules, ConfiguredObjectResource
+# from ecoreleve_server.database.meta import dbConfig
+from ecoreleve_server.core.configuration_model import (
+    ConfiguredObjectResource,
+    BusinessRules
+)
+from ecoreleve_server.database.meta import Main_Db_Base
+from ecoreleve_server.dependencies import dbConfig
 # from ..GenericObjets.DataBaseObjects import ConfiguredObjectResource
 from ecoreleve_server.utils.parseValue import parser, formatValue, isEqual
 
@@ -197,9 +202,11 @@ class EventRuler(object):
 
     @classmethod
     def getBuisnessRules(cls):
-        return dbConfig['dbSession']().query(BusinessRules
-                                             ).filter_by(target=cls.__tablename__
-                                                         ).all()
+        # return Main_Db_Base.engine.connect()
+        curSession = Main_Db_Base.metadata.bind.connect()
+        toRet = curSession.execute(select([BusinessRules]).where(BusinessRules.__table__.c.target==cls.__tablename__)).fetchall()
+        curSession.close()
+        return toRet
 
     @declared_attr
     def loadBusinessRules(cls):

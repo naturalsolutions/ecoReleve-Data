@@ -10,7 +10,7 @@ from pyramid.traversal import find_root
 from pyramid.response import Response
 from zope.interface import implementer
 
-from . import Base
+from ecoreleve_server.database.meta import Base
 from ..core import get_redis_con
 from .base_view import IRestCommonView, IRestCollectionView, IRestItemView
 from .configuration_model.frontmodules import FrontModules
