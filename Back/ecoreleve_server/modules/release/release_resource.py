@@ -17,15 +17,21 @@ from collections import Counter
 
 from ecoreleve_server.core.base_resource import CustomResource
 from ecoreleve_server.utils.parseValue import isNumeric, formatThesaurus
-from ecoreleve_server.core import RootCore
-from ..permissions import context_permissions
-from ..observations import Observation
-from ..individuals import Individual
-from ..stations import Station
-from ..observations.equipment_model import checkEquip, set_equipment
-from ..individuals.individual_resource import IndividualsResource
 
-from ecoreleve_server.core.configuration_model.frontmodules import ModuleGrids,FrontModules,ModuleForms
+from ..permissions import context_permissions
+from ecoreleve_server.database.main_db import (
+    Observation,
+    Individual,
+    Station,
+    checkEquip,
+    set_equipment
+)
+from ecoreleve_server.core.configuration_model.frontmodules import (
+    ModuleGrids,
+    FrontModules,
+    ModuleForms
+)
+from ecoreleve_server.modules.individuals import IndividualsResource
 
 ProtocoleType = Observation.TypeClass
 
@@ -492,7 +498,7 @@ class ReleaseResource(CustomResource):
         return result
 
 
-RootCore.children.append(('release', ReleaseResource))
+
 
 
 def isavailableSensor(request, data):
