@@ -1,6 +1,6 @@
 from ecoreleve_server.core.base_resource import *
 from ecoreleve_server.modules.permissions import context_permissions
-from ..sensor_model import Sensor
+from ecoreleve_server.database.main_db import Sensor
 
 SensorDynPropValue = Sensor.DynamicValuesClass
 

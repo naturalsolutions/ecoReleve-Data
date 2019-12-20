@@ -4,10 +4,11 @@ from sqlalchemy.orm import aliased, exc
 from ecoreleve_server.core import Base
 from ecoreleve_server.utils.datetime import parse
 from ecoreleve_server.core.base_collection import Query_engine
-from . import Sensor
-from ..monitored_sites import MonitoredSite
-from ..observations import Equipment
-
+from ecoreleve_server.database.main_db import (
+    Sensor,
+    MonitoredSite,
+    Equipment
+)
 
 
         # if 'FK_MonitoredSiteName' == curProp:
