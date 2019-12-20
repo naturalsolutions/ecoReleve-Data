@@ -1,2 +1,3 @@
-from .user_model import * 
 
+def includeme(config):
+    config.scan('.user_view')
