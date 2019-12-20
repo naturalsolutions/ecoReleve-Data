@@ -7,11 +7,13 @@ from collections import OrderedDict
 from ecoreleve_server.core import RootCore, Base
 from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
 from ecoreleve_server.core.base_collection import Query_engine
-from . import MonitoredSite
+from ecoreleve_server.database.main_db import (
+    MonitoredSite,
+    Sensor,
+    Station,
+    fieldActivity
+)
 from .monitored_site_collection import MonitoredSiteCollection
-from ..sensors import Sensor
-from ..stations import Station
-from ..field_activities import fieldActivity
 from ..permissions import context_permissions
 from .monitored_sites_history import MonitoredSiteHistoryResource
 
@@ -19,9 +21,9 @@ from .monitored_sites_history import MonitoredSiteHistoryResource
 SensorType = Sensor.TypeClass
 
 
-@Query_engine(Base.metadata.tables['MonitoredSitePosition'])
-class PositionCollection:
-    pass
+# @Query_engine(Base.metadata.tables['MonitoredSitePosition'])
+# class PositionCollection:
+#     pass
 
 
 class MonitoredSiteResource(DynamicObjectResource):
@@ -120,4 +122,4 @@ class MonitoredSitesResource(DynamicObjectCollectionResource):
         return response
 
 
-RootCore.children.append(('monitoredSites', MonitoredSitesResource))
+

@@ -3,8 +3,10 @@ from sqlalchemy import select, desc, join, func, outerjoin, and_, not_, or_, exi
 
 from ecoreleve_server.core import Base
 from ecoreleve_server.core.base_collection import Query_engine
-from . import MonitoredSite
-from ..sensors import Sensor
+from ecoreleve_server.database.main_db import (
+    MonitoredSite,
+    Sensor
+)
 
 SensorType = Sensor.TypeClass
 

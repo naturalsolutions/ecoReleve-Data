@@ -5,12 +5,13 @@ from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, T
 from collections import OrderedDict
 
 from ecoreleve_server.core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_resource import CustomResource
 from ecoreleve_server.core.base_collection import Query_engine
 from ecoreleve_server.modules.permissions import context_permissions
 
 
-@Query_engine(Base.metadata.tables['MonitoredSitePosition'])
+@Query_engine(Main_Db_Base.metadata.tables['MonitoredSitePosition'])
 class PositionCollection:
     pass
 
@@ -36,9 +37,9 @@ class MonitoredSiteHistoryResource(CustomResource):
 
         # listObj = CollectionEngine(MonitoredSite, moduleFront, View=view)
         positions = PositionCollection(session=self.session)
-    
+
         dataResult = positions.search(filters=filters,
-                                      order_by=searchInfo['order_by'])
+                                    order_by=searchInfo['order_by'])
 
         if 'geo' in self.request.params:
             geoJson = []
