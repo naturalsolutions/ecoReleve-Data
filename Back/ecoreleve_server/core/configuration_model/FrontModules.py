@@ -14,7 +14,9 @@ from sqlalchemy.orm import relationship
 from pyramid import threadlocal
 
 from ecoreleve_server.utils.parseValue import isNumeric
-from .. import Base, dbConfig
+from ecoreleve_server.database.meta import (
+    Main_Db_Base
+)
 
 
 FieldSizeToClass = {0: 'col-md-3', 1: 'col-md-6', 2: 'col-md-12'}
@@ -38,7 +40,7 @@ def isEditable(int_Render):
     return edit
 
 
-class FrontModules(Base):
+class FrontModules(Main_Db_Base):
     __tablename__ = 'FrontModules'
     ID = Column(Integer, Sequence('FrontModule__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
@@ -57,7 +59,7 @@ class FrontModules(Base):
         self.__init__()
 
 
-class ModuleForms(Base):
+class ModuleForms(Main_Db_Base):
     __tablename__ = 'ModuleForms'
     ID = Column(Integer, Sequence('ModuleForm__id_seq'), primary_key=True)
     Module_ID = Column(Integer, ForeignKey('FrontModules.ID'))
@@ -391,7 +393,7 @@ class ModuleForms(Base):
     }
 
 
-class ModuleGrids (Base):
+class ModuleGrids (Main_Db_Base):
     __tablename__ = 'ModuleGrids'
 
     ID = Column(Integer, Sequence('ModuleGrid__id_seq'), primary_key=True)
