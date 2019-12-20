@@ -5,9 +5,12 @@ import re
 import datetime
 import itertools
 
-from ecoreleve_server.core import dbConfig
-from ..sensors.sensor_data import Gsm, GsmEngineering
-from .import_model import Import
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.sensor_db import (
+    Import,
+    Gsm,
+    GsmEngineering
+)
 
 
 def uploadFilesGSM(request):

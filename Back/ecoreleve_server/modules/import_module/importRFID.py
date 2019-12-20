@@ -7,10 +7,11 @@ from pyramid import threadlocal
 from sqlalchemy import select, and_
 from sqlalchemy.exc import IntegrityError
 
-
-from ecoreleve_server.core import dbConfig
-from ..sensors.sensor_data import Rfid
-from .import_model import Import
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.sensor_db import (
+    Rfid,
+    Import
+)
 
 
 def uploadFileRFID(request):

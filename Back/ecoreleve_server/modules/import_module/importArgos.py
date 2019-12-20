@@ -15,9 +15,12 @@ from traceback import print_exc
 from sqlalchemy import select, and_
 
 import ecoreleve_server
-from ecoreleve_server.core import dbConfig
-from ..sensors.sensor_data import ArgosGps, ArgosEngineering
-from .import_model import Import
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.sensor_db import (
+    ArgosGps,
+    ArgosEngineering,
+    Import
+)
 
 
 def uploadFileArgos(request):
