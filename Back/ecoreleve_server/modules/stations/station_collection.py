@@ -14,10 +14,13 @@ from sqlalchemy.sql.expression import union_all
 
 from ecoreleve_server.core import Base
 from ecoreleve_server.core.base_collection import Query_engine, eval_
-from . import Station, Station_FieldWorker
-from ..observations import Observation
-from ..individuals import Individual
-from ..users import User
+from ecoreleve_server.database.main_db import (
+    Station,
+    Station_FieldWorker,
+    Observation,
+    Individual,
+    User
+)
 
 
 @Query_engine(Station)
