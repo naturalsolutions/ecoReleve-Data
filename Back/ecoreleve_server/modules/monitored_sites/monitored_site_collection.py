@@ -1,7 +1,11 @@
-from sqlalchemy import select, desc, join, func, outerjoin, and_, not_, or_, exists, Table
+from sqlalchemy import (
+    func,
+    outerjoin,
+    and_,
+    or_
+)
 
-
-from ecoreleve_server.core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_collection import Query_engine
 from ecoreleve_server.database.main_db import (
     MonitoredSite,
@@ -22,8 +26,8 @@ class MonitoredSiteCollection:
     #     return join_table, selectable
 
     def extend_from(self, _from):
-        lastPositionView = Base.metadata.tables['MonitoredSitePositionsNow']
-        EquipmentTable = Base.metadata.tables['MonitoredSiteEquipment']
+        lastPositionView = Main_Db_Base.metadata.tables['MonitoredSitePositionsNow']
+        EquipmentTable = Main_Db_Base.metadata.tables['MonitoredSiteEquipment']
 
         join_table = outerjoin(_from, lastPositionView, MonitoredSite.ID == lastPositionView.c['FK_MonitoredSite'])
         join_table = outerjoin(
