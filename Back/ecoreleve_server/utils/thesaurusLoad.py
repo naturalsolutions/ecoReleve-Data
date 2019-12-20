@@ -1,6 +1,5 @@
 from sqlalchemy import select
-
-from ..core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 
 
 thesaurusDictTraduction = {}
@@ -9,8 +8,10 @@ userOAuthDict = {}
 
 
 def loadThesaurusTrad(config):
-    session = config.registry.dbmaker()
-    thesTable = Base.metadata.tables['ERDThesaurusTerm']
+
+    # session = config.registry.dbmaker()
+    session = Main_Db_Base.metadata.bind.connect()
+    thesTable = Main_Db_Base.metadata.tables['ERDThesaurusTerm']
     query = select(thesTable.c)
 
     results = session.execute(query).fetchall()
@@ -20,7 +21,6 @@ def loadThesaurusTrad(config):
             'en': row['nameEn'], 'fr': row['nameFr'], 'parentID': row['parentID']}
         if thesaurusDictTraduction.get(row['fullPath'], None):
             thesaurusDictTraduction[row['fullPath']].append(newTraduction)
-      
         else:
             thesaurusDictTraduction[row['fullPath']] = [newTraduction]
         invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
