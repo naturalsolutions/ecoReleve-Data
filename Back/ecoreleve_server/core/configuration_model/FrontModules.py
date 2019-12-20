@@ -17,6 +17,7 @@ from ecoreleve_server.utils.parseValue import isNumeric
 from ecoreleve_server.database.meta import (
     Main_Db_Base
 )
+from ecoreleve_server.dependencies import dbConfig
 
 
 FieldSizeToClass = {0: 'col-md-3', 1: 'col-md-6', 2: 'col-md-12'}
@@ -219,7 +220,9 @@ class ModuleForms(Main_Db_Base):
         if (self.Options is not None
                 and self.Options != '' and 'select' in self.Options.lower()):
             self.dto['options'] = []
-            result = self.session.execute(text(self.Options)).fetchall()
+            # be careful now we work with EngineS
+            # we need to specify on which database we want to execute text query
+            result = self.session.get_bind(ModuleForms).execute(text(self.Options)).fetchall()
             for row in result:
                 temp = {}
                 for key in row.keys():
@@ -418,8 +421,11 @@ class ModuleGrids (Main_Db_Base):
     ColumnParams = Column(String(250))
     FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
 
+    #TODO REFACT
+    # threadlocal ?????
+    # reconstructor ????
     def __init__(self):
-        self.session = threadlocal.get_current_request().dbsession
+        self.session = threadlocal.get_current_request().dbsession.get_bind(ModuleGrids)
 
     @orm.reconstructor
     def init_on_load(self):
