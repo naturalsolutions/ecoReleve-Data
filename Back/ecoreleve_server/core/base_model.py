@@ -36,7 +36,10 @@ from ecoreleve_server.core.configuration_model import (
     ConfiguredObjectResource,
     BusinessRules
 )
-from ecoreleve_server.database.meta import Main_Db_Base
+from ecoreleve_server.database.meta import (
+    Main_Db_Base,
+    Sensor_Db_Base
+)
 from ecoreleve_server.dependencies import dbConfig
 # from ..GenericObjets.DataBaseObjects import ConfiguredObjectResource
 from ecoreleve_server.utils.parseValue import parser, formatValue, isEqual
@@ -202,6 +205,7 @@ class EventRuler(object):
 
     @classmethod
     def getBuisnessRules(cls):
+        # TODO REFACT
         # return Main_Db_Base.engine.connect()
         curSession = Main_Db_Base.metadata.bind.connect()
         toRet = curSession.execute(select([BusinessRules]).where(BusinessRules.__table__.c.target==cls.__tablename__)).fetchall()
@@ -210,7 +214,10 @@ class EventRuler(object):
 
     @declared_attr
     def loadBusinessRules(cls):
-        @event.listens_for(cls.getDeclarativeBase().metadata, 'after_create')
+        curDb = Main_Db_Base
+        if cls.__tablename__ == 'Import':
+            curDb = Sensor_Db_Base
+        @event.listens_for(curDb.metadata, 'after_create')
         def afterConfigured(target, connection, **kwargs):
             cls.__constraintRules__ = {'before_update': [],
                                        'after_update': [],
