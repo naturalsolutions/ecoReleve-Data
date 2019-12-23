@@ -39,7 +39,9 @@ MAIN_DB.DATABASE = database name
 # Base.metadata prior to any initialization routines
 from .main_db import *     # noqa
 from .sensor_db import * # noqa
-from ecoreleve_server.core.configuration_model.Business import BusinessRuleError
+from ecoreleve_server.core.configuration_model.Business import (
+    BusinessRuleError
+)
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup
@@ -272,6 +274,5 @@ def get_session(request):
 
 @subscriber(NewRequest)
 def new_request(event):
-    print("add add add")
     request = event.request
     request.set_property(get_session, 'dbsession', reify=True)
