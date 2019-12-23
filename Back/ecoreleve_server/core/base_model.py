@@ -30,6 +30,7 @@ from sqlalchemy.sql.expression import Executable, ClauseElement
 from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
+from sqlalchemy.orm.session import sessionmaker
 
 # from ecoreleve_server.database.meta import dbConfig
 from ecoreleve_server.core.configuration_model import (
@@ -196,7 +197,7 @@ class GenericType(ORMUtils):
 
 class EventRuler(object):
     '''
-    This class corresponding to a business layer, 
+    This class corresponding to a business layer,
     load and bind stored procedures to ORM event before|after create|update|delete
     trig by the model during the commit of the session.
     Bindings of stored prodecedures is configured in the BusinessRules Table
@@ -204,34 +205,45 @@ class EventRuler(object):
     enable_business_ruler = True
 
     @classmethod
-    def getBuisnessRules(cls):
+    def getBuisnessRules(cls, curEngine):
         # TODO REFACT
         # return Main_Db_Base.engine.connect()
-        curSession = Main_Db_Base.metadata.bind.connect()
-        toRet = curSession.execute(select([BusinessRules]).where(BusinessRules.__table__.c.target==cls.__tablename__)).fetchall()
-        curSession.close()
+        toRet = []
+        if curEngine.engine == Main_Db_Base.metadata.bind:  # Hack for skip model not in Main_Db_Base
+            curSessionMaker = sessionmaker()
+            curSessionMaker.configure(bind=curEngine)
+            curSession = curSessionMaker()
+            query = curSession.query(BusinessRules)
+            query = query.filter(
+                BusinessRules.__table__.c.target == cls.__tablename__
+                )
+            toRet = query.all()
+            curSession.close()
         return toRet
 
     @declared_attr
     def loadBusinessRules(cls):
-        curDb = Main_Db_Base
+        curEngine = Main_Db_Base.metadata
         if cls.__tablename__ == 'Import':
-            curDb = Sensor_Db_Base
-        @event.listens_for(curDb.metadata, 'after_create')
+            curEngine = Sensor_Db_Base.metadata
+        @event.listens_for(curEngine, 'after_create')
         def afterConfigured(target, connection, **kwargs):
-            cls.__constraintRules__ = {'before_update': [],
-                                       'after_update': [],
-                                       'before_insert': [],
-                                       'after_insert': [],
-                                       'before_delete': [],
-                                       'after_delete': []
-                                       }
-            rules = cls.getBuisnessRules()
+            cls.__constraintRules__ = {
+                'before_update': [],
+                'after_update': [],
+                'before_insert': [],
+                'after_insert': [],
+                'before_delete': [],
+                'after_delete': []
+            }
+            rules = cls.getBuisnessRules(curEngine=connection)
             if rules:
-                m = [cls.__constraintRules__[rule.actionType].append(rule)
-                     in cls.__constraintRules__
-                     for rule in rules
-                     if rule.actionType in cls.__constraintRules__]
+                m = [
+                    cls.__constraintRules__[rule.actionType].append(rule)
+                    in cls.__constraintRules__
+                    for rule in rules
+                    if rule.actionType in cls.__constraintRules__
+                    ]
 
     @declared_attr
     def onEvent(cls):
@@ -239,19 +251,19 @@ class EventRuler(object):
 
         @event.listens_for(cls, 'before_update')
         def before_update(mapper, connection, target):
-            target.executeBusinessRules('before_update')
+            target.executeBusinessRules('before_update',connection)
 
         @event.listens_for(cls, 'after_update')
         def after_update(mapper, connection, target):
-            target.executeBusinessRules('after_update')
+            target.executeBusinessRules('after_update',connection)
 
         @event.listens_for(cls, 'before_insert')
         def before_insert(mapper, connection, target):
-            target.executeBusinessRules('before_insert')
+            target.executeBusinessRules('before_insert',connection)
 
         @event.listens_for(cls, 'after_insert')
         def after_insert(mapper, connection, target):
-            target.executeBusinessRules('after_insert')
+            target.executeBusinessRules('after_insert',connection)
 
         # @event.listens_for(cls, 'before_delete')
         # def before_delete(mapper, connection, target):
@@ -260,10 +272,10 @@ class EventRuler(object):
 
         @event.listens_for(cls, 'after_delete')
         def after_delete(mapper, connection, target):
-            target.executeBusinessRules('after_delete')
+            target.executeBusinessRules('after_delete',connection)
 
     # @classmethod
-    def executeBusinessRules(self, event):
+    def executeBusinessRules(self, event, curSession, **kwargs):
         '''
         '''
         if self.__constraintRules__[event] and self.enable_business_ruler:
@@ -271,7 +283,7 @@ class EventRuler(object):
             for rule in self.__constraintRules__[event]:
                 if (not rule.targetTypes
                         or (hasattr(self, 'type_id') and self.type_id in rule.targetTypes)):
-                    result = rule.execute(entityDTO)
+                    result = rule.execute(entityDTO,curSession)
 
 
 class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
@@ -293,7 +305,7 @@ class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
         # remove this ???? session attribution from current request is not recommanded
         self.session = kwargs.get('session', None) or threadlocal.get_current_request(
         ).dbsession if threadlocal.get_current_request() else None
-        #### 
+        ####
 
         for param, value in kwargs.items():
             if hasattr(self, param):
@@ -301,7 +313,7 @@ class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
         if kwargs.get('session', None):
             del kwargs['session']
         self.getDeclarativeBase().__init__(self, **kwargs)
-        
+
     @property
     def session(self):
         return self._session
@@ -314,7 +326,7 @@ class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
     def init_on_load(self):
         '''
         This method is called during the instanciation of model,
-        after the fecth of data, using the SQLAlchemy Query API 
+        after the fecth of data, using the SQLAlchemy Query API
         '''
         self.session = inspect(self).session
         self.__values__ = {}

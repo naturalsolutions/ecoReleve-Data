@@ -2,7 +2,7 @@ from pyramid import threadlocal
 from sqlalchemy import select
 from datetime import datetime
 
-from .thesaurusLoad import thesaurusDictTraduction
+from ecoreleve_server.utils.thesaurusLoad import thesaurusDictTraduction
 from ecoreleve_server.database.meta import Main_Db_Base
 
 

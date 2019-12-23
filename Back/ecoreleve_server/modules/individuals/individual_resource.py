@@ -2,7 +2,8 @@ from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
 
-from ecoreleve_server.core import Base, RootCore
+from ecoreleve_server.database.meta import Main_Db_Base
+
 from ecoreleve_server.core.base_resource import *
 from ecoreleve_server.database.main_db import (
     Sensor,
@@ -28,7 +29,7 @@ class IndividualResource(DynamicObjectResource):
     __acl__ = context_permissions['individuals']
 
     def getEquipment(self):
-        table = Base.metadata.tables['IndividualEquipment']
+        table = Main_Db_Base.metadata.tables['IndividualEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,
                          SensorType,

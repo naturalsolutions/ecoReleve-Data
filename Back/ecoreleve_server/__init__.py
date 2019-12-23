@@ -3,14 +3,14 @@ from decimal import Decimal
 import exiftool
 from pyramid.config import Configurator
 from pyramid.renderers import JSON
-from pyramid.events import NewRequest
+# from pyramid.events import NewRequest
 # from ecoreleve_server.database.meta import dbConfig
-from ecoreleve_server.core import SecurityRoot
-from .utils import loadThesaurusTrad
-from .utils.callback import (
-    add_cors_headers_response_callback,
-    session_callback
-)
+# from ecoreleve_server.core import SecurityRoot
+# from .utils import loadThesaurusTrad
+# from .utils.callback import (
+#     add_cors_headers_response_callback,
+#     session_callback
+# )
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -62,8 +62,9 @@ def main(global_config, **settings):
         when i have time to refact
 
         '''
-        config.include('ecoreleve_server.dependencies') # FIRST FILE TO INCLUDE
+        config.include('ecoreleve_server.dependencies')  # FIRST FILE TO INCLUDE
         config.include('ecoreleve_server.database')
+        config.include('ecoreleve_server.utils')
         config.include('ecoreleve_server.core.policy')
         config.include("ecoreleve_server.modules.dashboard")
         config.include("ecoreleve_server.modules.export")
@@ -93,16 +94,18 @@ def main(global_config, **settings):
         config.add_renderer('pdf', PDFrenderer)
         config.add_renderer('gpx', GPXRenderer)
 
-        config.set_root_factory(SecurityRoot)
+        # config.set_root_factory(SecurityRoot)
+
+        config.include("ecoreleve_server.core")
 
         if ( settings.get('init_exiftool', 'False') == 'False'):
             print('Exiftool not initialized')
             pass
         else:
             initialize_exiftool()
-        config.add_subscriber(add_cors_headers_response_callback, NewRequest)
+        # config.add_subscriber(add_cors_headers_response_callback, NewRequest)
         config.include("ecoreleve_server.utils.init_cameratrap_path")
-        loadThesaurusTrad(config)
+        # loadThesaurusTrad(config)
         config.include('ecoreleve_server.traversal')
         config.include('ecoreleve_server.modules.url_dispatch')
         config.scan()

@@ -10,7 +10,7 @@ from pyramid.traversal import find_root
 from pyramid.response import Response
 from zope.interface import implementer
 
-from ecoreleve_server.database.meta import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 from ..core import get_redis_con
 from .base_view import IRestCommonView, IRestCollectionView, IRestItemView
 from .configuration_model.frontmodules import FrontModules
@@ -89,7 +89,7 @@ class AutocompleteResource(CustomResource):
         prop = self.attribute
 
         if self.integers(prop):
-            table = Base.metadata.tables[objName + 'DynPropValuesNow']
+            table = Main_Db_Base.metadata.tables[objName + 'DynPropValuesNow']
             query = sa.select([table.c['ValueString'].label('label'),
                             table.c['ValueString'].label('value')]
                            ).distinct(table.c['ValueString']
@@ -101,7 +101,7 @@ class AutocompleteResource(CustomResource):
             if self.targetValue:
                 NameValReturn = self.targetValue
 
-            table = Base.metadata.tables[objName]
+            table = Main_Db_Base.metadata.tables[objName]
             query = sa.select([table.c[NameValReturn].label('value'),
                             table.c[prop].label('label')]
                            ).distinct(table.c[prop])
@@ -129,8 +129,8 @@ class DynamicValuesResource(CustomResource):
     def retrieve(self):
         from ecoreleve_server.utils.parseValue import formatThesaurus
 
-        propertiesTable = Base.metadata.tables[self.__parent__.objectDB.TypeClass.PropertiesClass.__tablename__]
-        dynamicValuesTable = Base.metadata.tables[self.__parent__.objectDB.DynamicValuesClass.__tablename__]
+        propertiesTable = Main_Db_Base.metadata.tables[self.__parent__.objectDB.TypeClass.PropertiesClass.__tablename__]
+        dynamicValuesTable = Main_Db_Base.metadata.tables[self.__parent__.objectDB.DynamicValuesClass.__tablename__]
         FK_name = 'FK_' + self.__parent__.objectDB.__tablename__
         FK_property_name = self.__parent__.objectDB.fk_table_DynProp_name
 
@@ -260,7 +260,7 @@ class DynamicObjectCollectionResource(CustomResource):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
-        
+
         self.handleDataBeforeInsert(data)
         self.objectDB.values = data
         self.session.add(self.objectDB)

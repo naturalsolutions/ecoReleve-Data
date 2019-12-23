@@ -18,8 +18,6 @@ requires = [
     'psutil==5.6.2',
     'pyodbc==4.0.26',
     'pyramid==1.10.4',
-    'pyramid_jwtauth==0.1.3',
-    'pyramid_tm==2.2.1',
     'pytesseract==0.2.0',
     'reportlab==3.4.0',
     'scipy==1.2.1',
@@ -28,7 +26,7 @@ requires = [
     'waitress==1.3.0',
     'webargs==5.5.2',
     'vincenty==0.1.4',
-    'pyramid_retry==2.1'
+    'zope.sqlalchemy==1.2'
     ]
 
 dependency_links = [

@@ -19,7 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from pyramid import threadlocal
 from pyramid.view import view_config
-from ecoreleve_server.database.meta import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 
 
 class BusinessRuleError(Exception):
@@ -41,7 +41,7 @@ def businessError_view(exc, request):
     return request.response
 
 
-class BusinessRules(Base):
+class BusinessRules(Main_Db_Base):
     __tablename__ = 'BusinessRules'
 
     ID = Column(Integer, primary_key=True)
@@ -88,10 +88,9 @@ class BusinessRules(Base):
                     params_stmt + '\n SELECT @result;', bindparams=bindparams)
         return stmt
 
-    def execute(self, entityDTO):
-        session = threadlocal.get_current_request().dbsession
+
+    def execute(self, entityDTO, curSession):
         stmt = self.buildQuery(entityDTO)
-        result = session.execute(stmt).scalar()
+        result = curSession.execute(stmt).scalar()
         if result:
             self.raiseError()
-        # return result

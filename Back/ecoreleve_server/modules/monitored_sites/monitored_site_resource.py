@@ -4,7 +4,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from collections import OrderedDict
 
-from ecoreleve_server.core import RootCore, Base
+from ecoreleve_server.core import RootCore
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
 from ecoreleve_server.core.base_collection import Query_engine
 from ecoreleve_server.database.main_db import (
@@ -64,7 +65,7 @@ class MonitoredSiteResource(DynamicObjectResource):
 
     def getEquipment(self):
         id_site = self.objectDB.ID
-        table = Base.metadata.tables['MonitoredSiteEquipment']
+        table = Main_Db_Base.metadata.tables['MonitoredSiteEquipment']
 
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable, SensorType,

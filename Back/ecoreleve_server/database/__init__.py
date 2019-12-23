@@ -14,6 +14,8 @@ from ecoreleve_server.database.meta import (
     Export_Db_Base,
     Log_Db_Base
 ) # noqa
+from pyramid.events import NewRequest
+from pyramid.events import subscriber
 
 __all__ = [
     "Main_Db_Base",
@@ -37,6 +39,7 @@ MAIN_DB.DATABASE = database name
 # Base.metadata prior to any initialization routines
 from .main_db import *     # noqa
 from .sensor_db import * # noqa
+from ecoreleve_server.core.configuration_model.Business import BusinessRuleError
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup
@@ -46,13 +49,13 @@ configure_mappers()
 def includeme(config):
     myConfig = config.get_settings()
 
-    myConfig['tm.manager_hook'] = 'pyramid_tm.explicit_manager'
+    # myConfig['tm.manager_hook'] = 'pyramid_tm.explicit_manager'
 
     # use pyramid_tm to hook the transaction lifecycle to the request
-    config.include('pyramid_tm')
+    # config.include('pyramid_tm')
 
     # use pyramid_retry to retry a request when transient exceptions occur
-    config.include('pyramid_retry')
+    # config.include('pyramid_retry')
 
     dbPossible = getDBUsed(myConfig=myConfig)
     engines = createEngines(myConfig=myConfig, dbPossible=dbPossible)
@@ -61,12 +64,12 @@ def includeme(config):
     config.registry['dbsession_factory'] = session_factory
 
     # make request.dbsession available for use in Pyramid
-    config.add_request_method(
-        # r.tm is the transaction manager used by pyramid_tm
-        lambda r: get_tm_session(session_factory, r.tm),
-        'dbsession',
-        reify=True
-    )
+    # config.add_request_method(
+    #     # r.tm is the transaction manager used by pyramid_tm
+    #     lambda r: get_tm_session(session_factory, r.tm),
+    #     'dbsession',
+    #     reify=True
+    # )
 
     # createSession() #peut être a mettre en premier ça serait plus top level
     # On a de toute façon une session a binder pour chaque requête
@@ -144,8 +147,9 @@ def createEngines(myConfig, dbPossible):
             configuration=myConfig,
             prefix='sqlalchemy.' + item + '.',
             url=buildURL(myConfig=myConfig, db=item),
-            legacy_schema_aliasing=True,
-            implicit_returning=False
+            legacy_schema_aliasing=False,
+            implicit_returning=False,
+            use_scope_identity=False
         )
         mapAndBindEngineWithBaseWeUse(item, engines[item])
         '''
@@ -183,7 +187,7 @@ def mapAndBindEngineWithBaseWeUse(baseName, engineToBind):
 
 
 def get_session_factory(engines):
-    factory = sessionmaker()
+    factory = sessionmaker(autoflush=True)
 
     # class on fly
     # yeah i know that's not cool
@@ -228,3 +232,46 @@ def get_tm_session(session_factory, transaction_manager):
     zope.sqlalchemy.register(
         dbsession, transaction_manager=transaction_manager)
     return dbsession
+
+
+def get_session(request):
+    session = request.registry.get('dbsession_factory')()
+    session.begin_nested()
+
+    @event.listens_for(session, 'before_flush')
+    def receive_before_flush(session, flush_context, instances):
+        for instance_state, current_instance in session._deleted.items():
+            if hasattr(current_instance, 'executeBusinessRules'):
+                current_instance.executeBusinessRules('before_delete',flush_context)
+
+    def cleanup(request):
+        if request.exception is not None:
+            session.rollback()
+            # cache_callback(request, session)
+            session.close()
+            # session.remove()
+        else:
+            try:
+                session.commit()
+            except BusinessRuleError as e:
+                session.rollback()
+                request.response.status_code = 409
+                request.response.text = e.value
+            except Exception as e:
+                print_exc()
+                session.rollback()
+                request.response.status_code = 500
+            finally:
+                session.close()
+                # session.remove()
+
+    request.add_finished_callback(cleanup)
+
+    return session
+
+
+@subscriber(NewRequest)
+def new_request(event):
+    print("add add add")
+    request = event.request
+    request.set_property(get_session, 'dbsession', reify=True)

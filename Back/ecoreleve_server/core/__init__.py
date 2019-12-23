@@ -40,3 +40,7 @@ class RootCore(Resource):
 
     def retrieve(self):
         return {'next items': self}
+
+
+def includeme(config):
+    config.set_root_factory(SecurityRoot)

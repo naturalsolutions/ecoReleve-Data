@@ -1,6 +1,6 @@
 from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 
-from ecoreleve_server.core import Base
+# from ecoreleve_server.core import Base
 from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_collection import Query_engine, eval_
 

@@ -1,19 +1,3 @@
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker, scoped_session
-from ecoreleve_server.database.meta import (
-    Base,
-    Export_Db_Base,
-    # dbConfig
-)
-
-from urllib.parse import quote_plus
-# from ecoreleve_server.modules import import_submodule
-from ecoreleve_server.database import *
-
-
-# from ecoreleve_server.traversal.database.MAIN_DB.Views import individualequipment
-
-
 def get_redis_con():
     try:
         import redis

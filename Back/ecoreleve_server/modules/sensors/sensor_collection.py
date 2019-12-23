@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased, exc
 
-from ecoreleve_server.core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.utils.datetime import parse
 from ecoreleve_server.core.base_collection import Query_engine
 from ecoreleve_server.database.main_db import (
@@ -23,8 +23,8 @@ from ecoreleve_server.database.main_db import (
 class SensorCollection:
 
     def extend_from(self, _from):
-        curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
-        MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
+        curEquipmentTable = Main_Db_Base.metadata.tables['CurrentlySensorEquiped']
+        MonitoredSiteTable = Main_Db_Base.metadata.tables['MonitoredSite']
         table_join = sa.outerjoin(_from,
                         curEquipmentTable,
                         curEquipmentTable.c['FK_Sensor'] == Sensor.ID)

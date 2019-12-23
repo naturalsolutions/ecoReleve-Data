@@ -4,7 +4,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from collections import OrderedDict
 
-from ecoreleve_server.core import Base
 from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_resource import CustomResource
 from ecoreleve_server.core.base_collection import Query_engine
