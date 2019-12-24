@@ -118,6 +118,25 @@ def checkConfigURL(configOptions, databaseName):
             raise ValueError(
                 'Expected string value for {!r}'.format(concatKey))
 
+def buildConfigURLAccordingToDialect(myConfig, db):
+    dialectConfigURL = {
+        'drivername': myConfig.get(db + '.DIALECT'),
+        'username': myConfig.get(db + '.UID'),
+        'password': myConfig.get(db + '.PWD'),
+        'host': myConfig.get(db + '.SERVER'),
+        'port': myConfig.get(db + '.PORT'),
+        'database': myConfig.get(db + '.DATABASE'),
+        'query': dict(driver=myConfig.get(db + '.ODBCDRIVER'))
+    }
+    dialect = dialectConfigURL.get("drivername")
+    # When connecting to a SQL Server named instance,
+    # need instance name OR port number, not both.
+    if 'mssql' in dialect:
+        # So if named instance
+        if '\\' in dialectConfigURL.get("host"):
+            # remove port number
+            del dialectConfigURL["port"]
+    return dialectConfigURL
 
 def buildURL(myConfig, db):
     """
@@ -130,17 +149,9 @@ def buildURL(myConfig, db):
     ``db``
         META name of db used could be MAIN_DB, SENSOR_DB, EXPORT_DB, LOG_DB.
     """
-    checkConfigURL(myConfig, db)
-    return URL(
-        drivername=myConfig.get(db + '.DIALECT'),
-        username=myConfig.get(db + '.UID'),
-        password=myConfig.get(db + '.PWD'),
-        host=myConfig.get(db + '.SERVER'),
-        port=myConfig.get(db + '.PORT'),
-        database=myConfig.get(db + '.DATABASE'),
-        query=dict(driver=myConfig.get(db + '.ODBCDRIVER'))
-    )
-
+    checkConfigURL(myConfig, db)    
+    dictDialectConfigURL = buildConfigURLAccordingToDialect(myConfig, db)
+    return URL(**dictDialectConfigURL)
 
 def createEngines(myConfig, dbPossible):
     engines = {}
