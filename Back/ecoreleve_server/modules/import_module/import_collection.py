@@ -1,5 +1,5 @@
 from ecoreleve_server.core.base_collection import Query_engine
-from . import Import
+from ecoreleve_server.database.sensor_db import Import
 
 
 @Query_engine(Import)

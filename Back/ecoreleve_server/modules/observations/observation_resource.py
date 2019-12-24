@@ -4,14 +4,17 @@ from pyramid.view import view_config
 from sqlalchemy import select, and_, join, func
 from traceback import print_exc
 
-from ecoreleve_server.core import RootCore, DynamicObjectResource, DynamicObjectCollectionResource
+from ecoreleve_server.core import DynamicObjectResource, DynamicObjectCollectionResource
 from ecoreleve_server.core.log_view import sendLog
-from .observation_model import Observation
+from ecoreleve_server.database.main_db import Observation
 from .observation_collection import ObservationCollection
-from ..field_activities import FieldActivity_ProtocoleType
-from ..media_files import MediasFiles
+from ecoreleve_server.database.main_db import (
+    FieldActivity_ProtocoleType,
+    MediasFiles,
+    ErrorAvailable
+)
 from ..permissions import context_permissions
-from .equipment_model import  ErrorAvailable
+
 
 class ObservationResource(DynamicObjectResource):
 
@@ -283,7 +286,3 @@ class ObservationsResource(DynamicObjectCollectionResource):
             res.append(elem)
         res = sorted(res, key=lambda k: k['Name'])
         return res
-
-
-RootCore.children.append(('protocols', ObservationsResource))
-RootCore.children.append(('observations',ObservationsResource))

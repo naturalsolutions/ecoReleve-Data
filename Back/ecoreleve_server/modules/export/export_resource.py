@@ -5,13 +5,14 @@ from pyramid.response import Response
 from datetime import datetime
 from sqlalchemy import select, join
 
-from ecoreleve_server.core import RootCore, BaseExport
+from ecoreleve_server.database.meta import Export_Db_Base
 from ecoreleve_server.core.base_collection import Query_engine
 from ecoreleve_server.core.base_resource import CustomResource
 from ..permissions import context_permissions
 from ecoreleve_server.renderers import CSVRenderer, PDFrenderer, GPXRenderer
 
 # TOODO Replace Generator by  to Search in views
+
 
 class CustomExportResource(CustomResource):
 
@@ -51,7 +52,7 @@ class ExportQueryResource(CustomExportResource):
         CustomExportResource.__init__(self, ref, parent)
 
         self.viewName = self.getViewName(ref)
-        self.table = BaseExport.metadata.tables[self.viewName]
+        self.table = Export_Db_Base.metadata.tables[self.viewName]
         self.collection = self.getCollection(self.table)
 
         self.exportType = {
@@ -277,11 +278,11 @@ class ExportCollectionQueryResource(CustomExportResource):
     
     def __init__(self, ref, parent):
         CustomExportResource.__init__(self, ref, parent)
-        self.table = BaseExport.metadata.tables['Views']
+        self.table = Export_Db_Base.metadata.tables['Views']
 
     def retrieve(self):
-        vi = BaseExport.metadata.tables['Views']
-        t_v = BaseExport.metadata.tables['Theme_View']
+        vi = Export_Db_Base.metadata.tables['Views']
+        t_v = Export_Db_Base.metadata.tables['Theme_View']
         joinTable = join(vi, t_v, vi.c['ID'] == t_v.c['FK_View'])
         query = select(vi.c).select_from(joinTable)
 
@@ -303,7 +304,7 @@ class ExportThemeResource(CustomExportResource):
         self.id_ = ref
 
     def retrieve(self):
-        table = BaseExport.metadata.tables['ThemeEtude']
+        table = Export_Db_Base.metadata.tables['ThemeEtude']
         query = select(table.c
                        ).where(table.c['ID'] == self.id_)
         result = [dict(row) for row in self.session.execute(query).fetchall()]
@@ -316,7 +317,7 @@ class ExportCollectionThemeResource(CustomExportResource):
     children = [('{int}', ExportThemeResource)]
 
     def retrieve(self):
-        table = BaseExport.metadata.tables['ThemeEtude']
+        table = Export_Db_Base.metadata.tables['ThemeEtude']
         query = select([table.c['ID'], table.c['Caption']]
                        ).order_by(table.c['Caption'].asc())
         result = [dict(row) for row in self.session.execute(query).fetchall()]
@@ -335,5 +336,3 @@ class ExportCoreResource(CustomExportResource):
                                }
                 }
 
-
-RootCore.children.append(('export', ExportCoreResource))

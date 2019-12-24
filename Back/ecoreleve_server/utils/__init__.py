@@ -1,6 +1,17 @@
-from .eval import Eval
-from pyramid import threadlocal
-from .thesaurusLoad import *
+from .thesaurusLoad import (
+    loadThesaurusTrad,
 
-def getSession():
-    return threadlocal.get_current_request().dbsession
+)
+from .callback import add_cors_headers_response_callback
+from pyramid.events import NewRequest
+__all__ = [
+    "loadThesaurusTrad",
+]
+
+
+def includeme(config):
+    config.add_subscriber(
+        add_cors_headers_response_callback,
+        NewRequest
+        )
+    loadThesaurusTrad(config)

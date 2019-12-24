@@ -1,16 +1,14 @@
 from pyramid.security import (
     Allow,
-    Authenticated,
-    ALL_PERMISSIONS,
-    Everyone,
-    Deny
+    Authenticated
 )
 
-from .init_db import Base, BaseExport, dbConfig, get_redis_con
+from .init_db import get_redis_con
 from .base_model import *
 from .base_view import *
 from .base_resource import *
 from .configuration_model import *
+# from ecoreleve_server.traversal.database.MAIN_DB.Views import individualequipment
 
 
 class SecurityRoot(Resource):
@@ -42,3 +40,7 @@ class RootCore(Resource):
 
     def retrieve(self):
         return {'next items': self}
+
+
+def includeme(config):
+    config.set_root_factory(SecurityRoot)

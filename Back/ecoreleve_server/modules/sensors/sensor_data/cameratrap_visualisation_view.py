@@ -7,9 +7,11 @@ from pyramid.view import view_config
 from sqlalchemy import desc, select, func,text, insert, join, Integer, cast, and_, Float, or_,bindparam, update, outerjoin,Table
 from sqlalchemy.orm import query, joinedload
 
-from ecoreleve_server.core import Base, dbConfig
-from .sensor_data_model import CamTrap
-from ecoreleve_server.modules.media_files import Photos
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.meta import Main_Db_Base
+from ecoreleve_server.database.main_db import (
+    Photos
+)
 from ecoreleve_server.modules.permissions import routes_permission
 
 
@@ -122,7 +124,7 @@ def allPhotos (request):
             varchartmp = row['path'].split('\\')
             row['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
             row['FileName'] = row['FileName'].replace(" ","%20")
-            
+
     return dataResult
 
 @view_config(route_name='getSessionZip', renderer='json' ,request_method='GET',permission = routes_permission['rfid']['POST'])
@@ -133,7 +135,7 @@ def getSessionZip(request):
     siteid = 0
 
     viewTable = Table('V_dataCamTrap_With_equipSite',
-                        Base.metadata, autoload=True)
+                        Main_Db_Base.metadata, autoload=True)
 
     query = select([
         viewTable.c['pk_id'],
@@ -148,7 +150,7 @@ def getSessionZip(request):
     ])
     joinTable = join(Photos , viewTable, Photos.old_id == viewTable.c['pk_id'])
     query = query.select_from(joinTable)
-    
+
     if 'siteid' in request.GET:
         siteid = request.GET['siteid']
         query = query.where(

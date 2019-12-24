@@ -9,16 +9,20 @@ import copy
 
 from ecoreleve_server.core import RootCore
 from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
-from .station_model import Station, Station_FieldWorker
-from ..monitored_sites.monitored_site_model import MonitoredSite, MonitoredSitePosition
-from ..users.user_model import User
-from ..field_activities import fieldActivity
+from ecoreleve_server.database.main_db import (
+    Station,
+    Station_FieldWorker,
+    MonitoredSite,
+    User,
+    fieldActivity
+)
 from ..observations.observation_resource import ObservationsResource
 from .station_collection import StationCollection
 from ..permissions import context_permissions
-from ..sensors.sensor_data import CamTrap
+from ecoreleve_server.database.sensor_db import CamTrap
 
 from ...utils.datetime import parse
+
 
 class StationResource(DynamicObjectResource):
 
@@ -501,4 +505,4 @@ class StationsResource(DynamicObjectCollectionResource):
         return response
 
 
-RootCore.children.append(('stations', StationsResource))
+

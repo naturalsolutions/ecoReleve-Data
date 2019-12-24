@@ -1,6 +1,10 @@
-from ecoreleve_server.core.base_resource import *
-from ecoreleve_server.modules.permissions import context_permissions
-from ..sensor_model import Sensor
+from ecoreleve_server.core.base_resource import (
+    DynamicValueResource,
+    DynamicValuesResource
+)
+from collections import OrderedDict
+from ecoreleve_server.database.main_db import Sensor
+from ecoreleve_server.database.meta import Main_Db_Base
 
 SensorDynPropValue = Sensor.DynamicValuesClass
 
@@ -15,12 +19,11 @@ class SensorValueResource(DynamicValueResource):
 class SensorValuesResource(DynamicValuesResource):
     model = SensorDynPropValue
 
-
     def retrieve(self):
         from ecoreleve_server.utils.parseValue import formatThesaurus
 
-        propertiesTable = Base.metadata.tables[self.__parent__.objectDB.TypeClass.PropertiesClass.__tablename__]
-        dynamicValuesTable = Base.metadata.tables[self.__parent__.objectDB.DynamicValuesClass.__tablename__]
+        propertiesTable = Main_Db_Base.metadata.tables[self.__parent__.objectDB.TypeClass.PropertiesClass.__tablename__]
+        dynamicValuesTable = Main_Db_Base.metadata.tables[self.__parent__.objectDB.DynamicValuesClass.__tablename__]
         FK_name = 'FK_' + self.__parent__.objectDB.__tablename__
         FK_property_name = self.__parent__.objectDB.fk_table_DynProp_name
 

@@ -4,12 +4,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from sqlalchemy.orm import aliased, exc
 
-from ecoreleve_server.core import RootCore, Base
+from ecoreleve_server.core import RootCore
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_resource import *
 from ecoreleve_server.utils.datetime import parse
-from .sensor_model import Sensor
-from ..monitored_sites import MonitoredSite
-from ..observations import Equipment
+from ecoreleve_server.database.main_db import (
+    Sensor,
+    MonitoredSite
+)
+
 from ..permissions import context_permissions
 
 from .sensor_history import SensorValuesResource
@@ -27,7 +30,7 @@ class SensorResource(DynamicObjectResource):
     def getEquipment(self):
         _id = self.objectDB.ID
 
-        table = Base.metadata.tables['SensorEquipment']
+        table = Main_Db_Base.metadata.tables['SensorEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = outerjoin(joinTable, MonitoredSite, table.c[
                         'FK_MonitoredSite'] == MonitoredSite.ID)
@@ -82,6 +85,3 @@ class SensorsResource(DynamicObjectCollectionResource):
         response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
 
         return response
-
-
-RootCore.children.append(('sensors', SensorsResource))

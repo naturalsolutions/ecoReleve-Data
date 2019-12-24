@@ -29,8 +29,6 @@ pyramid.debug_authorization = false
 pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
-pyramid.includes =
-    pyramid_tm
 
 
 
@@ -40,33 +38,107 @@ pyramid.includes =
 #                                STARTING CONFIG BDD ACCESS                                                                  #
 #                                                                                                                            #
 
-sqlalchemy.default.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
-sqlalchemy.default.implicit_returning = False
-sqlalchemy.default.pool_reset_on_return = commit
-sqlalchemy.default.pool_size = 30
-sqlalchemy.default.pool_timeout = 5
-sqlalchemy.default.max_overflow = 10
-sqlalchemy.default.case_sensitive= False
+    # DBUSED = String with separator (,) with META name of database
+    # example :
+    # DBUSED = Main_Db,Sensor_Db,Log_Db,Export_Db
+
+DBUSED                 = Main_Db,Sensor_Db,Log_Db,Export_Db
+
+# For each meta name defined in DBUSED we should have
+    # the following key defined too
+    # .ODBCDRIVER if you want to know what drivers you have
+    #             launch python
+    #             import pyodbc
+    #             launch pyodbc.drivers() in python console
+    # .DIALECT
+    # .UID
+    # .PWD
+    # .SERVER
+    # .PORT
+    # .DATABASE
+
+    # example for SQLSERVER
+    # Main_Db.ODBCDRIVER     = ODBC Driver 11 for SQL Server
+    # Main_Db.DIALECT        = mssql+pyodbc
+    # Main_Db.UID            = myUser
+    # Main_Db.PWD            = myPassword
+    # Main_Db.SERVER         = mySQLServerName
+    # Main_Db.PORT           = 1433
+    # Main_Db.DATABASE       = myDatabase
+
+Main_Db.ODBCDRIVER     = ODBC Driver 11 for SQL Server
+Main_Db.DIALECT        = mssql+pyodbc
+Main_Db.UID            = 
+Main_Db.PWD            = 
+Main_Db.SERVER         = 
+Main_Db.PORT           = 1433
+Main_Db.DATABASE       = 
+#options for sqlalchemy ENGINE with datbase context
+
+sqlalchemy.Main_Db.implicit_returning = False
+sqlalchemy.Main_Db.pool_reset_on_return = commit
+sqlalchemy.Main_Db.pool_size = 30
+sqlalchemy.Main_Db.pool_timeout = 5
+sqlalchemy.Main_Db.max_overflow = 10
+sqlalchemy.Main_Db.case_sensitive= False
+
+Sensor_Db.ODBCDRIVER    = ODBC Driver 11 for SQL Server
+Sensor_Db.DIALECT       = mssql+pyodbc
+Sensor_Db.UID           = 
+Sensor_Db.PWD           = 
+Sensor_Db.SERVER        = 
+Sensor_Db.PORT          = 1433
+Sensor_Db.DATABASE      = 
+
+sqlalchemy.Sensor_Db.implicit_returning = False
+sqlalchemy.Sensor_Db.pool_reset_on_return = commit
+sqlalchemy.Sensor_Db.pool_size = 30
+sqlalchemy.Sensor_Db.pool_timeout = 5
+sqlalchemy.Sensor_Db.max_overflow = 10
+sqlalchemy.Sensor_Db.case_sensitive= False
+
+Export_Db.ODBCDRIVER    = ODBC Driver 11 for SQL Server
+Export_Db.DIALECT       = mssql+pyodbc
+Export_Db.UID           = 
+Export_Db.PWD           = 
+Export_Db.SERVER        = 
+Export_Db.PORT          = 1433
+Export_Db.DATABASE      = 
+
+sqlalchemy.Export_Db.implicit_returning = False
+sqlalchemy.Export_Db.pool_reset_on_return = commit
+sqlalchemy.Export_Db.pool_size = 30
+sqlalchemy.Export_Db.pool_timeout = 5
+sqlalchemy.Export_Db.max_overflow = 10
+sqlalchemy.Export_Db.case_sensitive= False
+
+Log_Db.ODBCDRIVER    = ODBC Driver 11 for SQL Server
+Log_Db.DIALECT       = mssql+pyodbc
+Log_Db.UID           = 
+Log_Db.PWD           = 
+Log_Db.SERVER        = 
+Log_Db.PORT          = 1433
+Log_Db.DATABASE      = 
+
+sqlalchemy.Log_Db.implicit_returning = False
+sqlalchemy.Log_Db.pool_reset_on_return = commit
+sqlalchemy.Log_Db.pool_size = 30
+sqlalchemy.Log_Db.pool_timeout = 5
+sqlalchemy.Log_Db.max_overflow = 10
+sqlalchemy.Log_Db.case_sensitive= False
 
 
-sqlalchemy.Export.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
-sqlalchemy.Export.implicit_returning = False
-sqlalchemy.Export.pool_reset_on_return = commit
-sqlalchemy.Export.pool_size = 30
-sqlalchemy.Export.pool_timeout = 5
-sqlalchemy.Export.max_overflow = 10
-sqlalchemy.Export.case_sensitive= False
-
+# dependencies from old 
 loadExportDB = True
-data_schema = you Database schema
-sensor_schema = you Sensor Database schema
+data_schema = your Database schema
+sensor_schema = your Sensor Database schema
+dbLog.schema = your Log Database schema
 
 # sql driver dialect (ex: for MS SQL Serveer)
 cn.dialect = mssql+pyodbc:///?odbc_connect=
 
 
-dbLog.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
-dbLog.schema = NSLog.dbo
+
 
 #                           ENDING CONFIG BDD ACESS                                                                          #
 #                                                                                                                            #

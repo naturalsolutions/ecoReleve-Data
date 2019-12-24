@@ -4,8 +4,8 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.interfaces import IAuthenticationPolicy
+from ecoreleve_server.database.main_db import User
 
-from .user_model import User
 
 
 @view_config(
@@ -51,7 +51,7 @@ def current_user(request, user_id=None):
         User.Lastname.label('Lastname')
     ]).where(User.id == userid)
     response = dict(session.execute(query).fetchone())
-    if 'group:' in currentUserRole[-1] :
+    if 'group:' in currentUserRole[-1]:
         response['role'] = currentUserRole[-1].replace('group:', '')
     else:
         response['role'] = 'user'

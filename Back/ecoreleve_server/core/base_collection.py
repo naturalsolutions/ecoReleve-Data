@@ -4,28 +4,21 @@ from sqlalchemy import (
     or_,
     exists,
     func,
-    join,
     outerjoin,
     not_)
-from sqlalchemy.sql import elements
 from sqlalchemy.orm import aliased, exc
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
 
 from inspect import isclass
-from pyramid import threadlocal
-import pandas as pd
-import time
 from datetime import datetime
 from functools import wraps
-import abc 
 
-from ..utils import Eval
-from ..utils.datetime import parse
-from ..utils.parseValue import parser
+from ecoreleve_server.utils.eval import Eval
+from ecoreleve_server.utils.parseValue import parser
 from .base_model import HasDynamicProperties
 
-from ecoreleve_server.core import Base
+# from ecoreleve_server.core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 
 eval_ = Eval()
 
@@ -142,7 +135,7 @@ class QueryEngine(object):
         tempSelectable = []
         for table in dictTableCol:
             tempSelectable = []
-            refTable = Base.metadata.tables[table]
+            refTable = Main_Db_Base.metadata.tables[table]
             aliasedTable =  refTable.alias('a')
             # trueTable = Base.metadata.tables.get(table)
             if refTable is None:

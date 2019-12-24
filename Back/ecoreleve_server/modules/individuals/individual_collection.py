@@ -2,11 +2,14 @@ from datetime import datetime
 from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from sqlalchemy.orm import aliased, exc
 
-from ecoreleve_server.core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_collection import Query_engine, eval_
-from . import Individual
-from ..sensors import Sensor
-from ..observations import Observation, Equipment
+from ecoreleve_server.database.main_db import (
+    Individual,
+    Sensor,
+    Observation,
+    Equipment
+)
 
 SensorType = Sensor.TypeClass
 
@@ -26,8 +29,8 @@ class IndividualCollection:
             startDate = self.from_history
 
         self.startDate = startDate
-        StatusTable = Base.metadata.tables['IndividualStatus']
-        EquipmentTable = Base.metadata.tables['IndividualEquipment']
+        StatusTable = Main_Db_Base.metadata.tables['IndividualStatus']
+        EquipmentTable = Main_Db_Base.metadata.tables['IndividualEquipment']
 
         table_join = outerjoin(_from, StatusTable, StatusTable.c[
                               'FK_Individual'] == Individual.ID)
@@ -91,7 +94,7 @@ def fk_sensorType_filter(self, query, criteria):
 
 @Query_engine.add_filter(IndividualCollection, 'Status_')
 def status_filter(self, query, criteria):
-        StatusTable = Base.metadata.tables['IndividualStatus']
+        StatusTable = Main_Db_Base.metadata.tables['IndividualStatus']
         query = query.where(eval_.eval_binary_expr(
             StatusTable.c['Status_'], criteria['Operator'], criteria['Value']))
 
@@ -104,7 +107,7 @@ def frequency_VHF_filter(self, query, criteria):
 
     freq = criteria['Value']
     e2 = aliased(Equipment)
-    vs = Base.metadata.tables['SensorDynPropValuesNow']
+    vs = Main_Db_Base.metadata.tables['SensorDynPropValuesNow']
     join_table_exist = join(Equipment, Sensor, Equipment.FK_Sensor == Sensor.ID)
     join_table_exist = join(join_table_exist, vs, vs.c['FK_Sensor'] == Sensor.ID)
 

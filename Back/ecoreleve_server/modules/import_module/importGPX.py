@@ -7,10 +7,13 @@ from pyramid import threadlocal
 from sqlalchemy import select, and_, insert
 from sqlalchemy.exc import IntegrityError
 
-from ecoreleve_server.core import dbConfig
-from ..stations.station_model import Station
-from ..sensors.sensor_data import GPX
-from .import_model import Import
+from ecoreleve_server.database.main_db import (
+    Station
+)
+from ecoreleve_server.database.sensor_db import (
+    GPX,
+    Import
+)
 
 
 model = Station
