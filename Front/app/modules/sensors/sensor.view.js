@@ -36,6 +36,17 @@ define([
 
     ModelPrototype: SensorModel,
 
+
+    displayForm: function(){
+      var _this = this
+
+      DetailView.prototype.displayForm.call(this)
+
+      this.nsForm.afterSaveSuccess = function() {
+        _this.historyGrid.fetchData()
+      }
+    },
+
     displayGrids: function(){
       this.displayHistoryGrid();
       this.displayDeploymentGrid();
