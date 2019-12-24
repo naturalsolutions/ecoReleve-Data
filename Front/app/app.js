@@ -154,6 +154,14 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       $.xhrPool.calls = [];
     }
   };
+  $.ajaxPrefilter( function( options) {
+    options.crossDomain ={
+      crossDomain: true
+    };
+    options.xhrFields = {
+      withCredentials: true
+    };
+  });
   $.ajaxSetup({
     // before jQuery send the request we will push it to our array
     beforeSend: function(jqxhr, options) {
