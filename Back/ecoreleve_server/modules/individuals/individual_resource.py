@@ -1,9 +1,11 @@
-from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
 
 from ecoreleve_server.core import Base, RootCore
-from ecoreleve_server.core.base_resource import *
+from ecoreleve_server.core.base_resource import (
+    DynamicObjectResource,
+    DynamicObjectCollectionResource
+)
 from ..sensors.sensor_model import Sensor
 from ..stations.station_model import Station
 from .individual_model import Individual, ErrorCheckIndividualCodes
