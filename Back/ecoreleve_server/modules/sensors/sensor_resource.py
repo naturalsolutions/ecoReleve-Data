@@ -14,7 +14,10 @@ from ..permissions import context_permissions
 
 from .sensor_history import SensorValuesResource
 from .sensor_collection import SensorCollection
-from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
+from ecoreleve_server.core.base_resource import (
+    DynamicObjectResource,
+    DynamicObjectCollectionResource
+)
 SensorDynPropValue = Sensor.DynamicValuesClass
 
 

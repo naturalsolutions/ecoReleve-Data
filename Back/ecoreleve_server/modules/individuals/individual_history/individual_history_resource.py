@@ -1,10 +1,13 @@
 from sqlalchemy import select, join, not_, desc
 
-from ecoreleve_server.core.base_resource import *
+from ecoreleve_server.core.base_resource import (
+    DynamicValueResource,
+    DynamicValuesResource
+)
 from ecoreleve_server.core import Base
 from ..individual_model import Individual
 from ecoreleve_server.modules.permissions import context_permissions
-
+from collections import OrderedDict
 IndividualDynPropValue = Individual.DynamicValuesClass
 
 
