@@ -34,10 +34,10 @@ class SensorValuesResource(DynamicValuesResource):
 
         tableJoin = join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
-        query = select([dynamicValuesTable, propertiesTable.c['Name']]
-                       ).select_from(tableJoin).where(
-            dynamicValuesTable.c[FK_name] == self.__parent__.objectDB.ID
-        ).order_by(desc(dynamicValuesTable.c['StartDate']))
+        query = select([dynamicValuesTable, propertiesTable.c['Name']])
+        query = query.select_from(tableJoin)
+        query = query.where(dynamicValuesTable.c[FK_name] == self.__parent__.objectDB.ID)
+        query = query.order_by(desc(dynamicValuesTable.c['StartDate']))
 
         result = self.session.execute(query).fetchall()
         response = []
