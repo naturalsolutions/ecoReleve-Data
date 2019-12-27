@@ -5,6 +5,11 @@ from ecoreleve_server.core.base_resource import (
 from collections import OrderedDict
 from ecoreleve_server.database.main_db import Sensor
 from ecoreleve_server.database.meta import Main_Db_Base
+from sqlalchemy import (
+    join,
+    select,
+    desc
+)
 
 SensorDynPropValue = Sensor.DynamicValuesClass
 
@@ -27,12 +32,12 @@ class SensorValuesResource(DynamicValuesResource):
         FK_name = 'FK_' + self.__parent__.objectDB.__tablename__
         FK_property_name = self.__parent__.objectDB.fk_table_DynProp_name
 
-        tableJoin = sa.join(dynamicValuesTable, propertiesTable,
+        tableJoin = join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
-        query = sa.select([dynamicValuesTable, propertiesTable.c['Name']]
+        query = select([dynamicValuesTable, propertiesTable.c['Name']]
                        ).select_from(tableJoin).where(
             dynamicValuesTable.c[FK_name] == self.__parent__.objectDB.ID
-        ).order_by(sa.desc(dynamicValuesTable.c['StartDate']))
+        ).order_by(desc(dynamicValuesTable.c['StartDate']))
 
         result = self.session.execute(query).fetchall()
         response = []
