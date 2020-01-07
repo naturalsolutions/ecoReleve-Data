@@ -34,7 +34,9 @@ define([
 		},
 
     validate: function() {
-      return this.$el.find('.tile-inside input[type="radio"]:checked').val();
+      var title = this.$el.find('.tile-inside input[type="radio"]:checked').val();
+      $('.import-step0').html(title);
+      return title;
     },
 
     changeValue: function(e) {

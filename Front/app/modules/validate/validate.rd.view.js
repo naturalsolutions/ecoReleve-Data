@@ -130,6 +130,7 @@ define([
 
     displayMap: function() {
       var url = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas' + '?geo=true';
+      var validateType = this.model.get('type')
       this.map = new NsMap({
         url: this.mapUrl,
         selection: true,
@@ -138,7 +139,11 @@ define([
         zoom: 7,
         element: 'map',
         bbox: true,
-        player: true
+        player: true,
+        popup: true,
+        legend: true,
+        validatePage: true,
+        validateType: validateType
       });
     },
 
@@ -179,6 +184,7 @@ define([
       var columnDefs = [{
         field: 'date',
         headerName: 'DATE',
+        filter: 'date',
         minWidth: 200,
       }, {
         field: 'PK_id',
@@ -244,6 +250,9 @@ define([
       },{
         field: 'type',
         headerName: 'Type',
+      },{
+        field: 'Data_Quality',
+        headerName: 'Quality',
       }];
 
       this.rgGrid.show(this.gridView = new GridView({
@@ -316,55 +325,191 @@ define([
       if(this.model.get('FK_Individual') === null){
         return;
       }
-
       var url = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas';
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
         return;
       }
-
-      var selectedIds = selectedNodes.map(function(node){
-        return node.data.PK_id;
-      });
-
-      $.ajax({
-        url: url,
-        method: 'POST',
-        data: {data: JSON.stringify(selectedIds),
-              id_ptt: this.model.get('FK_ptt'),
-              id_indiv : this.model.get('FK_Individual')
-              },
-        context: this,
-      }).done(function(resp) {
-        if (resp.errors) {
-          resp.title = 'An error occured';
-          resp.type = 'error';
-        }else {
-          resp.title = 'Success';
-          resp.type = 'success';
+      // var selectedfilters = selectedNodes[0].rowModel.filterManager.allFilters;
+      var selectedfilters = this.gridView.gridOptions.api.filterManager.allFilters
+      var nbSelectedFilters = Object.keys(selectedfilters).length;
+      console.log(nbSelectedFilters)
+      if(nbSelectedFilters ==! 0){
+        console.log('y a des filtres')
+        console.log(selectedfilters)
+        var filterslist = []
+        for(var i=0;i<=nbSelectedFilters;i++){
+          filterslist.push(Object.keys(selectedfilters)[i])
         }
+        var text = 'Filters activated: ' + filterslist;
+        Swal({
+          heightAuto: false,
+          title: 'Some filters are activated',
+          html: text,
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: 'green',
+          confirmButtonText: 'Validate',
+          cancelButtonText: 'Cancel',
+          closeOnCancel: true
+        })
+        .then( (result) => {
+          if( 'value' in result){
+            var selectedIds = selectedNodes.map(function(node){
+              return node.data.PK_id;
+            });
+            $.ajax({
+              url: url,
+              method: 'POST',
+              data: {data: JSON.stringify(selectedIds),
+                    id_ptt: this.model.get('FK_ptt'),
+                    id_indiv : this.model.get('FK_Individual')
+                    },
+              context: this,
+            }).done(function(resp) {
+              if (resp.errors) {
+                resp.title = 'An error occured';
+                resp.type = 'error';
+              }else {
+                resp.title = 'Success';
+                resp.type = 'success';
+              }
+    
+              var callback = function() {
+                $.when(_this.fetchGrid()).then(function(){
+                  var hash = window.location.hash.split('/').slice(0,-1).join('/');
+                  if(!_this.model.get('data').length){
+                    Backbone.history.navigate(hash + '/', {trigger: true});
+                    return;
+                  }
+                  if(_this.index + 1 == _this.model.get('data').length){
+                    _this.index = 0;
+                    Backbone.history.navigate(hash + '/' + (_this.index + 1), {trigger: true});
+                    return;
+                  }
+                  Backbone.history.loadUrl(Backbone.history.fragment);
+                });
+              };
+              resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
+              this.swal(resp, resp.type, callback);
+            }).fail(function(resp) {
+              this.swal(resp, 'error');
+            });
+            // Backbone.history.navigate('validate/camtrap',{trigger:true}) ;
+          }
+          if( 'dismiss' in result ) {
+            // Backbone.history.loadUrl(Backbone.history.fragment);
+          }
+        });
+      } else {     
+        var selectedIds = selectedNodes.map(function(node){
+          return node.data.PK_id;
+        });
+        $.ajax({
+          url: url,
+          method: 'POST',
+          data: {data: JSON.stringify(selectedIds),
+                id_ptt: this.model.get('FK_ptt'),
+                id_indiv : this.model.get('FK_Individual')
+                },
+          context: this,
+        }).done(function(resp) {
+          if (resp.errors) {
+            resp.title = 'An error occured';
+            resp.type = 'error';
+          }else {
+            resp.title = 'Success';
+            resp.type = 'success';
+          }
 
-        var callback = function() {
-          $.when(_this.fetchGrid()).then(function(){
-            var hash = window.location.hash.split('/').slice(0,-1).join('/');
-            if(!_this.model.get('data').length){
-              Backbone.history.navigate(hash + '/', {trigger: true});
-              return;
-            }
-            if(_this.index + 1 == _this.model.get('data').length){
-              _this.index = 0;
-              Backbone.history.navigate(hash + '/' + (_this.index + 1), {trigger: true});
-              return;
-            }
-            Backbone.history.loadUrl(Backbone.history.fragment);
-          });
-        };
-        resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
-        this.swal(resp, resp.type, callback);
-      }).fail(function(resp) {
-        this.swal(resp, 'error');
-      });
+          var callback = function() {
+            $.when(_this.fetchGrid()).then(function(){
+              var hash = window.location.hash.split('/').slice(0,-1).join('/');
+              if(!_this.model.get('data').length){
+                Backbone.history.navigate(hash + '/', {trigger: true});
+                return;
+              }
+              if(_this.index + 1 == _this.model.get('data').length){
+                _this.index = 0;
+                Backbone.history.navigate(hash + '/' + (_this.index + 1), {trigger: true});
+                return;
+              }
+              Backbone.history.loadUrl(Backbone.history.fragment);
+            });
+          };
+          resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
+          this.swal(resp, resp.type, callback);
+        }).fail(function(resp) {
+          this.swal(resp, 'error');
+        });
+      }
     },
+
+    // validate: function(){
+    //   var _this = this;
+    //   if(this.model.get('FK_Individual') === null){
+    //     return;
+    //   }
+    //   var url = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas';
+    //   var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+    //   debugger
+    //   // var selectedfilters = selectedNodes[0].rowModel.filterManager.allFilters;
+    //   var selectedfilters = this.gridView.gridOptions.api.filterManager.allFilters
+    //   var nbSelectedFilters = Object.keys(selectedfilters).length;
+    //   console.log(nbSelectedFilters)
+    //   debugger
+    //   if(nbSelectedFilters ==! 0){
+    //     console.log('y a des filtres')
+    //     console.log(selectedfilters)
+    //     debugger
+    //   } else {
+    //     debugger
+    //   if(!selectedNodes.length){
+    //     return;
+    //   }
+
+    //   var selectedIds = selectedNodes.map(function(node){
+    //     return node.data.PK_id;
+    //   });
+    //   $.ajax({
+    //     url: url,
+    //     method: 'POST',
+    //     data: {data: JSON.stringify(selectedIds),
+    //           id_ptt: this.model.get('FK_ptt'),
+    //           id_indiv : this.model.get('FK_Individual')
+    //           },
+    //     context: this,
+    //   }).done(function(resp) {
+    //     if (resp.errors) {
+    //       resp.title = 'An error occured';
+    //       resp.type = 'error';
+    //     }else {
+    //       resp.title = 'Success';
+    //       resp.type = 'success';
+    //     }
+
+    //     var callback = function() {
+    //       $.when(_this.fetchGrid()).then(function(){
+    //         var hash = window.location.hash.split('/').slice(0,-1).join('/');
+    //         if(!_this.model.get('data').length){
+    //           Backbone.history.navigate(hash + '/', {trigger: true});
+    //           return;
+    //         }
+    //         if(_this.index + 1 == _this.model.get('data').length){
+    //           _this.index = 0;
+    //           Backbone.history.navigate(hash + '/' + (_this.index + 1), {trigger: true});
+    //           return;
+    //         }
+    //         Backbone.history.loadUrl(Backbone.history.fragment);
+    //       });
+    //     };
+    //     resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
+    //     this.swal(resp, resp.type, callback);
+    //   }).fail(function(resp) {
+    //     this.swal(resp, 'error');
+    //   });
+    //   }
+    // },
 
     swal: function(opt, type, callback) {
       var btnColor;

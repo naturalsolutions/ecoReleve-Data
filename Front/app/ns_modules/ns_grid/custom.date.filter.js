@@ -196,6 +196,8 @@ define([
     dateClean : function() {
       this.dateFrom.value = "";
       this.dateTo.value = "";
+      if (this.filterDate)
+        delete this.filterDate;
       $(this.dateFrom).data().DateTimePicker.date(null);;
       this.onFilterChanged();
       this.filterChangedCallback();
@@ -263,6 +265,12 @@ define([
     },
 
     isFilterActive : function () {
+      if (this.filterDate) {
+        if( this.filterDate.dateFrom == '' && this.filterDate.dateTo =='') {
+          return false
+        }
+      }
+
       return this.filterDate && (this.filterDate.dateFrom || this.filterDate.dateTo);
     },
 

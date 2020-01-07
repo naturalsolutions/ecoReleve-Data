@@ -25,6 +25,9 @@ define([
     },
 
     initialize: function (options) {
+      if(options.model){
+        this.provider = options.model.get('constructor') || null;
+      }
       this.parent = options.parent;
       this.previousModels = options.parent.models[options.parent.currentStepIndex];
       this.model = new Backbone.Model();
@@ -48,8 +51,9 @@ define([
       var dropZoneParams = {
         url: this.url,
         previewTemplate: previewTemplate,
-        acceptedFiles: this.extension,
+        acceptedFiles: this.extension, //Why ?
         parallelUploads: 8,
+        params : {"provider" : this.provider || null},
         maxFiles: this.maxFiles,
         autoQueue: true,
         autoProcessQueue: false,
@@ -84,7 +88,13 @@ define([
     haveWrongExtension: function(file){
       var _this = this;
       var ext = file.name.toLowerCase().split('.');
-      if (ext[ext.length - 1] != this.extension.replace('.','')) {
+      var wrongExt;
+      for(var i in this.extension){
+        if (ext[ext.length - 1] != this.extension[i].replace('.','')) {
+          wrongExt = wrongExt + 1;
+        }
+      }
+      if (wrongExt == 2){  
         Swal(
         {
           title: 'Wrong file type',
@@ -307,6 +317,10 @@ define([
       this.model.set('files', this.dropzone.getQueuedFiles());
       if(this.checkFileIsPresent()){
         if(this.uploadOnly){
+          // debugger;
+          // t
+          // this.dropzone.params({'provider':this.provider})
+          this.dropzone.defaultOptions.params = { "provider" : this.provider} // a test sur toutes les pages de l'import 
           this.dropzone.processQueue();
           $('#header-loader').removeClass('hidden');
         }

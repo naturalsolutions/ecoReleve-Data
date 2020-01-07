@@ -79,6 +79,13 @@ class ArgosGps(Sensor_Db_Base):
     imported = Column('imported', Boolean, nullable=False, server_default='0')
     FK_Import = Column('FK_Import', Integer, ForeignKey('Import.ID'))
     ImportedFile = relationship('Import', back_populates='ArgosGPSRawDatas')
+    Status = Column(String(50))
+    Distance = Column(Integer)
+    Calculated_Speed = Column(Integer)
+    Quality_On_Speed = Column(Integer)
+    Quality_On_Metadata = Column(Integer)
+    Data_Quality = Column(Integer)
+    Fk_individual_location = Column(Integer)
     __table_args__ = (
         Index(
             'idx_Targosgps_checked_with_pk_ptt_date',
@@ -132,6 +139,7 @@ class Gsm(Sensor_Db_Base):
     FK_Import = Column('FK_Import', Integer, ForeignKey('Import.ID'))
     ImportedFile = relationship('Import', back_populates='GSMrawDatas')
     Status = Column(String(50))
+    Distance = Column(Integer)
     Calculated_Speed = Column(Integer)
     Quality_On_Speed = Column(Integer)
     Quality_On_Metadata = Column(Integer)

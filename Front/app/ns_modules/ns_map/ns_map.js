@@ -93,7 +93,8 @@ define([
     this.lastImported = false;
 
     this.regionFetched = false;
-
+    this.validatePage = options.validatePage || false;
+    this.validateType = options.validateType || false;
     this.init();
   }
 
@@ -132,7 +133,6 @@ define([
       L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images/';
       this.selectedIcon = new L.DivIcon({className: 'custom-marker selected'});
       this.icon = new L.DivIcon({className: 'custom-marker'});
-
       this.map = new L.Map(this.elem, {
         center: this.mapCenter || [33, 33],
         zoom: this.zoom,
@@ -428,7 +428,12 @@ define([
       this.setTotal(this.geoJson);
 
       if(this.legend && displayLegend){
-        this.addLegend();
+        if(this.validatePage == true){
+          this.addLegendValidate();
+        } else{
+          this.addLegend();
+        }
+        
       }
       if(this.clusterLayer){
         this.addClusterLayers();
@@ -621,6 +626,33 @@ define([
       legend.addTo(this.map);
     },
 
+    addLegendValidate: function(){
+      var _this = this
+      var legend = L.control({position: 'bottomright'});
+      legend.onAdd = function (map) {
+        
+        var div = L.DomUtil.create('div', 'info-legend');
+        if(_this.validateType == 'gsm'){
+          var types = ['1','2','3'];
+        } else {
+          var types = ['gps', 'argos', '1', '2', '3'];
+        }
+        
+        var labels = [];
+
+        for (var i = 0; i < types.length; i++) {
+          labels.push(
+            '<div class="marker marker marker-' + types[i] +'"></div>' + '&nbsp; ' + types[i]
+          );
+        }
+
+        div.innerHTML = labels.join('<br>');
+        return div;
+      };
+
+      legend.addTo(this.map);
+    },
+
     initLayer: function(geoJson){
       if(geoJson){
         this.clusterLayer = new L.FeatureGroup();
@@ -700,12 +732,25 @@ define([
             _this.dict[feature.id] = marker;
             
             marker.on('click', function(e){
+              if (_this.validatePage == true) {
+                this.closePopup();
+              }
+              
               if(_this.selection && this.feature.properties.type_ !== 'station'){
                 _this.interaction('singleSelection', this.feature.id);
               }
               _this.interaction('focus', this.feature.id);
             });
-              
+
+            if(this.validatePage == true){
+              marker.on('mouseover', function (e) {
+                this.openPopup();
+              });
+              marker.on('mouseout', function (e) {
+                  this.closePopup();
+              });
+            }
+            
             markerList.push(marker);
           } catch(excpetion){
             continue;
