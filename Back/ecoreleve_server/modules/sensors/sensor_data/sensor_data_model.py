@@ -23,8 +23,8 @@ from ecoreleve_server.core.base_model import ORMUtils
 if 'sensor_schema' in dbConfig:
     sensor_schema = dbConfig['sensor_schema']
 else:
-    dbConfig['sensor_schema']  = 'ecoReleve_Sensor.dbo'
-    sensor_schema = 'ecoReleve_Sensor.dbo'
+    dbConfig['sensor_schema']  = 'ecoReleve_Sensor_new.dbo'
+    sensor_schema = 'ecoReleve_Sensor_new.dbo'
 if 'cn.dialect' in dbConfig:
     dialect = dbConfig['cn.dialect']
 else:
@@ -83,6 +83,7 @@ class ArgosGps(Base):
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='ArgosGPSRawDatas')
     Status = Column(String(50))
+    Distance = Column(Integer)
     Calculated_Speed = Column(Integer)
     Quality_On_Speed = Column(Integer)
     Quality_On_Metadata = Column(Integer)
@@ -126,6 +127,7 @@ class Gsm(Base):
         dbConfig['sensor_schema'] + '.Import.ID'))
     ImportedFile = relationship('Import', back_populates='GSMrawDatas')
     Status = Column(String(50))
+    Distance = Column(Integer)
     Calculated_Speed = Column(Integer)
     Quality_On_Speed = Column(Integer)
     Quality_On_Metadata = Column(Integer)
