@@ -110,7 +110,7 @@ def allPhotos (request):
         query = text(""" select * from Photos,Tags """+ str(queryStrTotalParams))
         print ( query )
 
-    data = session.execute(query).fetchall()
+    data = session.get_bind(Photos).execute(query).fetchall()
     dataResult = [dict(row) for row in data]
     for row in dataResult:
 
