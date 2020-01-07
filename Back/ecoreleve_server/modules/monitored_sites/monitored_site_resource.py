@@ -4,14 +4,17 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from collections import OrderedDict
 
-from ecoreleve_server.core import RootCore, Base
+from ecoreleve_server.core import RootCore
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
 from ecoreleve_server.core.base_collection import Query_engine
-from . import MonitoredSite
+from ecoreleve_server.database.main_db import (
+    MonitoredSite,
+    Sensor,
+    Station,
+    fieldActivity
+)
 from .monitored_site_collection import MonitoredSiteCollection
-from ..sensors import Sensor
-from ..stations import Station
-from ..field_activities import fieldActivity
 from ..permissions import context_permissions
 from .monitored_sites_history import MonitoredSiteHistoryResource
 
@@ -19,9 +22,9 @@ from .monitored_sites_history import MonitoredSiteHistoryResource
 SensorType = Sensor.TypeClass
 
 
-@Query_engine(Base.metadata.tables['MonitoredSitePosition'])
-class PositionCollection:
-    pass
+# @Query_engine(Base.metadata.tables['MonitoredSitePosition'])
+# class PositionCollection:
+#     pass
 
 
 class MonitoredSiteResource(DynamicObjectResource):
@@ -62,7 +65,7 @@ class MonitoredSiteResource(DynamicObjectResource):
 
     def getEquipment(self):
         id_site = self.objectDB.ID
-        table = Base.metadata.tables['MonitoredSiteEquipment']
+        table = Main_Db_Base.metadata.tables['MonitoredSiteEquipment']
 
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable, SensorType,
@@ -120,4 +123,4 @@ class MonitoredSitesResource(DynamicObjectCollectionResource):
         return response
 
 
-RootCore.children.append(('monitoredSites', MonitoredSitesResource))
+

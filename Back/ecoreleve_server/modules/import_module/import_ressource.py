@@ -1,10 +1,6 @@
 import json
-from pyramid import threadlocal
-from pyramid.view import view_config
-
-from ecoreleve_server.core import RootCore
 from ecoreleve_server.core.base_resource import DynamicObjectCollectionResource
-from .import_model import Import
+from ecoreleve_server.database.sensor_db import Import
 from .import_collection import ImportCollection
 from ..permissions import context_permissions
 
@@ -22,7 +18,7 @@ class ImportHistoryResource(DynamicObjectCollectionResource):
 
     def insert(self):
         pass
-    
+
     def retrieve(self):
         return self.getHistory()
 
@@ -49,8 +45,8 @@ class ImportHistoryResource(DynamicObjectCollectionResource):
                                 limit=per_page,
                                 order_by=order_by)
         countResult = import_collection._count(filters=criteria)
-        
+
         return [{'total_entries': countResult}, result]
 
 
-RootCore.children.append(('importHistory', ImportHistoryResource))
+

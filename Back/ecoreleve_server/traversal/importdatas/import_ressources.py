@@ -6,11 +6,19 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from vincenty import vincenty
-from  ecoreleve_server.modules.sensors.sensor_model import Sensor
-from  ecoreleve_server.modules.sensors.sensor_data.sensor_data_model import Gsm, GsmEngineering, ArgosGps, ArgosEngineering
-from ecoreleve_server.core import Base, dbConfig
-from  ecoreleve_server.modules.individuals.individual_model import Individual_Location
-import io 
+from ecoreleve_server.database.main_db import (
+    Sensor,
+    Individual_Location
+)
+from ecoreleve_server.database.sensor_db import (
+    Gsm,
+    GsmEngineering,
+    ArgosGps,
+    ArgosEngineering
+)
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.meta import Main_Db_Base
+import io
 import uuid
 import os
 import shutil
@@ -39,8 +47,8 @@ class ImportWithFileLikeCSV(MetaEndPointNotREST):
         "haaaaaaaaaa on veut poster du gsm"
 
     def getFile(self):
-        if 'file' in self.__request__.POST:
-            return self.__request__.POST['file']
+        if 'file' in self.request.POST:
+            return self.request.POST['file']
         else:
             return None
 
@@ -52,7 +60,7 @@ class ImportWithFileLikeCSV(MetaEndPointNotREST):
 class GSMImport(ImportWithFileLikeCSV):
 
     __acl__ = context_permissions['formbuilder']
-    
+
     def retrieve(self):
         return 'youhouuo GSMImport'
 
@@ -83,7 +91,7 @@ class GSMImport(ImportWithFileLikeCSV):
             'individual_ID': ['individual-local-identifier']
         }
         first_time = datetime.now() # juste pour avoir temps d'exécution
-        curSession = self.__request__.dbsession
+        curSession = self.request.dbsession
         #filePosted = self.getFile()
         # if filePosted is not None:
         # name = filePosted.filename
@@ -321,7 +329,7 @@ class GSMImport(ImportWithFileLikeCSV):
         return maxDateData, rawData, countFuture
 
     def IndividualID_deployementDate(self, sensor, curSession, maxDateData, futureAnnotated):
-        equipmentView = Base.metadata.tables['IndividualEquipment']
+        equipmentView = Main_Db_Base.metadata.tables['IndividualEquipment']
         Sessions = []
         if sensor.ID:
             equipment = curSession.query(equipmentView).filter(equipmentView.columns.FK_Sensor == sensor.ID).all()
@@ -703,7 +711,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
             os.makedirs(tempDir)
 
         listFile = []
-        for item in self.__request__.POST._items:
+        for item in self.request.POST._items:
             name = item[1].filename
             if name.lower() == 'DIAG.TXT'.lower() or name.lower() == 'DS.TXT'.lower():
                 suffix  = str(uuid.uuid4())
@@ -813,11 +821,11 @@ class ARGOSImport(ImportWithFileLikeCSV):
         }
 
         first_time = datetime.now() # juste pour avoir temps d'exécution
-        curSession = self.__request__.dbsession
+        curSession = self.request.dbsession
         finalReport = []
         ## on est pour l'instant supposé ne recevoir que des fichiers DIAG ou DS pour l'import SAT
         flagOK = False
-        for item in self.__request__.POST._items:
+        for item in self.request.POST._items:
             name = item[1].filename
             if name.lower() == 'DIAG.txt'.lower() or name.lower() == 'DS.txt'.lower():
                 flagOK = True
@@ -1051,7 +1059,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         return maxDateData, rawData, countFuture
 
     def IndividualID_deployementDate(self, sensor, curSession, maxDateData):
-        equipmentView = Base.metadata.tables['IndividualEquipment']
+        equipmentView = Main_Db_Base.metadata.tables['IndividualEquipment']
         Sessions = []
         if sensor.ID:
             equipment = curSession.query(equipmentView).filter(equipmentView.columns.FK_Sensor == sensor.ID).all()

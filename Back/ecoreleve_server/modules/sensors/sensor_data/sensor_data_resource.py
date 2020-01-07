@@ -10,7 +10,8 @@ from sqlalchemy import func, select, bindparam, text, Table, join, or_, and_, up
 from sqlalchemy.orm import joinedload
 
 from ecoreleve_server.core.base_resource import CustomResource
-from ecoreleve_server.core import RootCore, Base, dbConfig
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.core import RootCore
 from ecoreleve_server.utils.distance import haversine
 from ecoreleve_server.utils.data_toXML import data_to_XML
 from ecoreleve_server.utils.ocr_detect import OCR_parser
@@ -23,11 +24,19 @@ from ecoreleve_server.modules.import_module.importGSM import uploadFilesGSM
 from ecoreleve_server.modules.import_module.importRFID import uploadFileRFID
 from ecoreleve_server.modules.import_module.importCameraTrap import *
 from ecoreleve_server.modules.statistics import graphDataDate
-from ecoreleve_server.modules.monitored_sites import MonitoredSite
-from ecoreleve_server.modules.observations import Equipment
-from ecoreleve_server.modules.users import User
+from ecoreleve_server.database.main_db import (
+    MonitoredSite,
+    Equipment,
+    User
+)
+from ecoreleve_server.database.sensor_db import (
+    CamTrap,
+    ArgosGps,
+    Gsm,
+    Rfid
+)
+from ecoreleve_server.database.meta import Main_Db_Base
 
-from . import CamTrap, ArgosGps, Gsm, Rfid, MetaData
 from lxml import etree
 # from ecoreleve_server.__init__ import mySubExif
 
@@ -40,15 +49,15 @@ if dbConfig.get('init_exiftool', 'True') == 'True':
 
 
 ArgosDatasWithIndiv = Table(
-    'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
+    'VArgosData_With_EquipIndiv', Main_Db_Base.metadata, autoload=True)
 GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
-                          Base.metadata, autoload=True)
+                          Main_Db_Base.metadata, autoload=True)
 DataRfidWithSite = Table('VRfidData_With_equipSite',
-                         Base.metadata, autoload=True)
+                         Main_Db_Base.metadata, autoload=True)
 DataRfidasFile = Table('V_dataRFID_as_file',
-                       Base.metadata, autoload=True)
+                       Main_Db_Base.metadata, autoload=True)
 DataCamTrapFile = Table('V_dataCamTrap_With_equipSite',
-                        Base.metadata, autoload=True)
+                        Main_Db_Base.metadata, autoload=True)
 viewDict = {'gsm': GsmDatasWithIndiv,
             'argos': ArgosDatasWithIndiv,
             'rfid': DataRfidasFile,
@@ -1031,5 +1040,3 @@ class SensorDatas(CustomResource):
                 ('camtrap', SensorDatasByType)
     ]
 
-
-RootCore.children.append(('sensorDatas', SensorDatas))

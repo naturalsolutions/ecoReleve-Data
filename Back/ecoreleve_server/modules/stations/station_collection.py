@@ -12,12 +12,15 @@ from sqlalchemy import (
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import union_all
 
-from ecoreleve_server.core import Base
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_collection import Query_engine, eval_
-from . import Station, Station_FieldWorker
-from ..observations import Observation
-from ..individuals import Individual
-from ..users import User
+from ecoreleve_server.database.main_db import (
+    Station,
+    Station_FieldWorker,
+    Observation,
+    Individual,
+    User
+)
 
 
 @Query_engine(Station)
@@ -81,7 +84,7 @@ def last_imported_filter(self, query, criteria):
 
 @Query_engine.add_filter(StationCollection, 'Species')
 def species_filter(self, query, criteria):
-    obsValTable = Base.metadata.tables['ObservationDynPropValuesNow']
+    obsValTable = Main_Db_Base.metadata.tables['ObservationDynPropValuesNow']
     o2 = aliased(Observation)
     s2 = aliased(Station)
 

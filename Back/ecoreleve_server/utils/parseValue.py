@@ -2,8 +2,8 @@ from pyramid import threadlocal
 from sqlalchemy import select
 from datetime import datetime
 
-from .thesaurusLoad import thesaurusDictTraduction
-from ..core import Base
+from ecoreleve_server.utils.thesaurusLoad import thesaurusDictTraduction
+from ecoreleve_server.database.meta import Main_Db_Base
 
 
 dictVal = {
@@ -132,7 +132,7 @@ def formatObjetPicker(data, key, label):
 
 def getAutcompleteValues(ID, objName, NameValReturn):
     session = threadlocal.get_current_request().dbsession
-    table = Base.metadata.tables[objName]
+    table = Main_Db_Base.metadata.tables[objName]
 
     query = select([table.c[NameValReturn]]).where(table.c['ID'] == ID)
     return session.execute(query).scalar()

@@ -10,9 +10,13 @@ import exifread
 from pyramid import threadlocal
 import subprocess
 
-from ecoreleve_server.core import dbConfig
-from ..sensors.sensor_data import CamTrap, MetaData
-from . import Import
+
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.sensor_db import (
+    CamTrap,
+    MetaData,
+    Import
+)
 
 
 # handle error on some photo

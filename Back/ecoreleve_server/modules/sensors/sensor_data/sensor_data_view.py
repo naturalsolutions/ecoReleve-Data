@@ -8,13 +8,17 @@ from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 from sqlalchemy import func, desc, select, and_, bindparam, update, text, Table
 
-from ecoreleve_server.core import Base, dbConfig
+from ecoreleve_server.dependencies import dbConfig
+from ecoreleve_server.database.meta import Main_Db_Base
 from ecoreleve_server.core.base_view import CRUDCommonView
 from ecoreleve_server.utils.distance import haversine
 from ecoreleve_server.utils.data_toXML import data_to_XML
 from ecoreleve_server.modules.permissions import routes_permission
-from ecoreleve_server.modules.statistics import graphDataDate
-from .sensor_data_resource import SensorDatasByType, SensorDatasBySession,SensorDatasBySessionItem
+from .sensor_data_resource import (
+    SensorDatasByType,
+    SensorDatasBySession,
+    SensorDatasBySessionItem
+)
 
 route_prefix = 'sensors/'
 
@@ -84,12 +88,12 @@ def error_response(err):
     return response
 
 ArgosDatasWithIndiv = Table(
-    'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
+    'VArgosData_With_EquipIndiv', Main_Db_Base.metadata, autoload=True)
 GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
-                          Base.metadata, autoload=True)
+                          Main_Db_Base.metadata, autoload=True)
 DataRfidWithSite = Table('VRfidData_With_equipSite',
-                         Base.metadata, autoload=True)
-DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
+                         Main_Db_Base.metadata, autoload=True)
+DataRfidasFile = Table('V_dataRFID_as_file', Main_Db_Base.metadata, autoload=True)
 
 
 @view_config(route_name=route_prefix + 'uncheckedDatas',

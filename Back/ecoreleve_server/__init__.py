@@ -1,29 +1,11 @@
 import datetime
 from decimal import Decimal
 import exiftool
-from urllib.parse import quote_plus
-from sqlalchemy import engine_from_config
 from pyramid.config import Configurator
 from pyramid.renderers import JSON
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.events import NewRequest
-from sqlalchemy.orm import sessionmaker, scoped_session
-
-from .core import SecurityRoot
-from .core.init_db import Base, BaseExport, initialize_session, initialize_session_export, dbConfig
-from .core.security import include_jwt_policy
-from .utils import loadThesaurusTrad
-from .utils.callback import add_cors_headers_response_callback, session_callback
-from .utils.init_cameratrap_path import initialize_cameratrap_path
-from .modules.url_dispatch import add_routes
-
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
-
-from ecoreleve_server.traversal import TraversalRESTView
-# mySubExif = exiftool.ExifTool()
-# mySubExif.start()
 
 
 def datetime_adapter(obj, request):
@@ -33,12 +15,14 @@ def datetime_adapter(obj, request):
     except:
         return obj.strftime('%d/%m/%Y')
 
+
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
     try:
         return obj.strftime('%d/%m/%Y')
     except:
         return obj
+
 
 def time_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -47,9 +31,11 @@ def time_adapter(obj, request):
     except:
         return obj.strftime('%H:%M:%S')
 
+
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
+
 
 def initialize_exiftool():
     mySubExif = exiftool.ExifTool()
@@ -58,52 +44,58 @@ def initialize_exiftool():
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
+    with Configurator(settings=settings) as config:
+        '''
+        https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/startup.html#deployment-settings
+        request.registry.settings
+        will replace all dbconfig[key]=value
+        when i have time to refact
 
-    config = Configurator(settings=settings)
-    config.include('pyramid_tm')
-    config.include('ecoreleve_server.core.policy')
+        '''
+        config.include('ecoreleve_server.dependencies')  # FIRST FILE TO INCLUDE
+        config.include('ecoreleve_server.database')
+        config.include('ecoreleve_server.utils')
+        config.include('ecoreleve_server.core.policy')
+        config.include("ecoreleve_server.modules.dashboard")
+        config.include("ecoreleve_server.modules.export")
+        config.include("ecoreleve_server.modules.field_activities")
+        config.include("ecoreleve_server.modules.import_module")
+        config.include("ecoreleve_server.modules.individuals")
+        config.include("ecoreleve_server.modules.media_files")
+        config.include("ecoreleve_server.modules.monitored_sites")
+        config.include("ecoreleve_server.modules.observations")
+        config.include("ecoreleve_server.modules.regions")
+        config.include("ecoreleve_server.modules.release")
+        config.include("ecoreleve_server.modules.sensors")
+        config.include("ecoreleve_server.modules.stations")
+        config.include("ecoreleve_server.modules.users")
 
-    engine = initialize_session(settings)
-    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
+        # Add renderer for JSON objects
+        json_renderer = JSON()
+        json_renderer.add_adapter(datetime.datetime, datetime_adapter)
+        # json_renderer.add_adapter(datetime.date, datetime_adapter)
+        json_renderer.add_adapter(Decimal, decimal_adapter)
+        json_renderer.add_adapter(datetime.time, time_adapter)
+        json_renderer.add_adapter(datetime.date, date_adapter)
+        config.add_renderer('json', json_renderer)
 
-    engineExport = initialize_session_export(settings)
-    if engineExport is not None:
-        config.registry.dbmakerExport = scoped_session(
-                sessionmaker(bind=engineExport))
+        # Add renderer for CSV, PDF,GPX files.
+        config.add_renderer('csv', CSVRenderer)
+        config.add_renderer('pdf', PDFrenderer)
+        config.add_renderer('gpx', GPXRenderer)
 
-    config.add_request_method(session_callback, name='dbsession', reify=True)
+        # config.set_root_factory(SecurityRoot)
 
-    # Add renderer for JSON objects
-    json_renderer = JSON()
-    json_renderer.add_adapter(datetime.datetime, datetime_adapter)
-    # json_renderer.add_adapter(datetime.date, datetime_adapter)
-    json_renderer.add_adapter(Decimal, decimal_adapter)
-    json_renderer.add_adapter(datetime.time, time_adapter)
-    json_renderer.add_adapter(datetime.date, date_adapter)
-    config.add_renderer('json', json_renderer)
+        config.include("ecoreleve_server.core")
 
-    # Add renderer for CSV, PDF,GPX files.
-    config.add_renderer('csv', CSVRenderer)
-    config.add_renderer('pdf', PDFrenderer)
-    config.add_renderer('gpx', GPXRenderer)
-    
-    config.set_root_factory(SecurityRoot)
-
-    dbConfig['init_exiftool'] = settings.get('init_exiftool', None)
-    if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
-        print('Exiftool not initialized')
-        pass
-    else:
-        initialize_exiftool()
-    config.add_subscriber(add_cors_headers_response_callback, NewRequest)
-    initialize_cameratrap_path(dbConfig, settings)
-    loadThesaurusTrad(config)
-    config.add_route('myTraversal',
-                    'ecoReleve-Core/traversal*traverse',
-                    factory='ecoreleve_server.traversal.root_factory_traversal'
-                    )
-    config.add_view(TraversalRESTView, route_name='myTraversal')
-    add_routes(config)
-    config.scan()
+        if ( settings.get('init_exiftool', 'False') == 'False'):
+            print('Exiftool not initialized')
+            pass
+        else:
+            initialize_exiftool()
+        config.include("ecoreleve_server.utils.init_cameratrap_path")
+        config.include('ecoreleve_server.traversal')
+        config.include('ecoreleve_server.modules.url_dispatch')
+        config.scan()
 
     return config.make_wsgi_app()

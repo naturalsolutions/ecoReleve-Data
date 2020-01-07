@@ -1,13 +1,12 @@
-import os,sys,errno
+import os
+import errno
 import shutil
-import subprocess
-import urllib.parse
 from sqlalchemy import and_
 
-from ecoreleve_server.core import RootCore, dbConfig
+from ecoreleve_server.dependencies import dbConfig
 from ecoreleve_server.core.base_resource import CustomResource
 from ..permissions import context_permissions
-from .media_file_model import MediasFiles
+from ecoreleve_server.database.main_db import MediasFiles
 
 
 class MediaFileResource(CustomResource):
@@ -71,6 +70,7 @@ class MediaFileResource(CustomResource):
     #     except Exception as error:
     #         print("erreur dans sql ou file")
     #         raise
+
 
 class MediasFilesResource(CustomResource):
     item = MediaFileResource
@@ -156,7 +156,3 @@ class MediasFilesResource(CustomResource):
         except Exception as error:
             print("erreur dans sql ou file")
             raise
-
-
-RootCore.children.append(('mediasfiles', MediasFilesResource))
-

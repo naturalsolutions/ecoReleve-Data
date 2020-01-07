@@ -1,11 +1,9 @@
 import json
-from datetime import datetime
-from sqlalchemy import select, join, desc
-from collections import OrderedDict
-from pyramid.traversal import find_root
 
 from ecoreleve_server.core.base_resource import *
-from ..individual_model import Individual, Individual_Location
+from ecoreleve_server.database.main_db import (
+    Individual_Location
+)
 from .inidividual_locations_collection import IndividualLocationsCollection
 from ecoreleve_server.utils.parseValue import integerOrDefault
 

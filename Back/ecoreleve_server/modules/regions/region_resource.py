@@ -10,11 +10,14 @@ from geojson import Feature, FeatureCollection, dumps
 from sqlalchemy import select, text, func
 
 
-from ecoreleve_server.core import RootCore, dbConfig
+from ecoreleve_server.dependencies import dbConfig
 from ecoreleve_server.core.base_resource import CustomResource
 from ecoreleve_server.utils.parseValue import isNumeric
 from ..permissions import context_permissions
-from .region_model import Region, GeomaticLayer, FieldworkArea
+from ecoreleve_server.database.main_db import (
+    GeomaticLayer,
+    FieldworkArea
+)
 
 
 def get_redis_con():
@@ -123,6 +126,3 @@ class RegionsResource(CustomResource):
         else:
             response = json.loads(existingGeoJson.decode())
         return response
-
-
-RootCore.children.append(('regions', RegionsResource))
