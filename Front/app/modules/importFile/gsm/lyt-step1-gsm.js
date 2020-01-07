@@ -4,7 +4,7 @@ define([
 	'backbone',
 	'marionette',
 
-	'i18n'
+	'i18n',
 
 ], function($, _, Backbone, Marionette
 ) {
@@ -14,29 +14,31 @@ define([
   return Marionette.LayoutView.extend({
 
     className: 'full-height',
-    template: 'app/modules/importFile/tpl-step0.html',
+    template: 'app/modules/importFile/gsm/templates/tpl-step1-gsm.html',
 
     events: {
       'change input': 'changeValue',
     },
 
-    name : '<span class="import-step0"></span>',
+    name : '<span class="import-step1"></span>',
 
     initialize: function() {
-		},
+        this.model = new Backbone.Model();
+	},
 
     onShow: function() {
       this.$el.find('.tile-inside:first input').prop('checked', true).change();
       this.$el.find('.tile-inside:first').addClass('active');
       this.$el.i18n();
-      var stepName = i18n.translate('import.stepper.step0-label');
-      $('.import-step0').html(stepName);
+      var stepName = i18n.translate('import.stepper.step1-label');
+      $('.import-step1').html('Provider selection');
 		},
 
     validate: function() {
-      var title = this.$el.find('.tile-inside input[type="radio"]:checked').val();
-      $('.import-step0').html(title);
-      return title;
+      var val = this.$el.find('.tile-inside input[type="radio"]:checked').val()
+      this.model.set('constructor', val)
+      $('.import-step1').html(val);
+      return this.model;
     },
 
     changeValue: function(e) {
@@ -45,5 +47,7 @@ define([
       });
       $(e.target).parent().addClass('active');
     },
+
   });
+
 });

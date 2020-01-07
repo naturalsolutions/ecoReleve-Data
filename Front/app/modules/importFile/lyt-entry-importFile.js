@@ -16,6 +16,7 @@ define([
 
 	'./gsm/lyt-step1-gsm',
 	'./gsm/lyt-step2-gsm',
+	'./gsm/lyt-step3-gsm',
 
 	'./argos/lyt-step1-argos',
 
@@ -35,6 +36,7 @@ define([
 
 	Step1GSM,
 	Step2GSM,
+	Step3GSM,
 
 	Step1ARGOS,
 
@@ -51,14 +53,13 @@ define([
 			this.urlToHold = options.type;
 			this.steps = [Step0];
 			NewStepper.prototype.initialize.call(this,options);
-
 		},
 
-    initSteps: function() {
-			if ( this.urlToHold !== null ) {
-				this.goToStepByType();
-			}
-		},
+		initSteps: function() {
+				if ( this.urlToHold !== null ) {
+					this.goToStepByType();
+				}
+			},
 
 		onShow : function(){
 			var _this = this;
@@ -101,15 +102,15 @@ define([
 					var steps = [Step0RFID, Step1RFID];
 					break;
 				case 'gsm':
-					var Step0GSM = StepSelectFile.extend({
+					var Step2GSM = StepSelectFile.extend({
 						name : 'GSM file selection',
 						url:config.coreUrl+'traversal/import/gsm',
 						acronymType: 'GSM',
-						extension:'.txt',
+						extension:'.txt,.csv',
 						uploadOnly:true,
 						maxFiles:8
 					});
-					var steps = [Step0GSM];
+					var steps = [Step1GSM,Step2GSM];
 					break;
 				case 'argos':
 					var Step0Argos = StepSelectFile.extend({

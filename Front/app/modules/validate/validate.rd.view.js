@@ -255,7 +255,6 @@ define([
         headerName: 'Quality',
       }];
 
-
       this.rgGrid.show(this.gridView = new GridView({
         columns: columnDefs,
         com: this.com,
@@ -356,7 +355,6 @@ define([
         })
         .then( (result) => {
           if( 'value' in result){
-            debugger
             var selectedIds = selectedNodes.map(function(node){
               return node.data.PK_id;
             });
@@ -400,13 +398,10 @@ define([
             // Backbone.history.navigate('validate/camtrap',{trigger:true}) ;
           }
           if( 'dismiss' in result ) {
-            debugger
             // Backbone.history.loadUrl(Backbone.history.fragment);
           }
         });
-        debugger
-      } else {
-        debugger     
+      } else {     
         var selectedIds = selectedNodes.map(function(node){
           return node.data.PK_id;
         });
