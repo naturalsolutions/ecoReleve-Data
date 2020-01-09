@@ -40,14 +40,13 @@ class CRUDCommonView(object):
     def put(self):
         return self.context.update()
 
-
 @view_defaults(context=IRestCollectionView)
 class RestCollectionView(object):
     def __init__(self, context, request):
         self.request = request
         self.context = context
 
-    @view_config(name='0', request_method='GET', renderer='json', permission='read')    
+    @view_config(name='0', request_method='GET', renderer='json', permission='read')
     @view_config(name='forms', request_method='GET', renderer='json', permission='read')
     def getForm(self):
         return self.context.getForm()
