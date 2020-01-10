@@ -54,6 +54,7 @@ context_permissions = {
     ],
     'individual_locations': [
         (Allow, 'group:admin', ('read', 'update', 'delete')),
+        (Deny, 'group:superUser', ('update', 'delete')),
         (Allow, 'group:superUser', ('read')),
         (Allow, 'group:user', ('read'))
     ],
