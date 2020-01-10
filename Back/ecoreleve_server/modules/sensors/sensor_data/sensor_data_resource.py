@@ -1015,8 +1015,6 @@ class SensorDatasByType(CustomResource):
 
 class SensorDatas(CustomResource):
 
-    __acl__ = context_permissions['SensorDatas']
-
     item = SensorDatasByType
     children = [('argos', SensorDatasByType),
                 ('gsm', SensorDatasByType),
