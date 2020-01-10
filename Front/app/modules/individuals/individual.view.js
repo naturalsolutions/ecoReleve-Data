@@ -317,9 +317,7 @@ define([
       }).done(function(resp) {
         this.locationsGrid.gridOptions.api.removeItems(selectedNodes);
         this.locationsGrid.clientSideFilter();
-      }).fail(function(resp) {
-        this.swal(resp, 'error');
-      });
+      })
     },
 
     deleteHistory: function(row) {
