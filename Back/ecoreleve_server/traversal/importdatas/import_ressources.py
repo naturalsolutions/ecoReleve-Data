@@ -522,7 +522,7 @@ class GSMImport(ImportWithFileLikeCSV):
         timeDifference = 12 # parameter to verify if data in future = date > import date + time difference (depends where is the server)
         maxDateData, futurAnnotated, countFuture = self.futureAnnotation(rawData, timeDifference, datefile, report)
         report['FutureAnnotated'] = countFuture
-            individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
+        individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
         # #Function that permits to get new data comparing with what is already in database
         dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, individualID, curSession, identifier, columns,sensor)
         report['AlreadyImportedData'] = oldData
