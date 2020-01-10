@@ -46,6 +46,6 @@ def forbidden(request):
     if getattr(request, 'authenticated_userid') is None:
         return HTTPUnauthorized('No cookie')
 
-    # effective_principals didn't math
+    # effective_principals didn't match
     # return 403
     return HTTPForbidden()
