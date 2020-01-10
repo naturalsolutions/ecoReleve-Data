@@ -13,42 +13,6 @@
 	</head>
 	<body>
 		<script src="./app/config.js"></script>
-		<script>
-
-			/*
-			FOR REAL????!!!!!!!!!!!!!
-			https://v8.dev/features/modules#defer
-			So  when browser fetch the index.html document and parse it
-			he gonna load our css
-			tether.js lib
-			config.js
-			and then he call API for checking if we have access....
-			If we have access
-				finally load our js
-			Else 
-				if error call status == 502 or 403 redirect to portal url
-				brutally without any error message 
-				that's should be in application... 
-
-			why ? because we have to handle message in a global way
-			
-			*/
-			var xhttp;
-			if (window.XMLHttpRequest) {
-			    xhttp = new XMLHttpRequest();
-			    } else {
-			    // code for IE6, IE5
-			    xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-			}
-			xhttp.onreadystatechange = function() {
-			  if (xhttp.status == 502 || xhttp.status == 403 ) {
-			    document.location.href = portalUrl;
-			  }
-			};
-			xhttp.open("GET", coreUrl +'security/has_access' , true);
-			xhttp.send();
-
-		</script>
 		<!-- fileblock:js app -->
 		<script data-main="app/main" src="bower_components/requirejs/require.js"></script>
 		<!-- endfileblock -->

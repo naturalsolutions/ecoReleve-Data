@@ -3,20 +3,7 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
   var Translater = Marionette.Object.extend({
 
     initialize: function(options) {
-      this.dfd = $.Deferred();
-    //  if(config.instance == 'demo') {
-        this.dfd = $.ajax({
-          context: this,
-          url: config.coreUrl + 'currentUser',
-        }).done(function(data){
-          //overwrite while trad is not completed
-          // this.initi18n(data.Language);
-          this.initi18n('en');
-        });
-        return;
-   //   }
-      this.dfd.resolve();
-      this.initi18n();
+      this.initi18n('en');
     },
 
     initi18n: function(language){

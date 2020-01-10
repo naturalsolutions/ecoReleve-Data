@@ -27,60 +27,79 @@ from pyramid.security import (
 
 
 context_permissions = {
-    'regions': [
+    'dashboard': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
-        # (Allow, Authenticated, ALL_PERMISSIONS),
-        (Allow, 'group:superUser', ('create', 'update', 'read')),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
+    'export': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
+    'fieldActivities': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
+    'importHistory': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
+    'individuals': [
+        (Allow, 'group:admin', ('create', 'read', 'update')),
+        (Allow, 'group:superUser', ('update', 'read')),
+        (Allow, 'group:user', 'read')
+    ],
+    'individual_locations': [
+        (Allow, 'group:admin', ('read', 'update', 'delete')),
+        (Deny, 'group:superUser', ('update', 'delete')),
+        (Allow, 'group:superUser', ('read')),
         (Allow, 'group:user', ('read'))
     ],
-
+    'monitoredSites': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ('create', 'read', 'update')),
+        (Allow, 'group:user', ('create', 'read', 'update'))
+    ],
+    'sensors': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ('create', 'read', 'update')),
+        (Allow, 'group:user', 'read')
+    ],
+    'SensorDatasByType': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ALL_PERMISSIONS),
+        (Allow, 'group:user', ('GPX', 'RFID', 'CAMTRAP')),
+        (Deny, 'group:user', ('GSM', 'ARGOS'))
+    ],
+    'release': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ALL_PERMISSIONS),
+        (Deny, 'group:user', ALL_PERMISSIONS),
+    ],
+    'regions': [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ('create', 'read', 'update')),
+        (Allow, 'group:user', ('read'))
+    ],
     'import': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Allow, 'group:superUser', ('create', 'update', 'read')),
-        (Allow, 'group:user', ('create', 'update', 'read'))
+        (Allow, 'group:superUser', ('create', 'read', 'update')),
+        (Allow, 'group:user', ('create', 'read', 'update'))
     ],
-
     'stations': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Allow, 'group:superUser', ('create', 'update', 'read')),
-        (Allow, 'group:user', ('create', 'update', 'read'))
+        (Allow, 'group:superUser', ('create', 'read', 'update')),
+        (Allow, 'group:user', ('create', 'read', 'update'))
     ],
-
     'observations': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUser', ALL_PERMISSIONS),
         (Allow, 'group:user', ALL_PERMISSIONS)
     ],
-
-    'individuals': [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Allow, 'group:superUser', ('update', 'read')),
-        (Allow, 'group:user', 'read')
-    ],
-
-    'monitoredSites': [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Allow, 'group:superUser', ('create', 'update', 'read')),
-        (Allow, 'group:user', ('create', 'update', 'read'))
-    ],
-
-    'sensors': [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Allow, 'group:superUser', 'read'),
-        (Allow, 'group:user', 'read')
-    ],
-
-    'release': [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Deny, 'group:superUser', ALL_PERMISSIONS),
-        (Deny, 'group:user', ALL_PERMISSIONS),
-    ],
-    'dashboard' : [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
-        (Allow, 'group:superUsers', 'read'),
-        (Allow, 'group:users', 'read')
-    ],
-    'mediasfiles' : [
+    'mediasfiles': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUsers', ('create', 'update', 'read')),
         (Allow, 'group:users', 'read')
@@ -160,5 +179,5 @@ routes_permission = {
         'POST': 'admin',
         'PUT': 'admin',
         'DELETE': 'admin'
-    },
+    }
 }
