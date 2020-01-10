@@ -23,6 +23,7 @@ class SensorValueResource(DynamicValueResource):
 
 class SensorValuesResource(DynamicValuesResource):
     model = SensorDynPropValue
+    children = [('{int}', SensorValueResource)]
 
     def retrieve(self):
         from ecoreleve_server.utils.parseValue import formatThesaurus

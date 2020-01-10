@@ -12,11 +12,11 @@ def includeme(config):
     authentificationPolicy = MyAuthenticationPolicy(**customSettings)
     config.set_authentication_policy (authentificationPolicy)
 
-    # from now all view added to project will have no permission by default
+    # from now all view added to project will have 'read' permission by default
     # but BE CAREFUL and read the doc 
     # https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html#setting-a-default-permission
     # short way : use NO_PERMISSION_REQUIRED for overwrite this default permission
-    config.set_default_permission('deny')
+    config.set_default_permission('read')
 
 
 def meaningConfig(config):

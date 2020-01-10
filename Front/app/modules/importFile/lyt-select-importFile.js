@@ -197,7 +197,12 @@ define([
         if (xhr.status == 502){
           _this.timeout = true
         } else {
-          _this.errors = true;
+          if (xhr.status == 409){
+            _this.totalReturned.add(resp)
+            _this.providerError = true;
+          } else {
+            _this.errors = true;
+          } 
         }
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
@@ -227,10 +232,10 @@ define([
     },
 
     endingMessage: function(sumObjreturned){
+      
       var _this = this;
-      if (!_this.errors && !_this.timeout) {
+      if (!_this.errors && !_this.timeout && !_this.providerError) {
         Swal({
-          
           heightAuto: false,
           title: 'Well done',
           text: 'File(s) have been correctly imported\n\n' +
@@ -251,8 +256,6 @@ define([
             _this.cancelAll();
           }
         });
-
-
           // Swal({
           //     title: 'Well done',
           //     text: 'File(s) have been correctly imported\n\n' +
@@ -273,19 +276,32 @@ define([
           //       _this.cancelAll();
           //     }
           //   });
-        } 
-        if(_this.errors) {
-          Swal({
+      }
+      if (_this.providerError){
+        Swal(
+          {
             heightAuto: false,
             title: 'An error occured',
-            text: 'Please verify your file',
+            text: "Wrong provider was chosen\n"
+                        + "\t selected file's provider: " + JSON.stringify(sumObjreturned).replace(',',',\n'),
             type: 'error',
             showCancelButton: false,
             confirmButtonText: 'OK',
             confirmButtonColor: 'rgb(147, 14, 14)'
-          });
-        }
-
+          }
+        );
+      } 
+      if(_this.errors) {
+        Swal({
+          heightAuto: false,
+          title: 'An error occured',
+          text: 'Please verify your file',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          confirmButtonColor: 'rgb(147, 14, 14)'
+        });
+      }      
       if(_this.timeout){
         Swal({
           heightAuto: false,
@@ -297,8 +313,9 @@ define([
           confirmButtonColor: 'rgb(147, 14, 14)'
         });
       }
-        _this.errors = false;
-        _this.totalReturned.reset();
+      _this.providerError = false;
+      _this.errors = false;
+      _this.totalReturned.reset();
     },
 
     checkFileIsPresent: function () {
