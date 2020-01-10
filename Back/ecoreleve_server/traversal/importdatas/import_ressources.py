@@ -28,7 +28,6 @@ import win32gui
 import win32con
 from win32 import win32api
 import psutil
-import ecoreleve_server
 import copy 
 
 
@@ -69,7 +68,7 @@ class GSMImport(ImportWithFileLikeCSV):
             'MTIg': ['DateTime', 'Latitude_N', 'Longitude_E', 'Speed', 'Course', 'Altitude_m', 'HDOP', 'VDOP', 'SatelliteCount', 'ShowInKML'],
             'MTIe': ['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount'],
             'Eobs': ['event-id','visible','timestamp','location-long','location-lat','bar:barometric-pressure','data-decoding-software','eobs:activity','eobs:activity-samples','eobs:battery-voltage','eobs:fix-battery-voltage','eobs:horizontal-accuracy-estimate','eobs:key-bin-checksum','eobs:speed-accuracy-estimate','eobs:start-timestamp','eobs:status','eobs:temperature','eobs:type-of-fix','eobs:used-time-to-get-fix','gps:dop','gps:satellite-count','ground-speed','heading','height-above-ellipsoid','import-marked-outlier','mag:magnetic-field-raw-x','mag:magnetic-field-raw-y','mag:magnetic-field-raw-z','quaternion-raw-w','quaternion-raw-x','quaternion-raw-y','quaternion-raw-z','sensor-type','individual-taxon-canonical-name','tag-local-identifier','individual-local-identifier','study-name'],   
-            'Ornitela':[]
+            'Ornitela':['event-id','visible','timestamp','location-long','location-lat','acceleration-raw-x','acceleration-raw-y','acceleration-raw-z','bar:barometric-height','battery-charge-percent','battery-charging-current','external-temperature','gps:hdop','gps:satellite-count','gps-time-to-fix','ground-speed','heading','height-above-msl','import-marked-outlier','gls:light-level','mag:magnetic-field-raw-x','mag:magnetic-field-raw-y','mag:magnetic-field-raw-z','orn:transmission-protocol','tag-voltage','sensor-type','individual-taxon-canonical-name','tag-local-identifier','individual-local-identifier','study-name']
         }
 
         variables = {
@@ -78,13 +77,13 @@ class GSMImport(ImportWithFileLikeCSV):
             'Longitude_E': ['Longitude_E','Lon1(E)','Longitude(E)','location-long'],
             'Speed': ['Speed','ground-speed'],
             'Course': ['Course'],
-            'Altitude_m': ['Altitude_m','Altitude(m)','height-above-ellipsoid'],
-            'HDOP': ['HDOP'],
+            'Altitude_m': ['Altitude_m','Altitude(m)','height-above-ellipsoid','height-above-msl'],
+            'HDOP': ['HDOP','gps:hdop'],
             'VDOP': ['VDOP'],
             'SatelliteCount': ['SatelliteCount','Satellite Count','gps:satellite-count'],
             'ShowInKML': ['ShowInKML'],
-            'Temperature_C': ['Temperature_C','eobs:temperature'],
-            'BatteryVoltage_V': ['BatteryVoltage_V','eobs:battery-voltage'],
+            'Temperature_C': ['Temperature_C','eobs:temperature','external-temperature'],
+            'BatteryVoltage_V': ['BatteryVoltage_V','eobs:battery-voltage','tag-voltage'],
             'ActivityCount': ['ActivityCount','eobs:activity'],
             'type': ['sensor-type'],
             'platform_': ['tag-local-identifier'],
@@ -111,7 +110,12 @@ class GSMImport(ImportWithFileLikeCSV):
             'TestAnnotated': 0,
             'FutureAnnotated': 0,
         }
-        for item in self.__request__.POST._items:
+        reportWrongProvider = {
+            'ChosenDataProvider': '',
+            'SuggestedDataProvider': '',
+            'file': ''
+        }
+        for item in self.request.POST._items:
             if item is not None:
                 if item[0] == 'provider':
                     report['dataprovider'] = item[1]
@@ -122,7 +126,7 @@ class GSMImport(ImportWithFileLikeCSV):
                     path = item[1].file
                     # File type management
                     if type(item[1].file) is io.BytesIO:
-                        data = repr( self.__request__.POST._items[0][1].file.getvalue().decode('latin1') )
+                        data = repr( self.request.POST._items[0][1].file.getvalue().decode('latin1') )
                         data = data[1:-1]
                         rawData = pd.DataFrame( [ line.split('\\t') for line in data.split('\\r\\n') ])
                         headers = rawData.iloc[0]
@@ -130,10 +134,6 @@ class GSMImport(ImportWithFileLikeCSV):
                         rawData = rawData.rename(columns = headers)
                     else:
                         rawData = self.readData(report, path)
-                        # if report['dataprovider'] == 'MTI':
-                        #     rawData = pd.read_csv(path, sep='\t', dtype=str)
-                        # if report['dataprovider'] == 'Eobs':
-                        #     rawData = pd.read_csv(path, sep=',', dtype=str)
                     # Get tag identifier depending on provider
                     if report['dataprovider'] == 'MTI':
                         datefile = name[10:20]
@@ -146,98 +146,117 @@ class GSMImport(ImportWithFileLikeCSV):
                         if name[8] == 'g':
                             dataType = 'locations'
                             report['dataprovider'] = report['dataprovider'] + 'g'
-                        if name[8] == 'e':
+                        elif name[8] == 'e':
                             dataType = 'engineering'
                             report['dataprovider'] = report['dataprovider'] + 'e'
                         # Get Standardized columns as the ones in database
-                        rawData, columns = self.getStandardizedColumns(rawData,report, variables, providers)
-                        datefile = datetime.strptime(datefile,'%Y-%m-%d')
-                        file_date = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
-                        rawData.insert(len(rawData.columns),'file_date',file_date)
-                        rawData.insert(len(rawData.columns),'platform_',identifier[-3:])
-                        sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
-                        if sensor is None:
-                            rawData['Status'] = 'exotic'
-                            print('No matching sensor found in database')
-                            # on les insère quand même dans la base
-                        sensorCreationDate = sensor.creationDate
-                        if dataType == 'engineering':
-                            rawData = rawData.drop(['PK_id'],axis = 1)
-                            finalReport = self.engineeringDataManagement(rawData,identifier, finalReport,report,curSession)
-                            print(finalReport)
-                            continue
-                        if dataType == 'locations':
-                            print(rawData)
+                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData,report, variables, providers, path)
+                        # if len(columns) == 0:
+                        if SuggestedDataProvider is not None:
+                            reportWrongProvider['ChosenDataProvider'] = report['dataprovider']
+                            reportWrongProvider['SuggestedDataProvider'] = SuggestedDataProvider
+                            reportWrongProvider['file'] = report['file']
+                            finalReport.append(copy.deepcopy(reportWrongProvider)) # Wrong provider
+                            print(finalReport)  
+                            self.request.response.status_code = 409
+                        else:
+                            datefile = datetime.strptime(datefile,'%Y-%m-%d')
+                            file_date = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
+                            rawData.insert(len(rawData.columns),'file_date',file_date)
+                            rawData.insert(len(rawData.columns),'platform_',identifier[-3:])
+                            sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
+                            if sensor is None:
+                                rawData['Status'] = 'exotic'
+                                print('No matching sensor found in database')
+                                # on les insère quand même dans la base
+                            sensorCreationDate = sensor.creationDate
+                            if dataType == 'engineering':
+                                rawData = rawData.drop(['PK_id'],axis = 1)
+                                finalReport = self.engineeringDataManagement(rawData,identifier, finalReport,report,curSession)
+                                print(finalReport)
+                                continue
+                            if dataType == 'locations':
+                                print(rawData)
+                                rawData.insert(len(rawData.columns),'Quality_On_Speed','')
+                                rawData.insert(len(rawData.columns),'Quality_On_Metadata','')
+                                rawData.insert(len(rawData.columns),'Status','ok')
+                                newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, columns, sensor, file_date)
+                                if len(newdataDf) == 0:
+                                    print('deso deja importées dans Sensor')   
+                                    report['AlreadyImportedData'] = sentData
+                                    print(report)  
+                                    finalReport.append(copy.deepcopy(report))
+                                    print(finalReport)                                             
+                                    continue
+                                else:
+                                    report['AlreadyImportedData'] = sentData - len(newdataDf)
+                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
+                                    finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+                                    lasttime = datetime.now()
+                                    diftime = lasttime - first_time
+                                    print(diftime)
+                                    print('diftime')
+                                    print(report)
+                                    finalReport.append(copy.deepcopy(report))
+                                    print(finalReport)    
+                                    continue
+                    if report['dataprovider'] == 'Eobs'or report['dataprovider'] == 'Ornitela':
+                        # Get Standardized columns as the ones in database
+                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData,report, variables, providers, path)
+                        # if len(columns) == 0:
+                        if SuggestedDataProvider is not None:
+                            reportWrongProvider['ChosenDataProvider'] = report['dataprovider']
+                            reportWrongProvider['SuggestedDataProvider'] = SuggestedDataProvider
+                            reportWrongProvider['file'] = report['file']
+                            finalReport.append(copy.deepcopy(reportWrongProvider)) # Wrong provider
+                            self.request.response.status_code = 409
+                        else:
+                            file_date = None
+                            rawData.insert(len(rawData.columns),'file_date',file_date)
                             rawData.insert(len(rawData.columns),'Quality_On_Speed','')
                             rawData.insert(len(rawData.columns),'Quality_On_Metadata','')
                             rawData.insert(len(rawData.columns),'Status','ok')
-                            newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, columns, sensor, file_date)
-                            if len(newdataDf) == 0:
-                                print('deso deja importées dans Sensor')   
-                                report['AlreadyImportedData'] = sentData
-                                print(report)  
-                                finalReport.append(copy.deepcopy(report))
-                                print(finalReport)                                             
-                                continue
-                            else:
-                                report['AlreadyImportedData'] = sentData - len(newdataDf)
-                                finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
-                                finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
-                                lasttime = datetime.now()
-                                diftime = lasttime - first_time
-                                print(diftime)
-                                print('diftime')
-                                print(report)
-                                finalReport.append(copy.deepcopy(report))
-                                print(finalReport)    
-                                continue
-                    if report['dataprovider'] == 'Eobs':
-                        # Get Standardized columns as the ones in database
-                        rawData, columns = self.getStandardizedColumns(rawData,report, variables, providers)
-                        file_date = None
-                        rawData.insert(len(rawData.columns),'file_date',file_date)
-                        rawData.insert(len(rawData.columns),'Quality_On_Speed','')
-                        rawData.insert(len(rawData.columns),'Quality_On_Metadata','')
-                        rawData.insert(len(rawData.columns),'Status','ok')
-                        identifiers = rawData.platform_.unique() # to get all identifiers of the file
-                        print(identifiers)
-                        idList = []
-                        sentDatatagList = []
-                        for iden in identifiers :
-                            sentData = len(rawData)
-                            report['SentDatafile'] = sentData
-                            rawDatatag = rawData.loc[rawData['platform_'] == iden].copy()
-                            sentDatatag = len(rawDatatag)
-                            sentDatatagList.append(sentDatatag)
-                            report['SentDataPertag'] = sentDatatagList
-                            identifier = iden 
-                            idList.append(identifier)
-                            report['tagID'] = idList
-                            sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
-                            if sensor is None:
-                                rawDatatag['Status'] = 'Exotic'
-                                dataForQuality = rawDatatag.copy()
-                            else:
-                                sensorCreationDate = sensor.creationDate
-                                newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawDatatag, report, curSession, identifier, columns, sensor, file_date)
-                                if len(newdataDf) == 0:
-                                    print('deso deja importées dans Sensor')   
-                                    report['AlreadyImportedData'] = report['AlreadyImportedData'] + sentDatatag
-                                    print(report)  
-                                    # finalReport.append(copy.deepcopy(report))
-                                    # print(finalReport)                                             
-                                    continue
+                            identifiers = rawData.platform_.unique() # to get all identifiers of the file
+                            print(identifiers)
+                            idList = []
+                            sentDatatagList = []
+                            for iden in identifiers :
+                                sentData = len(rawData)
+                                report['SentDatafile'] = sentData
+                                rawDatatag = rawData.loc[rawData['platform_'] == iden].copy()
+                                sentDatatag = len(rawDatatag)
+                                sentDatatagList.append(sentDatatag)
+                                report['SentDataPertag'] = sentDatatagList
+                                identifier = iden 
+                                idList.append(identifier)
+                                report['tagID'] = idList
+                                sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
+                                if sensor is None:
+                                    rawDatatag['Status'] = 'Exotic'
+                                    dataForQuality = rawDatatag.copy()
+                                    sensorCreationDate = None
                                 else:
-                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
-                                    # engineering data management
-                                    engineeringDf = finalDataset[['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount','platform_','file_date']].copy()
-                                    finalReport = self.engineeringDataManagement(engineeringDf ,identifier, finalReport, report, curSession)
-                                    finalLocations = finalDataset[['DateTime','platform_','Latitude_N','Longitude_E','Speed','Course','Altitude_m','HDOP','VDOP','SatelliteCount','file_date','Status','Quality_On_Speed','Quality_On_Metadata']].copy()
-                                    finalLocations.to_sql(Gsm.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
-                                    print(report)
-                        finalReport.append(copy.deepcopy(report))
-                        print(finalReport)    
-                        continue       
+                                    sensorCreationDate = sensor.creationDate
+                                    newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawDatatag, report, curSession, identifier, columns, sensor, file_date)
+                                    if len(newdataDf) == 0:
+                                        print('deso deja importées dans Sensor')   
+                                        report['AlreadyImportedData'] = report['AlreadyImportedData'] + sentDatatag
+                                        print(report)  
+                                        # finalReport.append(copy.deepcopy(report))
+                                        # print(finalReport)                                             
+                                        continue
+                                    else:
+                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
+                                        # engineering data management
+                                        engineeringDf = finalDataset[['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount','platform_','file_date']].copy()
+                                        finalReport = self.engineeringDataManagement(engineeringDf ,identifier, finalReport, report, curSession)
+                                        finalLocations = finalDataset[['DateTime','platform_','Latitude_N','Longitude_E','Speed','Course','Altitude_m','HDOP','VDOP','SatelliteCount','file_date','Status','Quality_On_Speed','Quality_On_Metadata']].copy()
+                                        finalLocations.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+                                        print(report)
+                            finalReport.append(copy.deepcopy(report))
+                            print(finalReport)    
+                            continue    
+
         return finalReport
 
     def parseFile(self,filePosted):
@@ -246,35 +265,62 @@ class GSMImport(ImportWithFileLikeCSV):
     def readData(self, report, path):
         if report['dataprovider'] == 'MTI':
             rawData = pd.read_csv(path, sep='\t', dtype=str)
-        if report['dataprovider'] == 'Eobs':
+        if report['dataprovider'] == 'Eobs' or report['dataprovider'] == 'Ornitela':
             rawData = pd.read_csv(path, sep=',', dtype=str)
+            print('rawData')
         return rawData
 
-    def getStandardizedColumns(self, rawData, report, variables, providers):
+    def findProvider(self,rawData, providers, path, report):
+        providerCol = list(rawData)
+        if len(providerCol) == 1:
+            if report['dataprovider'] == 'MTI':
+                providerCol = providerCol[0].split(',')
+            if report['dataprovider'] == 'Eobs' or report['dataprovider'] == 'Ornitela':
+                providerCol = providerCol[0].split('\t')
+        SuggestedDataProvider = 'No registered provider is matching'
+        for p in providers:
+            if providers[p] == providerCol:
+                SuggestedDataProvider = p
+        return SuggestedDataProvider
+
+    def getStandardizedColumns(self, rawData, report, variables, providers, path):
         columns = []
-        for col in rawData.columns:
-            columns.append(col)
-        if providers[report['dataprovider']] == columns:
-            if report['dataprovider'] is not None:
-                for col in providers[report['dataprovider']]:
-                    for item in variables:
-                        if col in variables.get(item):
-                            rawData.rename(columns={col:item}, inplace=True) 
-                            [item if x==col else x for x in columns]
-                columns = rawData.columns
-        else :
+        columns = rawData.columns
+        if report['dataprovider'] in providers :
+            if len(providers[report['dataprovider']]) == len(columns):
+                if providers[report['dataprovider']] == columns:
+                    for col in providers[report['dataprovider']]:
+                        for item in variables:
+                            if col in variables.get(item):
+                                rawData.rename(columns={col:item}, inplace=True) 
+                                [item if x==col else x for x in columns]
+                    rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T") 
+                    rawData['DateTime'] = pd.to_datetime(rawData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
+                    rawData = rawData.sort_values(by='DateTime',ascending=True)
+                    rawData = rawData.replace({'':None})
+                    rawData.insert(0, 'PK_id', range(0, 0 + len(rawData)))
+                    if report['dataprovider'] == 'Eobs':
+                        rawData.insert(len(rawData.columns),'HDOP',None)
+                        rawData.insert(len(rawData.columns),'VDOP',None)
+                        rawData.insert(len(rawData.columns),'Course',None)
+                    if report['dataprovider'] == 'Ornitela':
+                        rawData.insert(len(rawData.columns),'VDOP',None)
+                        rawData.insert(len(rawData.columns),'Course',None)
+                        rawData.insert(len(rawData.columns),'ActivityCount',None)
+                    SuggestedDataProvider = None
+                    return rawData, SuggestedDataProvider
+                else :
+                    SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
+                    print("wrong provider was selected")
+                    return rawData, SuggestedDataProvider
+            else :
+                SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
+                print("wrong provider was selected")
+                return rawData, SuggestedDataProvider
+        else:
+            SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
             print("wrong provider was selected")
-            return False
-        rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T") 
-        rawData['DateTime'] = pd.to_datetime(rawData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
-        rawData = rawData.sort_values(by='DateTime',ascending=True)
-        rawData = rawData.replace({'':None})
-        rawData.insert(0, 'PK_id', range(0, 0 + len(rawData)))
-        if report['dataprovider'] == 'Eobs':
-            rawData.insert(len(rawData.columns),'HDOP',None)
-            rawData.insert(len(rawData.columns),'VDOP',None)
-            rawData.insert(len(rawData.columns),'Course',None)
-        return rawData, columns
+            return rawData, SuggestedDataProvider
 
     def engineeringDataManagement(self, engineeringData, identifier, finalReport, report, curSession):
         if report['dataprovider'] == 'MTIe':
@@ -298,11 +344,11 @@ class GSMImport(ImportWithFileLikeCSV):
             report['DataInsertedInSensorDB'] = len(newData)
             finalReport.append(copy.deepcopy(report))
             print(finalReport)
-        if report['dataprovider'] == 'Eobs':
+        if report['dataprovider'] == 'Eobs' or report['dataprovider'] == 'Ornitela':
             newData = engineeringData.copy()
         # newData['BatteryVoltage_V'] = newData['BatteryVoltage_V'].astype(float)
         newData['BatteryVoltage_V'] = newData['BatteryVoltage_V'].apply(pd.to_numeric)/1000
-        newData.to_sql(GsmEngineering.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+        newData.to_sql(GsmEngineering.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
         return finalReport
 
     def futureAnnotation(self, rawData, timeDifference, file_date, report):
@@ -312,7 +358,7 @@ class GSMImport(ImportWithFileLikeCSV):
         # datefile = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
         if report['dataprovider'] == 'MTIg':
             datefile = file_date
-        if report['dataprovider'] == 'Eobs':
+        if report['dataprovider'] == 'Eobs' or report['dataprovider'] == 'Ornitela':
             datefile = (datetime.now()+timedelta(hours=timeDifference)).strftime('%Y-%m-%dT%H:%M:%S')
         countFuture = 0
         for i in rawData.index:
@@ -369,7 +415,7 @@ class GSMImport(ImportWithFileLikeCSV):
         countImported = 0
         dataSensorNotImportedQuery1 = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 1).order_by(desc(Gsm.date))
         dataSensorNotImportedRes1 = dataSensorNotImportedQuery1.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind())
+        dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind(Gsm))
         if len(dataSensorNotImportedDf1) > 0:
             lastValidData =  dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
             lastValidDate = lastValidData['DateTime'].isoformat()
@@ -379,9 +425,9 @@ class GSMImport(ImportWithFileLikeCSV):
             dataSensorNotImportedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'ok').order_by(desc(Gsm.date))
             dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'Future').order_by(desc(Gsm.date))
         dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind())
+        dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind(Gsm))
         dataFutureAnnotatedRes = dataFutureAnnotatedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind())
+        dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind(Gsm))
         dataFutureAnnotatedDf['DateTime'] = pd.to_datetime(dataFutureAnnotatedDf['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
         # à modifier
         # individualLocation = curSession.query(Individual_Location).filter(Individual_Location.FK_Individual == int(individualID),Individual_Location.FK_Sensor == sensor.ID).order_by(desc(Individual_Location.Date)).first()
@@ -636,6 +682,21 @@ class GSMImport(ImportWithFileLikeCSV):
             finalDataset = finalDataset.drop(['study-name'],axis = 1)
             finalDataset = finalDataset.drop(['individual-local-identifier'],axis = 1)
             finalDataset = finalDataset.drop(['sensor-type'],axis = 1)
+        if report['dataprovider'] == 'Ornitela':
+            finalDataset = finalDataset.drop(['event-id'],axis = 1)
+            finalDataset = finalDataset.drop(['visible'],axis = 1)
+            finalDataset = finalDataset.drop(['acceleration-raw-x'],axis = 1)
+            finalDataset = finalDataset.drop(['acceleration-raw-y'],axis = 1)
+            finalDataset = finalDataset.drop(['acceleration-raw-z'],axis = 1)
+            finalDataset = finalDataset.drop(['bar:barometric-height'],axis = 1)
+            finalDataset = finalDataset.drop(['battery-charge-percent'],axis = 1)
+            finalDataset = finalDataset.drop(['battery-charging-current'],axis = 1)
+            finalDataset = finalDataset.drop(['gps-time-to-fix'],axis = 1)
+            finalDataset = finalDataset.drop(['heading'],axis = 1)
+            finalDataset = finalDataset.drop(['import-marked-outlier'],axis = 1)
+            finalDataset = finalDataset.drop(['gls:light-level'],axis = 1)
+            finalDataset = finalDataset.drop(['mag:magnetic-field-raw-x'],axis = 1)
+            finalDataset = finalDataset.drop(['mag:magnetic-field-raw-y'],axis = 1)
         finalDataset = finalDataset.drop(['PK_id'],axis = 1)
         date = 'DateTime'
         finalDataset = finalDataset.sort_values(by=date,ascending=True)
@@ -923,7 +984,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                 if dataType == 'engineering':
                     dataSensorQuery = curSession.query(ArgosEngineering).filter(ArgosEngineering.fk_ptt==int(identifier)).order_by(desc(ArgosEngineering.txDate))
                     dataSensor = dataSensorQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-                    dataSensorDf = pd.read_sql_query(dataSensor,curSession.get_bind())
+                    dataSensorDf = pd.read_sql_query(dataSensor,curSession.get_bind(Gsm))
                     rawData['txDate'] = pd.to_datetime(rawData['txDate']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                     rawData['pttDate'] = pd.to_datetime(rawData['pttDate']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                     rawData = rawData.sort_values(by='txDate',ascending=True)
@@ -940,7 +1001,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         newData = rawData.copy()
                     newData.insert(len(newData.columns),'FK_ptt',identifier)
                     newData = newData.drop(['Hours since GPS fix'],axis = 1)
-                    newData.to_sql(ArgosEngineering.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+                    newData.to_sql(ArgosEngineering.__tablename__, curSession.get_bind(ArgosGps), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                 else:
                     # #Gets database info about sensor 
                     sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
@@ -1034,7 +1095,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                             print(finalReport)
                             print(diftime)
                             print('diftime')
-                            finalDataset.to_sql(ArgosGps.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+                            finalDataset.to_sql(ArgosGps.__tablename__, curSession.get_bind(ArgosGps), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
         return finalReport
 
     def futureAnnotation(self, rawData, timeDifference):
@@ -1091,7 +1152,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         # dataSensorNotImported = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0).order_by(desc(Gsm.date)).all()
         dataSensorNotImportedQuery1 = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 1).order_by(desc(ArgosGps.date))
         dataSensorNotImportedRes1 = dataSensorNotImportedQuery1.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind())
+        dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind(ArgosGps))
         if len(dataSensorNotImportedDf1) > 0:
             lastValidData =  dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
             lastValidDate = lastValidData['date'].isoformat()
@@ -1103,11 +1164,11 @@ class ARGOSImport(ImportWithFileLikeCSV):
             dataTypeSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.Status == 'ok',ArgosGps.type_==dataType).order_by(desc(ArgosGps.date))
             dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.Status == 'Future').order_by(desc(ArgosGps.date))
         dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind())
+        dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind(ArgosGps))
         dataTypeSensorNotImportedRes = dataTypeSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataTypeSensorNotImportedDf = pd.read_sql_query(dataTypeSensorNotImportedRes,curSession.get_bind())
+        dataTypeSensorNotImportedDf = pd.read_sql_query(dataTypeSensorNotImportedRes,curSession.get_bind(ArgosGps))
         dataFutureAnnotatedRes = dataFutureAnnotatedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind())
+        dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind(ArgosGps))
         dataFutureAnnotatedDf['date'] = pd.to_datetime(dataFutureAnnotatedDf['date']).dt.strftime('%Y-%m-%dT%H:%M:%S')
         # à modifier
         # individualLocation = curSession.query(Individual_Location).filter(Individual_Location.FK_Individual == int(individualID),Individual_Location.FK_Sensor == sensor.ID).order_by(desc(Individual_Location.Date)).first()
