@@ -614,6 +614,17 @@ define([
             };
             setTimeout(  function () {_this.swal(opts);}, 400);
           }
+          else if (response.status == 403 ) {
+            Swal({
+              heightAuto: false,
+              title: 'Unauthorized',
+              text: "You don't have permission",
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(240, 173, 78)',
+              confirmButtonText: 'OK'
+            });
+          }
            else {
               var opts = {
                 title : ' Critical Error',
