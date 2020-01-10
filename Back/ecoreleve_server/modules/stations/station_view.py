@@ -11,7 +11,7 @@ class StationsView(RestCollectionView):
         name='updateSiteLocation',
         request_method='GET',
         renderer='json',
-        permissions='admin'
+        permission='admin'
     )
     def updateMonitoredSite(self):
         return self.context.updateMonitoredSite()
@@ -20,7 +20,7 @@ class StationsView(RestCollectionView):
         name='importGPX',
         request_method='GET',
         renderer='json',
-        permissions='read'
+        permission='read'
     )
     def getFormImportGPX(self):
         return self.context.getFormImportGPX()
@@ -29,7 +29,7 @@ class StationsView(RestCollectionView):
         name='fieldActivity',
         request_method='GET',
         renderer='json',
-        permissions='read'
+        permission='read'
     )
     def getFieldActivityList(self):
         return self.context.getFieldActivityList()
@@ -38,7 +38,7 @@ class StationsView(RestCollectionView):
         name='deleteMany',
         request_method='POST',
         renderer='json',
-        permissions='delete'
+        permission='delete'
     )
     def deleteMany(self):
         return self.context.deleteMany()
@@ -47,7 +47,7 @@ class StationsView(RestCollectionView):
         name='deleteStationWithCamTrap',
         request_method='POST',
         renderer='json',
-        permissions='delete'
+        permission='delete'
     )
     def deleteStationWithCamTrap(self):
         return self.context.deleteStationWithCamTrap()
@@ -56,7 +56,7 @@ class StationsView(RestCollectionView):
         name='deleteManyWithCamTrap',
         request_method='POST',
         renderer='json',
-        permissions='delete'
+        permission='delete'
     )
     def deleteManyWithCamtrap(self):
         return self.context.deleteManyWithCamTrap()
@@ -65,7 +65,7 @@ class StationsView(RestCollectionView):
         name='insertWithCamTrap',
         request_method='POST',
         renderer='json',
-        permissions='create'
+        permission='create'
     )
     def insertWithCamTrap(self):
         return self.context.insertWithCamTrap()
@@ -74,7 +74,7 @@ class StationsView(RestCollectionView):
         name='insertAllWithCamTrap',
         request_method='POST',
         renderer='json',
-        permissions='create'
+        permission='create'
     )
     def insertAllWithCamTrap(self):
         return self.context.insertAllWithCamTrap()
