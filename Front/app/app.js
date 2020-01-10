@@ -43,7 +43,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       }
     };
 
-     window.addEventListener('mousewheel', function(event) {
+    window.addEventListener('mousewheel', function(event) {
       if(document.activeElement.type == "number"){
         event.preventDefault();
         event.stopPropagation();
@@ -63,6 +63,15 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     app.router = new Router({controller: app.controller});
     app.rootView.render();
     Backbone.history.start();
+    $.ajax({
+      context: this,
+      url: config.coreUrl +'security/has_access',
+      dataType: 'json'
+    }).done(function(data) {
+      console.log("o")
+    }).fail(function(msg) {
+      console.error(msg);
+    });
   });
 
   window.swal = function(opt, type, callback, showCancelBtn) {
@@ -182,10 +191,10 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       // }
     },
     error: function(jqxhr, options){
-      if(jqxhr.status == 403){
+      if(jqxhr.status == 401){
         document.location.href = config.portalUrl;
       }
-      if(jqxhr.status == 401){
+      if(jqxhr.status == 403){
         Swal({
           heightAuto: false,
           title: 'Unauthorized',
