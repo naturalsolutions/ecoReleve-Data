@@ -130,7 +130,6 @@ class ModuleForms(Main_Db_Base):
         isDisabled = False
 
         if self.Editable:
-
             isDisabled = True
             if binaryTest(self.FormRender, 2):
                 # input is inactive only in edit mode
@@ -140,7 +139,6 @@ class ModuleForms(Main_Db_Base):
                     isDisabled = False
 
             if binaryTest(self.FormRender, 4):
-
                 isDisabled = False
             self.fullPath = False
             curSize = self.FieldSizeEdit
@@ -154,6 +152,14 @@ class ModuleForms(Main_Db_Base):
             CssClass = 'col-md-' + str(curSize) + ' js-begin-line'
         else:
             CssClass = 'col-md-' + str(curSize)
+
+        # Binary weight 5
+        if binaryTest(self.FormRender, 1) and binaryTest(self.FormRender, 4) and not binaryTest(self.FormRender, 2):
+            # input inactive and hidden in create mode
+            # (currently a special case for ajaxButtonEditor updateSite, need refact of binary weight management)
+            if displayMode.lower() == 'create':
+                isDisabled = True
+                CssClass += ' hidden'
 
         self.dto = {
             'name': self.Name,
