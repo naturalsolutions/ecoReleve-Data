@@ -68,9 +68,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       url: config.coreUrl +'security/has_access',
       dataType: 'json'
     }).done(function(data) {
-      console.log("o")
-    }).fail(function(msg) {
-      console.error(msg);
+      console.log(data);
     });
   });
 
