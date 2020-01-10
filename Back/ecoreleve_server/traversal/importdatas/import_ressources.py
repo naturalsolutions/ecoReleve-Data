@@ -191,7 +191,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                 else:
                                     report['AlreadyImportedData'] = sentData - len(newdataDf)
                                     finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
-                                    finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+                                    finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                                     lasttime = datetime.now()
                                     diftime = lasttime - first_time
                                     print(diftime)
@@ -255,8 +255,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                         print(report)
                             finalReport.append(copy.deepcopy(report))
                             print(finalReport)    
-                            continue    
-
+                            continue
         return finalReport
 
     def parseFile(self,filePosted):
@@ -326,7 +325,7 @@ class GSMImport(ImportWithFileLikeCSV):
         if report['dataprovider'] == 'MTIe':
             dataSensorQuery = curSession.query(GsmEngineering).filter(GsmEngineering.platform_==int(identifier)).order_by(desc(GsmEngineering.date))
             dataSensor = dataSensorQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-            dataSensorDf = pd.read_sql_query(dataSensor,curSession.get_bind())
+            dataSensorDf = pd.read_sql_query(dataSensor,curSession.get_bind(GsmEngineering))
             engineeringData['DateTime'] = pd.to_datetime(engineeringData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
             engineeringData = engineeringData.sort_values(by='DateTime',ascending=True)
             if len(dataSensorDf) > 0:
@@ -348,7 +347,7 @@ class GSMImport(ImportWithFileLikeCSV):
             newData = engineeringData.copy()
         # newData['BatteryVoltage_V'] = newData['BatteryVoltage_V'].astype(float)
         newData['BatteryVoltage_V'] = newData['BatteryVoltage_V'].apply(pd.to_numeric)/1000
-        newData.to_sql(GsmEngineering.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+        newData.to_sql(GsmEngineering.__tablename__, curSession.get_bind(GsmEngineering), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
         return finalReport
 
     def futureAnnotation(self, rawData, timeDifference, file_date, report):
@@ -382,7 +381,7 @@ class GSMImport(ImportWithFileLikeCSV):
             # if no equipment 
             if equipment is None:
                 futureAnnotated['Status'] = 'No information'
-                deploymentDateobj = 0
+                deploymentDateobj = None
             else:
                 for session in equipment:
                     Sessions.append({
@@ -398,7 +397,7 @@ class GSMImport(ImportWithFileLikeCSV):
                             individualID = item['individualID']
                             deploymentDateobj = item['startDate']
                         if maxDateData > item['endDate']:
-                            deploymentDateobj = 0
+                            deploymentDateobj = None
                     else:
                         if item['startDate'] < maxDateData:
                             individualID = item['individualID']
@@ -523,7 +522,7 @@ class GSMImport(ImportWithFileLikeCSV):
         timeDifference = 12 # parameter to verify if data in future = date > import date + time difference (depends where is the server)
         maxDateData, futurAnnotated, countFuture = self.futureAnnotation(rawData, timeDifference, datefile, report)
         report['FutureAnnotated'] = countFuture
-        individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
+            individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
         # #Function that permits to get new data comparing with what is already in database
         dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, individualID, curSession, identifier, columns,sensor)
         report['AlreadyImportedData'] = oldData
@@ -560,7 +559,7 @@ class GSMImport(ImportWithFileLikeCSV):
         timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
         countTest = 0
         # # Recherche de potentielles dates avant le déploiement
-        if deploymentDateobj != 0:
+        if deploymentDateobj is not None:
             if timeDataClean['DateTime'].iloc[0] < deploymentDateobj:
                 for i in timeDataClean.index:
                     if timeDataClean.loc[i,'DateTime'] >= deploymentDateobj:
@@ -984,7 +983,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                 if dataType == 'engineering':
                     dataSensorQuery = curSession.query(ArgosEngineering).filter(ArgosEngineering.fk_ptt==int(identifier)).order_by(desc(ArgosEngineering.txDate))
                     dataSensor = dataSensorQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-                    dataSensorDf = pd.read_sql_query(dataSensor,curSession.get_bind(Gsm))
+                    dataSensorDf = pd.read_sql_query(dataSensor,curSession.get_bind(ArgosEngineering))
                     rawData['txDate'] = pd.to_datetime(rawData['txDate']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                     rawData['pttDate'] = pd.to_datetime(rawData['pttDate']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                     rawData = rawData.sort_values(by='txDate',ascending=True)
@@ -1001,7 +1000,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         newData = rawData.copy()
                     newData.insert(len(newData.columns),'FK_ptt',identifier)
                     newData = newData.drop(['Hours since GPS fix'],axis = 1)
-                    newData.to_sql(ArgosEngineering.__tablename__, curSession.get_bind(ArgosGps), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+                    newData.to_sql(ArgosEngineering.__tablename__, curSession.get_bind(ArgosEngineering), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                 else:
                     # #Gets database info about sensor 
                     sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
@@ -1529,7 +1528,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #                             print(finalReport)
 #                             print(diftime)
 #                             print('diftime')
-#                             finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
+#                             finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
 #                             # csvpandas = self.parseFile(item)
 # else:
 #     HTTPBadRequest()
