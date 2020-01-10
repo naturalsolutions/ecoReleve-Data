@@ -105,6 +105,7 @@ class GSMImport(ImportWithFileLikeCSV):
             'SentDataPertag':'',
             'AlreadyImportedData': 0,
             'GeoOutliers': 0,
+            'PastOutliers': 0,
             'Duplicates': 0,
             'DataInsertedInSensorDB': 0,
             'TestAnnotated': 0,
@@ -164,12 +165,6 @@ class GSMImport(ImportWithFileLikeCSV):
                             file_date = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
                             rawData.insert(len(rawData.columns),'file_date',file_date)
                             rawData.insert(len(rawData.columns),'platform_',identifier[-3:])
-                            sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
-                            if sensor is None:
-                                rawData['Status'] = 'exotic'
-                                print('No matching sensor found in database')
-                                # on les insère quand même dans la base
-                            sensorCreationDate = sensor.creationDate
                             if dataType == 'engineering':
                                 rawData = rawData.drop(['PK_id'],axis = 1)
                                 finalReport = self.engineeringDataManagement(rawData,identifier, finalReport,report,curSession)
@@ -180,6 +175,14 @@ class GSMImport(ImportWithFileLikeCSV):
                                 rawData.insert(len(rawData.columns),'Quality_On_Speed','')
                                 rawData.insert(len(rawData.columns),'Quality_On_Metadata','')
                                 rawData.insert(len(rawData.columns),'Status','ok')
+                                sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
+                                if sensor is None:
+                                    rawData['Status'] = 'exotic'
+                                    print('No matching sensor found in database')
+                                    # on les insère quand même dans la base
+                                    sensorCreationDate = None
+                                else:
+                                    sensorCreationDate = sensor.creationDate
                                 newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, columns, sensor, file_date)
                                 if len(newdataDf) == 0:
                                     print('deso deja importées dans Sensor')   
@@ -408,23 +411,30 @@ class GSMImport(ImportWithFileLikeCSV):
             raise Exception("No sensor :( ") 
         return individualID, deploymentDateobj, futureAnnotated
 
-    def findNewData(self,futurAnnotated, individualID, curSession, identifier, columns,sensor): 
+    def findNewData(self,futurAnnotated, curSession, identifier, columns): 
         # result gives all 
         # dataSensorNotImported = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0).order_by(desc(Gsm.date)).all()
         countImported = 0
         dataSensorNotImportedQuery1 = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 1).order_by(desc(Gsm.date))
         dataSensorNotImportedRes1 = dataSensorNotImportedQuery1.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind(Gsm))
+        dataSensorNotImportedExoticDf = pd.DataFrame(columns = dataSensorNotImportedDf1.columns)
         if len(dataSensorNotImportedDf1) > 0:
             lastValidData =  dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
             lastValidDate = lastValidData['DateTime'].isoformat()
             dataSensorNotImportedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'ok').order_by(desc(Gsm.date))
             dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'Future').order_by(desc(Gsm.date))     
         else:
+            dataSensorNotImportedExoticQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'exotic').order_by(desc(Gsm.date))
+            dataSensorNotImportedExoticRes = dataSensorNotImportedExoticQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
+            dataSensorNotImportedExoticDf = pd.read_sql_query(dataSensorNotImportedExoticRes,curSession.get_bind(Gsm))
             dataSensorNotImportedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'ok').order_by(desc(Gsm.date))
             dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'Future').order_by(desc(Gsm.date))
-        dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind(Gsm))
+        if len(dataSensorNotImportedExoticDf) > 0:
+            dataSensorNotImportedDf = dataSensorNotImportedExoticDf.copy()
+        else:
+            dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
+            dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind(Gsm))
         dataFutureAnnotatedRes = dataFutureAnnotatedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind(Gsm))
         dataFutureAnnotatedDf['DateTime'] = pd.to_datetime(dataFutureAnnotatedDf['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
@@ -522,9 +532,12 @@ class GSMImport(ImportWithFileLikeCSV):
         timeDifference = 12 # parameter to verify if data in future = date > import date + time difference (depends where is the server)
         maxDateData, futurAnnotated, countFuture = self.futureAnnotation(rawData, timeDifference, datefile, report)
         report['FutureAnnotated'] = countFuture
-        individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
+        if sensor is not None:
+            individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
+        else:
+            deployementDate = None
         # #Function that permits to get new data comparing with what is already in database
-        dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, individualID, curSession, identifier, columns,sensor)
+        dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, curSession, identifier, columns)
         report['AlreadyImportedData'] = oldData
 
         return newData, report, dataForSpeed, deployementDate
@@ -552,11 +565,15 @@ class GSMImport(ImportWithFileLikeCSV):
         return geoOutliers2, geoDataClean
 
     def findTimeOutliers(self,geoDataClean,sensorCreationDate,deploymentDateobj):
-        sensorCreationDateobj = sensorCreationDate.isoformat()
-        # # Recherche de potentielles dates avant la céation du sensor
-        pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorCreationDateobj].copy()
-        pastOutliers ['Status'] = 'Past outlier'
-        timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
+        if sensorCreationDate is None:
+            pastOutliers = pd.DataFrame(columns = geoDataClean.columns)
+            timeDataClean = geoDataClean.copy()
+        else:
+            sensorCreationDateobj = sensorCreationDate.isoformat()
+            # # Recherche de potentielles dates avant la céation du sensor
+            pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorCreationDateobj].copy()
+            pastOutliers ['Status'] = 'Past outlier'
+            timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
         countTest = 0
         # # Recherche de potentielles dates avant le déploiement
         if deploymentDateobj is not None:
@@ -568,7 +585,8 @@ class GSMImport(ImportWithFileLikeCSV):
                         timeDataClean.loc[i,'Status']='test'   
                         countTest = countTest + 1
         else :
-            timeDataClean['Status'] = 'No information'
+            if sensorCreationDate is not None:
+                timeDataClean['Status'] = 'No information'
         return timeDataClean, pastOutliers, countTest
 
     def findTimeDuplicates(self, timeDataClean):
@@ -710,6 +728,7 @@ class GSMImport(ImportWithFileLikeCSV):
         else:
             # #Function to remove and annotate data depending on date possibility : past before sensor creation, test before deployment
             timeDataClean, pastOutliers, countTest = self.findTimeOutliers(geoDataClean, sensorCreationDate, deployementDate)
+            report['PastOutliers'] = len(pastOutliers)
             report['TestAnnotated'] = report['TestAnnotated'] + countTest
             # #Function that finds duplicates = data with at least exactly same timestamp
             duplicatesToDelete,duplicateCleanData = self.findTimeDuplicates(timeDataClean)
