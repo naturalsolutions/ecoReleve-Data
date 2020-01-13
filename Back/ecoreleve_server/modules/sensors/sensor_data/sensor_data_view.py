@@ -23,7 +23,7 @@ route_prefix = 'sensors/'
 @view_defaults(context=SensorDatasBySessionItem)
 class SensorDatasBySessionItemView(CRUDCommonView):
 
-    @view_config(renderer='json', request_method='PATCH', permission='update')
+    @view_config(renderer='json', request_method='PATCH', permission='CAMTRAP')
     def getDatasPatch(self):
         return self.context.patch()
 
@@ -74,6 +74,7 @@ def asInt(s):
     except:
         return None
 
+
 def error_response(err):
     if err is not None:
         msg = err.args[0] if err.args else ""
@@ -83,27 +84,47 @@ def error_response(err):
     response.status_int = 500
     return response
 
+
 ArgosDatasWithIndiv = Table(
-    'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
-                          Base.metadata, autoload=True)
-DataRfidWithSite = Table('VRfidData_With_equipSite',
-                         Base.metadata, autoload=True)
-DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
+    'VArgosData_With_EquipIndiv',
+    Base.metadata,
+    autoload=True
+)
+GsmDatasWithIndiv = Table(
+    'VGSMData_With_EquipIndiv',
+    Base.metadata,
+    autoload=True
+)
+DataRfidWithSite = Table(
+    'VRfidData_With_equipSite',
+    Base.metadata,
+    autoload=True
+)
+DataRfidasFile = Table(
+    'V_dataRFID_as_file',
+    Base.metadata,
+    autoload=True
+)
 
 
-@view_config(route_name=route_prefix + 'uncheckedDatas',
-             renderer='json',
-             match_param='type=rfid',
-             permission=routes_permission['rfid']['GET'])
-@view_config(route_name=route_prefix + 'uncheckedDatas',
-             renderer='json',
-             match_param='type=gsm',
-             permission=routes_permission['gsm']['GET'])
-@view_config(route_name=route_prefix + 'uncheckedDatas',
-             renderer='json',
-             match_param='type=argos',
-             permission=routes_permission['argos']['GET'])
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas',
+    renderer='json',
+    match_param='type=rfid',
+    permission='RFID'
+    )
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas',
+    renderer='json',
+    match_param='type=gsm',
+    permission=routes_permission['gsm']['GET']
+)
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas',
+    renderer='json',
+    match_param='type=argos',
+    permission='ARGOS'
+)
 def type_unchecked_list(request):
     session = request.dbsession
 
@@ -115,24 +136,32 @@ def type_unchecked_list(request):
     elif type_ == 'rfid':
         return unchecked_rfid(request)
 
-    selectStmt = select([unchecked.c['FK_Individual'],
-                         unchecked.c['Survey_type'],
-                         unchecked.c['FK_ptt'],
-                         unchecked.c['FK_Sensor'],
-                         unchecked.c['StartDate'],
-                         unchecked.c['EndDate'],
-                         func.count().label('nb'),
-                         func.max(unchecked.c['date']).label('max_date'),
-                         func.min(unchecked.c['date']).label('min_date')])
+    selectStmt = select([
+        unchecked.c['FK_Individual'],
+        unchecked.c['Survey_type'],
+        unchecked.c['FK_ptt'],
+        unchecked.c['FK_Sensor'],
+        unchecked.c['StartDate'],
+        unchecked.c['EndDate'],
+        func.count().label('nb'),
+        func.max(unchecked.c['date']).label('max_date'),
+        func.min(unchecked.c['date']).label('min_date')
+    ])
 
-    queryStmt = selectStmt.where(unchecked.c['checked'] == 0
-                                 ).group_by(unchecked.c['FK_Individual'],
-                                            unchecked.c['Survey_type'],
-                                            unchecked.c['FK_ptt'],
-                                            unchecked.c['StartDate'],
-                                            unchecked.c['EndDate'],
-                                            unchecked.c['FK_Sensor']
-                                            ).order_by(unchecked.c['FK_ptt'].asc())
+    queryStmt = selectStmt.where(
+        unchecked.c['checked'] == 0
+    )
+    queryStmt = queryStmt.group_by(
+        unchecked.c['FK_Individual'],
+        unchecked.c['Survey_type'],
+        unchecked.c['FK_ptt'],
+        unchecked.c['StartDate'],
+        unchecked.c['EndDate'],
+        unchecked.c['FK_Sensor']
+    )
+    queryStmt = queryStmt.order_by(
+        unchecked.c['FK_ptt'].asc()
+    )
     data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries': len(dataResult)}]
@@ -152,16 +181,20 @@ def unchecked_rfid(request):
     return result
 
 
-@view_config(route_name=route_prefix + 'uncheckedDatas/id_indiv/ptt',
-             renderer='json',
-             request_method='GET',
-             match_param='type=argos',
-             permission=routes_permission['argos']['GET'])
-@view_config(route_name=route_prefix + 'uncheckedDatas/id_indiv/ptt',
-             renderer='json',
-             request_method='GET',
-             match_param='type=gsm',
-             permission=routes_permission['gsm']['GET'])
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas/id_indiv/ptt',
+    renderer='json',
+    request_method='GET',
+    match_param='type=argos',
+    permission='ARGOS'
+)
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas/id_indiv/ptt',
+    renderer='json',
+    request_method='GET',
+    match_param='type=gsm',
+    permission='GSM'
+)
 def details_unchecked_indiv(request):
     session = request.dbsession
 
@@ -178,33 +211,59 @@ def details_unchecked_indiv(request):
         unchecked = GsmDatasWithIndiv
 
     if 'geo' in request.params:
-        queryGeo = select([unchecked.c['PK_id'],
-                           unchecked.c['type'],
-                           unchecked.c['lat'],
-                           unchecked.c['lon'],
-                           unchecked.c['date']]
-                          ).where(and_(unchecked.c['FK_ptt'] == ptt,
-                                       and_(unchecked.c['checked'] == 0,
-                                            unchecked.c['FK_Individual'] == id_indiv)
-                                       ))
+        queryGeo = select([
+            unchecked.c['PK_id'],
+            unchecked.c['type'],
+            unchecked.c['lat'],
+            unchecked.c['lon'],
+            unchecked.c['date']]
+            )
+        queryGeo = queryGeo.where(
+            and_(
+                unchecked.c['FK_ptt'] == ptt,
+                and_(
+                    unchecked.c['checked'] == 0,
+                    unchecked.c['FK_Individual'] == id_indiv
+                    )
+                )
+        )
 
         dataGeo = session.execute(queryGeo).fetchall()
         geoJson = []
         for row in dataGeo:
-            geoJson.append({'type': 'Feature',
-                            'id': row['PK_id'],
-                            'properties': {'type': row['type'],
-                                           'date': row['date'].strftime('%Y-%m-%d %H:%M:%S')},
-                            'geometry': {'type': 'Point',
-                                         'coordinates': [row['lat'], row['lon']]}
-                            })
-        result = {'type': 'FeatureCollection', 'features': geoJson}
+            geoJson.append(
+                {
+                    'type': 'Feature',
+                    'id': row['PK_id'],
+                    'properties': {
+                        'type': row['type'],
+                        'date': row['date'].strftime('%Y-%m-%d %H:%M:%S')
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [row['lat'], row['lon']]
+                    }
+                }
+            )
+        result = {
+            'type': 'FeatureCollection',
+            'features': geoJson
+        }
     else:
-        query = select([unchecked]
-                       ).where(and_(unchecked.c['FK_ptt'] == ptt,
-                                    and_(unchecked.c['checked'] == 0,
-                                         unchecked.c['FK_Individual'] == id_indiv))
-                               ).order_by(desc(unchecked.c['date']))
+        query = select([unchecked])
+        query = query.where(
+            and_(
+                unchecked.c['FK_ptt'] == ptt,
+                and_(
+                    unchecked.c['checked'] == 0,
+                    unchecked.c['FK_Individual'] == id_indiv)
+                    )
+        )
+        query = query.order_by(
+            desc(
+                unchecked.c['date']
+                )
+        )
         data = session.execute(query).fetchall()
 
         df = pd.DataFrame.from_records(
@@ -218,11 +277,22 @@ def details_unchecked_indiv(request):
         df['date'] = df['date'].apply(
             lambda row: np.datetime64(row).astype(datetime))
         # Fill NaN
-        df.fillna(value={'ele': -999}, inplace=True)
-        df.fillna(value={'speed': 0}, inplace=True)
-        df.replace(to_replace={'speed': np.inf},
-                   value={'speed': 9999}, inplace=True)
-        df.fillna(value=0, inplace=True)
+        df.fillna(
+            value={'ele': -999},
+            inplace=True
+        )
+        df.fillna(
+            value={'speed': 0},
+            inplace=True
+        )
+        df.replace(
+            to_replace={'speed': np.inf},
+            value={'speed': 9999}, inplace=True
+        )
+        df.fillna(
+            value=0,
+            inplace=True
+        )
 
         dataResult = df.to_dict('records')
         result = [{'total_entries': len(dataResult)}]
@@ -231,10 +301,12 @@ def details_unchecked_indiv(request):
     return result
 
 
-@view_config(route_name=route_prefix + 'uncheckedDatas/id_indiv/ptt',
-             renderer='json',
-             request_method='POST',
-             permission=routes_permission['gsm']['POST'])
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas/id_indiv/ptt',
+    renderer='json',
+    request_method='POST',
+    permission=('GSM', 'ARGOS')
+)
 def manual_validate(request):
     global graphDataDate
     session = request.dbsession
@@ -275,21 +347,27 @@ def manual_validate(request):
         return error_response(err)
 
 
-@view_config(route_name=route_prefix + 'uncheckedDatas',
-             renderer='json',
-             request_method='POST',
-             match_param='type=rfid',
-             permission=routes_permission['rfid']['POST'])
-@view_config(route_name=route_prefix + 'uncheckedDatas',
-             renderer='json',
-             request_method='POST',
-             match_param='type=gsm',
-             permission=routes_permission['gsm']['POST'])
-@view_config(route_name=route_prefix + 'uncheckedDatas',
-             renderer='json',
-             request_method='POST',
-             match_param='type=argos',
-             permission=routes_permission['argos']['POST'])
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas',
+    renderer='json',
+    request_method='POST',
+    match_param='type=rfid',
+    permission='RFID'
+)
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas',
+    renderer='json',
+    request_method='POST',
+    match_param='type=gsm',
+    permission='GSM'
+)
+@view_config(
+    route_name=route_prefix + 'uncheckedDatas',
+    renderer='json',
+    request_method='POST',
+    match_param='type=argos',
+    permission='ARGOS'
+)
 def auto_validation(request):
     session = request.dbsession
     global graphDataDate
