@@ -72,6 +72,11 @@ context_permissions = {
         (Allow, 'group:superUser', ('create', 'read', 'update')),
         (Allow, 'group:user', 'read')
     ],
+    'sensors_history': [
+        (Allow, 'group:admin', ('read', 'update', 'delete')),
+        (Allow, 'group:superUser', ('read', 'update', 'delete')),
+        (Allow, 'group:user', 'read')
+    ],
     'SensorDatasByType': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUser', ALL_PERMISSIONS),
