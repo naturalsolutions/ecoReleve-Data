@@ -177,7 +177,7 @@ class StationsResource(DynamicObjectCollectionResource):
         session = self.request.dbsession
         data = self.request.params.mixed()
 
-        if data['FK_MonitoredSite'] == '':
+        if "FK_MonitoredSite" not in data or data['FK_MonitoredSite'] == '':
             return 'Station is not monitored'
         try:
             data['StartDate'] = data['StationDate']
