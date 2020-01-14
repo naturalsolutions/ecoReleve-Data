@@ -1,0 +1,9 @@
+UPDATE [ModuleForms]
+SET [FormRender] = 5
+WHERE [module_id] = 2 AND [Name] = 'updateSite'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('216_Update_FormRender_for_updateSite_button_in_StationForm',GETDATE(),(SELECT db_name()))
+
+
+GO
