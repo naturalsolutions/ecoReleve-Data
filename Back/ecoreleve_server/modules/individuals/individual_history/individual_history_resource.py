@@ -14,6 +14,8 @@ IndividualDynPropValue = Individual.DynamicValuesClass
 class IndividualValueResource(DynamicValueResource):
     model = IndividualDynPropValue
 
+    __acl__ = context_permissions['individuals_history']
+
     def retrieve(self):
         pass
 
