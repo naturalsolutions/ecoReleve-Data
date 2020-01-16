@@ -28,32 +28,33 @@ import win32gui
 import win32con
 from win32 import win32api
 import psutil
-import copy 
+import copy
 
 
 
 class ImportWithFileLikeCSV(MetaEndPointNotREST):
-    __acl__ = context_permissions['formbuilder']
+    pass
+#     __acl__ = context_permissions['formbuilder']
 
-    def create(self):
-        filePosted = self.getFile()
-        if filePosted is not None:
-            "we got a file "
-            print(filePosted)
-            csvpandas = self.parseFile()
-        else:
-            HTTPBadRequest()
-        "haaaaaaaaaa on veut poster du gsm"
+#     def create(self):
+#         filePosted = self.getFile()
+#         if filePosted is not None:
+#             "we got a file "
+#             print(filePosted)
+#             csvpandas = self.parseFile()
+#         else:
+#             HTTPBadRequest()
+#         "haaaaaaaaaa on veut poster du gsm"
 
-    def getFile(self):
-        if 'file' in self.request.POST:
-            return self.request.POST['file']
-        else:
-            return None
+#     def getFile(self):
+#         if 'file' in self.request.POST:
+#             return self.request.POST['file']
+#         else:
+#             return None
 
-    def parseFile(self):
-        print("you should implement you own")
-        return None
+#     def parseFile(self):
+#         print("you should implement you own")
+#         return None
 
 
 class GSMImport(ImportWithFileLikeCSV):
@@ -105,6 +106,7 @@ class GSMImport(ImportWithFileLikeCSV):
             'SentDataPertag':'',
             'AlreadyImportedData': 0,
             'GeoOutliers': 0,
+            'PastOutliers': 0,
             'Duplicates': 0,
             'DataInsertedInSensorDB': 0,
             'TestAnnotated': 0,
@@ -157,19 +159,13 @@ class GSMImport(ImportWithFileLikeCSV):
                             reportWrongProvider['SuggestedDataProvider'] = SuggestedDataProvider
                             reportWrongProvider['file'] = report['file']
                             finalReport.append(copy.deepcopy(reportWrongProvider)) # Wrong provider
-                            print(finalReport)  
+                            print(finalReport)
                             self.request.response.status_code = 409
                         else:
                             datefile = datetime.strptime(datefile,'%Y-%m-%d')
                             file_date = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
                             rawData.insert(len(rawData.columns),'file_date',file_date)
                             rawData.insert(len(rawData.columns),'platform_',identifier[-3:])
-                            sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
-                            if sensor is None:
-                                rawData['Status'] = 'exotic'
-                                print('No matching sensor found in database')
-                                # on les insère quand même dans la base
-                            sensorCreationDate = sensor.creationDate
                             if dataType == 'engineering':
                                 rawData = rawData.drop(['PK_id'],axis = 1)
                                 finalReport = self.engineeringDataManagement(rawData,identifier, finalReport,report,curSession)
@@ -180,13 +176,21 @@ class GSMImport(ImportWithFileLikeCSV):
                                 rawData.insert(len(rawData.columns),'Quality_On_Speed','')
                                 rawData.insert(len(rawData.columns),'Quality_On_Metadata','')
                                 rawData.insert(len(rawData.columns),'Status','ok')
-                                newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, columns, sensor, file_date)
+                                sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
+                                if sensor is None:
+                                    rawData['Status'] = 'exotic'
+                                    print('No matching sensor found in database')
+                                    # on les insère quand même dans la base
+                                    sensorCreationDate = None
+                                else:
+                                    sensorCreationDate = sensor.creationDate
+                                newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, sensor, file_date)
                                 if len(newdataDf) == 0:
-                                    print('deso deja importées dans Sensor')   
+                                    print('deso deja importées dans Sensor')
                                     report['AlreadyImportedData'] = sentData
-                                    print(report)  
+                                    print(report)
                                     finalReport.append(copy.deepcopy(report))
-                                    print(finalReport)                                             
+                                    print(finalReport)
                                     continue
                                 else:
                                     report['AlreadyImportedData'] = sentData - len(newdataDf)
@@ -198,7 +202,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                     print('diftime')
                                     print(report)
                                     finalReport.append(copy.deepcopy(report))
-                                    print(finalReport)    
+                                    print(finalReport)
                                     continue
                     if report['dataprovider'] == 'Eobs'or report['dataprovider'] == 'Ornitela':
                         # Get Standardized columns as the ones in database
@@ -227,7 +231,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                 sentDatatag = len(rawDatatag)
                                 sentDatatagList.append(sentDatatag)
                                 report['SentDataPertag'] = sentDatatagList
-                                identifier = iden 
+                                identifier = iden
                                 idList.append(identifier)
                                 report['tagID'] = idList
                                 sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
@@ -237,13 +241,13 @@ class GSMImport(ImportWithFileLikeCSV):
                                     sensorCreationDate = None
                                 else:
                                     sensorCreationDate = sensor.creationDate
-                                    newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawDatatag, report, curSession, identifier, columns, sensor, file_date)
+                                    newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawDatatag, report, curSession, identifier, sensor, file_date)
                                     if len(newdataDf) == 0:
-                                        print('deso deja importées dans Sensor')   
+                                        print('deso deja importées dans Sensor')
                                         report['AlreadyImportedData'] = report['AlreadyImportedData'] + sentDatatag
-                                        print(report)  
+                                        print(report)
                                         # finalReport.append(copy.deepcopy(report))
-                                        # print(finalReport)                                             
+                                        # print(finalReport)
                                         continue
                                     else:
                                         finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
@@ -254,12 +258,9 @@ class GSMImport(ImportWithFileLikeCSV):
                                         finalLocations.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                                         print(report)
                             finalReport.append(copy.deepcopy(report))
-                            print(finalReport)    
+                            print(finalReport)
                             continue
         return finalReport
-
-    def parseFile(self,filePosted):
-        print("on est dans le parsing des fichers gsm")
 
     def readData(self, report, path):
         if report['dataprovider'] == 'MTI':
@@ -284,16 +285,16 @@ class GSMImport(ImportWithFileLikeCSV):
 
     def getStandardizedColumns(self, rawData, report, variables, providers, path):
         columns = []
-        columns = rawData.columns
+        columns = list(rawData.columns)
         if report['dataprovider'] in providers :
             if len(providers[report['dataprovider']]) == len(columns):
                 if providers[report['dataprovider']] == columns:
                     for col in providers[report['dataprovider']]:
                         for item in variables:
                             if col in variables.get(item):
-                                rawData.rename(columns={col:item}, inplace=True) 
+                                rawData.rename(columns={col:item}, inplace=True)
                                 [item if x==col else x for x in columns]
-                    rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T") 
+                    rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T")
                     rawData['DateTime'] = pd.to_datetime(rawData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                     rawData = rawData.sort_values(by='DateTime',ascending=True)
                     rawData = rawData.replace({'':None})
@@ -329,8 +330,8 @@ class GSMImport(ImportWithFileLikeCSV):
             engineeringData['DateTime'] = pd.to_datetime(engineeringData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
             engineeringData = engineeringData.sort_values(by='DateTime',ascending=True)
             if len(dataSensorDf) > 0:
-                lastData =  dataSensorDf.loc[0]       
-                lastDate = lastData['DateTime'].isoformat()                
+                lastData =  dataSensorDf.loc[0]
+                lastDate = lastData['DateTime'].isoformat()
                 newDatatmpID = []
                 for i in engineeringData.index:
                     fileDate = engineeringData.loc[i,'DateTime']
@@ -352,8 +353,8 @@ class GSMImport(ImportWithFileLikeCSV):
 
     def futureAnnotation(self, rawData, timeDifference, file_date, report):
         ## Annotate dates in the future
-        # date import 
-        # Date in filename at 23:59:59 
+        # date import
+        # Date in filename at 23:59:59
         # datefile = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
         if report['dataprovider'] == 'MTIg':
             datefile = file_date
@@ -378,7 +379,7 @@ class GSMImport(ImportWithFileLikeCSV):
         Sessions = []
         if sensor.ID:
             equipment = curSession.query(equipmentView).filter(equipmentView.columns.FK_Sensor == sensor.ID).all()
-            # if no equipment 
+            # if no equipment
             if equipment is None:
                 futureAnnotated['Status'] = 'No information'
                 deploymentDateobj = None
@@ -403,28 +404,34 @@ class GSMImport(ImportWithFileLikeCSV):
                             individualID = item['individualID']
                             deploymentDateobj = item['startDate']
                             print(deploymentDateobj)
-                    
         else:
-            raise Exception("No sensor :( ") 
-        return individualID, deploymentDateobj, futureAnnotated
+            raise Exception("No sensor :( ")
+        return deploymentDateobj, futureAnnotated
 
-    def findNewData(self,futurAnnotated, individualID, curSession, identifier, columns,sensor): 
-        # result gives all 
+    def findNewData(self,futurAnnotated, curSession, identifier):
+        # result gives all
         # dataSensorNotImported = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0).order_by(desc(Gsm.date)).all()
         countImported = 0
         dataSensorNotImportedQuery1 = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 1).order_by(desc(Gsm.date))
         dataSensorNotImportedRes1 = dataSensorNotImportedQuery1.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind(Gsm))
+        dataSensorNotImportedExoticDf = pd.DataFrame(columns = dataSensorNotImportedDf1.columns)
         if len(dataSensorNotImportedDf1) > 0:
             lastValidData =  dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
             lastValidDate = lastValidData['DateTime'].isoformat()
             dataSensorNotImportedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'ok').order_by(desc(Gsm.date))
             dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'Future').order_by(desc(Gsm.date))     
         else:
+            dataSensorNotImportedExoticQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'exotic').order_by(desc(Gsm.date))
+            dataSensorNotImportedExoticRes = dataSensorNotImportedExoticQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
+            dataSensorNotImportedExoticDf = pd.read_sql_query(dataSensorNotImportedExoticRes,curSession.get_bind(Gsm))
             dataSensorNotImportedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'ok').order_by(desc(Gsm.date))
             dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'Future').order_by(desc(Gsm.date))
-        dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
-        dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind(Gsm))
+        if len(dataSensorNotImportedExoticDf) > 0:
+            dataSensorNotImportedDf = dataSensorNotImportedExoticDf.copy()
+        else:
+            dataSensorNotImportedRes = dataSensorNotImportedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
+            dataSensorNotImportedDf = pd.read_sql_query(dataSensorNotImportedRes,curSession.get_bind(Gsm))
         dataFutureAnnotatedRes = dataFutureAnnotatedQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
         dataFutureAnnotatedDf = pd.read_sql_query(dataFutureAnnotatedRes,curSession.get_bind(Gsm))
         dataFutureAnnotatedDf['DateTime'] = pd.to_datetime(dataFutureAnnotatedDf['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
@@ -433,8 +440,6 @@ class GSMImport(ImportWithFileLikeCSV):
         listOldID = []
         # list from file
         listForSpeedtmpID = []
-        # list from database
-        getDataForSpeed = []
         newDatatmpID = []
         if len(dataSensorNotImportedDf) > 0:
             lastDataNotImported = dataSensorNotImportedDf.loc[0]
@@ -443,20 +448,20 @@ class GSMImport(ImportWithFileLikeCSV):
             if len(dataSensorNotImportedDf1) > 0:
                 # lastDataImported = individualLocation[0] # à modifier
                 # lastDataImportedDate = lastDataImported.Date.isoformat()
-                # Case : some data have already been imported in EcoReleveData but not all 
+                # Case : some data have already been imported in EcoReleveData but not all
                 for i in futurAnnotated.index:
                     fileDate = futurAnnotated.loc[i,'DateTime']
                     # To find data already validated and so that doesn't need to be imported
                     if fileDate < lastValidDate :
                         listOldID.append(i)
-                    # To select data (from file) that haven't been validated by being imported in EcoReleveData 
+                    # To select data (from file) that haven't been validated by being imported in EcoReleveData
                     elif fileDate > lastDataNotImportedDate:
                         newDatatmpID.append(i)
                     else:
-                        countImported = countImported + 1 
+                        countImported = countImported + 1
                 newData = futurAnnotated[futurAnnotated.index.isin(newDatatmpID)]
-                    # to select newdata that are neither in EcoReleveData nor in Sensor + to get not imported data from sensor database if they weren't in file 
-                # Means that none of not imported data are in the current file 
+                    # to select newdata that are neither in EcoReleveData nor in Sensor + to get not imported data from sensor database if they weren't in file
+                # Means that none of not imported data are in the current file
                 dataForSpeed = dataSensorNotImportedDf.loc[~dataSensorNotImportedDf['checked']==1].copy()
                 dataForSpeed = dataForSpeed.drop(['checked','imported','validated','FK_Import','Data_Quality','Fk_individual_location'],axis = 1)
                 dataForSpeed['DateTime'] = pd.to_datetime(dataForSpeed['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
@@ -518,13 +523,16 @@ class GSMImport(ImportWithFileLikeCSV):
         newData = newData.loc[(~newData['PK_id'].isin(futureDuplicates.PK_id))].copy()
         return newData, futureDuplicates
 
-    def newLocationsManagement(self,rawData, report, curSession, identifier, columns, sensor, datefile):
+    def newLocationsManagement(self,rawData, report, curSession, identifier, sensor, datefile):
         timeDifference = 12 # parameter to verify if data in future = date > import date + time difference (depends where is the server)
         maxDateData, futurAnnotated, countFuture = self.futureAnnotation(rawData, timeDifference, datefile, report)
         report['FutureAnnotated'] = countFuture
-        individualID, deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
+        if sensor is not None:
+            deployementDate, futurAnnotated = self.IndividualID_deployementDate(sensor, curSession, maxDateData, futurAnnotated)
+        else:
+            deployementDate = None
         # #Function that permits to get new data comparing with what is already in database
-        dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, individualID, curSession, identifier, columns,sensor)
+        dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, curSession, identifier)
         report['AlreadyImportedData'] = oldData
 
         return newData, report, dataForSpeed, deployementDate
@@ -552,11 +560,15 @@ class GSMImport(ImportWithFileLikeCSV):
         return geoOutliers2, geoDataClean
 
     def findTimeOutliers(self,geoDataClean,sensorCreationDate,deploymentDateobj):
-        sensorCreationDateobj = sensorCreationDate.isoformat()
-        # # Recherche de potentielles dates avant la céation du sensor
-        pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorCreationDateobj].copy()
-        pastOutliers ['Status'] = 'Past outlier'
-        timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
+        if sensorCreationDate is None:
+            pastOutliers = pd.DataFrame(columns = geoDataClean.columns)
+            timeDataClean = geoDataClean.copy()
+        else:
+            sensorCreationDateobj = sensorCreationDate.isoformat()
+            # # Recherche de potentielles dates avant la céation du sensor
+            pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorCreationDateobj].copy()
+            pastOutliers ['Status'] = 'Past outlier'
+            timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
         countTest = 0
         # # Recherche de potentielles dates avant le déploiement
         if deploymentDateobj is not None:
@@ -565,10 +577,11 @@ class GSMImport(ImportWithFileLikeCSV):
                     if timeDataClean.loc[i,'DateTime'] >= deploymentDateobj:
                         break
                     else:
-                        timeDataClean.loc[i,'Status']='test'   
+                        timeDataClean.loc[i,'Status']='test'
                         countTest = countTest + 1
         else :
-            timeDataClean['Status'] = 'No information'
+            if sensorCreationDate is not None:
+                timeDataClean['Status'] = 'No information'
         return timeDataClean, pastOutliers, countTest
 
     def findTimeDuplicates(self, timeDataClean):
@@ -607,7 +620,7 @@ class GSMImport(ImportWithFileLikeCSV):
                 prefilteredData[i+j]['Calculated_Speed'] = speed
                 # prefilteredData[i+j]['speed'] = speed
                 # Comparaison à la vitesse maximale entrée en paramètre,
-                # Si la vitesse est considérée aberrante on ajoute le point aux données éliminées et on l'annote dans les données brutes 
+                # Si la vitesse est considérée aberrante on ajoute le point aux données éliminées et on l'annote dans les données brutes
                 if iterationNb == 1:
                     if speed > MaxSpeed:
                         eliminatedSpeed.append(prefilteredData[i+j])
@@ -615,16 +628,16 @@ class GSMImport(ImportWithFileLikeCSV):
                     else:
                         prefilteredData[i+j]['Quality_On_Speed']= 1
                         i=i+j
-                        break 
+                        break
                 if iterationNb == 2:
                     if speed > MaxSpeed:
                         eliminatedSpeed.append(prefilteredData[i+j])
-                        prefilteredData[i+j]['Quality_On_Speed']=prefilteredData[i+j]['Quality_On_Speed'] + 1 
+                        prefilteredData[i+j]['Quality_On_Speed']=prefilteredData[i+j]['Quality_On_Speed'] + 1
                     else:
                         i=i+j
-                        break 
+                        break
         # Elimination des points dont la vitesse a été jugée aberrante
-        pointsfiltered = [x for x in prefilteredData if x not in eliminatedSpeed]          
+        pointsfiltered = [x for x in prefilteredData if x not in eliminatedSpeed]
         return prefilteredData, eliminatedSpeed, pointsfiltered
 
     def setQuality(self, speedQualityNewData,report):
@@ -701,7 +714,7 @@ class GSMImport(ImportWithFileLikeCSV):
         finalDataset = finalDataset.sort_values(by=date,ascending=True)
         return finalDataset
 
-    def dataAnnotation(self, newData, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport):  
+    def dataAnnotation(self, newData, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport):
         # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
         geoOutliers, geoDataClean = self.findGeoOutliers(newData)
         report['GeoOutliers'] = len(geoOutliers)
@@ -710,11 +723,12 @@ class GSMImport(ImportWithFileLikeCSV):
         else:
             # #Function to remove and annotate data depending on date possibility : past before sensor creation, test before deployment
             timeDataClean, pastOutliers, countTest = self.findTimeOutliers(geoDataClean, sensorCreationDate, deployementDate)
+            report['PastOutliers'] = len(pastOutliers)
             report['TestAnnotated'] = report['TestAnnotated'] + countTest
             # #Function that finds duplicates = data with at least exactly same timestamp
             duplicatesToDelete,duplicateCleanData = self.findTimeDuplicates(timeDataClean)
             report['Duplicates'] = report['Duplicates'] + len(duplicatesToDelete)
-            # to have only ok status data for quality annotation 
+            # to have only ok status data for quality annotation
             dataForAfterQuality = duplicateCleanData.loc[duplicateCleanData['Status'].isin(['test','Future'])].copy()
             dataForQuality = duplicateCleanData.loc[~duplicateCleanData['Status'].isin(['test','Future'])].copy()
             if len(dataForSpeed) > 0:
@@ -724,7 +738,7 @@ class GSMImport(ImportWithFileLikeCSV):
                 # dataForSpeed.update(self, dataForQuality, join='left', overwrite=True, filter_func=None, errors='ignore')
                 # to transform dataframe into List of dict
                 dataForSpeedComplete.reset_index(drop=True, inplace=True)
-            else : 
+            else :
                 dataForSpeedComplete = dataForQuality.copy()
                 dataForSpeedComplete.reset_index(drop=True, inplace=True)
             prefilteredData = dataForSpeedComplete.to_dict('Index')
@@ -751,7 +765,6 @@ class GSMImport(ImportWithFileLikeCSV):
             print(finalDataset)
             report['DataInsertedInSensorDB'] = report['DataInsertedInSensorDB'] + len(finalDataset)
             print(report)
-        
         return finalDataset, report
 
 class ARGOSImport(ImportWithFileLikeCSV):
@@ -865,7 +878,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
             'activity': ['Activity'],
             'txCount': ['Tx Count'],
             'temp': ['Temperature (°C)'],
-            'batt': ['Battery Voltage (V)'], 
+            'batt': ['Battery Voltage (V)'],
             'fixTime': ['GPS fix time'],
             'satCount': ['Satellite Count'],
             'resetHours': ['Hours Since Reset'],
@@ -905,7 +918,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         def listFilesFromDirectory(pathDirectory):
             fileList = []
             print(f"from HERE WE LIST {pathDirectory}")
-            for (dirpath, dirnames, filenames) in os.walk(pathDirectory):        
+            for (dirpath, dirnames, filenames) in os.walk(pathDirectory):
                 curListFiles = []
                 print(f"dirpath {dirpath} pathdirectectory {pathDirectory}")
                 if dirpath == pathDirectory:
@@ -913,9 +926,9 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         if files[-5:].lower() in ['a.txt','e.txt','g.txt'] :
                             curListFiles.append(files)
                     fileList.extend(curListFiles)
-            return fileList    
+            return fileList
 
-        listFiles = listFilesFromDirectory(pathDirectory=out_path)                    
+        listFiles = listFilesFromDirectory(pathDirectory=out_path)
 
         print(f"{listFiles}")
         for item in listFiles:
@@ -975,7 +988,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                     for col in providers[dataProvider]:
                         for item in variables:
                             if col in variables.get(item):
-                                rawData.rename(columns={col:item}, inplace=True) 
+                                rawData.rename(columns={col:item}, inplace=True)
                                 [item if x==col else x for x in columns]
                     columns = rawData.columns
                 else :
@@ -988,8 +1001,8 @@ class ARGOSImport(ImportWithFileLikeCSV):
                     rawData['pttDate'] = pd.to_datetime(rawData['pttDate']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                     rawData = rawData.sort_values(by='txDate',ascending=True)
                     if len(dataSensorDf) > 0:
-                        lastData =  dataSensorDf.loc[0]       
-                        lastDate = lastData['txDate'].isoformat()                
+                        lastData =  dataSensorDf.loc[0]
+                        lastDate = lastData['txDate'].isoformat()
                         newDatatmpID = []
                         for i in rawData.index:
                             fileDate = rawData.loc[i,'txDate']
@@ -1002,7 +1015,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                     newData = newData.drop(['Hours since GPS fix'],axis = 1)
                     newData.to_sql(ArgosEngineering.__tablename__, curSession.get_bind(ArgosEngineering), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                 else:
-                    # #Gets database info about sensor 
+                    # #Gets database info about sensor
                     sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
                     if sensor is None:
                         rawData.insert(len(rawData.columns),'Status','')
@@ -1017,7 +1030,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         # if dataType == 'Argos':
                         #     if dataProvider == 'MTI_ARGOS_a':
                         # #Dates management
-                        rawData['date'] = rawData['date'].str.replace(" ","T") 
+                        rawData['date'] = rawData['date'].str.replace(" ","T")
                         rawData['date'] = pd.to_datetime(rawData['date']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                         rawData = rawData.sort_values(by='date',ascending=True)
                         # #Dataset management
@@ -1042,8 +1055,8 @@ class ARGOSImport(ImportWithFileLikeCSV):
                             print(report)
                             finalReport.append(report)
                             print(finalReport)
-                            continue 
-                        else:  
+                            continue
+                        else:
                             # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
                             geoOutliers, geoDataClean = self.findGeoOutliers(newData, dataType)
                             report['GeoOutliers'] = len(geoOutliers)
@@ -1053,7 +1066,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                             # #Function that finds duplicates = data with at least exactly same timestamp
                             duplicatesToDelete,duplicateCleanData = self.findTimeDuplicates(timeDataClean)
                             report['Duplicates'] = len(duplicatesToDelete)
-                            # to have only ok status data for quality annotation 
+                            # to have only ok status data for quality annotation
                             dataForAfterQuality = duplicateCleanData.loc[duplicateCleanData['Status'].isin(['test','Future'])].copy()
                             dataForQuality = duplicateCleanData.loc[~duplicateCleanData['Status'].isin(['test','Future'])].copy()
                             if len(dataForSpeed) > 0:
@@ -1063,7 +1076,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                                 # dataForSpeed.update(self, dataForQuality, join='left', overwrite=True, filter_func=None, errors='ignore')
                                 # to transform dataframe into List of dict
                                 dataForSpeedComplete.reset_index(drop=True, inplace=True)
-                            else : 
+                            else :
                                 dataForSpeedComplete = dataForQuality.copy()
                                 dataForSpeedComplete.reset_index(drop=True, inplace=True)
                             prefilteredData = dataForSpeedComplete.to_dict('Index')
@@ -1099,9 +1112,9 @@ class ARGOSImport(ImportWithFileLikeCSV):
 
     def futureAnnotation(self, rawData, timeDifference):
         ## Annotate dates in the future
-        # date import 
+        # date import
         currentDate = (datetime.now()+timedelta(hours=timeDifference)).strftime('%Y-%m-%dT%H:%M:%S')
-        # Date in filename at 23:59:59 
+        # Date in filename at 23:59:59
         # datefile = datetime.strptime(datefile,'%Y-%m-%d')
         # datefile = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
         countFuture = 0
@@ -1111,7 +1124,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
         ## get FK_individual and deployment date
         for idx in reversed(rawData.index):
             if rawData.loc[idx,'Status']=='Future':
-                countFuture = countFuture + 1 
+                countFuture = countFuture + 1
                 pass
             else :
                 maxDateData = rawData.loc[idx,'date']
@@ -1141,13 +1154,13 @@ class ARGOSImport(ImportWithFileLikeCSV):
                         individualID = item['individualID']
                         deploymentDateobj = item['startDate']
         else:
-            raise Exception("No sensor :( ") 
+            raise Exception("No sensor :( ")
         return individualID, deploymentDateobj
 
-    def findNewData(self,futurAnnotated, curSession, identifier, columns, dataType): 
+    def findNewData(self,futurAnnotated, curSession, identifier, columns, dataType):
         oldData = 0
         countImported = 0
-        # result gives all 
+        # result gives all
         # dataSensorNotImported = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0).order_by(desc(Gsm.date)).all()
         dataSensorNotImportedQuery1 = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 1).order_by(desc(ArgosGps.date))
         dataSensorNotImportedRes1 = dataSensorNotImportedQuery1.statement.compile( compile_kwargs={"literal_binds" : True} )
@@ -1157,7 +1170,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
             lastValidDate = lastValidData['date'].isoformat()
             dataSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'ok').order_by(desc(ArgosGps.date))
             dataTypeSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'ok',ArgosGps.type_==dataType).order_by(desc(ArgosGps.date))
-            dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'Future').order_by(desc(ArgosGps.date))     
+            dataFutureAnnotatedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.date > lastValidDate, ArgosGps.Status == 'Future').order_by(desc(ArgosGps.date))
         else:
             dataSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.Status == 'ok').order_by(desc(ArgosGps.date))
             dataTypeSensorNotImportedQuery = curSession.query(ArgosGps).filter(ArgosGps.ptt==int(identifier), ArgosGps.imported == 0, ArgosGps.checked == 0, ArgosGps.Status == 'ok',ArgosGps.type_==dataType).order_by(desc(ArgosGps.date))
@@ -1184,20 +1197,20 @@ class ARGOSImport(ImportWithFileLikeCSV):
             if len(dataSensorNotImportedDf1) > 0:
                 # lastDataImported = individualLocation[0] # à modifier
                 # lastDataImportedDate = lastDataImported.Date.isoformat()
-                # Case : some data have already been imported in EcoReleveData but not all 
+                # Case : some data have already been imported in EcoReleveData but not all
                 for i in futurAnnotated.index:
                     fileDate = futurAnnotated.loc[i,'date']
                     # To find data already validated and so that doesn't need to be imported
                     if fileDate < lastValidDate :
                         listOldID.append(i)
-                    # To select data (from file) that haven't been validated by being imported in EcoReleveData 
+                    # To select data (from file) that haven't been validated by being imported in EcoReleveData
                     elif fileDate > lastDataNotImportedDate:
                         newDatatmpID.append(i)
                     else:
-                        countImported = countImported + 1 
+                        countImported = countImported + 1
                 newData = futurAnnotated[futurAnnotated.index.isin(newDatatmpID)]
-                    # to select newdata that are neither in EcoReleveData nor in Sensor + to get not imported data from sensor database if they weren't in file 
-                # Means that none of not imported data are in the current file 
+                    # to select newdata that are neither in EcoReleveData nor in Sensor + to get not imported data from sensor database if they weren't in file
+                # Means that none of not imported data are in the current file
                 dataForSpeed = dataSensorNotImportedDf.drop(['checked','imported','FK_Import','Data_Quality','Fk_individual_location'],axis = 1)
                 dataForSpeed['date'] = pd.to_datetime(dataForSpeed['date']).dt.strftime('%Y-%m-%dT%H:%M:%S')
                 dataForSpeed = dataForSpeed.sort_values(by='date',ascending=True) # Attention, peut-être vérifier que la dernière donnée (qui correspond à la première dans le temps) soit bien valide et corresponde au release
@@ -1283,8 +1296,8 @@ class ARGOSImport(ImportWithFileLikeCSV):
                 if timeDataClean.loc[i,'date'] >= deploymentDateobj:
                     break
                 else:
-                    timeDataClean.loc[i,'Status']='test' 
-                    countTest = countTest + 1  
+                    timeDataClean.loc[i,'Status']='test'
+                    countTest = countTest + 1
         return timeDataClean, pastOutliers, countTest
 
     def findTimeDuplicates(self, timeDataClean):
@@ -1315,7 +1328,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                 prefilteredData[i+j]['Calculated_Speed'] = speed
                 # prefilteredData[i+j]['speed'] = speed
                 # Comparaison à la vitesse maximale entrée en paramètre,
-                # Si la vitesse est considérée aberrante on ajoute le point aux données éliminées et on l'annote dans les données brutes 
+                # Si la vitesse est considérée aberrante on ajoute le point aux données éliminées et on l'annote dans les données brutes
                 if iterationNb == 1:
                     if speed > MaxSpeed:
                         eliminatedSpeed.append(prefilteredData[i+j])
@@ -1323,22 +1336,22 @@ class ARGOSImport(ImportWithFileLikeCSV):
                     else:
                         prefilteredData[i+j]['Quality_On_Speed']= 1
                         i=i+j
-                        break 
+                        break
                 if iterationNb == 2:
                     if speed > MaxSpeed:
                         eliminatedSpeed.append(prefilteredData[i+j])
-                        prefilteredData[i+j]['Quality_On_Speed']=prefilteredData[i+j]['Quality_On_Speed'] + 1 
+                        prefilteredData[i+j]['Quality_On_Speed']=prefilteredData[i+j]['Quality_On_Speed'] + 1
                     else:
                         i=i+j
-                        break 
+                        break
         # Elimination des points dont la vitesse a été jugée aberrante
-        pointsfiltered = [x for x in prefilteredData if x not in eliminatedSpeed]          
+        pointsfiltered = [x for x in prefilteredData if x not in eliminatedSpeed]
         return prefilteredData, eliminatedSpeed, pointsfiltered
 
 
     def setQuality(self, speedQualityNewData):
         for i in speedQualityNewData.index:
-            # there is no quality indication in MTI_ARGOS_g, Reneco decided quality on metadata would be 1 by default in that case 
+            # there is no quality indication in MTI_ARGOS_g, Reneco decided quality on metadata would be 1 by default in that case
             if speedQualityNewData.loc[i,'type']=='GPS':
                 speedQualityNewData.loc[i,'Quality_On_Metadata'] = 1
             else:
@@ -1400,7 +1413,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #                 print(identifier)
 #             sentData = len(rawData)
 #             report['SentData'] = sentData
-#             # #Gets database info about sensor 
+#             # #Gets database info about sensor
 #             sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
 #             if sensor is None:
 #                 rawData.insert(len(rawData.columns),'Status','')
@@ -1426,14 +1439,14 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #                         for col in providers[report['dataprovider']]:
 #                             for item in variables:
 #                                 if col in variables.get(item):
-#                                     rawData.rename(columns={col:item}, inplace=True) 
+#                                     rawData.rename(columns={col:item}, inplace=True)
 #                                     [item if x==col else x for x in columns]
 #                         columns = rawData.columns
 #                 else :
 #                     print("wrong provider was selected")
 #                     return False
 #                 # #Dates management
-#                 rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T") 
+#                 rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T")
 #                 rawData['DateTime'] = pd.to_datetime(rawData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
 #                 rawData = rawData.sort_values(by='DateTime',ascending=True)
 #                 rawData = rawData.replace({'':np.NAN})
@@ -1467,13 +1480,13 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #                     dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, individualID, curSession, identifier, columns,sensor)
 #                     report['AlreadyImportedData'] = oldData
 #                     if len(newData) == 0:
-#                         print('deso deja importées dans Sensor')   
+#                         print('deso deja importées dans Sensor')
 #                         report['AlreadyImportedData'] = sentData
-#                         print(report)  
+#                         print(report)
 #                         finalReport.append(report)
-#                         print(finalReport)                                             
+#                         print(finalReport)
 #                         continue
-#                     else:  
+#                     else:
 #                         # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
 #                         geoOutliers, geoDataClean = self.findGeoOutliers(newData)
 #                         report['GeoOutliers'] = len(geoOutliers)
@@ -1487,7 +1500,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #                             # #Function that finds duplicates = data with at least exactly same timestamp
 #                             duplicatesToDelete,duplicateCleanData = self.findTimeDuplicates(timeDataClean)
 #                             report['Duplicates'] = len(duplicatesToDelete)
-#                             # to have only ok status data for quality annotation 
+#                             # to have only ok status data for quality annotation
 #                             dataForAfterQuality = duplicateCleanData.loc[duplicateCleanData['Status'].isin(['test','Future'])].copy()
 #                             dataForQuality = duplicateCleanData.loc[~duplicateCleanData['Status'].isin(['test','Future'])].copy()
 #                             if len(dataForSpeed) > 0:
@@ -1497,7 +1510,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #                                 # dataForSpeed.update(self, dataForQuality, join='left', overwrite=True, filter_func=None, errors='ignore')
 #                                 # to transform dataframe into List of dict
 #                                 dataForSpeedComplete.reset_index(drop=True, inplace=True)
-#                             else : 
+#                             else :
 #                                 dataForSpeedComplete = dataForQuality.copy()
 #                                 dataForSpeedComplete.reset_index(drop=True, inplace=True)
 #                             prefilteredData = dataForSpeedComplete.to_dict('Index')
