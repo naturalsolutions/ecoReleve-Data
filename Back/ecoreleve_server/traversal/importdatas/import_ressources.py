@@ -71,7 +71,11 @@ class GSMImport(ImportWithFileLikeCSV):
             'Eobs': ['event-id','visible','timestamp','location-long','location-lat','bar:barometric-pressure','data-decoding-software','eobs:activity','eobs:activity-samples','eobs:battery-voltage','eobs:fix-battery-voltage','eobs:horizontal-accuracy-estimate','eobs:key-bin-checksum','eobs:speed-accuracy-estimate','eobs:start-timestamp','eobs:status','eobs:temperature','eobs:type-of-fix','eobs:used-time-to-get-fix','gps:dop','gps:satellite-count','ground-speed','heading','height-above-ellipsoid','import-marked-outlier','mag:magnetic-field-raw-x','mag:magnetic-field-raw-y','mag:magnetic-field-raw-z','quaternion-raw-w','quaternion-raw-x','quaternion-raw-y','quaternion-raw-z','sensor-type','individual-taxon-canonical-name','tag-local-identifier','individual-local-identifier','study-name'],
             'Ornitela':['event-id','visible','timestamp','location-long','location-lat','acceleration-raw-x','acceleration-raw-y','acceleration-raw-z','bar:barometric-height','battery-charge-percent','battery-charging-current','external-temperature','gps:hdop','gps:satellite-count','gps-time-to-fix','ground-speed','heading','height-above-msl','import-marked-outlier','gls:light-level','mag:magnetic-field-raw-x','mag:magnetic-field-raw-y','mag:magnetic-field-raw-z','orn:transmission-protocol','tag-voltage','sensor-type','individual-taxon-canonical-name','tag-local-identifier','individual-local-identifier','study-name']
         }
-
+        providerSeparator = {
+            'MTI': '\t',
+            'Eobs': ',',
+            'Ornitela': ','
+        }
         variables = {
             'DateTime': ['DateTime','Date Time','Date/Time','Tx Date/Time','timestamp'],
             'Latitude_N': ['Latitude_N','Lat1(N)','Latitude(N)','location-lat'],
@@ -135,7 +139,7 @@ class GSMImport(ImportWithFileLikeCSV):
                         rawData = rawData[1:-1]
                         rawData = rawData.rename(columns = headers)
                     else:
-                        rawData = self.readData(report, path)
+                        rawData = self.readData(providerSeparator, report, path)
                     # Get tag identifier depending on provider
                     if report['dataprovider'] == 'MTI':
                         datefile = name[10:20]
@@ -152,7 +156,7 @@ class GSMImport(ImportWithFileLikeCSV):
                             dataType = 'engineering'
                             report['dataprovider'] = report['dataprovider'] + 'e'
                         # Get Standardized columns as the ones in database
-                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData,report, variables, providers, path)
+                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData, report, variables, providers, path, providerSeparator)
                         # if len(columns) == 0:
                         if SuggestedDataProvider is not None:
                             reportWrongProvider['ChosenDataProvider'] = report['dataprovider']
@@ -206,7 +210,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                     continue
                     if report['dataprovider'] == 'Eobs'or report['dataprovider'] == 'Ornitela':
                         # Get Standardized columns as the ones in database
-                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData,report, variables, providers, path)
+                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData,report, variables, providers, path, providerSeparator)
                         # if len(columns) == 0:
                         if SuggestedDataProvider is not None:
                             reportWrongProvider['ChosenDataProvider'] = report['dataprovider']
@@ -262,28 +266,24 @@ class GSMImport(ImportWithFileLikeCSV):
                             continue
         return finalReport
 
-    def readData(self, report, path):
-        if report['dataprovider'] == 'MTI':
-            rawData = pd.read_csv(path, sep='\t', dtype=str)
-        if report['dataprovider'] == 'Eobs' or report['dataprovider'] == 'Ornitela':
-            rawData = pd.read_csv(path, sep=',', dtype=str)
-            print('rawData')
+    def readData(self, providerSeparator, report, path):
+        rawData = pd.read_csv(path, sep=providerSeparator[report['dataprovider']], dtype=str)
+        print('rawData')
         return rawData
 
-    def findProvider(self,rawData, providers, path, report):
+    def findProvider(self, rawData, providerSeparator, providers, report):
         providerCol = list(rawData)
-        if len(providerCol) == 1:
-            if report['dataprovider'] == 'MTI':
-                providerCol = providerCol[0].split(',')
-            if report['dataprovider'] == 'Eobs' or report['dataprovider'] == 'Ornitela':
-                providerCol = providerCol[0].split('\t')
+        for p in providerSeparator:
+            if len(providerCol) == 1:
+                if not p == report['dataprovider']:
+                    providerCol = providerCol[0].split(providerSeparator[p])
         SuggestedDataProvider = 'No registered provider is matching'
         for p in providers:
             if providers[p] == providerCol:
                 SuggestedDataProvider = p
         return SuggestedDataProvider
 
-    def getStandardizedColumns(self, rawData, report, variables, providers, path):
+    def getStandardizedColumns(self, rawData, report, variables, providers, path, providerSeparator):
         columns = []
         columns = list(rawData.columns)
         if report['dataprovider'] in providers :
@@ -310,15 +310,15 @@ class GSMImport(ImportWithFileLikeCSV):
                     SuggestedDataProvider = None
                     return rawData, SuggestedDataProvider
                 else :
-                    SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
+                    SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
                     print("wrong provider was selected")
                     return rawData, SuggestedDataProvider
             else :
-                SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
+                SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
                 print("wrong provider was selected")
                 return rawData, SuggestedDataProvider
         else:
-            SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
+            SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
             print("wrong provider was selected")
             return rawData, SuggestedDataProvider
 
