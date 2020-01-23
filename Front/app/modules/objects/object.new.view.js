@@ -71,12 +71,12 @@ define([
       Swal({
         heightAuto: false,
         title: 'Succes',
-        text: 'creating new ' + _this.model.get('single'),
+        text: 'Creating new ' + _this.model.get('single'),
         type: 'success',
         showCancelButton: true,
         confirmButtonColor: 'green',
-        confirmButtonText: 'create another ' + _this.model.get('single'),
-        cancelButtonText: 'cancel'
+        confirmButtonText: 'Create another ' + _this.model.get('single'),
+        cancelButtonText: 'Back to ' + _this.model.get('single') + ' list'
       }).then( (result) => { 
         if ('dismiss' in result) {
           _this.cancel();
