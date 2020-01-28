@@ -419,12 +419,15 @@ define([
         if(!this.BBForm.model.get('ID')){
           this.formRegion.find('input:enabled,select:enabled,textarea:enabled').first().focus();
         }
-      }else{
+      }
+      else{
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').addClass('hidden');
-
+        if ( ['sensors', 'individuals'].indexOf(this.modelurl)  > -1 ) {
+          this.buttonRegion[0].find('.NsFormModuleEdit').addClass('js-superUser');
+        }
         this.buttonRegion[0].find('.NsFormModuleEdit').removeClass('hidden');
       }
 
