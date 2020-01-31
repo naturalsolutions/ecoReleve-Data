@@ -77,13 +77,18 @@ define([
 
             this.historyGrid.focusedRow = this.historyGrid.gridOptions.api.rowModel.getRow(cell.rowIndex);
             var $deleteBtn = this.$el.find(".js-btn-delete-history");
-            switch (this.historyGrid.focusedRow.data.Name) {
-              case 'Status':
-                $deleteBtn.attr("disabled", null);
-                break;
-              default:
-                $deleteBtn.attr("disabled", true);
-                break;
+            if (typeof(this.historyGrid.focusedRow) == "undefined") {
+                console.log("No row focusable")
+            }
+            else {
+              switch (this.historyGrid.focusedRow.data.Name) {
+                case 'Status':
+                  $deleteBtn.attr("disabled", null);
+                  break;
+                default:
+                  $deleteBtn.attr("disabled", true);
+                  break;
+              }
             }
           }, this)
         }
@@ -120,9 +125,7 @@ define([
         this.historyGrid.gridOptions.api.removeItems([row]);
         // call onCellFocused to update current focusedRow, event is not called otherwise
         this.historyGrid.gridOptions.onCellFocused();
-      }).fail(function(resp) {
-        this.swal(resp, 'error');
-      });
+      })
     },
 
     displayDeploymentGrid: function() {

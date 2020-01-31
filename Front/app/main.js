@@ -248,10 +248,7 @@ require.config({
 });
 
 require(['app', 'templates','translater'],
-function(app, templates, Translater) {
+function(app,  templates, Translater) {
   this.translater = Translater.getTranslater();
-  this.translater.dfd.done(function(){
-    app.start();
-  })
-
+  app.start();
 });
