@@ -19,6 +19,8 @@ SensorDynPropValue = Sensor.DynamicValuesClass
 class SensorValueResource(DynamicValueResource):
     model = SensorDynPropValue
 
+    __acl__ = context_permissions['sensors_history']
+
     def retrieve(self):
         pass
 

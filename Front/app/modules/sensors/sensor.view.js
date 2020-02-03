@@ -125,9 +125,7 @@ define([
         this.historyGrid.gridOptions.api.removeItems([row]);
         // call onCellFocused to update current focusedRow, event is not called otherwise
         this.historyGrid.gridOptions.onCellFocused();
-      }).fail(function(resp) {
-        this.swal(resp, 'error');
-      });
+      })
     },
 
     displayDeploymentGrid: function() {

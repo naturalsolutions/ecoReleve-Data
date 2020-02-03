@@ -1,8 +1,6 @@
 from pyramid.security import (
     Allow,
-    Authenticated,
     ALL_PERMISSIONS,
-    Everyone,
     Deny
 )
 ###
@@ -11,19 +9,20 @@ from pyramid.security import (
 #
 # SO and acl = (A,B,C)
 # A could be Allow or Deny
-# B is a principal 
+# B is a principal
 # C is the persmission or sequence of permissions
 # example:
 # (Allow, 'group:admin' , ('create','update','read') )
-# means IF your principal is 'group:admin' you are ALLOWED to (create, update, read)
+# means IF your principal is 'group:admin'
+# you are ALLOWED to (create, update, read)
 ###
 
 
-## NEED A TRUE REFACT (
-# that's not just autorization access for ressources we need a global vision 
+# NEED A TRUE REFACT (
+# that's not just autorization access for ressources we need a global vision
 # for now we gonna create a "special" action 'fixForOld'
 # )
-## but for now we g
+# but for now we g
 
 
 context_permissions = {
@@ -52,6 +51,11 @@ context_permissions = {
         (Allow, 'group:superUser', ('update', 'read')),
         (Allow, 'group:user', 'read')
     ],
+    'individuals_history': [
+        (Allow, 'group:admin', ('read', 'update', 'delete')),
+        (Allow, 'group:superUser', ('read', 'update', 'delete')),
+        (Allow, 'group:user', 'read')
+    ],
     'individual_locations': [
         (Allow, 'group:admin', ('read', 'update', 'delete')),
         (Deny, 'group:superUser', ('update', 'delete')),
@@ -66,6 +70,11 @@ context_permissions = {
     'sensors': [
         (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUser', ('create', 'read', 'update')),
+        (Allow, 'group:user', 'read')
+    ],
+    'sensors_history': [
+        (Allow, 'group:admin', ('read', 'update', 'delete')),
+        (Allow, 'group:superUser', ('read', 'update', 'delete')),
         (Allow, 'group:user', 'read')
     ],
     'SensorDatasByType': [
