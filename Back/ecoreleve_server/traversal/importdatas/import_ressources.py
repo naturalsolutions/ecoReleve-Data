@@ -90,6 +90,9 @@ class GSMImport(ImportWithFileLikeCSV):
             'platform_': ['tag-local-identifier'],
             'individual_ID': ['individual-local-identifier']
         }
+        twoDfix = [
+            '2D Fix'
+        ]
         first_time = datetime.now() # juste pour avoir temps d'exécution
         curSession = self.request.dbsession
         #filePosted = self.getFile()
@@ -194,7 +197,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                     continue
                                 else:
                                     report['AlreadyImportedData'] = sentData - len(newdataDf)
-                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
+                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, twoDfix)
                                     finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                                     lasttime = datetime.now()
                                     diftime = lasttime - first_time
@@ -250,7 +253,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                         # print(finalReport)
                                         continue
                                     else:
-                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
+                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, twoDfix)
                                         # engineering data management
                                         engineeringDf = finalDataset[['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount','platform_','file_date']].copy()
                                         finalReport = self.engineeringDataManagement(engineeringDf ,identifier, finalReport, report, curSession)
@@ -417,10 +420,10 @@ class GSMImport(ImportWithFileLikeCSV):
         dataSensorNotImportedDf1 = pd.read_sql_query(dataSensorNotImportedRes1,curSession.get_bind(Gsm))
         dataSensorNotImportedExoticDf = pd.DataFrame(columns = dataSensorNotImportedDf1.columns)
         if len(dataSensorNotImportedDf1) > 0:
-            lastValidData =  dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
+            lastValidData = dataSensorNotImportedDf1.loc[0] #to have dataframe output and not series
             lastValidDate = lastValidData['DateTime'].isoformat()
             dataSensorNotImportedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'ok').order_by(desc(Gsm.date))
-            dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'Future').order_by(desc(Gsm.date))     
+            dataFutureAnnotatedQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.date > lastValidDate, Gsm.Status == 'Future').order_by(desc(Gsm.date))
         else:
             dataSensorNotImportedExoticQuery = curSession.query(Gsm).filter(Gsm.platform_==int(identifier), Gsm.imported == 0, Gsm.Status == 'exotic').order_by(desc(Gsm.date))
             dataSensorNotImportedExoticRes = dataSensorNotImportedExoticQuery.statement.compile( compile_kwargs={"literal_binds" : True} )
@@ -544,20 +547,24 @@ class GSMImport(ImportWithFileLikeCSV):
         except ValueError as e:
             return False
 
-
-    def findGeoOutliers(self, newData):
+    def findGeoOutliers(self, newData, twoDfix):
         geoOutliers = newData.loc[((newData['Latitude_N'].isnull())|(newData['Longitude_E'].isnull()))|((abs(pd.to_numeric(newData['Latitude_N']))>90)|(abs(pd.to_numeric(newData['Longitude_E']))>180))].copy()
         geoOutliers['Status'] = 'geoimpossible'
         geoDataClean = newData.loc[(~newData['PK_id'].isin(geoOutliers.PK_id))].copy()
         # geoDataClean.astype({'Altitude_m':'int32'}, errors='ignore')
         # geoDataClean.loc[:,'Altitude_m']=geoDataClean['Altitude_m'].apply(pd.to_numeric, errors = 'ignore')
-        wrongValues = geoDataClean['Altitude_m'].apply(self.findWrongStringValues) #returns True if not str
+        goodStringCollection = geoDataClean.loc[geoDataClean['Altitude_m'].isin(twoDfix)].copy() # get 2D fix data
+        collectionWithout2D = geoDataClean.loc[~geoDataClean.index.isin(goodStringCollection)].copy()
+        wrongValues = collectionWithout2D['Altitude_m'].apply(self.findWrongStringValues) #returns True if not str
         wrongValues = wrongValues.loc[wrongValues == False].copy()
         wrongValues = wrongValues.to_frame()
         geoDataClean = geoDataClean[~geoDataClean.index.isin(wrongValues.index)].copy()
-        toConcat = [geoOutliers,wrongValues]
-        geoOutliers2 = pd.concat(toConcat, sort=False)
-        return geoOutliers2, geoDataClean
+        toConcatWrong = [geoOutliers,wrongValues]
+        geoOutliers2 = pd.concat(toConcatWrong, sort=False)
+        goodStringCollection['Altitude_m']=-999
+        toConcatGood = [geoDataClean,goodStringCollection]
+        geoDataClean1 = pd.concat(toConcatGood, sort=False)
+        return geoOutliers2, geoDataClean1
 
     def findTimeOutliers(self,geoDataClean,sensorCreationDate,deploymentDateobj):
         if sensorCreationDate is None:
@@ -714,9 +721,9 @@ class GSMImport(ImportWithFileLikeCSV):
         finalDataset = finalDataset.sort_values(by=date,ascending=True)
         return finalDataset
 
-    def dataAnnotation(self, newData, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport):
+    def dataAnnotation(self, newData, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, twoDfix):
         # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
-        geoOutliers, geoDataClean = self.findGeoOutliers(newData)
+        geoOutliers, geoDataClean = self.findGeoOutliers(newData, twoDfix)
         report['GeoOutliers'] = len(geoOutliers)
         if len(geoOutliers)==len(newData):
             return report
