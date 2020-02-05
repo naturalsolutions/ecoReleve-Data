@@ -34,9 +34,9 @@ def individual_filter(self, query, criteria):
                     Observation.__table__.c[curProp] != None)
         )
         if criteria['Operator'].lower() == 'is not null':
-            query = query.where(~exists(subSelect))
-        else:
             query = query.where(exists(subSelect))
+        else:
+            query = query.where(~exists(subSelect))
     else:
         subSelect = select([Observation]
                             ).where(
