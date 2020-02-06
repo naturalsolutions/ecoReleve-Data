@@ -42,7 +42,7 @@ function($,Marionette, config, Breadcrumb) {
 
       this.breadcrumb.show(new Breadcrumb());
       window.app.user = new Backbone.Model();
-      window.app.user.url = 'currentUser';
+      window.app.user.url = config.coreUrl + 'currentUser';
       window.app.user.fetch({
         success: function(data) {
           /*

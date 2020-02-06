@@ -51,13 +51,13 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1,
     initStats: function() {
       var isDomoInstance = config.instance ;
       var collGraphObj = [{
-        url: 'sensor/uncheckedDatas/graph',
+        url: config.coreUrl + 'sensor/uncheckedDatas/graph',
         ele: '#validate',
         title: 'pending',
         stored: false,
         template: 'app/base/home/tpl/tpl-dounutGraph.html'
       },{
-        url: 'individuals/location/graph',
+        url: config.coreUrl + 'individuals/location/graph',
         ele: '#locations',
         title: 'location',
         stored: false,
