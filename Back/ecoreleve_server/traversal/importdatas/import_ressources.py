@@ -92,6 +92,7 @@ class GSMImport(ImportWithFileLikeCSV):
         }
         first_time = datetime.now() # juste pour avoir temps d'exécution
         curSession = self.request.dbsession
+        dynprop = Sensor.DynamicValuesClass
         #filePosted = self.getFile()
         # if filePosted is not None:
         # name = filePosted.filename
@@ -181,9 +182,9 @@ class GSMImport(ImportWithFileLikeCSV):
                                     rawData['Status'] = 'exotic'
                                     print('No matching sensor found in database')
                                     # on les insère quand même dans la base
-                                    sensorCreationDate = None
+                                    sensorReception = None #Ancien sensorCreationDate
                                 else:
-                                    sensorCreationDate = sensor.creationDate
+                                    sensorReception, SensorDeployment = self.getSensorStatusDates(sensor, dynprop)
                                 newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, sensor, file_date)
                                 if len(newdataDf) == 0:
                                     print('deso deja importées dans Sensor')
@@ -321,6 +322,17 @@ class GSMImport(ImportWithFileLikeCSV):
             SuggestedDataProvider = self.findProvider(rawData, providers, path, report)
             print("wrong provider was selected")
             return rawData, SuggestedDataProvider
+
+    def getSensorStatusDates(self, sensor, dynprop):
+        sensorID = sensor.ID
+        sensorStatus = curSession.query(dynprop)
+                                        .filter(dynprop.fk_property == 3, dynprop.fk_parent == int(sensorID))
+                                        .order_by(desc(dynprop.StartDate))
+                                        .first()
+        sensorStatusList : list = [sensorStatus[i].realValue for i in range (len(sensorStatus))]
+        SensorDeployment : list = [Status['StartDate'] for Status in sensorStatusList if Status['value:'].find('mise en service') != -1]
+        sensorReception = min(Status['StartDate'] for Status in sensorStatusList if Status['value:'].find('livraison et stockage') != -1)
+        return sensorReception, SensorDeployment
 
     def engineeringDataManagement(self, engineeringData, identifier, finalReport, report, curSession):
         if report['dataprovider'] == 'MTIe':
@@ -559,15 +571,15 @@ class GSMImport(ImportWithFileLikeCSV):
         geoOutliers2 = pd.concat(toConcat, sort=False)
         return geoOutliers2, geoDataClean
 
-    def findTimeOutliers(self,geoDataClean,sensorCreationDate,deploymentDateobj):
-        if sensorCreationDate is None:
+    def findTimeOutliers(self,geoDataClean,sensorReception,deploymentDateobj):
+        if sensorReception is None:
             pastOutliers = pd.DataFrame(columns = geoDataClean.columns)
             timeDataClean = geoDataClean.copy()
         else:
-            sensorCreationDateobj = sensorCreationDate.isoformat()
+            sensorReceptionDateobj = sensorReception.isoformat()
             # # Recherche de potentielles dates avant la céation du sensor
-            pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorCreationDateobj].copy()
-            pastOutliers ['Status'] = 'Past outlier'
+            pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorReceptionDateobj].copy()
+            pastOutliers ['Status'] = 'Before reception'
             timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
         countTest = 0
         # # Recherche de potentielles dates avant le déploiement
@@ -580,7 +592,7 @@ class GSMImport(ImportWithFileLikeCSV):
                         timeDataClean.loc[i,'Status']='test'
                         countTest = countTest + 1
         else :
-            if sensorCreationDate is not None:
+            if sensorReception is not None:
                 timeDataClean['Status'] = 'No information'
         return timeDataClean, pastOutliers, countTest
 
