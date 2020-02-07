@@ -116,11 +116,6 @@ class GSMImport(ImportWithFileLikeCSV):
             'TestAnnotated': 0,
             'FutureAnnotated': 0,
         }
-        reportWrongProvider = {
-            'ChosenDataProvider': '',
-            'SuggestedDataProvider': '',
-            'file': ''
-        }
         for item in self.request.POST._items:
             if item is not None:
                 if item[0] == 'provider':
@@ -155,24 +150,18 @@ class GSMImport(ImportWithFileLikeCSV):
                         elif name[8] == 'e':
                             dataType = 'engineering'
                             report['dataprovider'] = report['dataprovider'] + 'e'
-                        # Get Standardized columns as the ones in database
-                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData, report, variables, providers, path, providerSeparator)
-                        # if len(columns) == 0:
-                        if SuggestedDataProvider is not None:
-                            reportWrongProvider['ChosenDataProvider'] = report['dataprovider']
-                            reportWrongProvider['SuggestedDataProvider'] = SuggestedDataProvider
-                            reportWrongProvider['file'] = report['file']
-                            finalReport.append(copy.deepcopy(reportWrongProvider)) # Wrong provider
-                            print(finalReport)
-                            self.request.response.status_code = 409
-                        else:
+                        # Check if file is from the selected provider
+                        SuggestedDataProvider = self.checkProvider(rawData, providerSeparator, providers, report, finalReport)
+                        if SuggestedDataProvider is None:
+                            # Get Standardized columns as the ones in database
+                            rawData = self.getStandardizedColumns(rawData, report, variables, providers)
                             datefile = datetime.strptime(datefile,'%Y-%m-%d')
                             file_date = (datefile+timedelta(hours=23,minutes=59,seconds=59)).strftime('%Y-%m-%dT%H:%M:%S')
                             rawData.insert(len(rawData.columns),'file_date',file_date)
-                            rawData.insert(len(rawData.columns),'platform_',identifier[-3:])
+                            rawData['platform_'] = identifier[-3:]
                             if dataType == 'engineering':
-                                rawData = rawData.drop(['PK_id'],axis = 1)
-                                finalReport = self.engineeringDataManagement(rawData,identifier, finalReport,report,curSession)
+                                engineeringDf = rawData[['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount','platform_','file_date']].copy()
+                                finalReport = self.engineeringDataManagement(engineeringDf,identifier, finalReport,report,curSession)
                                 print(finalReport)
                                 continue
                             if dataType == 'locations':
@@ -209,16 +198,11 @@ class GSMImport(ImportWithFileLikeCSV):
                                     print(finalReport)
                                     continue
                     if report['dataprovider'] == 'Eobs'or report['dataprovider'] == 'Ornitela':
-                        # Get Standardized columns as the ones in database
-                        rawData, SuggestedDataProvider = self.getStandardizedColumns(rawData,report, variables, providers, path, providerSeparator)
-                        # if len(columns) == 0:
-                        if SuggestedDataProvider is not None:
-                            reportWrongProvider['ChosenDataProvider'] = report['dataprovider']
-                            reportWrongProvider['SuggestedDataProvider'] = SuggestedDataProvider
-                            reportWrongProvider['file'] = report['file']
-                            finalReport.append(copy.deepcopy(reportWrongProvider)) # Wrong provider
-                            self.request.response.status_code = 409
-                        else:
+                        # Check if file is from the selected provider
+                        SuggestedDataProvider = self.checkProvider(rawData, providerSeparator, providers, report, finalReport)
+                        if SuggestedDataProvider is None:
+                            # Get Standardized columns as the ones in database
+                            rawData = self.getStandardizedColumns(rawData, report, variables, providers)
                             file_date = None
                             rawData.insert(len(rawData.columns),'file_date',file_date)
                             rawData.insert(len(rawData.columns),'Quality_On_Speed','')
@@ -271,6 +255,26 @@ class GSMImport(ImportWithFileLikeCSV):
         print('rawData')
         return rawData
 
+    def checkProvider(self, rawData, providerSeparator, providers, report, finalReport):
+        SuggestedDataProvider = None
+        columns = list(rawData.columns)
+        if not (
+            report['dataprovider'] in providers
+            and len(providers[report['dataprovider']]) == len(columns)
+            and providers[report['dataprovider']] == columns
+        ):
+            SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
+            print("wrong provider was selected")
+            reportWrongProvider = {
+                'ChosenDataProvider': report['dataprovider'],
+                'SuggestedDataProvider': SuggestedDataProvider,
+                'file': report['file']
+            }
+            finalReport.append(copy.deepcopy(reportWrongProvider)) # Wrong provider
+            print(finalReport)
+            self.request.response.status_code = 409
+        return SuggestedDataProvider
+
     def findProvider(self, rawData, providerSeparator, providers, report):
         providerCol = list(rawData)
         for p in providerSeparator:
@@ -283,44 +287,23 @@ class GSMImport(ImportWithFileLikeCSV):
                 SuggestedDataProvider = p
         return SuggestedDataProvider
 
-    def getStandardizedColumns(self, rawData, report, variables, providers, path, providerSeparator):
-        columns = []
-        columns = list(rawData.columns)
-        if report['dataprovider'] in providers :
-            if len(providers[report['dataprovider']]) == len(columns):
-                if providers[report['dataprovider']] == columns:
-                    for col in providers[report['dataprovider']]:
-                        for item in variables:
-                            if col in variables.get(item):
-                                rawData.rename(columns={col:item}, inplace=True)
-                                [item if x==col else x for x in columns]
-                    rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T")
-                    rawData['DateTime'] = pd.to_datetime(rawData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
-                    rawData = rawData.sort_values(by='DateTime',ascending=True)
-                    rawData = rawData.replace({'':None})
-                    rawData.insert(0, 'PK_id', range(0, 0 + len(rawData)))
-                    if report['dataprovider'] == 'Eobs':
-                        rawData.insert(len(rawData.columns),'HDOP',None)
-                        rawData.insert(len(rawData.columns),'VDOP',None)
-                        rawData.insert(len(rawData.columns),'Course',None)
-                    if report['dataprovider'] == 'Ornitela':
-                        rawData.insert(len(rawData.columns),'VDOP',None)
-                        rawData.insert(len(rawData.columns),'Course',None)
-                        rawData.insert(len(rawData.columns),'ActivityCount',None)
-                    SuggestedDataProvider = None
-                    return rawData, SuggestedDataProvider
-                else :
-                    SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
-                    print("wrong provider was selected")
-                    return rawData, SuggestedDataProvider
-            else :
-                SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
-                print("wrong provider was selected")
-                return rawData, SuggestedDataProvider
-        else:
-            SuggestedDataProvider = self.findProvider(rawData, providerSeparator, providers, report)
-            print("wrong provider was selected")
-            return rawData, SuggestedDataProvider
+    def getStandardizedColumns(self, rawData, report, variables, providers):
+        dbColWithEqInFile = []
+        for fileCol in providers[report['dataprovider']]:
+            for dbCol in variables:
+                if fileCol in variables.get(dbCol):
+                    rawData.rename(columns={fileCol:dbCol}, inplace=True)
+                    dbColWithEqInFile.append(dbCol)
+        rawData['DateTime'] = rawData['DateTime'].str.replace(" ","T")
+        rawData['DateTime'] = pd.to_datetime(rawData['DateTime']).dt.strftime('%Y-%m-%dT%H:%M:%S')
+        rawData = rawData.sort_values(by='DateTime',ascending=True)
+        rawData = rawData.replace({'':None})
+        rawData.insert(0, 'PK_id', range(0, 0 + len(rawData)))
+        for dbCol in variables:
+            if dbCol not in dbColWithEqInFile:
+                print(dbCol)
+                rawData.insert(len(rawData.columns),dbCol,None)
+        return rawData
 
     def engineeringDataManagement(self, engineeringData, identifier, finalReport, report, curSession):
         if report['dataprovider'] == 'MTIe':
