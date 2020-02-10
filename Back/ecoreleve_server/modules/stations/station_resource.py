@@ -328,17 +328,29 @@ class StationsResource(DynamicObjectCollectionResource):
         #           #'limit':params.get('per_page')#,
         #           #'order_by':params.get('order_by')
         #         }
-        params = {'selectable': ['ID'],
-                  'filters':params.get('criteria', [])
-                }
 
-        queryCTE = self.collection.build_query(**params).cte()
-        joinFW = join(Station_FieldWorker, User,
-                      Station_FieldWorker.FK_FieldWorker == User.id)
-        joinTable = join(queryCTE, joinFW, queryCTE.c[
-                            'ID'] == Station_FieldWorker.FK_Station)
-        query = select([Station_FieldWorker.FK_Station,
-                        User.Login]).select_from(joinTable)
+        params = {
+            'selectable': [a.get('Column') for a in params.get('criteria')],
+            'filters': params.get('criteria', [])
+            }
+        queryTmp = self.collection.build_query(**params)
+        queryTmp = queryTmp.with_only_columns([getattr(self.model, 'ID')])
+        queryCTE = queryTmp.cte()
+        # queryCTE = self.collection.build_query(**params).cte()
+        joinFW = join(
+            Station_FieldWorker,
+            User,
+            Station_FieldWorker.FK_FieldWorker == User.id
+            )
+        joinTable = join(
+            queryCTE,
+            joinFW,
+            queryCTE.c['ID'] == Station_FieldWorker.FK_Station
+            )
+        query = select([
+            Station_FieldWorker.FK_Station,
+            User.Login
+            ]).select_from(joinTable)
         FieldWorkers = self.session.execute(query).fetchall()
         list_ = {}
         for x, y in FieldWorkers:
