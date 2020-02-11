@@ -26,6 +26,9 @@ from ..utils.parseValue import parser
 from .base_model import HasDynamicProperties
 
 from ecoreleve_server.core import Base
+from ecoreleve_server.modules.individuals import Individual
+from ecoreleve_server.modules.monitored_sites import MonitoredSite
+from ecoreleve_server.modules.sensors.sensor_model import Sensor
 from ecoreleve_server.modules.stations.station_model import Station
 
 
@@ -272,6 +275,7 @@ class QueryEngine(object):
 
     def apply_custom_filters(self, query, filters):
         if self.model == Station:
+            print("custom filters for Station")
             subQueryTest = None
             modelToAdd = []
             modelRel = []
@@ -312,7 +316,23 @@ class QueryEngine(object):
                 )
 
                 query = query.where(exists(subQueryTest))
+        elif self.model == Individual:
+            print("custom filters for Individual")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+        elif self.model == MonitoredSite:
+            print("custom filters for MonitoredSite")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+        elif self.model == Sensor:
+            print("custom filters for Sensor")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
         else:
+            print("custom filters for Individual")
             for criteria in filters:
                 if criteria['Column'] in self.custom_filters:
                     query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
