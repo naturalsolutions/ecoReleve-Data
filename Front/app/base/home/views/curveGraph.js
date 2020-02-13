@@ -25,7 +25,7 @@ define([
         var gData = JSON.parse(dataGraph);
         _this.drawGraph(gData);
       } else {
-        var url = config.coreUrl + 'stations/graph';
+        var url = config.erdApiUrl + 'stations/graph';
         $.ajax({
           context: this,
           url: url,

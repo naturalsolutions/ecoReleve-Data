@@ -343,7 +343,7 @@ define([
         columns: this.cols,
         pageSize: 20,
         com: this.com,
-        url: config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas',
+        url: config.erdApiUrl + 'sensors/' + this.type_ + '/uncheckedDatas',
         rowClicked: true,
         totalElement: 'totalEntriesType',
         idCell: 'FK_Sensor'
@@ -431,7 +431,7 @@ define([
         params.toValidate = 'all';
       }
       params.toValidate = JSON.stringify(params.toValidate);
-      var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
+      var url = config.erdApiUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
       $.ajax({
         url: url,
         method: 'POST',

@@ -135,7 +135,7 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl + 'photos/?siteid='+_this.siteId+'&sessionID='+this.equipmentId+''
+        url: config.erdApiUrl + 'photos/?siteid='+_this.siteId+'&sessionID='+this.equipmentId+''
       });
 
       this.myImageCollection = new ImageCollection();

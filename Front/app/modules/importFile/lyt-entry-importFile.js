@@ -94,7 +94,7 @@ define([
 					var Step0RFID = StepSelectFile.extend({
 						name : 'RFID file selection',
 						acronymType: 'RFID',
-						url:config.coreUrl+'sensors/rfid/datas',
+						url:config.erdApiUrl+'sensors/rfid/datas',
 						extension:'.txt',
 						maxFiles:1
 					});
@@ -103,7 +103,7 @@ define([
 				case 'gsm':
 					var Step0GSM = StepSelectFile.extend({
 						name : 'GSM file selection',
-						url:config.coreUrl+'sensors/gsm/datas',
+						url:config.erdApiUrl+'sensors/gsm/datas',
 						acronymType: 'GSM',
 						extension:'.txt',
 						uploadOnly:true,
@@ -114,7 +114,7 @@ define([
 				case 'argos':
 					var Step0Argos = StepSelectFile.extend({
 						name : 'Argos file selection',
-						url:config.coreUrl+'sensors/argos/datas',
+						url:config.erdApiUrl+'sensors/argos/datas',
 						acronymType: 'Argos',
 						extension:'.txt',
 						uploadOnly:true,
