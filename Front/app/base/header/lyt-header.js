@@ -27,7 +27,7 @@ function($,Marionette, config, Breadcrumb) {
         context: this,
         url: 'security/logout'
       }).done(function() {
-        document.location.href = config.portalUrl;
+        document.location.href = config.portalFrontUrl;
       });
     },
 
@@ -42,7 +42,7 @@ function($,Marionette, config, Breadcrumb) {
 
       this.breadcrumb.show(new Breadcrumb());
       window.app.user = new Backbone.Model();
-      window.app.user.url = config.coreUrl + 'currentUser';
+      window.app.user.url = config.erdApiUrl + 'currentUser';
       window.app.user.fetch({
         success: function(data) {
           /*
