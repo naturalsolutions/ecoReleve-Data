@@ -16,6 +16,7 @@ require.config({
     'transition-region': './base/transition-region/transition-region',
     'googleLoaer': './vendors/google-maps-loader',
     'translater': 'translater',
+    'oauth2': './oauth2',
 
     /*==========  NS modules  ==========*/
     'ns_modules': 'ns_modules',

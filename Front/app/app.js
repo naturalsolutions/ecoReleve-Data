@@ -1,5 +1,6 @@
 define([
   'marionette',
+  'oauth2',
   'lyt-rootview',
   'router',
   'controller',
@@ -28,7 +29,7 @@ define([
 
   ],
 
-function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) {
+function( Marionette, OAuth2, LytRootView, Router, Controller,Swal,config, $, Backbone) {
 
     var app = {};
     var JST = window.JST = window.JST || {};
@@ -56,168 +57,240 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       return JST[template](data);
   };
 
-    function oauth2Flow() {
+  function redirectToAuht() {
+    redirect_uri = window.location.origin + window.location.pathname
+    client_id = config.client_id
+    encodedRedirectUri = encodeURIComponent(redirect_uri)
+    url = config.portalFrontUrl
+    search = '?redirect_uri=' + encodedRedirectUri + '&client_id=' + client_id
+    urlToRedirect = url + search
+    window.location.href = urlToRedirect
+  }
 
-      /****** STARTING define function ****/
+  var xhrRefeshToken;
 
-      function checkCode () {
-        var keyToFind = "code"
-        var toRet = null
-        var qs = window.location.search.substring(1)
-        if ( qs != '') {
-          var pairs = qs.split('&')
-          for (var i = 0; i < pairs.length; i++) {
-            var tmp = pairs[i].split('=');
-            var key = tmp[0];
-            var value = tmp[1]
-            if (decodeURIComponent(key) == keyToFind) {
-              toRet = value
-            }
-          }
-        }
-        return toRet
+  function checkValidityToken(keyToken) {
+    var token = localStorage.getItem(keyToken);
+    var toRet = false;
+    try {
+      var tmp = token.split('.');
+      var payload = JSON.parse(atob(tmp[1]));
+    }
+    catch(error) {
+      localStorage.removeItem(keyToken);
+      return toRet;
+    }
+
+    var now = new Date().getTime();
+    //js timestamp is in milliseconds
+    //python timestamp is in seconds
+    var dateExp = new Date( payload['exp'] * 1000 ).getTime();
+
+    if ( now - 5000 < dateExp ) {
+      toRet = token;
+    }
+    return toRet;
+  }
+
+  $(document).bind("ajaxSend", function(a, b, c){
+    console.log('ajaxStart', c.url);
+  });
+
+  // $( document ).ajaxStart(function() {
+  //   console.log('ajaxStart');
+  // })
+  $( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
+    //TODO
+  });
+  $.ajaxSetup({
+    // before jQuery send the request we will push it to our array
+    beforeSend: function(jqxhr, options) {
+      // if(options.type === 'GET' || options.url.indexOf('http://') !==-1 ){ //should be a GET!! (thesaurus calls)
+      //   $.xhrPool.calls.push(jqxhr);
+      // }
+    },
+    // when some of the requests completed it will splice from the array
+    complete: function(jqxhr, options){
+      var index = $.xhrPool.calls.indexOf(jqxhr);
+      if (index > -1) {
+        $.xhrPool.calls.splice(index, 1);
       }
-      function storeTokens(data) {
-        localStorage.setItem("Authorization", data['access_token']);
-        localStorage.setItem("refreshToken", data['refresh_token']);
-      }
-      function getTokenWithCode(codeToSend) {
-        $.ajax({
-          context: this,
-          type: 'POST',
-          url: 'http://api.com:6544/security/oauth2/v1/token',
-          data: JSON.stringify({
-            'grant_type' : "code",
-            "code" : codeToSend
-          }),
-          dataType: 'json',
-          contentType: 'application/json',
-          success: function(data) {
-            storeTokens(data)
-          },
-          error: function() {
+    },
+    error: function(jqxhr, options){
+      if(jqxhr.status == 401){
 
-          },
-          complete: function() {
-
-          }
-        })
+        console.log(arguments, "you are not logged or the api could not identify you, you will be redirected to the portal")
+        // document.location.href = config.portalFrontUrl;
       }
-
-      function checkValidityToken(token) {
-        var toRet = false
-        var tmp = token.split('.')
-        var payload = JSON.parse(atob(tmp[1]))
-        var now = new Date()
-        //js timestamp is in milliseconds
-        //python timestamp is in seconds
-        var dateExp = new Date( payload['exp'] * 1000 )
-
-        if ( now < dateExp ) {
-          toRet = true
-        }
-        return toRet
+      if(jqxhr.status == 403){
+        Swal({
+          heightAuto: false,
+          title: 'Unauthorized',
+          text: "You don't have permission",
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK'
+        });
       }
-      function accessTokenExistAndValid() {
-        var token = localStorage.getItem("Authorization")
-        var toRet = false
-        if (token == null) {
-          toRet = false
-        }
-        else {
-          toRet = checkValidityToken(token)
-        }
-        return toRet
+      if(jqxhr.status == 409){
+        Swal({
+          heightAuto: false,
+          title: 'Data conflicts',
+          text: jqxhr.responseText,
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK'
+        });
       }
-      function refreshTokenExistAndValid() {
-        var token = localStorage.getItem("refreshToken")
-        var toRet = false
-        if (token == null) {
-          toRet = false
-        }
-        else {
-          toRet = checkValidityToken(token)
-        }
-        return toRet
-      }
-      function callPortalAndGetNewAccessToken() {
-        var refresh_token = localStorage.getItem('refreshToken')
-        $.ajax({
-          context: this,
-          type: 'POST',
-          url: 'http://api.com:6544/security/oauth2/v1/token',
-          data: JSON.stringify({
-            'grant_type' : "refresh_token",
-            "refresh_token" : refresh_token
-          }),
-          dataType: 'json',
-          contentType: 'application/json',
-          success: function(data) {
-            localStorage.setItem("Authorization", data['access_token']);
-          },
-          error: function() {
+    }
+  });
+  var xhrRefeshToken
+  $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+    if(options.url.indexOf('http://') > -1) {
+      options.url = options.url;
+    } else {
+      options.url = config.erdApiUrl + options.url;
+    }
+    if (options.url.indexOf(config.erdApiUrl) > -1) {
 
-          },
-          complete: function() {
-
-          }
-        })
-      }
-      function redirectToAuht() {
-        redirect_uri = window.location.origin + window.location.pathname
-        client_id = config.client_id
-        encodedRedirectUri = encodeURIComponent(redirect_uri)
-        url = 'http://api.com/nsportal/front/'
-        search = '?redirect_uri='+encodedRedirectUri+'&client_id='+client_id
-        urlToRedirect = url + search
-        window.location = urlToRedirect
+      if (options.refreshRequest) {
+        return;
       }
 
-      /****** ENDING define function ******/
+      // our own deferred object to handle done/fail callbacks
+      var dfd = $.Deferred();
 
-      /******  STARTING FLOW    ******/
-      var qsCode = checkCode();
-      if (qsCode == null) {
-        var accessTokenValid = accessTokenExistAndValid();
-        if (accessTokenValid) {
-          //case No code but accessTokenAndValid
-          //do the call
-        }
-        else {
-          var refreshTokenInMemory = refreshTokenExistAndValid();
-          if (refreshTokenInMemory) {
-            callPortalAndGetNewAccessToken(refreshTokenInMemory);
+      // if the request works, return normally
+      jqXHR.done(dfd.resolve);
+
+      // if the request fails, do something else
+      // yet still resolve
+      jqXHR.fail(function() {
+          var args = Array.prototype.slice.call(arguments);
+          if (jqXHR.status != 401) {
+            dfd.rejectWith(jqXHR, args);
           }
           else {
-            //case No code and no access token and refreshtoken
-            redirectToAuht();
+            var refresh_token = checkValidityToken("NSERDRefresh_token")
+            if (!refresh_token) {
+              redirectToAuht();
+            }
+            else {
+              var refresh_token = localStorage.getItem('NSERDRefresh_token');
+              if (!xhrRefeshToken) {
+                xhrRefeshToken = $.ajax({
+                  context: this,
+                  type: 'POST',
+                  url: config.portalApiUrl + 'security/oauth2/v1/token',
+                  data: JSON.stringify({
+                    'grant_type' : "refresh_token",
+                    "refresh_token" : refresh_token
+                  }),
+                  dataType: 'json',
+                  contentType: 'application/json'
+                }).then(function(data) {
+                    localStorage.setItem('NSERDAccess_token', data.access_token);
+                  },
+                  function(err) {
+                    redirectToAuht();
+                  }
+                  ).always(function() {
+                    xhrRefeshToken = null;
+                });
+              }
+              xhrRefeshToken.then(function() {
+                // retry with a copied originalOpts with refreshRequest.
+                var newOpts = $.extend({}, originalOptions, {
+                  refreshRequest: true,
+                  headers: {
+                    Authorization: 'Bearer '+ localStorage.getItem('NSERDAccess_token')
+                  }
+                });
+                // pass this one on to our deferred pass or fail.
+                $.ajax(newOpts).then(dfd.resolve, dfd.reject);
+              });
+            }
           }
-        }
-      }
-      else {
-        //code in url get token
-        getTokenWithCode(qsCode);
-      }
-      /******  ENDING FLOW    ******/
+      });
+
+      // NOW override the jqXHR's promise functions with our deferred
+      return dfd.promise(jqXHR);
+
+      // var access_token = checkValidityToken("NSERDAccess_token");
+      // if (access_token) {
+      //   //var access_token = localStorage.getItem('NSERDAccess_token')
+      //   //  API TOKEN NOT EXPIRED
+      //   console.log("access_token still valid");
+      //   jqXHR.setRequestHeader('Authorization', 'Bearer '+ localStorage.getItem('NSERDAccess_token') )
+      //   $.xhrPool.calls.push(jqXHR);
+      //   return;
+      // }
+      // jqXHR.abort();
+      // console.log("on est bon ? ")
+      // //call on erd api need to check token first
+      // var refresh_token = checkValidityToken("NSERDRefresh_token")
+      // if (!refresh_token) {
+      //   redirectToAuht();
+      // } else {
+      //   // $.xhrPool.calls.push(jqXHR);
+      //   // return;
+      //   var refresh_token = localStorage.getItem('NSERDRefresh_token');
+      //   console.log("refresh_token still valid");
+      //   //  REFRESH TOKEN NOT EXPIRED - NEED NEW API TOKEN
+      //   if (!xhrRefeshToken) {
+      //     xhrRefeshToken = $.ajax({
+      //       context: this,
+      //       type: 'POST',
+      //       url: config.portalApiUrl + 'security/oauth2/v1/token',
+      //       data: JSON.stringify({
+      //         'grant_type' : "refresh_token",
+      //         "refresh_token" : refresh_token
+      //       }),
+      //       dataType: 'json',
+      //       contentType: 'application/json'
+      //     }).then(function(data) {
+      //       console.log("A");
+      //       localStorage.setItem('NSERDAccess_token', data.access_token);
+      //       return;
+      //     }, function(err) {
+      //       redirectToAuht();
+      //     }).always(function() {
+      //       xhrRefeshToken = null;
+      //     });
+      //   }
+      //   xhrRefeshToken.then(function() {
+      //     console.log("B", options);
+      //     originalOptions.headers = originalOptions.headers || {};
+      //     originalOptions.headers.Authorization =  'Bearer '+ localStorage.getItem('NSERDAccess_token');
+      //     $.ajax(originalOptions);
+      //   });
+      // }
     }
+    else {
+      return;
+    }
+  });
 
   app = new Marionette.Application();
   app.on('start', function() {
 
-    oauth2Flow()
-
-
-    app.rootView = new LytRootView();
-    app.controller = new Controller();
-    app.router = new Router({controller: app.controller});
-    app.rootView.render();
-    Backbone.history.start();
-    $.ajax({
-      context: this,
-      url: config.coreUrl +'security/has_access',
-      dataType: 'json'
-    }).done(function(data) {
-      console.log(data);
+    OAuth2.then(function() {
+      app.rootView = new LytRootView();
+      app.controller = new Controller();
+      app.router = new Router({controller: app.controller});
+      app.rootView.render();
+      Backbone.history.start();
+      $.ajax({
+        context: this,
+        url: config.erdApiUrl +'security/has_access',
+        dataType: 'json'
+      }).done(function(data) {
+        console.log(data);
+      });
+    }, function(err) {
+      //
     });
   });
 
@@ -310,140 +383,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       $.xhrPool.calls = [];
     }
   };
-
-function checkTokenExp(successCb, errorCb) {
-  function checkValidityToken(token) {
-    var toRet = false
-    var tmp = token.split('.')
-    var payload = JSON.parse(atob(tmp[1]))
-    var now = new Date()
-    //js timestamp is in milliseconds
-    //python timestamp is in seconds
-    var dateExp = new Date( payload['exp'] * 1000 )
-
-    if ( now < dateExp ) {
-      toRet = true
-    }
-    return toRet
-  }
-
-  var access_token = localStorage.getItem('Authorization')
-  console.log("tululu")
-
-  if (checkValidityToken(access_token)) {
-    //  API TOKEN NOT EXPIRED
-    console.log("access_token still valid")
-    successCb();
-  }
-  else {
-    console.log("access_token no more valid")
-    var refresh_token = localStorage.getItem('refreshToken')
-    if (checkValidityToken(refresh_token)) {
-      console.log("refresh_token still valid")
-      //  REFRESH TOKEN NOT EXPIRED - NEED NEW API TOKEN
-      $.ajax({
-          context: this,
-          type: 'POST',
-          url: 'http://api.com:6544/security/oauth2/v1/token',
-          data: JSON.stringify({
-            'grant_type' : "refresh_token",
-            "refresh_token" : refresh_token
-          }),
-          dataType: 'json',
-          contentType: 'application/json',
-          success: function(data) {
-            var data = jQuery.parseJSON(data);
-            if (data.status == 'success'){
-                localStorage.setItem('Authorization', data.apiToken);
-                successCb(); // the new token is set, you can make ajax calls
-            }
-            // TODO: log error here, don't do validToken = true
-          },
-          fail: function(data) {
-            errorCb(data)
-          }
-      })
-    }
-    else{
-      console.log("refresh_token no more valid bim logout (this case will be handle by 401 returned")
-      //  REFRESH TOKEN EXPIRED - FORCE LOG OUT
-    }
-  }
-
-
-}
-
-  $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-    options.crossDomain ={
-      crossDomain: true
-    };
-    options.xhrFields = {
-      withCredentials: false
-    };
-    successCb = function() {
-      $.xhrPool.calls[ options.url ] = jqXHR;
-    };
-    errorCb = function() {
-        console.error("Could not refresh token, aborting Ajax call to " + options.url);
-        $.xhrPool.calls[ options.url ].abort();
-    };
-
-    if (options.url.indexOf(config.coreUrl) > -1) {
-      //call on erd api need to check token first
-      checkTokenExp(successCb, errorCb);
-    }
-    else {
-      return;
-    }
-  });
-  $.ajaxSetup({
-    // before jQuery send the request we will push it to our array
-    beforeSend: function(jqxhr, options) {
-      if(options.url.indexOf('http://') !== -1) {
-        options.url = options.url;
-      } else {
-        options.url = config.coreUrl + options.url;
-      }
-      if(options.type === 'GET' || options.url.indexOf('http://') !==-1 ){ //should be a GET!! (thesaurus calls)
-        $.xhrPool.calls.push(jqxhr);
-      }
-    },
-    // when some of the requests completed it will splice from the array
-    complete: function(jqxhr, options){
-      // var index = $.xhrPool.indexOf(jqxhr);
-      // if (index > -1) {
-      //   $.xhrPool.splice(index, 1);
-      // }
-    },
-    error: function(jqxhr, options){
-      if(jqxhr.status == 401){
-        console.log("you are not logged or the api could not identify you, you will be redirected to the portal")
-        // document.location.href = config.portalUrl;
-      }
-      if(jqxhr.status == 403){
-        Swal({
-          heightAuto: false,
-          title: 'Unauthorized',
-          text: "You don't have permission",
-          type: 'warning',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(240, 173, 78)',
-          confirmButtonText: 'OK'
-        });
-      }
-      if(jqxhr.status == 409){
-        Swal({
-          heightAuto: false,
-          title: 'Data conflicts',
-          text: jqxhr.responseText,
-          type: 'warning',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(240, 173, 78)',
-          confirmButtonText: 'OK'
-        });
-      }
-    }
-  });
 
     window.formInEdition= {};
 
