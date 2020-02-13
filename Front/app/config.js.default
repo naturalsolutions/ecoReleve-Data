@@ -1,12 +1,14 @@
-var coreUrl= ...;
-var portalUrl = ...;
+var erdApiUrl= ...;
+var portalFrontUrl = ...;
+var portalApiUrl = ...;
 var thesaurusUrl = ...;
+var clientID = ...;
 try {
   define(
     {
       root: window.location.pathname.replace(/\/(?:index.html)?$/, ''),
-      coreUrl: coreUrl ,
-      portalUrl : portalUrl,
+      erdApiUrl: erdApiUrl ,
+      portalFrontUrl : portalFrontUrl,
       thesaurusUrl: thesaurusUrl,
       siteName: '',
       dateLabel: 'jj/mm/aaaa hh:mm:ss',
@@ -14,7 +16,7 @@ try {
       googleAPIkey: 'AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk',
       language : 'fr',
       mapZoom : 6,
-      client_id : 'ecoRelevé'
+      client_id : clientID
     }
  );
 }
