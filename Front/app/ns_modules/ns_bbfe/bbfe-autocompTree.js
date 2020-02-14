@@ -278,6 +278,9 @@ define([
             if (this.isEmptyVal(displayValue)) {
                 this.isTermError = false;
                 this.displayError(false);
+                if (this.options.schema.validators[0] !== 'required') {
+                    this.$el.find('#' + this.id + '_value').val(displayValue);
+                }
                 return;
             }
 
