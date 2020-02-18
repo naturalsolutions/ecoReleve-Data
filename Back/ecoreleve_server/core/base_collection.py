@@ -30,6 +30,7 @@ from ecoreleve_server.modules.individuals import Individual
 from ecoreleve_server.modules.monitored_sites import MonitoredSite
 from ecoreleve_server.modules.sensors.sensor_model import Sensor
 from ecoreleve_server.modules.stations.station_model import Station
+from ecoreleve_server.modules.observations.equipment_model import Observation
 
 
 eval_ = Eval()
@@ -276,7 +277,7 @@ class QueryEngine(object):
     def apply_custom_filters(self, query, filters):
         if self.model == Station:
             print("custom filters for Station")
-            subQueryTest = None
+            subQuery = None
             modelToAdd = []
             modelRel = []
             allClauses = []
@@ -295,27 +296,54 @@ class QueryEngine(object):
                         allClauses.append(toAnd)
                     if toSpecies is not None:
                         allSpeciesClauses.append(toSpecies)
-            subQueryTest = None
             bonusClauses = []
             if allSpeciesClauses != []:
+                now = func.current_timestamp()
+                observationDynPropValue2 = aliased(Observation.DynamicValuesClass)
+                observationDynPropValue = Observation.DynamicValuesClass
+                # observationDynProp2 = aliased(Observation.TypeClass.PropertiesClass)
+                valuesNowModel = [observationDynPropValue2.ID]
+                valuesNowRel = [
+                    observationDynPropValue2.fk_property == observationDynPropValue.fk_property,
+                    observationDynPropValue2.fk_parent == observationDynPropValue.fk_parent,
+                    observationDynPropValue2.StartDate > observationDynPropValue.StartDate,
+                    observationDynPropValue2.StartDate <= now
+                    ]
+                subQueryValuesNow = select(valuesNowModel)
+                subQueryValuesNow = subQueryValuesNow.where(
+                    and_(
+                        *(valuesNowRel)
+                    )
+                )
+
                 bonusClauses.append(or_(*allSpeciesClauses))
+                bonusClauses.append(and_(
+                    Observation.DynamicValuesClass.StartDate <= now
+                    ))  # will eliminate all observation value in the futur
                 if allClauses == []:
-                    subQueryTest = select(modelToAdd)
-                    subQueryTest = subQueryTest.where(
+                    subQuery = select(modelToAdd)
+                    subQuery = subQuery.where(
                         and_(
                             *(modelRel + bonusClauses)
                         )
                     )
-                    query = query.where(exists(subQueryTest))
+
+                    subQuery = subQuery.where(~exists(subQueryValuesNow))
+
+
+                    #add valuesNow
+                    query = query.where(exists(subQuery))
             if allClauses != []:
-                subQueryTest = select(modelToAdd)
-                subQueryTest = subQueryTest.where(
+                subQuery = select(modelToAdd)
+                subQuery = subQuery.where(
                     and_(
                         *(modelRel + allClauses + bonusClauses)
                     )
                 )
+                if subQueryValuesNow is not None:
+                    subQuery = subQuery.where(~exists(subQueryValuesNow))
 
-                query = query.where(exists(subQueryTest))
+                query = query.where(exists(subQuery))
         elif self.model == Individual:
             print("custom filters for Individual")
             for criteria in filters:
