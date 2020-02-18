@@ -1,22 +1,11 @@
 from sqlalchemy import (
     and_,
-    func,
-    select,
-    exists,
-    join,
-    cast,
-    not_,
-    or_,
-    DATE,
-    outerjoin)
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import union_all
+    or_
+)
 
-from ecoreleve_server.core import Base
 from ecoreleve_server.core.base_collection import Query_engine, eval_
 from . import Station, Station_FieldWorker
 from ..observations import Observation
-from ..individuals import Individual
 from ..users import User
 
 
@@ -40,6 +29,7 @@ def individual_filter(self, modelToAdd, modelRel, criteria):
 
     return clauseToAdd
 
+
 @Query_engine.add_filter(StationCollection, 'FK_FieldWorker')
 def fieldworker_filter(self, modelToAdd, modelRel, criteria):
 
@@ -58,6 +48,7 @@ def fieldworker_filter(self, modelToAdd, modelRel, criteria):
 
     return clauseToAdd
 
+
 @Query_engine.add_filter(StationCollection, 'FK_ProtocoleType')
 def protocoleType_filter(self, modelToAdd, modelRel, criteria):
 
@@ -73,14 +64,6 @@ def protocoleType_filter(self, modelToAdd, modelRel, criteria):
 
     return clauseToAdd
 
-@Query_engine.add_filter(StationCollection, 'LastImported')
-def last_imported_filter(self, query, criteria):
-    st = aliased(Station)
-    subSelect2 = select([st]).where(
-        cast(st.creationDate, DATE) > cast(Station.creationDate, DATE))
-    query = query.where(~exists(subSelect2))
-
-    return query
 
 @Query_engine.add_filter(StationCollection, 'Species')
 def species_filter(self, modelToAdd, modelRel, criteria):
@@ -96,8 +79,12 @@ def species_filter(self, modelToAdd, modelRel, criteria):
         modelToAdd.append(observationDynProp.ID)
         modelToAdd.append(observationDynPropValue.fk_parent)
         modelToAdd.append(observationDynPropValue.fk_property)
-        modelRel.append(Observation.ID == observationDynPropValue.fk_parent)
-        modelRel.append(observationDynProp.ID == observationDynPropValue.fk_property)
+        modelRel.append(
+            Observation.ID == observationDynPropValue.fk_parent
+            )
+        modelRel.append(
+            observationDynProp.ID == observationDynPropValue.fk_property
+            )
 
     clauseToAdd = and_(
         or_(
