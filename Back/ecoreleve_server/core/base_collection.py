@@ -26,6 +26,12 @@ from ..utils.parseValue import parser
 from .base_model import HasDynamicProperties
 
 from ecoreleve_server.core import Base
+from ecoreleve_server.modules.individuals import Individual
+from ecoreleve_server.modules.monitored_sites import MonitoredSite
+from ecoreleve_server.modules.sensors.sensor_model import Sensor
+from ecoreleve_server.modules.stations.station_model import Station
+from ecoreleve_server.modules.observations.equipment_model import Observation
+
 
 eval_ = Eval()
 
@@ -247,7 +253,7 @@ class QueryEngine(object):
         self.filters = filters
         query = self.build_query(filters, selectable, order_by, limit, offset)
         self.before_exec_query()
-        # print (query.compile(compile_kwargs={"literal_binds": True}) )
+        # print(query.compile(compile_kwargs={"literal_binds": True}))
         queryResult = self.session.execute(query).fetchall()
         return [dict(row) for row in queryResult]
 
@@ -269,9 +275,95 @@ class QueryEngine(object):
         return query
 
     def apply_custom_filters(self, query, filters):
-        for criteria in filters:
-            if criteria['Column'] in self.custom_filters:
-                query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+        if self.model == Station:
+            print("custom filters for Station")
+            subQuery = None
+            modelToAdd = []
+            modelRel = []
+            allClauses = []
+            allSpeciesClauses = []
+            # that's not generic... but the function is used by every objects
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    toSpecies = None
+                    toAnd = None
+                    # subQuery = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+                    if criteria['Column'] == 'Species':
+                        toSpecies = self.custom_filters.get(criteria['Column'])(self, modelToAdd, modelRel, criteria)
+                    else:
+                        toAnd = self.custom_filters.get(criteria['Column'])(self, modelToAdd, modelRel, criteria)
+                    if toAnd is not None:
+                        allClauses.append(toAnd)
+                    if toSpecies is not None:
+                        allSpeciesClauses.append(toSpecies)
+            bonusClauses = []
+            if allSpeciesClauses != []:
+                now = func.current_timestamp()
+                observationDynPropValue2 = aliased(Observation.DynamicValuesClass)
+                observationDynPropValue = Observation.DynamicValuesClass
+                # observationDynProp2 = aliased(Observation.TypeClass.PropertiesClass)
+                valuesNowModel = [observationDynPropValue2.ID]
+                valuesNowRel = [
+                    observationDynPropValue2.fk_property == observationDynPropValue.fk_property,
+                    observationDynPropValue2.fk_parent == observationDynPropValue.fk_parent,
+                    observationDynPropValue2.StartDate > observationDynPropValue.StartDate,
+                    observationDynPropValue2.StartDate <= now
+                    ]
+                subQueryValuesNow = select(valuesNowModel)
+                subQueryValuesNow = subQueryValuesNow.where(
+                    and_(
+                        *(valuesNowRel)
+                    )
+                )
+
+                bonusClauses.append(or_(*allSpeciesClauses))
+                bonusClauses.append(and_(
+                    Observation.DynamicValuesClass.StartDate <= now
+                    ))  # will eliminate all observation value in the futur
+                if allClauses == []:
+                    subQuery = select(modelToAdd)
+                    subQuery = subQuery.where(
+                        and_(
+                            *(modelRel + bonusClauses)
+                        )
+                    )
+
+                    subQuery = subQuery.where(~exists(subQueryValuesNow))
+
+
+                    #add valuesNow
+                    query = query.where(exists(subQuery))
+            if allClauses != []:
+                subQuery = select(modelToAdd)
+                subQuery = subQuery.where(
+                    and_(
+                        *(modelRel + allClauses + bonusClauses)
+                    )
+                )
+                if subQueryValuesNow is not None:
+                    subQuery = subQuery.where(~exists(subQueryValuesNow))
+
+                query = query.where(exists(subQuery))
+        elif self.model == Individual:
+            print("custom filters for Individual")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+        elif self.model == MonitoredSite:
+            print("custom filters for MonitoredSite")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+        elif self.model == Sensor:
+            print("custom filters for Sensor")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
+        else:
+            print("custom filters for Individual")
+            for criteria in filters:
+                if criteria['Column'] in self.custom_filters:
+                    query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
         return query
 
     def _where(self, query, criteria):
