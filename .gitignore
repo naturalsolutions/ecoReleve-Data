@@ -1,48 +1,27 @@
-Front/bower_components/*
-Front/node_modules/*
-Front/build/*
-**/*.css
-**/*.css.map
+#ENV's files ignored
+.vscode/
+erdenv
+mandatory/*
+logs/*
+**/*.rar
+back/env
 
-Front/nsCorejs/**
-
-
-Front/externalModules/*
-
-Front/app/styles/*.css
-Front/app/styles/*.css.map
-
-Front/app/styles/_perso.less
-Front/app/styles/img/perso/*
-
-Back/build/*
-Back/pserve*
-
-**/config.js
-
+#BACK's files ignored
+Back/build/
+Back/init.txt
+Back/ecoReleve_import/*
 **/*.pyc
 **/*.ini
 **/*.egg-info
 **/*.egg-info/*
 **/*.egg
 
-**/*.rar
-
-npm-debug.log
-web.config
-**/init.text
-.idea/*
-.vscode/*
-Front/path_vars_backup2016-11-28_15h29m05s.txt
-Front/path_vars_backup2016-11-28_15h29m05s.json
-
-Back/init.txt
-Back/.vscode/settings.json
-Back/.vscode/launch.json
-Back/init.txt
-Back/ecoReleve_import/*
+#FRONT's files ignored
+Front/bower_components/*
+Front/node_modules/*
+Front/build/*
 Front/package-lock.json
-
-erdenv
-mandatory/*
-back/env
+npm-debug.log
+**/*.css
+**/*.css.map
+**/config.js
