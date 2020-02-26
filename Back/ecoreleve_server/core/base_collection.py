@@ -278,6 +278,7 @@ class QueryEngine(object):
         if self.model == Station:
             print("custom filters for Station")
             subQuery = None
+            subQueryValuesNow = None
             modelToAdd = []
             modelRel = []
             allClauses = []
