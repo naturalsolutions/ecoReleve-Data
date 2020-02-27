@@ -5,7 +5,7 @@ require.config({
     'tmp': './tmp',
 
     'app': 'app',
-    'config': 'config',
+    'config': 'config_old',
     'router': 'router',
     'controller': 'controller',
     'models': './models',
