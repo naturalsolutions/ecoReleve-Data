@@ -70,8 +70,8 @@ define([
       var _this = this;
       Swal({
         heightAuto: false,
-        title: 'Succes',
-        text: 'Creating new ' + _this.model.get('single'),
+        title: 'Success',
+        text: 'New ' + _this.model.get('single') + ' created',
         type: 'success',
         showCancelButton: true,
         confirmButtonColor: 'green',
