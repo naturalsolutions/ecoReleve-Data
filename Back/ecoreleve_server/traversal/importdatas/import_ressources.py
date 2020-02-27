@@ -185,7 +185,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                     sensorReception = None #Ancien sensorCreationDate
                                 else:
                                     sensorReception, finalStatusDate = self.getSensorStatusDates(sensor, dynprop, curSession)
-                                newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, sensor, file_date)
+                                newdataDf, report, dataForSpeed, deployementDate, maxDateData = self.newLocationsManagement(rawData, report, curSession, identifier, sensor, file_date)
                                 if len(newdataDf) == 0:
                                     print('deso deja importées dans Sensor')
                                     report['AlreadyImportedData'] = sentData
@@ -195,7 +195,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                     continue
                                 else:
                                     report['AlreadyImportedData'] = sentData - len(newdataDf)
-                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, finalStatusDate)
+                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorReception, deployementDate, dataForSpeed, finalReport,maxDateData, finalStatusDate)
                                     finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                                     lasttime = datetime.now()
                                     diftime = lasttime - first_time
@@ -239,10 +239,10 @@ class GSMImport(ImportWithFileLikeCSV):
                                 if sensor is None:
                                     rawDatatag['Status'] = 'No existing sensor'
                                     dataForQuality = rawDatatag.copy()
-                                    sensorCreationDate = None
+                                    sensorReception = None #Ancien sensorCreationDate
                                 else:
-                                    sensorCreationDate = sensor.creationDate
-                                    newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawDatatag, report, curSession, identifier, sensor, file_date)
+                                    sensorReception, finalStatusDate = self.getSensorStatusDates(sensor, dynprop, curSession)
+                                    newdataDf, report, dataForSpeed, deployementDate, maxDateData = self.newLocationsManagement(rawDatatag, report, curSession, identifier, sensor, file_date)
                                     if len(newdataDf) == 0:
                                         print('deso deja importées dans Sensor')
                                         report['AlreadyImportedData'] = report['AlreadyImportedData'] + sentDatatag
@@ -251,7 +251,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                         # print(finalReport)
                                         continue
                                     else:
-                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport)
+                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorReception, deployementDate, dataForSpeed, finalReport, maxDateData, finalStatusDate)
                                         # engineering data management
                                         engineeringDf = finalDataset[['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount','platform_','file_date']].copy()
                                         finalReport = self.engineeringDataManagement(engineeringDf ,identifier, finalReport, report, curSession)
@@ -342,7 +342,7 @@ class GSMImport(ImportWithFileLikeCSV):
         #             deployementDate = [sensorStatusList[i]['StartDate']]
         #             deployements.update({deployementNb : deployementDate})
         # SensorDeployment : list = [Status['StartDate'] for Status in sensorStatusList if Status['value:'].find('mise en service') != -1]
-        finalStatusDate = Status['StartDate'] for Status in sensorStatusList if Status['value:'] in finalStatus
+        finalStatusDate = [Status['StartDate'] for Status in sensorStatusList if Status['value:'] in finalStatus]
         sensorReception = min(Status['StartDate'] for Status in sensorStatusList if Status['value:'].find('livraison et stockage') != -1)
         return sensorReception, finalStatusDate #deployements
 
@@ -573,7 +573,7 @@ class GSMImport(ImportWithFileLikeCSV):
         dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, curSession, identifier)
         report['AlreadyImportedData'] = oldData
 
-        return newData, report, dataForSpeed, deployementDate
+        return newData, report, dataForSpeed, deployementDate, maxDateData
 
     def findWrongStringValues(self,value):
         try:
@@ -614,14 +614,16 @@ class GSMImport(ImportWithFileLikeCSV):
             pastOutliers ['Status'] = 'Before reception'
             timeDataClean.loc[timeDataClean.PK_id.isin(pastOutliers.PK_id),['Status']] = pastOutliers['Status'] #We keep 'Before reception' data
             #timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy() #We don't keep 'Before reception' data
-            if finalStatusDate is not None:
+            if len(finalStatusDate) != 0:
+                finalStatusDate = finalStatusDate[0]
+                finalStatusDate = finalStatusDate.strftime('%Y-%m-%dT%H:%M:%S')
                 if  maxDateData > finalStatusDate:
                     for i in reversed(timeDataClean.index):
                         if timeDataClean.loc[i,'DateTime'] >= finalStatusDate:
                             timeDataClean.loc[i,'Status']= 'Sensor out of work' # voir nom du statut
                         else:
                             break
-            timeDataClean = timeDataClean.loc[(~timeDataClean['Status'].isin('Sensor out of work'))].copy() #pour les retirer, à tester
+            timeDataClean = timeDataClean.loc[timeDataClean['Status'] != 'Sensor out of work'].copy() #pour les retirer, à tester
         # countTest = 0
             # if timeDataClean['DateTime'].iloc[0] < deploymentDateobj:
             #     for i in timeDataClean.index:
@@ -762,7 +764,7 @@ class GSMImport(ImportWithFileLikeCSV):
         finalDataset = finalDataset.sort_values(by=date,ascending=True)
         return finalDataset
 
-    def dataAnnotation(self, newData, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, finalStatusDate):
+    def dataAnnotation(self, newData, report, sensorReception, deployementDate, dataForSpeed, finalReport, maxDateData, finalStatusDate):
         # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
         geoOutliers, geoDataClean = self.findGeoOutliers(newData)
         report['GeoOutliers'] = len(geoOutliers)
@@ -770,9 +772,9 @@ class GSMImport(ImportWithFileLikeCSV):
             return report
         else:
             # #Function to remove and annotate data depending on date possibility : past before sensor creation, test before deployment
-            timeDataClean, pastOutliers, countTest = self.findTimeRangeOutliers(geoDataClean, sensorCreationDate, deployementDate, finalStatusDate, maxDateData)
+            timeDataClean, pastOutliers = self.findTimeRangeOutliers(geoDataClean, sensorReception, deployementDate, finalStatusDate, maxDateData)
             report['PastOutliers'] = len(pastOutliers)
-            report['TestAnnotated'] = report['TestAnnotated'] + countTest
+            # report['TestAnnotated'] = report['TestAnnotated'] + countTest # à voir si on détaille les annotations No individual attached
             # #Function that finds duplicates = data with at least exactly same timestamp
             duplicatesToDelete,duplicateCleanData = self.findTimeDuplicates(timeDataClean)
             report['Duplicates'] = report['Duplicates'] + len(duplicatesToDelete)
