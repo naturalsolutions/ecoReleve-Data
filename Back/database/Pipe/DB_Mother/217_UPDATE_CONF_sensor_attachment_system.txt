@@ -1,0 +1,21 @@
+DELETE FROM [dbo].[SensorType_SensorDynProp]
+      WHERE FK_SensorDynProp = 5
+
+DELETE FROM [dbo].[ModuleForms]
+      WHERE module_id = 16 and Name = 'Harness'
+
+UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'Attachment system',
+             [Options] = 204113
+ WHERE Module_ID = 14 and Name = 'Harness'
+
+UPDATE [dbo].[ModuleForms]
+   SET [Label] = 'Attachment system',
+             [Name] = 'Attachment system'
+ WHERE Module_ID = 16 and Name = 'Shape'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('217_UPDATE_CONF_sensor_attachment_system',GETDATE(),(SELECT db_name()))
+
+
+GO

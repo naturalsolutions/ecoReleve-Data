@@ -267,7 +267,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         if(!objectValue){
           return;
         }
-        if(objectValue.displayValue !== ''){
+        if(objectValue.displayValue !== '' ||
+          (objectValue.displayValue === '' && this.params.colDef.schema.validators[0] !== 'required')){
           valueToDisplay = objectValue.displayValue;
         } else {
           valueToDisplay = objectValue.value;
@@ -276,7 +277,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       };
   
       ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
-        if(params.colDef.schema.editable && objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
+        if(params.colDef.schema.editable && objectValue.error ||
+          (params.colDef.schema.validators[0] === 'required' && objectValue.value !== '' && objectValue.displayValue === '')){
           this.handleError(params);
         } else if ( ( objectValue.value === null && objectValue.displayValue === null && params.colDef.schema.defaultValue ) ) {
           this.handleError(params);
