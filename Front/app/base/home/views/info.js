@@ -25,7 +25,7 @@ define([
       if(!isDomoInstance || (isDomoInstance != 'demo')) {
           $.ajax({
             context: this,
-            url: config.coreUrl + 'individuals/count',
+            url: config.erdApiUrl + 'individuals/count',
           }).done(function(data) {
             this.model.set('nbIndiv', data);
             this.$el.fadeIn();

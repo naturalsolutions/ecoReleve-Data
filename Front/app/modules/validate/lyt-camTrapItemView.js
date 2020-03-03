@@ -274,7 +274,7 @@ define([
 		destroyAStation : function(stationId) {
 			return $.ajax({
 			  type: 'DELETE',
-			  url: config.coreUrl + 'stations/' + stationId,
+			  url: config.erdApiUrl + 'stations/' + stationId,
 			  contentType: 'application/json'
 			})  
 		},

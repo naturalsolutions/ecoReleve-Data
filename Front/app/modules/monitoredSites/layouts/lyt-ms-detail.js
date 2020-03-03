@@ -74,7 +74,7 @@ define([
 
     reloadFromNavbar: function(model) {
       this.display(model);
-      this.map.url = config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true';
+      this.map.url = config.erdApiUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true';
       this.map.updateFromServ();
       Backbone.history.navigate(this.rootUrl + this.monitoredSiteId, {trigger: false});
     },
@@ -117,7 +117,7 @@ define([
         pageSize: 10,
         pagingServerSide: true,
         name: 'MonitoredSiteGridHistory',
-        url: config.coreUrl + 'monitoredSites/' + id  + '/history/',
+        url: config.erdApiUrl + 'monitoredSites/' + id  + '/history/',
         urlParams: this.urlParams,
         rowClicked: true,
 
@@ -148,7 +148,7 @@ define([
         pageSize: 20,
         columns: colsEquip,
         pagingServerSide: false,
-        url: config.coreUrl + 'monitoredSites/' + id  + '/equipment',
+        url: config.erdApiUrl + 'monitoredSites/' + id  + '/equipment',
         urlParams: this.urlParams,
         rowClicked: true,
       });
@@ -193,7 +193,7 @@ define([
         pagingServerSide: false,
         pageSize: 10,
         columns: stationsCols,
-        url: config.coreUrl + 'photos/?siteid='+_this.monitoredSiteId+'',
+        url: config.erdApiUrl + 'photos/?siteid='+_this.monitoredSiteId+'',
         rowClicked: true,
 
       });
@@ -232,7 +232,7 @@ define([
 
       $.ajax({
         type: "GET",
-        url: config.coreUrl  + 'photos/?siteid='+_this.monitoredSiteId+'&equipid='+equipId+'',
+        url: config.erdApiUrl  + 'photos/?siteid='+_this.monitoredSiteId+'&equipid='+equipId+'',
       })
       .done( function(response,status,jqXHR){
         if( jqXHR.status === 200 ){
@@ -303,7 +303,7 @@ define([
         pagingServerSide: false,
         pageSize: 10,
         columns: stationsCols,
-        url: config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/stations',
+        url: config.erdApiUrl + 'monitoredSites/' + this.monitoredSiteId  + '/stations',
         rowClicked: true,
         com: this.com,
       });
@@ -315,7 +315,7 @@ define([
 
     displayMap: function(geoJson) {
       this.map = new NsMap({
-        url: config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true',
+        url: config.erdApiUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true',
         zoom: 4,
         element: 'map',
         popup: true,
@@ -327,7 +327,7 @@ define([
       var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
-        modelurl: config.coreUrl + 'monitoredSites',
+        modelurl: config.erdApiUrl + 'monitoredSites',
         formRegion: this.ui.form,
         buttonRegion: [this.ui.formBtns],
         displayMode: 'display',
@@ -344,7 +344,7 @@ define([
 
       this.nsform.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + 'monitoredSites/' + id,
+          url: config.erdApiUrl + 'monitoredSites/' + id,
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {

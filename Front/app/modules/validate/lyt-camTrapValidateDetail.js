@@ -156,7 +156,7 @@ define([
     fetchSessionInfos: function () {
       var _this = this;
       $.ajax({
-          url: config.coreUrl + 'sensorDatas/' + _this.type + '/' + _this.equipmentId,
+          url: config.erdApiUrl + 'sensorDatas/' + _this.type + '/' + _this.equipmentId,
         })
         .done(function (resp) {
           _this.sensorId = resp.FK_Sensor;
@@ -174,7 +174,7 @@ define([
       this.sensorForm = new NsForm({
         name: 'sensorForm',
         buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'sensors',
+        modelurl: config.erdApiUrl + 'sensors',
         formRegion: this.ui.sensorForm,
         displayMode: 'display',
         id: this.sensorId,
@@ -186,7 +186,7 @@ define([
       this.monitoredSiteForm = new NsForm({
         name: 'siteForm',
         buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'monitoredSites',
+        modelurl: config.erdApiUrl + 'monitoredSites',
         formRegion: this.ui.siteForm,
         displayMode: 'display',
         id: this.siteId,
@@ -202,7 +202,7 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
+        url: config.erdApiUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
         patch: function () {},
         getNextPage : function(options){
           if (this.hasNextPage()) {
@@ -728,7 +728,7 @@ define([
       }
       $.ajax({
         type: 'PUT',
-        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
         contentType: 'application/json',
         data: JSON.stringify(tabModels)
       })
@@ -772,7 +772,7 @@ define([
       }
       $.ajax({
         type: 'PUT',
-        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
         contentType: 'application/json',
         data: JSON.stringify(tabModels)
       })
@@ -812,7 +812,7 @@ define([
       }
       $.ajax({
         type: 'PUT',
-        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
         contentType: 'application/json',
         data: JSON.stringify(tabModels)
       })
@@ -852,7 +852,7 @@ define([
       }
       $.ajax({
         type: 'PUT',
-        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
         contentType: 'application/json',
         data: JSON.stringify(tabModels)
       })
@@ -938,7 +938,7 @@ define([
       })
       $.ajax({
         type: 'POST',
-        url: config.coreUrl + 'stations/deleteManyWithCamTrap',
+        url: config.erdApiUrl + 'stations/deleteManyWithCamTrap',
         contentType: 'application/json',
         data: JSON.stringify(tabStationIdRejected)
       })
@@ -966,7 +966,7 @@ define([
       }
       $.ajax({
         type: 'PUT',
-        url: config.coreUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/'+this.equipmentId+'/updateMany',
         contentType: 'application/json',
         data: JSON.stringify(tabModels)
       })
@@ -1046,7 +1046,7 @@ define([
       var _this = this;
       $.ajax({
           type: 'POST',
-          url: config.coreUrl + 'stations/insertWithCamTrap',
+          url: config.erdApiUrl + 'stations/insertWithCamTrap',
           data: JSON.stringify(data),
           contentType: 'application/json',
           dataType: 'json'
@@ -1102,7 +1102,7 @@ define([
       var _this = this;
       $.ajax({
         type: 'POST',
-        url: config.coreUrl + 'stations/insertAllWithCamTrap',
+        url: config.erdApiUrl + 'stations/insertAllWithCamTrap',
         data: JSON.stringify(tabData),
         contentType: 'application/json',
         dataType: 'json'
@@ -1185,7 +1185,7 @@ define([
         var _this = this;
         $.ajax({
             type: 'POST',
-            url: config.coreUrl + 'stations/deleteStationWithCamTrap',
+            url: config.erdApiUrl + 'stations/deleteStationWithCamTrap',
             contentType: 'application/json',
             data : JSON.stringify(tabModelsWithStation)
           })
@@ -1516,7 +1516,7 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
+        url: config.erdApiUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
         queryParams: {
           totalPages: null,
           totalRecords: null,
@@ -1615,7 +1615,7 @@ define([
           if( 'value' in result) {
             
             $.ajax({
-              url: config.coreUrl + 'sensorDatas/' + _this.type + '/validate',
+              url: config.erdApiUrl + 'sensorDatas/' + _this.type + '/validate',
               method: 'POST',
               data: {
                 fk_Sensor: _this.sensorId,
@@ -1685,7 +1685,7 @@ define([
         function (isConfirm) {
           if (isConfirm) {
             $.ajax({
-                url: config.coreUrl + 'sensorDatas/' + _this.type + '/validate',
+                url: config.erdApiUrl + 'sensorDatas/' + _this.type + '/validate',
                 method: 'POST',
                 data: {
                   fk_Sensor: _this.sensorId,

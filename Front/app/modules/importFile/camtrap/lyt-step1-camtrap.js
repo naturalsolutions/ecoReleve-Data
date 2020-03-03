@@ -66,7 +66,7 @@ define([
         this.r = this.previousModels.get('resumable');
       } else {
         this.r = new Resumable({
-          target: config.coreUrl + 'sensorDatas/camtrap/resumable',
+          target: config.erdApiUrl + 'sensorDatas/camtrap/resumable',
           query: {
             /*params will be update after sessions selected*/
           },

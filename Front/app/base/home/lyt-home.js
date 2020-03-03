@@ -51,13 +51,13 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1,
     initStats: function() {
       var isDomoInstance = config.instance ;
       var collGraphObj = [{
-        url: 'sensor/uncheckedDatas/graph',
+        url: config.erdApiUrl + 'sensor/uncheckedDatas/graph',
         ele: '#validate',
         title: 'pending',
         stored: false,
         template: 'app/base/home/tpl/tpl-dounutGraph.html'
       },{
-        url: 'individuals/location/graph',
+        url: config.erdApiUrl + 'individuals/location/graph',
         ele: '#locations',
         title: 'location',
         stored: false,
@@ -135,7 +135,7 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1,
     getUser : function(){
       var _this = this;
       var user  = new Backbone.Model();
-      user.url = config.coreUrl + 'currentUser';
+      user.url = config.erdApiUrl + 'currentUser';
       user.fetch({
         success: function(md) {
           _this.ui.userFirst.html(user.get('Firstname'));

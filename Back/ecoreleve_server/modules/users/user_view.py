@@ -39,7 +39,7 @@ def current_user(request, user_id=None):
     if user_id is not None:
         userid = user_id
     else:
-        userid = int(request.authenticated_userid['iss'])
+        userid = int(request.authenticated_userid['sub'])
 
     TIns_Label = request.registry.settings.get('RENECO.SECURITE.TINS_LABEL').encode('latin1').decode('utf-8') 
     currentUserRole = request.effective_principals

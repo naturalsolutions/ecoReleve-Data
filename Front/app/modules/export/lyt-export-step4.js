@@ -111,7 +111,7 @@ define([
       };
 
       if (this.model.get('fileType') == 'excel'){
-        var url =  Config.coreUrl+'export/views/'+this.model.get('viewId')+'/getFile?criteria='+JSON.stringify(this.datas);
+        var url =  Config.erdApiUrl+'export/views/'+this.model.get('viewId')+'/getFile?criteria='+JSON.stringify(this.datas);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
 

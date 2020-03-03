@@ -4,7 +4,7 @@ erdenv
 mandatory/*
 logs/*
 **/*.rar
-back/env
+Back/env
 
 #BACK's files ignored
 Back/build/

@@ -1,19 +1,22 @@
-var coreUrl= ...;
-var portalUrl = ...;
+var erdApiUrl= ...;
+var portalFrontUrl = ...;
+var portalApiUrl = ...;
 var thesaurusUrl = ...;
+var clientID = ...;
 try {
   define(
     {
       root: window.location.pathname.replace(/\/(?:index.html)?$/, ''),
-      coreUrl: coreUrl ,
-      portalUrl : portalUrl,
+      erdApiUrl: erdApiUrl ,
+      portalFrontUrl : portalFrontUrl,
       thesaurusUrl: thesaurusUrl,
       siteName: '',
       dateLabel: 'jj/mm/aaaa hh:mm:ss',
       dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
       googleAPIkey: 'AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk',
       language : 'fr',
-      mapZoom : 6
+      mapZoom : 6,
+      client_id : clientID
     }
  );
 }

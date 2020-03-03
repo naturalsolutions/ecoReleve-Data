@@ -9,7 +9,8 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
-    'jwcrypto==0.6.0',
+    #'jwcrypto==0.6.0',
+    'pyjwt==1.7.1',
     'exifread==2.1.2',
     'geojson==2.4.1',
     'lxml==4.3.3',
