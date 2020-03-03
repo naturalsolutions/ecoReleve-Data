@@ -1,0 +1,14 @@
+DELETE FROM [dbo].[SensorDynPropValue]
+      WHERE FK_SensorDynProp = 5
+
+DELETE FROM [dbo].[SensorDynProp]
+      WHERE ID = 5
+
+UPDATE [dbo].[SensorDynProp]
+   SET [Name] = 'Attachment system'
+ WHERE Name = 'Shape'
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('218_UPDATE_dynprop_sensor_harness',GETDATE(),(SELECT db_name()))
+
+
+GO

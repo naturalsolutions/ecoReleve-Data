@@ -40,6 +40,10 @@ def sendLog(logLevel, domaine, msg_number=500, scope='Pyramid', errorDict=None, 
             })
             logMsg = str(exc_value)
 
+        userFind = 'NOREQUEST'
+        if request:
+            #need to find 
+            userFind = 'need to find user'
         stmt = text("""
             EXEC  """ + dbConfig['dbLog.schema']
                     + """.[PR_LOG_MESSAGE] :lvl, :origin, :scope, :user, :domain , :msg_number, :other, :log_msg;
@@ -47,7 +51,8 @@ def sendLog(logLevel, domaine, msg_number=500, scope='Pyramid', errorDict=None, 
             bindparam('lvl', logLevel),
             bindparam('origin', 'ecoReleveData'),
             bindparam('scope', scope),
-            bindparam('user', request.authenticated_userid['username']),
+            bindparam('user',userFind),
+            #bindparam('user', request.authenticated_userid['username']),## NOT GOOD WHY WHE SHOULD DO THAT (auth or unauth ?  we dont care!!! we need to LOG something wrong....)
             bindparam('domain', domaine),
             bindparam('msg_number', msg_number),
             bindparam('other', errorDict),

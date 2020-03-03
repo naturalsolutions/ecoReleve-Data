@@ -1,0 +1,11 @@
+UPDATE [ModuleForms]
+SET [Options] = '{ "startId":204121, "date": true, "dateFormat": "DD/MM/YYYY"}'
+WHERE [module_id] = 16
+AND 
+[Name] = 'Status'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('216_UPDATE_CONF_Sensor_Status_wtih_Date_picker',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -7,7 +7,12 @@ from .individual_resource import IndividualResource, IndividualsResource, Indivi
 @view_defaults(context=IndividualResource)
 class IndividualView(CRUDCommonView):
 
-    @view_config(name='equipment', request_method='GET', renderer='json', permission='read')
+    @view_config(
+        name='equipment',
+        request_method='GET',
+        renderer='json',
+        permission='read'
+    )
     def getEquipment(self):
         return self.context.getEquipment()
 

@@ -419,12 +419,15 @@ define([
         if(!this.BBForm.model.get('ID')){
           this.formRegion.find('input:enabled,select:enabled,textarea:enabled').first().focus();
         }
-      }else{
+      }
+      else{
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').addClass('hidden');
-
+        if ( ['sensors', 'individuals'].indexOf(this.modelurl)  > -1 ) {
+          this.buttonRegion[0].find('.NsFormModuleEdit').addClass('js-superUser');
+        }
         this.buttonRegion[0].find('.NsFormModuleEdit').removeClass('hidden');
       }
 
@@ -613,6 +616,17 @@ define([
               confirmButtonColor: '#DD6B55'
             };
             setTimeout(  function () {_this.swal(opts);}, 400);
+          }
+          else if (response.status == 403 ) {
+            Swal({
+              heightAuto: false,
+              title: 'Unauthorized',
+              text: "You don't have permission",
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(240, 173, 78)',
+              confirmButtonText: 'OK'
+            });
           }
            else {
               var opts = {
