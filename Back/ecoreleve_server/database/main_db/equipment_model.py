@@ -57,7 +57,7 @@ def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
                                 bindparam('siteID', fk_site),
                                 bindparam('indID', fk_indiv),
                                 bindparam('date', equipDate))
-    Nb = session.execute(query).scalar()
+    Nb = session.get_bind(Observation).execute(query).scalar()
     if Nb > 0:
         return True
     else:

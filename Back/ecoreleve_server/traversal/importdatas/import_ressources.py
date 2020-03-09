@@ -99,6 +99,7 @@ class GSMImport(ImportWithFileLikeCSV):
         ]
         first_time = datetime.now() # juste pour avoir temps d'exécution
         curSession = self.request.dbsession
+        dynprop = Sensor.DynamicValuesClass
         #filePosted = self.getFile()
         # if filePosted is not None:
         # name = filePosted.filename
@@ -174,13 +175,13 @@ class GSMImport(ImportWithFileLikeCSV):
                                 rawData.insert(len(rawData.columns),'Status','ok')
                                 sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
                                 if sensor is None:
-                                    rawData['Status'] = 'exotic'
+                                    rawData['Status'] = 'No existing sensor'
                                     print('No matching sensor found in database')
                                     # on les insère quand même dans la base
-                                    sensorCreationDate = None
+                                    sensorReception = None #Ancien sensorCreationDate
                                 else:
-                                    sensorCreationDate = sensor.creationDate
-                                newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawData, report, curSession, identifier, sensor, file_date)
+                                    sensorReception, finalStatusDate = self.getSensorStatusDates(sensor, dynprop, curSession)
+                                newdataDf, report, dataForSpeed, deployementDate, maxDateData = self.newLocationsManagement(rawData, report, curSession, identifier, sensor, file_date)
                                 if len(newdataDf) == 0:
                                     print('deso deja importées dans Sensor')
                                     report['AlreadyImportedData'] = sentData
@@ -190,7 +191,9 @@ class GSMImport(ImportWithFileLikeCSV):
                                     continue
                                 else:
                                     report['AlreadyImportedData'] = sentData - len(newdataDf)
-                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, twoDfix)
+
+                                    finalDataset, report = self.dataAnnotation(newdataDf, report, sensorReception, deployementDate, dataForSpeed, finalReport, twoDfix, maxDateData, finalStatusDate)
+
                                     finalDataset.to_sql(Gsm.__tablename__, curSession.get_bind(Gsm), schema = dbConfig['sensor_schema'], if_exists='append', index=False)
                                     lasttime = datetime.now()
                                     diftime = lasttime - first_time
@@ -227,12 +230,12 @@ class GSMImport(ImportWithFileLikeCSV):
                                 report['tagID'] = idList
                                 sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
                                 if sensor is None:
-                                    rawDatatag['Status'] = 'Exotic'
+                                    rawDatatag['Status'] = 'No existing sensor'
                                     dataForQuality = rawDatatag.copy()
-                                    sensorCreationDate = None
+                                    sensorReception = None #Ancien sensorCreationDate
                                 else:
-                                    sensorCreationDate = sensor.creationDate
-                                    newdataDf, report, dataForSpeed, deployementDate = self.newLocationsManagement(rawDatatag, report, curSession, identifier, sensor, file_date)
+                                    sensorReception, finalStatusDate = self.getSensorStatusDates(sensor, dynprop, curSession)
+                                    newdataDf, report, dataForSpeed, deployementDate, maxDateData = self.newLocationsManagement(rawDatatag, report, curSession, identifier, sensor, file_date)
                                     if len(newdataDf) == 0:
                                         print('deso deja importées dans Sensor')
                                         report['AlreadyImportedData'] = report['AlreadyImportedData'] + sentDatatag
@@ -241,7 +244,7 @@ class GSMImport(ImportWithFileLikeCSV):
                                         # print(finalReport)
                                         continue
                                     else:
-                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, twoDfix)
+                                        finalDataset, report = self.dataAnnotation(newdataDf, report, sensorReception, deployementDate, dataForSpeed, finalReport, twoDfix, maxDateData, finalStatusDate)
                                         # engineering data management
                                         engineeringDf = finalDataset[['DateTime','Temperature_C','BatteryVoltage_V','ActivityCount','platform_','file_date']].copy()
                                         finalReport = self.engineeringDataManagement(engineeringDf ,identifier, finalReport, report, curSession)
@@ -308,6 +311,29 @@ class GSMImport(ImportWithFileLikeCSV):
                 rawData.insert(len(rawData.columns),dbCol,None)
         return rawData
 
+    def getSensorStatusDates(self, sensor, dynprop, curSession):
+        finalStatus = ['sortie de stock>retour définitif au constructeur','sortie de stock>don','sortie de stock>mise au rebut'] #status without more data possibility
+        # endOfServiceStatus = ['sortie de stock>retour après service','sortie de stock>fin de service sans retour','sortie de stock>disparition, destruction ou vol'] 
+        sensorID = sensor.ID
+        sensorStatus = curSession.query(dynprop).filter(dynprop.fk_property == 3, dynprop.fk_parent == int(sensorID)).order_by(desc(dynprop.StartDate)).all()
+        sensorStatusList : list = [sensorStatus[i].realValue for i in range (len(sensorStatus))]
+        # deployementNb = 0
+        # deployements = {}
+        # for i in reversed(xrange(len(sensorStatusList))):
+        #     if sensorStatusList[i]['value:'].find('mise en service') != -1:
+        #         if sensorStatusList[i+1]['value:'] in endOfServiceStatus :
+        #             deployementNb += 1
+        #             deployementDate = [sensorStatusList[i]['StartDate'],sensorStatusList[i+1]['StartDate']]
+        #             deployements.update({deployementNb : deployementDate})
+        #         else :
+        #             deployementNb += 1
+        #             deployementDate = [sensorStatusList[i]['StartDate']]
+        #             deployements.update({deployementNb : deployementDate})
+        # SensorDeployment : list = [Status['StartDate'] for Status in sensorStatusList if Status['value:'].find('mise en service') != -1]
+        finalStatusDate = [Status['StartDate'] for Status in sensorStatusList if Status['value:'] in finalStatus]
+        sensorReception = min(Status['StartDate'] for Status in sensorStatusList if Status['value:'].find('livraison et stockage') != -1)
+        return sensorReception, finalStatusDate #deployements
+
     def engineeringDataManagement(self, engineeringData, identifier, finalReport, report, curSession):
         if report['dataprovider'] == 'MTIe':
             dataSensorQuery = curSession.query(GsmEngineering).filter(GsmEngineering.platform_==int(identifier)).order_by(desc(GsmEngineering.date))
@@ -359,6 +385,20 @@ class GSMImport(ImportWithFileLikeCSV):
                 maxDateData = rawData.loc[idx,'DateTime']
                 break
         return maxDateData, rawData, countFuture
+
+    # def deployementAnnotation(self, sensorStatusList, deployements, maxDateData):
+    #     if len(sensorStatusList) > 0:
+    #         if len(deployements) == 0:
+    #             futureAnnotated['Status'] = 'No information'
+    #         else:
+    #             for deployement in deployements:
+    #                 if len(deployement) == 2:
+    #                     if deployement[0] < maxDateData < deployement[1]:
+    #                         futureAnnotated['Status'] = 'ok'
+    #                 if len(deployement) == 1:
+    #                     if maxDateData > deployement[0]:
+    #                         futureAnnotated['Status'] = 'ok'
+
 
     def IndividualID_deployementDate(self, sensor, curSession, maxDateData, futureAnnotated):
         equipmentView = Main_Db_Base.metadata.tables['IndividualEquipment']
@@ -521,7 +561,7 @@ class GSMImport(ImportWithFileLikeCSV):
         dataForSpeed, newData, oldData = self.findNewData(futurAnnotated, curSession, identifier)
         report['AlreadyImportedData'] = oldData
 
-        return newData, report, dataForSpeed, deployementDate
+        return newData, report, dataForSpeed, deployementDate, maxDateData
 
     def findWrongStringValues(self,value):
         try:
@@ -549,30 +589,42 @@ class GSMImport(ImportWithFileLikeCSV):
         geoDataClean1 = pd.concat(toConcatGood, sort=False)
         return geoOutliers2, geoDataClean1
 
-    def findTimeOutliers(self,geoDataClean,sensorCreationDate,deploymentDateobj):
-        if sensorCreationDate is None:
+    def findTimeRangeOutliers(self,geoDataClean,sensorReception,deploymentDateobj, finalStatusDate, maxDateData):
+        timeDataClean = geoDataClean.copy()
+        if sensorReception is None:
             pastOutliers = pd.DataFrame(columns = geoDataClean.columns)
-            timeDataClean = geoDataClean.copy()
         else:
-            sensorCreationDateobj = sensorCreationDate.isoformat()
-            # # Recherche de potentielles dates avant la céation du sensor
-            pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorCreationDateobj].copy()
-            pastOutliers ['Status'] = 'Past outlier'
-            timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy()
-        countTest = 0
-        # # Recherche de potentielles dates avant le déploiement
-        if deploymentDateobj is not None:
-            if timeDataClean['DateTime'].iloc[0] < deploymentDateobj:
-                for i in timeDataClean.index:
-                    if timeDataClean.loc[i,'DateTime'] >= deploymentDateobj:
-                        break
-                    else:
-                        timeDataClean.loc[i,'Status']='test'
-                        countTest = countTest + 1
-        else :
-            if sensorCreationDate is not None:
+            # # Recherche de potentielles dates avant le déploiement
+            if deploymentDateobj is not None:
+                noIndAttached = geoDataClean.loc[geoDataClean['DateTime'] < deploymentDateobj].copy()
+                timeDataClean.loc[timeDataClean.PK_id.isin(noIndAttached.PK_id),['Status']] = 'No individual attached'
+                sensorReceptionDateobj = sensorReception.isoformat()
+            else :
                 timeDataClean['Status'] = 'No information'
-        return timeDataClean, pastOutliers, countTest
+            # # Recherche de potentielles dates avant la céation du sensor
+            pastOutliers = geoDataClean.loc[geoDataClean['DateTime'] < sensorReceptionDateobj].copy()
+            pastOutliers ['Status'] = 'Before reception'
+            timeDataClean.loc[timeDataClean.PK_id.isin(pastOutliers.PK_id),['Status']] = pastOutliers['Status'] #We keep 'Before reception' data
+            #timeDataClean = geoDataClean.loc[(~geoDataClean['PK_id'].isin(pastOutliers.PK_id))].copy() #We don't keep 'Before reception' data
+            if len(finalStatusDate) != 0:
+                finalStatusDate = finalStatusDate[0]
+                finalStatusDate = finalStatusDate.strftime('%Y-%m-%dT%H:%M:%S')
+                if  maxDateData > finalStatusDate:
+                    for i in reversed(timeDataClean.index):
+                        if timeDataClean.loc[i,'DateTime'] >= finalStatusDate:
+                            timeDataClean.loc[i,'Status']= 'Sensor out of work' # voir nom du statut
+                        else:
+                            break
+            timeDataClean = timeDataClean.loc[timeDataClean['Status'] != 'Sensor out of work'].copy() #pour les retirer, à tester
+        # countTest = 0
+            # if timeDataClean['DateTime'].iloc[0] < deploymentDateobj:
+            #     for i in timeDataClean.index:
+            #         if timeDataClean.loc[i,'DateTime'] >= deploymentDateobj:
+            #             break
+            #         else:
+            #             timeDataClean.loc[i,'Status']='No individual attached' #will see if we put more details ou faire ça direct ?  noIndAttached = geoDataClean.loc[geoDataClean['DateTime'] < deploymentDateobj].copy()
+            #             countTest = countTest + 1
+        return timeDataClean, pastOutliers#, countTest
 
     def findTimeDuplicates(self, timeDataClean):
         # Dataframe with duplicates with same date
@@ -704,7 +756,7 @@ class GSMImport(ImportWithFileLikeCSV):
         finalDataset = finalDataset.sort_values(by=date,ascending=True)
         return finalDataset
 
-    def dataAnnotation(self, newData, report, sensorCreationDate, deployementDate, dataForSpeed, finalReport, twoDfix):
+    def dataAnnotation(self, newData, report, sensorReception, deployementDate, dataForSpeed, finalReport, twoDfix, maxDateData, finalStatusDate):
         # #Function to remove impossible coordinates (null or abs(lat)> 90 or abs(lon)>180)
         geoOutliers, geoDataClean = self.findGeoOutliers(newData, twoDfix)
         report['GeoOutliers'] = len(geoOutliers)
@@ -712,9 +764,9 @@ class GSMImport(ImportWithFileLikeCSV):
             return report
         else:
             # #Function to remove and annotate data depending on date possibility : past before sensor creation, test before deployment
-            timeDataClean, pastOutliers, countTest = self.findTimeOutliers(geoDataClean, sensorCreationDate, deployementDate)
+            timeDataClean, pastOutliers = self.findTimeRangeOutliers(geoDataClean, sensorReception, deployementDate, finalStatusDate, maxDateData)
             report['PastOutliers'] = len(pastOutliers)
-            report['TestAnnotated'] = report['TestAnnotated'] + countTest
+            # report['TestAnnotated'] = report['TestAnnotated'] + countTest # à voir si on détaille les annotations No individual attached
             # #Function that finds duplicates = data with at least exactly same timestamp
             duplicatesToDelete,duplicateCleanData = self.findTimeDuplicates(timeDataClean)
             report['Duplicates'] = report['Duplicates'] + len(duplicatesToDelete)
@@ -1009,7 +1061,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
                     sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
                     if sensor is None:
                         rawData.insert(len(rawData.columns),'Status','')
-                        rawData['Status'] = 'exotic'
+                        rawData['Status'] = 'No existing sensor'
                         return 'No matching sensor found in database'
                     else:
                         sensorCreationDate = sensor.creationDate
@@ -1407,7 +1459,7 @@ class ARGOSImport(ImportWithFileLikeCSV):
 #             sensor = curSession.query(Sensor).filter(Sensor.UnicIdentifier == str(int(identifier))).first()
 #             if sensor is None:
 #                 rawData.insert(len(rawData.columns),'Status','')
-#                 rawData['Status'] = 'exotic'
+#                 rawData['Status'] = 'No existing sensor'
 #                 print('No matching sensor found in database')
 #                 return 'No matching sensor found in database'
 #             else:

@@ -19,6 +19,7 @@ Back/build/*
 Back/pserve*
 
 **/config.js
+**/config_old.js
 
 **/*.pyc
 **/*.ini
