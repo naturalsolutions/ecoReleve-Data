@@ -212,7 +212,7 @@ define([
       var self = this;
       var model = new Backbone.Model();
       $.ajax({
-        url: config.coreUrl + 'stations/importGPX',
+        url: config.erdApiUrl + 'stations/importGPX',
       }).then(function (data) {
         model.schema = data.schema;
         model.fieldsets = data.fieldsets;

@@ -157,7 +157,7 @@ define([
       $('#myPleaseWait').modal({"keyboard":false,"backdrop": "static","show":true});
       $.ajax({
         type: "POST",
-        url: config.coreUrl + 'sensorDatas/camtrap/concat',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/concat',
         data: {
           path: params.path,
           action: 0 // create folder
@@ -193,7 +193,7 @@ define([
       var _this = this;
       return this.dfd = $.ajax({
           type: "GET",
-          url: config.coreUrl + 'dashboard/availableSpace',
+          url: config.erdApiUrl + 'dashboard/availableSpace',
         })
         .done(function (response, status, jqXHR) {
           if (jqXHR.status === 200) {

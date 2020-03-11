@@ -59,7 +59,7 @@ define([
       var self = this;
       $.ajax({
         context: this,
-        url: config.coreUrl + 'sensors/getUnicIdentifier',
+        url: config.erdApiUrl + 'sensors/getUnicIdentifier',
         data: {sensorType: 5},
       }).done(function(data) {
         var len = data.length;
@@ -92,7 +92,7 @@ define([
       var _this = this;
       $.ajax({
         type: "POST",
-        url: config.coreUrl + 'sensorDatas/camtrap/concat',
+        url: config.erdApiUrl + 'sensorDatas/camtrap/concat',
         data: {
           path : params.path,
           action : 0 // create folder

@@ -152,7 +152,7 @@ define([
       formData.append("FK_Station",this.model.get("FK_Station"));
       return $.ajax({
         type: 'POST',
-        url : config.coreUrl+ 'mediasfiles/upload',
+        url : config.erdApiUrl+ 'mediasfiles/upload',
         processData: false,
         contentType: false,
         data : formData,

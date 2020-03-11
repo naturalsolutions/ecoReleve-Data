@@ -160,7 +160,7 @@ define([
     },
 
     export: function(){
-        var url = Config.coreUrl+this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
+        var url = Config.erdApiUrl+this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
 

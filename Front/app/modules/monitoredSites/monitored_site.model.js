@@ -128,7 +128,7 @@ define([
               var path = window.location.href.split('/');
 
               var siteID = path[ path.length - 1 ];
-              var url = config.coreUrl + 'photos/export/?siteid='+siteID
+              var url = config.erdApiUrl + 'photos/export/?siteid='+siteID
 
               window.open(url);
           };
@@ -154,7 +154,7 @@ define([
             var path = window.location.href.split('/');
             var siteID = path[ path.length - 1 ];
             var sessionID = params.data['sessionID'];
-            var url = config.coreUrl + 'photos/export/?siteid='+siteID+'&sessionid='+sessionID;
+            var url = config.erdApiUrl + 'photos/export/?siteid='+siteID+'&sessionid='+sessionID;
 
             window.open(url);
           };

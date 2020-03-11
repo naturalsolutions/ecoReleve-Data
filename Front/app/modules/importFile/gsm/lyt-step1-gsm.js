@@ -42,7 +42,7 @@ define([
       var previewTemplate = previewNode.parentNode.innerHTML;
       previewNode.parentNode.removeChild(previewNode);
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl+'sensorDatas/gsm', // Set the url
+        url: config.erdApiUrl+'sensorDatas/gsm', // Set the url
         thumbnailWidth: 80,
         thumbnailHeight: 80,
         parallelUploads: 8,

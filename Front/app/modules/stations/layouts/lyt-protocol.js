@@ -118,7 +118,7 @@ define([
       var patern = new Backbone.Model();
 
       this.jqxhr = $.ajax({
-        url: config.coreUrl + 'stations/' + this.stationId + '/protocols/0',
+        url: config.erdApiUrl + 'stations/' + this.stationId + '/protocols/0',
         context: this,
         type: 'GET',
         data: {
@@ -128,7 +128,7 @@ define([
         },
         dataType: 'json',
         success: function(resp) {
-          patern.urlRoot = config.coreUrl + 'stations/' + _this.options.stationId + '/protocols';
+          patern.urlRoot = config.erdApiUrl + 'stations/' + _this.options.stationId + '/protocols';
           patern.attributes.data = resp.data;
           patern.attributes.fieldsets = resp.fieldsets;
           patern.attributes.schema = resp.schema;

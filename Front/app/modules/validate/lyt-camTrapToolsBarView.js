@@ -208,7 +208,7 @@ define([
 			
 			$.ajax({
 				type: 'PUT',
-				url: config.coreUrl + 'sensorDatas/camtrap/'+_this.parent.equipmentId+'/updateMany',
+				url: config.erdApiUrl + 'sensorDatas/camtrap/'+_this.parent.equipmentId+'/updateMany',
 				contentType: 'application/json',
 				data: JSON.stringify(tab)
 			  })
