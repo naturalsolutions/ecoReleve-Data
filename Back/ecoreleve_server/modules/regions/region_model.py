@@ -127,4 +127,3 @@ class FieldworkArea(Base):
     #             'Management_unit': self.Management_Unit,
     #             'Name': self.Name
     #             }
-
