@@ -41,10 +41,32 @@ class RegionResource(CustomResource):
             return 'reference not found'
 
     def getGeoJson(self):
-        return self.objectDB.geom_json
+        item = self.objectDB
+        toRet = Feature(
+                id=getattr(item, 'ID'),
+                geometry=wkb.loads(getattr(item, 'valid_geom')),
+                properties={
+                    'FieldworkArea': getattr(item, 'fullpath'),
+                    'Country': getattr(item, 'Country'),
+                    'Working_area': getattr(item, 'Working_Area'),
+                    'Working_region': getattr(item, 'Working_Region'),
+                    'Management_unit': getattr(item, 'Management_Unit'),
+                    'name': getattr(item, 'Name')
+                }
+            )
+        return toRet
 
     def retrieve(self):
-        return self.objectDB.json
+        toRet = {
+            'FieldworkArea': getattr(self.objectDB, 'fullpath', None),
+            'Country': getattr(self.objectDB, 'Country', None),
+            'Working_area': getattr(self.objectDB, 'Working_Area', None),
+            'Working_region': getattr(self.objectDB, 'Working_Region', None),
+            'Management_unit': getattr(self.objectDB, 'Management_Unit', None),
+            'Name': getattr(self.objectDB, 'Name', None),
+            }
+
+        return toRet
 
 
 class RegionsResource(CustomResource):
