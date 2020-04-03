@@ -1,6 +1,6 @@
-var coreUrl= ...;
-var portalUrl = ...;
-var thesaurusUrl = ...;
+var coreUrl= '$coreUrl';
+var portalUrl = '$portalUrl';
+var thesaurusUrl = '$thesaurusUrl';
 try {
   define(
     {
