@@ -1,8 +1,8 @@
-var erdApiUrl= ...;
-var portalFrontUrl = ...;
-var portalApiUrl = ...;
-var thesaurusUrl = ...;
-var clientID = ...;
+var erdApiUrl= '$erdApiUrl';
+var portalFrontUrl = '$portalFrontUrl';
+var portalApiUrl = '$portalApiUrl';
+var thesaurusUrl = '$thesaurusUrl';
+var clientID = '$clientID';
 try {
   define(
     {
