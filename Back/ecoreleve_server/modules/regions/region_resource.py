@@ -5,9 +5,9 @@ import time
 from datetime import datetime
 from traceback import print_exc
 from collections import Counter
-from shapely.wkt import loads
+from shapely import wkt, wkb
 from geojson import Feature, FeatureCollection, dumps
-from sqlalchemy import select, text, func
+from sqlalchemy import select, text, func, and_
 
 
 from ecoreleve_server.core import RootCore, dbConfig
@@ -41,10 +41,32 @@ class RegionResource(CustomResource):
             return 'reference not found'
 
     def getGeoJson(self):
-        return self.objectDB.geom_json
+        item = self.objectDB
+        toRet = Feature(
+                id=getattr(item, 'ID'),
+                geometry=wkb.loads(getattr(item, 'valid_geom')),
+                properties={
+                    'FieldworkArea': getattr(item, 'fullpath'),
+                    'Country': getattr(item, 'Country'),
+                    'Working_area': getattr(item, 'Working_Area'),
+                    'Working_region': getattr(item, 'Working_Region'),
+                    'Management_unit': getattr(item, 'Management_Unit'),
+                    'name': getattr(item, 'Name')
+                }
+            )
+        return toRet
 
     def retrieve(self):
-        return self.objectDB.json
+        toRet = {
+            'FieldworkArea': getattr(self.objectDB, 'fullpath', None),
+            'Country': getattr(self.objectDB, 'Country', None),
+            'Working_area': getattr(self.objectDB, 'Working_Area', None),
+            'Working_region': getattr(self.objectDB, 'Working_Region', None),
+            'Management_unit': getattr(self.objectDB, 'Management_Unit', None),
+            'Name': getattr(self.objectDB, 'Name', None),
+            }
+
+        return toRet
 
 
 class RegionsResource(CustomResource):
@@ -73,13 +95,18 @@ class RegionsResource(CustomResource):
         query = select([FieldworkArea.fullpath.label('label'),
                         FieldworkArea.ID.label('value'),
                         FieldworkArea.Name.label('displayLabel'),
-                        ]).where(FieldworkArea.fullpath.like('%'+params['term']+'%')
-                        ).order_by(FieldworkArea.fullpath)
+                        ])
+        query = query.where(and_(
+            FieldworkArea.fullpath.like('%'+params['term']+'%'),
+            FieldworkArea.Status == 'current'
+        ))
+        query = query.order_by(FieldworkArea.fullpath)
 
         return [dict(row) for row in self.session.execute(query).fetchall()]
 
     def getRegionTypes(self):
         query = select([GeomaticLayer.type_]).distinct(GeomaticLayer.type_)
+        query = query.where(GeomaticLayer.type_ != 'Country')
         regions = self.session.execute(query).fetchall()
 
         return [r[0] for r in regions]
@@ -87,41 +114,60 @@ class RegionsResource(CustomResource):
     def getGeomFromType(self):
         session = self.request.dbsession
         params = self.request.params.mixed()
-        existingGeoJson = None
-        redisInstance = False
-        
-        if get_redis_con() is not None:
-            try:
-                existingGeoJson = get_redis_con().get('regions/' + params['type'])
-            except:
-                pass
 
-        if not existingGeoJson:
-            results = session.query(FieldworkArea).filter(
-                FieldworkArea.type_ == params['type'])
-            curStyle = self.colorByTypes.get(params['type'], {}).copy()
-            curStyle.update({
-                'fillOpacity': 0.2,
-                'weight': 2,
-                'opacity': 0.7
-            })
+        curStyle = self.colorByTypes.get(params['type'], {}).copy()
+        curStyle.update({
+            'fillOpacity': 0.2,
+            'weight': 2,
+            'opacity': 0.7
+        })
 
-            if params and params.get('criteria', None):
-                criterias = params.get('criteria')
-                for crit in criterias:
-                    results = results.filter(
-                        getattr(FieldworkArea, crit['Column']) == crit['Value'])
-            results = results.all()
-            response = {
-                'geojson': [r.geom_json for r in results],
-                'style': curStyle
-            }
+        colToRet = [
+            FieldworkArea.ID,
+            FieldworkArea.Country,
+            FieldworkArea.Working_Area,
+            FieldworkArea.Working_Region,
+            FieldworkArea.Management_Unit,
+            FieldworkArea.Name,
+            FieldworkArea.type_,
+            FieldworkArea.fullpath,
+            FieldworkArea.valid_geom
+        ]
 
-            if get_redis_con() is not None:
-                # set region json in redis, expires in 60 days
-                get_redis_con().set('regions/' + params['type'], json.dumps(response), ex=60*3600*24)
-        else:
-            response = json.loads(existingGeoJson.decode())
+        query = select(colToRet)
+        query = query.where(and_(
+            FieldworkArea.type_ == params['type'],
+            FieldworkArea.Status == 'current'
+            ))
+        # if params and params.get('criteria', None):
+        #     criterias = params.get('criteria')
+        #     for crit in criterias:
+        #         query = query.filter(
+        #             getattr(FieldworkArea, crit['Column']) == crit['Value']
+        #             )
+
+        results = session.execute(query).fetchall()
+
+        toRet = []
+
+        for item in results:
+            tmpFeat = Feature(
+                id=getattr(item, 'ID'),
+                geometry=wkb.loads(getattr(item, 'valid_geom')),
+                properties={
+                    'FieldworkArea': getattr(item, 'fullpath'),
+                    'Country': getattr(item, 'Country'),
+                    'Working_area': getattr(item, 'Working_Area'),
+                    'Working_region': getattr(item, 'Working_Region'),
+                    'Management_unit': getattr(item, 'Management_Unit'),
+                    'name': getattr(item, 'Name')
+                }
+            )
+            toRet.append(tmpFeat)
+        response = {
+            'geojson': toRet,
+            'style': curStyle
+        }
         return response
 
 
