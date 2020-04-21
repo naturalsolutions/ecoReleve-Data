@@ -1,22 +1,23 @@
-var erdApiUrl= '$erdApiUrl';
-var portalFrontUrl = '$portalFrontUrl';
-var portalApiUrl = '$portalApiUrl';
-var thesaurusUrl = '$thesaurusUrl';
+var erdApiUrl = $erdApiUrl;
+var portalFrontUrl = $portalFrontUrl;
+var portalApiUrl = $portalApiUrl;
+var thesaurusUrl = $thesaurusUrl;
 var clientID = '$clientID';
 try {
   define(
     {
       root: window.location.pathname.replace(/\/(?:index.html)?$/, ''),
-      erdApiUrl: erdApiUrl ,
-      portalFrontUrl : portalFrontUrl,
+      erdApiUrl: erdApiUrl,
+      portalFrontUrl: portalFrontUrl,
+      portalApiUrl: portalApiUrl,
       thesaurusUrl: thesaurusUrl,
       siteName: '',
       dateLabel: 'jj/mm/aaaa hh:mm:ss',
       dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
       googleAPIkey: 'AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk',
-      language : 'fr',
-      mapZoom : 6,
-      client_id : clientID
+      language: 'fr',
+      mapZoom: 6,
+      client_id: clientID
     }
  );
 }

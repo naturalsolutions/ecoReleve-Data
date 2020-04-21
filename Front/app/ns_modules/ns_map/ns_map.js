@@ -512,10 +512,15 @@ define([
       
       $.when(window.RegionLayers[layerName]).then(function() {
         var geoJson = window.RegionLayers[layerName].responseJSON
-        _this.RegionLayers[layerName] = new L.GeoJSON(geoJson['geojson'],
-                                                      {style : geoJson['style'],
-                                                      onEachFeature: _this.eachPolygon
-                                                    });
+        if (typeof(geoJson) == 'undefined') {
+          return;
+        }
+        else {
+          _this.RegionLayers[layerName] = new L.GeoJSON(geoJson['geojson'],
+                                                        {style : geoJson['style'],
+                                                        onEachFeature: _this.eachPolygon
+                                                      });
+        }
         _this.lControl.addOverlay(_this.RegionLayers[layerName], layerName);
       });
     },
