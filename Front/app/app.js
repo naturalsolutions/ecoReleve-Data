@@ -154,7 +154,9 @@ function( Marionette, OAuth2, LytRootView, Router, Controller,Swal,config, $, Ba
       options.url = config.erdApiUrl + options.url;
     }
     if (options.url.indexOf(config.erdApiUrl) > -1 || options.url.indexOf(config.thesaurusUrl) > -1) {
-
+      if (localStorage.getItem('NSERDAccess_token') != null) {
+        jqXHR.setRequestHeader('Authorization', 'Bearer '+ localStorage.getItem('NSERDAccess_token') )
+      }
       if (options.refreshRequest) {
         return;
       }
