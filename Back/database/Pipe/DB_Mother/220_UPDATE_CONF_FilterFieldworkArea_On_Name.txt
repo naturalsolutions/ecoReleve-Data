@@ -1,0 +1,13 @@
+UPDATE [ModuleGrids]
+SET [Name] = 'FieldworkArea@Name',
+	[Options] = '{"source": "autocomplete/fieldworkarea/Name/Name", "minLength":3}'
+WHERE
+[Module_ID] = 3
+AND
+[name] = 'FieldworkArea@fullpath'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('220_UPDATE_CONF_FilterFieldworkArea_On_Name',GETDATE(),(SELECT db_name()))
+
+
+GO
