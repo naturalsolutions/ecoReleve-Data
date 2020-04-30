@@ -68,7 +68,7 @@ context_permissions = {
         (Allow, 'group:user', ('create', 'read', 'update'))
     ],
     'sensors': [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:admin', ('create', 'read', 'update')),
         (Allow, 'group:superUser', ('create', 'read', 'update')),
         (Allow, 'group:user', 'read')
     ],
@@ -138,7 +138,7 @@ routes_permission = {
         'GET': 'all',
         'POST': 'admin',
         'PUT': 'admin',
-        'DELETE': 'admin'
+        'DELETE': 'noONe'
     },
     'individuals': {
         'GET': 'all',
