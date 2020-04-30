@@ -8,9 +8,12 @@ from ecoreleve_server.core.base_resource import *
 from ..individual_model import Individual, Individual_Location
 from .inidividual_locations_collection import IndividualLocationsCollection
 from ecoreleve_server.utils.parseValue import integerOrDefault
+from ecoreleve_server.modules.permissions import context_permissions
 
 
 class IndividualLocationsResource(CustomResource):
+
+    __acl__ = context_permissions['individual_locations']
 
     def retrieve(self):
         return self.getLocations()
@@ -54,7 +57,7 @@ class IndividualLocationsResource(CustomResource):
                 'exceed': exceed}
         return data
 
-    def getMinimalParamsForPagination(self,data):
+    def getMinimalParamsForPagination(self, data):
         '''
         @request :: A dictionary-like object containing both the parameters from the query string and request body,
         @returning :: dict
@@ -92,7 +95,7 @@ class IndividualLocationsResource(CustomResource):
 
         return result
 
-    def getOrderBy(self,data):
+    def getOrderBy(self, data):
         '''
         @request :: A dictionary-like object containing both the parameters from the query string and request body,
         @returning :: list
@@ -104,8 +107,8 @@ class IndividualLocationsResource(CustomResource):
             result = ['Date:desc']
 
         return result
-    
-    def getFilters(self,data): 
+
+    def getFilters(self, data):
 
         result = []
 

@@ -12,6 +12,7 @@ from ..field_activities import FieldActivity_ProtocoleType
 from ..media_files import MediasFiles
 from ..permissions import context_permissions
 from .equipment_model import  ErrorAvailable
+import collections
 
 class ObservationResource(DynamicObjectResource):
 
@@ -56,7 +57,7 @@ class ObservationResource(DynamicObjectResource):
                 # mediaItem = self.session.query(MediasFiles).filter(MediasFiles.FK_Station == self.objectDB.FK_Station).one()
                 mediaItem = self.session.query(MediasFiles).filter(and_( MediasFiles.FK_Station == self.objectDB.FK_Station, MediasFiles.Name == self.objectDB.values['mediafile'].split('/')[-1] )).first()
                 if mediaItem :
-                    delSubReq = Request.blank('/ecoReleve-Core/mediasfiles/'+str(mediaItem.Id) )
+                    delSubReq = Request.blank('/' + dbConfig.get('prefixapi') + '/mediasfiles/'+str(mediaItem.Id) )
                     delSubReq.method = 'DELETE'
                     delSubReq.cookies = self.request.cookies
                     delSubResp = self.request.invoke_subrequest(delSubReq)
@@ -181,37 +182,29 @@ class ObservationsResource(DynamicObjectCollectionResource):
 
         try:
             if 'FormName' in self.request.params:
-                listObs = list(self.session.query(Observation).filter(
-                    and_(Observation.FK_Station == sta_id, Observation.Parent_Observation == None)))
-                listType = list(self.session.query(FieldActivity_ProtocoleType
-                                                   ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
+                queryExistingObs = self.session.query(Observation)
+                queryExistingObs = queryExistingObs.filter(
+                    and_(
+                        Observation.FK_Station == sta_id,
+                        Observation.Parent_Observation == None
+                        )
+                    )
+                listObs = list(queryExistingObs)
 
-                listProto = {}
-                if listObs:
-                    for i in range(len(listObs)):
-                        DisplayMode = 'edit'
-                        curObs = listObs[i]
-                        curObsType = curObs._type
-                        typeID = curObsType.ID
-                        if typeID in listProto:
-                            listProto[typeID]['obs'].append(curObs.ID)
-                        else:
-                            typeName = curObsType.Name.replace('_', ' ')
-                            if curObsType.Status == 10:
-                                curObsForm = curObs.getForm(
-                                    displayMode=DisplayMode)
-                                curObsForm['grid'] = True
-                            else:
-                                curObsForm = {}
-                                curObsForm['grid'] = False
+                queryProtoForAFActivity = self.session.query(
+                    FieldActivity_ProtocoleType
+                    )
+                queryProtoForAFActivity = queryProtoForAFActivity.filter(
+                    FieldActivity_ProtocoleType.FK_fieldActivity
+                    ==
+                    curSta.fieldActivityId
+                )
+                queryProtoForAFActivity = queryProtoForAFActivity.order_by(
+                    FieldActivity_ProtocoleType.Order
+                )
+                listType = list(queryProtoForAFActivity)
 
-                            listProto[typeID] = {
-                                'Name': typeName,
-                                'schema': curObsForm.get('schema', None),
-                                'fieldsets': curObsForm.get('fieldsets', None),
-                                'grid': curObsForm['grid'],
-                                'obs': [curObs.ID]
-                            }
+                listProto = collections.OrderedDict()
 
                 if listType:
                     listVirginProto = list(
@@ -243,6 +236,32 @@ class ObservationsResource(DynamicObjectCollectionResource):
                                 'obs': []
                             }
 
+                if listObs:
+                    for i in range(len(listObs)):
+                        DisplayMode = 'edit'
+                        curObs = listObs[i]
+                        curObsType = curObs._type
+                        typeID = curObsType.ID
+                        if typeID in listProto:
+                            listProto[typeID]['obs'].append(curObs.ID)
+                        else:
+                            typeName = curObsType.Name.replace('_', ' ')
+                            if curObsType.Status == 10:
+                                curObsForm = curObs.getForm(
+                                    displayMode=DisplayMode)
+                                curObsForm['grid'] = True
+                            else:
+                                curObsForm = {}
+                                curObsForm['grid'] = False
+
+                            listProto[typeID] = {
+                                'Name': typeName,
+                                'schema': curObsForm.get('schema', None),
+                                'fieldsets': curObsForm.get('fieldsets', None),
+                                'grid': curObsForm['grid'],
+                                'obs': [curObs.ID]
+                            }
+
                 globalListProto = [{'ID': typeID,
                                     'Name': listProto[typeID]['Name'],
                                     'schema':listProto[typeID]['schema'],
@@ -253,7 +272,7 @@ class ObservationsResource(DynamicObjectCollectionResource):
                                    for typeID in listProto.keys()
                                    ]
 
-                response = sorted(globalListProto, key=lambda k: k['Name'])
+                response = globalListProto
 
         except Exception as e:
             print_exc()

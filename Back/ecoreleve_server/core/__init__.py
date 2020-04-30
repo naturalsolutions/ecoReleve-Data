@@ -15,6 +15,7 @@ from .configuration_model import *
 
 class SecurityRoot(Resource):
     __acl__ = [
+        (Allow, Authenticated, 'fixForOld'),
         (Allow, Authenticated, 'read'),
         (Allow, Authenticated, 'all'),
         (Allow, 'group:admin', 'admin'),
@@ -29,7 +30,7 @@ class SecurityRoot(Resource):
         self.request = request
 
     def __getitem__(self, item):
-        if item == 'ecoReleve-Core':
+        if item == dbConfig.get('prefixapi'):
             return RootCore(item, self)
         else:
             raise KeyError

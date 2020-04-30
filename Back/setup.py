@@ -9,6 +9,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
+    'jwcrypto==0.6.0',
     'exifread==2.1.2',
     'geojson==2.4.1',
     'lxml==4.3.3',
@@ -29,7 +30,7 @@ requires = [
     # 'shapely',
     'SQLAlchemy==1.3.3',
     'SQLAlchemy-Utils==0.33.1',
-    'waitress==1.3.0'
+    'waitress==1.4.2'
     ]
 
 dependency_links=[

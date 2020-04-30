@@ -1,21 +1,22 @@
-var coreUrl= ...;
-var portalUrl = ...;
- try {
-    define({
-    root: window.location.pathname.replace(/\/(?:index.html)?$/, ''),
-
-    serverUrl: ...,
-    sensorUrl: ...,
-    coreUrl: coreUrl ,
-    portalUrl : portalUrl,
-    siteName: ...,
-    dateLabel: 'jj/mm/aaaa hh:mm:ss',
-    dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
-    googleAPIkey: 'AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk',
-
-    language : 'fr',
-    mapZoom : 6
- });
-}catch(e){
-    console.log(e);
+var coreUrl= '$coreUrl';
+var portalUrl = '$portalUrl';
+var thesaurusUrl = '$thesaurusUrl';
+try {
+  define(
+    {
+      root: window.location.pathname.replace(/\/(?:index.html)?$/, ''),
+      coreUrl: coreUrl ,
+      portalUrl : portalUrl,
+      thesaurusUrl: thesaurusUrl,
+      siteName: '',
+      dateLabel: 'jj/mm/aaaa hh:mm:ss',
+      dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
+      googleAPIkey: 'AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk',
+      language : 'fr',
+      mapZoom : 6
+    }
+ );
+}
+catch(e){
+  console.log(e);
 }

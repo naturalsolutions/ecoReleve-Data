@@ -90,40 +90,40 @@ class FieldworkArea(Base):
     fullpath = Column(String(255))
     valid_geom = Column(Geometry)
     geom = Column(Geometry)
+    Status = Column(String(255), nullable=False)
 
-    @hybrid_property
-    def geom_WKT(self):
-        return func.geo.wkt(self.valid_geom)
+    # @hybrid_property
+    # def geom_WKT(self):
+    #     return func.geo.wkt(self.valid_geom)
 
-    @geom_WKT.expression
-    def geom_WKT(cls):
-        return func.geo.wkt(cls.valid_geom)
+    # @geom_WKT.expression
+    # def geom_WKT(cls):
+    #     return func.geo.wkt(cls.valid_geom)
 
-    @geom_WKT.setter
-    def geom_WKT(cls):
-        return func.geo.wkt(cls.valid_geom)
+    # @geom_WKT.setter
+    # def geom_WKT(cls):
+    #     return func.geo.wkt(cls.valid_geom)
 
-    @hybrid_property
-    def geom_json(self):
-        return Feature(
-            id=self.ID,
-            geometry=loads(self.valid_geom) if self.valid_geom else None,
-            properties={'FieldworkArea': self.fullpath,
-                        'Country': self.Country,
-                        'Working_area': self.Working_Area,
-                        'Working_region': self.Working_Region,
-                        'Management_unit': self.Management_Unit,
-                        'name' :self.Name
-                        }
-        )
+    # @hybrid_property
+    # def geom_json(self):
+    #     return Feature(
+    #         id=self.ID,
+    #         geometry=loads(self.valid_geom) if self.valid_geom else None,
+    #         properties={'FieldworkArea': self.fullpath,
+    #                     'Country': self.Country,
+    #                     'Working_area': self.Working_Area,
+    #                     'Working_region': self.Working_Region,
+    #                     'Management_unit': self.Management_Unit,
+    #                     'name':self.Name
+    #                     }
+    #     )
 
-    @hybrid_property
-    def json(self):
-        return {'FieldworkArea': self.fullpath,
-                'Country': self.Country,
-                'Working_area': self.Working_Area,
-                'Working_region': self.Working_Region,
-                'Management_unit': self.Management_Unit,
-                'Name': self.Name
-                }
-
+    # @hybrid_property
+    # def json(self):
+    #     return {'FieldworkArea': self.fullpath,
+    #             'Country': self.Country,
+    #             'Working_area': self.Working_Area,
+    #             'Working_region': self.Working_Region,
+    #             'Management_unit': self.Management_Unit,
+    #             'Name': self.Name
+    #             }

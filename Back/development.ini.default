@@ -3,6 +3,24 @@
 # http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
 ###
 
+##############################################################################################################################
+#                                                                                                                            #
+#                           STARTING TEMPLATE                                                                                #
+#                                                                                                                            #
+##############################################################################################################################
+#  INFOS TEMPLATE                                                                                                            #
+#  LIST ALL THE KEYS AND DESCRIBE IT PLEASE!!!!                                                                              #
+#  keyExample = will be use for an example                                                                                   #
+##############################################################################################################################
+#keyExample = valueExample
+#                           ENDING TEMPLATE                                                                                  #
+#                                                                                                                            #
+##############################################################################################################################
+
+
+
+
+
 [app:main]
 use = egg:ecoreleve_server
 
@@ -12,12 +30,17 @@ pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
 pyramid.includes =
-    pyramid_debugtoolbar
     pyramid_tm
 
-sqlalchemy.default.url = mssql+pyodbc://username:password@host\instance/initialDB
-# or (for MS SQL Server)
-#sqlalchemy.default.url = DRIVER={SQL Server};Server= yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
+
+
+
+##############################################################################################################################
+#                                                                                                                            #
+#                                STARTING CONFIG BDD ACCESS                                                                  #
+#                                                                                                                            #
+
+sqlalchemy.default.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
 sqlalchemy.default.implicit_returning = False
 sqlalchemy.default.pool_reset_on_return = commit
 sqlalchemy.default.pool_size = 30
@@ -26,10 +49,7 @@ sqlalchemy.default.max_overflow = 10
 sqlalchemy.default.case_sensitive= False
 
 
-#### connection for Export Database
-sqlalchemy.Export.url = mssql+pyodbc://username:password@host\instance/initialDB
-# or (for MS SQL Server)
-sqlalchemy.Export.url = DRIVER={SQL Server};Server= yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
+sqlalchemy.Export.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
 sqlalchemy.Export.implicit_returning = False
 sqlalchemy.Export.pool_reset_on_return = commit
 sqlalchemy.Export.pool_size = 30
@@ -44,17 +64,82 @@ sensor_schema = you Sensor Database schema
 # sql driver dialect (ex: for MS SQL Serveer)
 cn.dialect = mssql+pyodbc:///?odbc_connect=
 
+
+dbLog.url = DRIVER={SQL Server};Server=yourServerName;Database=yourDBName;UID=yourUser;PWD=yourPassword;
+dbLog.schema = NSLog.dbo
+
+#                           ENDING CONFIG BDD ACESS                                                                          #
+#                                                                                                                            #
+##############################################################################################################################
+
+
+##############################################################################################################################
+#                                                                                                                            #
+#                           STARTING APP CONF                                                                                #
+#                                                                                                                            #
+
+#init_exiftool  is for debbugging fix
+init_exiftool = True
+
+#Path access for storing and retrieve cameratrap image and mediafiles
+camTrap.path = C:\Data\CameraTrap
+mediasFiles.path = C:\Data\mediasFiles
+##For config server (renecore) prefixapi = ecoReleve-Core-Referentiel
+prefixapi = ecoReleve-Core
+
+#                           ENDING APP CONF                                                                                  #
+#                                                                                                                            #
+##############################################################################################################################
+
+
+
+##############################################################################################################################
+#                                                                                                                            #
+#                           STARTING SECURITY                                                                                #
+#                                                                                                                            #
+##############################################################################################################################
+#  INFOS SECURITY                                                                                                            #
+#  JWTSECURITY.MASTER_SECRET = this key will be used generate cookie THAT MUST BE THE SAME AS IN THE PORTAL                  #
+#  JWTSECURITY.COOKIENAME    = this key will be used to identify the cookie we want to retrieve in the request and get claims#
+##############################################################################################################################
+
+JWTSECURITY.MASTER_SECRET   =   test
+JWTSECURITY.COOKIENAME      =   ecoReleve-Core
+
+#                           ENDING SECURITY                                                                                  #
+#                                                                                                                            #
+##############################################################################################################################
+
+##############################################################################################################################
+#                                                                                                                            #
+#                           STARTING RENECO CONTEXT                                                                          #
+#                                                                                                                            #
+##############################################################################################################################
+#  INFOS RENECO                                                                                                              #
+#  RENECO.SECURITE.TINS_LABEL = this is specific for RENECO                                                                  #
+#                               when authentificated by the portal, the payload in cookie will have an "dictionaries"        #
+#                                 "roles" : {                                                                                #
+#                                            TIns_Label : Role                                                               #
+#                                           }                                                                                #
+##############################################################################################################################
+
+RENECO.SECURITE.TINS_LABEL = ecoRelevé
+
 # Thesaurus Configuration
 wsThesaurus.wsUrl = yourWebWervicesURL
 wsThesaurus.lng = fr
 
-jwtauth.master_secret = test
-init_exiftool = True
-camTrap.path = C:\Data\CameraTrap
-mediasFiles.path = C:\Data\mediasFiles
+#                           ENDING RENECO CONTEXT                                                                            #
+#                                                                                                                            #
+##############################################################################################################################
 
-dbLog.url = DRIVER={SQL Server};Server=.;Database=NSLog;UID=toto;PWD=totomdp;Trusted_Connection=Yes
-dbLog.schema = NSLog.dbo
+
+
+
+
+
+
+
 
 
 # By default, the toolbar only appears for clients from IP addresses

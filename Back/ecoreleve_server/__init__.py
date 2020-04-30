@@ -61,7 +61,7 @@ def main(global_config, **settings):
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
-    config.include('pyramid_jwtauth')
+    config.include('ecoreleve_server.core.policy')
 
     engine = initialize_session(settings)
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
@@ -86,8 +86,7 @@ def main(global_config, **settings):
     config.add_renderer('csv', CSVRenderer)
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
-
-    include_jwt_policy(config)
+    
     config.set_root_factory(SecurityRoot)
 
     dbConfig['init_exiftool'] = settings.get('init_exiftool', None)
@@ -99,7 +98,7 @@ def main(global_config, **settings):
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
     initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
-    config.add_route('myFormbuilder', 'ecoReleve-Core/formbuilder*traverse',
+    config.add_route('myFormbuilder', dbConfig.get('prefixapi') + '/formbuilder*traverse',
                     factory = 'ecoreleve_server.formbuilder.root_factory_formbuilder' )
     config.add_view( FormBuilderView , route_name='myFormbuilder')
     add_routes(config)

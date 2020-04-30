@@ -1163,10 +1163,23 @@ define([
         title: 'Are you sure?',
         text: 'selected rows will be deleted'
       };
-      this.swal(opt, 'warning', function() {
-        _this.destroySelectedRows(callback);
+      Swal({
+        title: opt.title,
+        text: opt.text,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'OK',
+      }).then((result) => {
+        if('value' in result) {
+          debugger
+          _this.destroySelectedRows(callback)
+        }
+        else {
+          debugger
+          document.querySelector('#actions .cancel').click();
+        }
       });
-
+      // this.swal(opt, 'warning',_this.destroySelectedRows(callback));
     },
 
     removeEmptyRow : function() {
@@ -1345,7 +1358,8 @@ define([
 
     },
     
-    destroySelectedRows: function(callback){
+    destroySelectedRows: function(callback) {
+      debugger
       var _this = this;
       var rowData = [];
 

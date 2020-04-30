@@ -45,6 +45,10 @@ function($,Marionette, config, Breadcrumb) {
       window.app.user.url = 'currentUser';
       window.app.user.fetch({
         success: function(data) {
+          /*
+          TODO:REFACT
+            set role in the body for front app 
+          */
           $('body').addClass(window.app.user.get('role'));
           $.xhrPool.allowAbort = true;
           _this.ui.userName.html(window.app.user.get('fullname'));
