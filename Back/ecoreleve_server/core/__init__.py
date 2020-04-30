@@ -30,7 +30,7 @@ class SecurityRoot(Resource):
         self.request = request
 
     def __getitem__(self, item):
-        if item == 'ecoReleve-Core':
+        if item == dbConfig.get('prefixapi'):
             return RootCore(item, self)
         else:
             raise KeyError
