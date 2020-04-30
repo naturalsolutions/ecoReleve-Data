@@ -360,17 +360,20 @@ class ProtocoleTypeCollection (MetaCollectionRessource):
         ]
 
         query = self.__request__.dbsession.query(ProtocoleType)
-        query = query.join(
+        query = query.outerjoin(
             FieldActivity_ProtocoleType,
             ProtocoleType.ID
             ==
             FieldActivity_ProtocoleType.FK_ProtocoleType
             )
-        query = query.join(
+        query = query.outerjoin(
             fieldActivity,
             fieldActivity.ID
             ==
             FieldActivity_ProtocoleType.FK_fieldActivity
+            )
+        query = query.filter(
+            ProtocoleType.Status.in_([4, 10])
             )
         query = query.with_entities(*colToRet)
         query = query.order_by(
@@ -399,7 +402,8 @@ class ProtocoleTypeCollection (MetaCollectionRessource):
                     Name=getattr(item, 'FieldActivities.Name'),
                     Order=getattr(item, 'FieldActivities.Order')
                     )
-            curProtocleType['FieldActivities'].append(curFieldActivity)
+            if curFieldActivity.get('ID')  is not None:
+                curProtocleType['FieldActivities'].append(curFieldActivity)
 
         for key, value in dictOfProtocoleType.items():
             toRet.append(value)
