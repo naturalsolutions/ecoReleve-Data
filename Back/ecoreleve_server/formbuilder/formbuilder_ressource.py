@@ -4,18 +4,35 @@ from ecoreleve_server.modules.field_activities.field_activity_model import (
     ProtocoleType,
     FieldActivity_ProtocoleType
 )
+from ecoreleve_server.core.init_db import dbConfig
 from sqlalchemy import asc
 from pyramid.httpexceptions import (
     HTTPClientError,
     HTTPOk
 )
+from pyramid.security import Allow
+from pyramid.security import Deny
+from pyramid.security import Everyone
 import collections
 
 
 class MetaRootRessource (dict):
-    __acl__ = context_permissions['formbuilder']
     __name__ = ''
     __parent__ = None
+
+    def __acl__(self):
+        # readonly endpoint for formbuilder if we are not on renecore
+        # that's maybe not the best solution
+        # we check if 'referentiel' is in prefix api
+        if 'referentiel' not in dbConfig.get('prefixapi').lower():
+            return [
+                (Allow, Everyone, 'read'),
+                (Deny, Everyone, ('create', 'update', 'delete'))
+                ]
+        else:
+            return [
+                context_permissions['formbuilder']
+            ]
 
     def __init__(self, name, ref, request):
         self.__name__ = name
@@ -45,7 +62,6 @@ class MetaRootRessource (dict):
 
 
 class MetaCollectionRessource (MetaRootRessource):
-    __acl__ = context_permissions['formbuilder']
     __name__ = ''
     __parent__ = None
 
@@ -62,7 +78,6 @@ class MetaCollectionRessource (MetaRootRessource):
 
 
 class MetaItemRessource(MetaCollectionRessource):
-    __acl__ = context_permissions['formbuilder']
     __name__ = ''
     __parent__ = None
 
@@ -80,7 +95,6 @@ class MetaItemRessource(MetaCollectionRessource):
 
 class FormBuilderRessource (MetaRootRessource):
 
-    __acl__ = context_permissions['formbuilder']
     __name__ = ''
     __parent__ = None
 
@@ -92,8 +106,6 @@ class FormBuilderRessource (MetaRootRessource):
     def __getitem__(self, name):
         if name == 'FieldActivity':
             return FieldActivityCollection(name, self)
-        elif name == 'FieldActivity_ProtocoleType':
-            return FieldActivityProtocoleTypeCollection(name, self)
         elif name == 'ProtocoleType':
             return ProtocoleTypeCollection(name, self)
         else:
@@ -105,7 +117,6 @@ class FormBuilderRessource (MetaRootRessource):
 
 class FieldActivityCollection (MetaCollectionRessource):
 
-    __acl__ = context_permissions['formbuilder']
     params = {
         'protocoleType': {
             'ID': None,
@@ -474,23 +485,15 @@ class ProtocoleTypeRessource(MetaItemRessource):
 
 class FieldActivityRessource(MetaItemRessource):
 
-    __acl__ = context_permissions['formbuilder']
-
     def __init__(self, name, ref):
         self.__name__ = name
         self.__parent__ = ref
         self.__request__ = ref.__request__
 
-    def __getitem__(self, name):
-        if name == 'FieldActivity_ProtocoleType':
-            return FieldActivityProtocoleTypeCollection(name, self)
-        else:
-            raise KeyError
-
     def retrieve(self):
-        item = self.__request__.dbsession.query(fieldActivity).get(self.__name__)
-
+        query = self.__request__.dbsession.query(fieldActivity)
+        item = query.get(self.__name__)
         return {
-                'ID' : getattr(item, 'ID'),
+                'ID': getattr(item, 'ID'),
                 'Name': getattr(item, 'Name')
                 }
