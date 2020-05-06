@@ -1,0 +1,330 @@
+CREATE PROCEDURE [dbo].[sp_PullModuleForms]
+	@IdProtocoleType INT,
+	@Debug INT = 0,
+	@RollbackForced INT = 0
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	IF @Debug = 1
+		BEGIN
+			PRINT(CONCAT('sp_PullModuleForms Start for protocoleType : ',@IdProtocoleType))
+		END
+
+	IF OBJECT_ID('tempdb..#ModuleFormsTMP') IS NOT NULL
+		DROP TABLE #ModuleFormsTMP
+
+	CREATE TABLE #ModuleFormsTMP (
+		[ID] INT NOT NULL,
+		[module_id] INT NULL,
+		[TypeObj] INT NULL,
+		[Name] NVARCHAR(250) NULL,
+		[Label] NVARCHAR(250) NULL,
+		[Required] BIT NULL,
+		[FieldSizeEdit] INT NOT NULL,
+		[FieldSizeDisplay] INT NOT NULL,
+		[InputType] NVARCHAR(100) NULL,
+		[editorClass] NVARCHAR(100) NULL,
+		[FormRender] INT NULL,
+		[FormOrder] INT NULL,
+		[Legend] NVARCHAR(500) NULL,
+		[Options] NVARCHAR(255) NULL,
+		[Validators] NVARCHAR(255) NULL,
+		[displayClass] NVARCHAR(150) NULL,
+		[EditClass] NVARCHAR(150) NULL,
+		[Status] INT NULL,
+		[Locked] BIT NULL,
+		[DefaultValue] VARCHAR(100) NULL,
+		[Rules] VARCHAR(550) NULL,
+		[Orginal_FB_ID] INT NULL
+		)
+
+	INSERT INTO #ModuleFormsTMP([ID],[module_id],[TypeObj],[Name],[Label],[Required],[FieldSizeEdit],[FieldSizeDisplay],[InputType],[editorClass],[FormRender],[FormOrder],[Legend],[Options],[Validators],[displayClass],[EditClass],[Status],[Locked],[DefaultValue],[Rules],[Orginal_FB_ID])
+	SELECT
+	[ID],
+	[module_id],
+	[TypeObj],
+	[Name],
+	[Label],
+	[Required],
+	[FieldSizeEdit],
+	[FieldSizeDisplay],
+	[InputType],
+	[editorClass],
+	[FormRender],
+	[FormOrder],
+	[Legend],
+	[Options],
+	[Validators],
+	[displayClass],
+	[EditClass],
+	[Status],
+	[Locked],
+	[DefaultValue],
+	[Rules],
+	[Orginal_FB_ID]
+	FROM [syn_Referentiel.ModuleForms] AS ODP
+	WHERE
+	[module_id] = 1
+	AND
+	[TypeObj] = @IdProtocoleType
+
+
+
+	---- MERGE TABLE ---
+	IF OBJECT_ID('tempdb..#tempMergeModuleForms') IS NOT NULL
+		DROP TABLE #tempMergeModuleForms
+
+	CREATE TABLE #tempMergeModuleForms(
+		[action] VARCHAR(MAX),
+		[SourceID] INT,
+		[Sourcemodule_id] INT,
+		[SourceTypeObj] INT,
+		[SourceName] NVARCHAR(250),
+		[SourceLabel] NVARCHAR(250),
+		[SourceRequired] BIT,
+		[SourceFieldSizeEdit] INT,
+		[SourceFieldSizeDisplay] INT,
+		[SourceInputType] NVARCHAR(100),
+		[SourceeditorClass] NVARCHAR(100),
+		[SourceFormRender] INT,
+		[SourceFormOrder] INT,
+		[SourceLegend] NVARCHAR(500),
+		[SourceOptions] NVARCHAR(255),
+		[SourceValidators] NVARCHAR(255),
+		[SourcedisplayClass] NVARCHAR(150),
+		[SourceEditClass] NVARCHAR(150),
+		[SourceStatus] INT,
+		[SourceLocked] BIT,
+		[SourceDefaultValue] VARCHAR(100),
+		[SourceRules] VARCHAR(550),
+		[SourceOrginal_FB_ID] INT,
+		[TargetID] INT,
+		[Targetmodule_id] INT,
+		[TargetTypeObj] INT,
+		[TargetName] NVARCHAR(250),
+		[TargetLabel] NVARCHAR(250),
+		[TargetRequired] BIT,
+		[TargetFieldSizeEdit] INT,
+		[TargetFieldSizeDisplay] INT,
+		[TargetInputType] NVARCHAR(100),
+		[TargeteditorClass] NVARCHAR(100),
+		[TargetFormRender] INT,
+		[TargetFormOrder] INT,
+		[TargetLegend] NVARCHAR(500),
+		[TargetOptions] NVARCHAR(255),
+		[TargetValidators] NVARCHAR(255),
+		[TargetdisplayClass] NVARCHAR(150),
+		[TargetEditClass] NVARCHAR(150),
+		[TargetStatus] INT,
+		[TargetLocked] BIT,
+		[TargetDefaultValue] VARCHAR(100),
+		[TargetRules] VARCHAR(550),
+		[TargetOrginal_FB_ID] INT
+	)
+
+	IF @debug = 1
+		BEGIN
+			SELECT 'DATA TO MERGE'
+			SELECT
+			*
+			FROM #ModuleFormsTMP
+
+			SELECT 'WILL BE MERGED WITH TARGET'
+			SELECT
+			[ID],
+			[module_id],
+			[TypeObj],
+			[Name],
+			[Label],
+			[Required],
+			[FieldSizeEdit],
+			[FieldSizeDisplay],
+			[InputType],
+			[editorClass],
+			[FormRender],
+			[FormOrder],
+			[Legend],
+			[Options],
+			[Validators],
+			[displayClass],
+			[EditClass],
+			[Status],
+			[Locked],
+			[DefaultValue],
+			[Rules],
+			[Orginal_FB_ID]
+			FROM [ModuleForms] AS ODP
+			WHERE
+			[module_id] = 1
+			AND
+			[TypeObj] = @IdProtocoleType
+		END
+
+
+	SET IDENTITY_INSERT [ModuleForms] ON;
+	PRINT('SET IDENTITY_INSERT ON FOR [ModuleForms]');
+
+	WITH ModuleFormsFiltered AS (
+			SELECT
+			[ID],
+			[module_id],
+			[TypeObj],
+			[Name],
+			[Label],
+			[Required],
+			[FieldSizeEdit],
+			[FieldSizeDisplay],
+			[InputType],
+			[editorClass],
+			[FormRender],
+			[FormOrder],
+			[Legend],
+			[Options],
+			[Validators],
+			[displayClass],
+			[EditClass],
+			[Status],
+			[Locked],
+			[DefaultValue],
+			[Rules],
+			[Orginal_FB_ID]
+			FROM [ModuleForms] AS ODP
+			WHERE
+			[module_id] = 1
+			AND
+			[TypeObj] = @IdProtocoleType
+	)
+	MERGE ModuleFormsFiltered AS [TARGET]
+	USING #ModuleFormsTMP AS [SOURCE]
+	ON ( [TARGET].[ID] = [SOURCE].[ID])
+
+	WHEN MATCHED THEN
+		UPDATE SET
+		TARGET.[module_id] = SOURCE.[module_id],
+		TARGET.[TypeObj] = SOURCE.[TypeObj],
+		TARGET.[Name] = SOURCE.[Name],
+		TARGET.[Label] = SOURCE.[Label],
+		TARGET.[Required] = SOURCE.[Required],
+		TARGET.[FieldSizeEdit] = SOURCE.[FieldSizeEdit],
+		TARGET.[FieldSizeDisplay] = SOURCE.[FieldSizeDisplay],
+		TARGET.[InputType] = SOURCE.[InputType],
+		TARGET.[editorClass] = SOURCE.[editorClass],
+		TARGET.[FormRender] = SOURCE.[FormRender],
+		TARGET.[FormOrder] = SOURCE.[FormOrder],
+		TARGET.[Legend] = SOURCE.[Legend],
+		TARGET.[Options] = SOURCE.[Options],
+		TARGET.[Validators] = SOURCE.[Validators],
+		TARGET.[displayClass] = SOURCE.[displayClass],
+		TARGET.[EditClass] = SOURCE.[EditClass],
+		TARGET.[Status] = SOURCE.[Status],
+		TARGET.[Locked] = SOURCE.[Locked],
+		TARGET.[DefaultValue] = SOURCE.[DefaultValue],
+		TARGET.[Rules] = SOURCE.[Rules],
+		TARGET.[Orginal_FB_ID] = SOURCE.[Orginal_FB_ID]
+
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT ([ID],[module_id],[TypeObj],[Name],[Label],[Required],[FieldSizeEdit],[FieldSizeDisplay],[InputType],[editorClass],[FormRender],[FormOrder],[Legend],[Options],[Validators],[displayClass],[EditClass],[Status],[Locked],[DefaultValue],[Rules],[Orginal_FB_ID]) 
+		VALUES ([ID],[module_id],[TypeObj],[Name],[Label],[Required],[FieldSizeEdit],[FieldSizeDisplay],[InputType],[editorClass],[FormRender],[FormOrder],[Legend],[Options],[Validators],[displayClass],[EditClass],[Status],[Locked],[DefaultValue],[Rules],[Orginal_FB_ID])
+
+	WHEN NOT MATCHED BY SOURCE THEN
+        DELETE
+
+	OUTPUT $action AS [action],
+	INSERTED.[ID] AS [SourceID],
+	INSERTED.[module_id] AS [Sourcemodule_id],
+	INSERTED.[TypeObj] AS [SourceTypeObj],
+	INSERTED.[Name] AS [SourceName],
+	INSERTED.[Label] AS [SourceLabel],
+	INSERTED.[Required] AS [SourceRequired],
+	INSERTED.[FieldSizeEdit] AS [SourceFieldSizeEdit],
+	INSERTED.[FieldSizeDisplay] AS [SourceFieldSizeDisplay],
+	INSERTED.[InputType] AS [SourceInputType],
+	INSERTED.[editorClass] AS [SourceeditorClass],
+	INSERTED.[FormRender] AS [SourceFormRender],
+	INSERTED.[FormOrder] AS [SourceFormOrder],
+	INSERTED.[Legend] AS [SourceLegend],
+	INSERTED.[Options] AS [SourceOptions],
+	INSERTED.[Validators] AS [SourceValidators],
+	INSERTED.[displayClass] AS [SourcedisplayClass],
+	INSERTED.[EditClass] AS [SourceEditClass],
+	INSERTED.[Status] AS [SourceStatus],
+	INSERTED.[Locked] AS [SourceLocked],
+	INSERTED.[DefaultValue] AS [SourceDefaultValue],
+	INSERTED.[Rules] AS [SourceRules],
+	INSERTED.[Orginal_FB_ID] AS [SourceOrginal_FB_ID],
+	DELETED.[ID] AS [TargetID],
+	DELETED.[module_id] AS [Targetmodule_id],
+	DELETED.[TypeObj] AS [TargetTypeObj],
+	DELETED.[Name] AS [TargetName],
+	DELETED.[Label] AS [TargetLabel],
+	DELETED.[Required] AS [TargetRequired],
+	DELETED.[FieldSizeEdit] AS [TargetFieldSizeEdit],
+	DELETED.[FieldSizeDisplay] AS [TargetFieldSizeDisplay],
+	DELETED.[InputType] AS [TargetInputType],
+	DELETED.[editorClass] AS [TargeteditorClass],
+	DELETED.[FormRender] AS [TargetFormRender],
+	DELETED.[FormOrder] AS [TargetFormOrder],
+	DELETED.[Legend] AS [TargetLegend],
+	DELETED.[Options] AS [TargetOptions],
+	DELETED.[Validators] AS [TargetValidators],
+	DELETED.[displayClass] AS [TargetdisplayClass],
+	DELETED.[EditClass] AS [TargetEditClass],
+	DELETED.[Status] AS [TargetStatus],
+	DELETED.[Locked] AS [TargetLocked],
+	DELETED.[DefaultValue] AS [TargetDefaultValue],
+	DELETED.[Rules] AS [TargetRules],
+	DELETED.[Orginal_FB_ID] AS [TargetOrginal_FB_ID]
+	INTO #tempMergeModuleForms([action],[SourceID],[Sourcemodule_id],[SourceTypeObj],[SourceName],[SourceLabel],[SourceRequired],[SourceFieldSizeEdit],[SourceFieldSizeDisplay],[SourceInputType],[SourceeditorClass],[SourceFormRender],[SourceFormOrder],[SourceLegend],[SourceOptions],[SourceValidators],[SourcedisplayClass],[SourceEditClass],[SourceStatus],[SourceLocked],[SourceDefaultValue],[SourceRules],[SourceOrginal_FB_ID],[TargetID],[Targetmodule_id],[TargetTypeObj],[TargetName],[TargetLabel],[TargetRequired],[TargetFieldSizeEdit],[TargetFieldSizeDisplay],[TargetInputType],[TargeteditorClass],[TargetFormRender],[TargetFormOrder],[TargetLegend],[TargetOptions],[TargetValidators],[TargetdisplayClass],[TargetEditClass],[TargetStatus],[TargetLocked],[TargetDefaultValue],[TargetRules],[TargetOrginal_FB_ID]);
+
+	SET IDENTITY_INSERT [ModuleForms] OFF;
+	PRINT('SET IDENTITY_INSERT OFF FOR [ModuleForms]');
+
+	IF @Debug = 1
+		BEGIN
+			SELECT 'RESULT MERGE'
+
+			SELECT * FROM #tempMergeModuleForms
+		END
+
+	IF @@TRANCOUNT > 0
+		BEGIN
+			IF @RollbackForced = 1
+				BEGIN
+					PRINT('ROLLBACK TRAN')
+					ROLLBACK TRAN
+				END
+			ELSE
+				BEGIN
+					COMMIT TRAN
+				END
+		END
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0
+			ROLLBACK TRAN;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('228_CREATE_sp_PullModuleForms',GETDATE(),(SELECT db_name()))
+
+
+GO

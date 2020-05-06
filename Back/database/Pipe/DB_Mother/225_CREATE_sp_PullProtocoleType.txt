@@ -1,0 +1,168 @@
+CREATE PROCEDURE [dbo].[sp_PullProtocoleType]
+	@IdProtocoleType INT,
+	@Debug INT = 0,
+	@RollbackForced INT = 0
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	IF @Debug = 1
+	BEGIN
+		PRINT(CONCAT('sp_PullProtocoleType Start for protocoleType : ',@IdProtocoleType))
+	END
+
+	IF OBJECT_ID('tempdb..#ProtocoleTypeTMP') IS NOT NULL
+		DROP TABLE #ProtocoleTypeTMP
+
+	CREATE TABLE #ProtocoleTypeTMP (
+		[ID] INT NULL,
+		[Name] NVARCHAR(250) NULL,
+		[Status] INT NULL,
+		[OriginalId] NVARCHAR(250) NULL,
+		[obsolete] BIT NULL
+		)
+
+	INSERT INTO #ProtocoleTypeTMP([ID],[Name],[Status],[OriginalId],[obsolete])
+	SELECT
+	[ID],
+	[Name],
+	[Status],
+	[OriginalId],
+	[obsolete]
+	FROM [syn_Referentiel.ProtocoleType]
+	WHERE [ID] = @IdProtocoleType
+
+
+
+	---- MERGE TABLE ---
+	IF OBJECT_ID('tempdb..#tempMergeProtocoleType') IS NOT NULL
+		DROP TABLE #tempMergeProtocoleType
+
+	CREATE TABLE #tempMergeProtocoleType(
+	[action] VARCHAR(MAX),
+	[SourceId] INT,
+	[sourceName] VARCHAR(MAX),
+	[sourceStatus] VARCHAR(MAX),
+	[sourceOriginalId] VARCHAR(MAX),
+	[sourceObsolete] BIT,
+	[TargetId] INT,
+	[TargetName] VARCHAR(MAX),
+	[TargetStatus] VARCHAR(MAX),
+	[TargetOriginalId] VARCHAR(MAX),
+	[TargetObsolete] BIT,
+	);
+
+	IF @debug = 1
+	BEGIN
+		SELECT 'DATA TO MERGE'
+		SELECT
+		*
+		FROM #ProtocoleTypeTMP
+
+		SELECT 'WILL BE MERGED WITH TARGET'
+		SELECT
+		[ID],
+		[Name],
+		[Status],
+		[OriginalId],
+		[obsolete]
+		FROM [ProtocoleType]
+		WHERE [ID] = @IdProtocoleType
+	END
+
+
+	SET IDENTITY_INSERT [ProtocoleType] ON;
+	PRINT('SET IDENTITY_INSERT ON FOR [ProtocoleType]');
+
+	WITH ProtocoleTypeFiltered AS (
+		SELECT
+		[ID],
+		[Name],
+		[Status],
+		[OriginalId],
+		[obsolete]
+		FROM [ProtocoleType]
+		WHERE [ID] = @IdProtocoleType
+	)
+	MERGE ProtocoleTypeFiltered AS [TARGET]
+	USING #ProtocoleTypeTMP AS [SOURCE]
+	ON ( [TARGET].[ID] = [SOURCE].[ID])
+
+	WHEN MATCHED THEN
+		UPDATE SET
+		TARGET.[Name] = SOURCE.[Name],
+		TARGET.[Status] = SOURCE.[Status],
+		TARGET.[OriginalId] = SOURCE.[OriginalId],
+		TARGET.[obsolete] = SOURCE.[obsolete]
+
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT ([ID],[Name],[Status],[OriginalId],[obsolete])
+		VALUES ([ID],[Name],[Status],[OriginalId],[obsolete])
+
+	--WHEN NOT MATCHED BY SOURCE THEN
+	-- DELETE
+
+	OUTPUT $action AS [action],
+	INSERTED.[ID] AS [SOURCEId],
+	INSERTED.[name] AS [sourceName],
+	INSERTED.[Status]  AS [sourceStatus],
+	INSERTED.[OriginalId] AS [sourceOriginalId],
+	INSERTED.[obsolete] AS [sourceObsolete],
+	DELETED.[ID] AS [TargetId],
+	DELETED.[name] AS [TargetName],
+	DELETED.[Status]  AS [TargetStatus],
+	DELETED.[OriginalId] AS [TargetOriginalId],
+	DELETED.[obsolete] AS [TargetObsolete]
+	INTO #tempMergeProtocoleType([action],[SourceId],[sourceName],[sourceStatus],[sourceOriginalId],[sourceObsolete],[TargetId],[TargetName],[TargetStatus],[TargetOriginalId],[TargetObsolete]);
+
+	SET IDENTITY_INSERT [ProtocoleType] OFF; 
+	PRINT('SET IDENTITY_INSERT OFF FOR [ProtocoleType]');
+
+	IF @Debug = 1
+	BEGIN
+		SELECT 'RESULT MERGE'
+
+		SELECT * FROM #tempMergeProtocoleType
+	END
+
+	IF @@TRANCOUNT > 0
+		BEGIN
+			IF @RollbackForced = 1
+				BEGIN
+					PRINT('ROLLBACK TRAN')
+					ROLLBACK TRAN
+				END
+			ELSE
+				BEGIN
+					COMMIT TRAN
+				END
+		END
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  
+			ROLLBACK TRAN;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('225_CREATE_sp_PullProtocoleType',GETDATE(),(SELECT db_name()))
+
+
+GO

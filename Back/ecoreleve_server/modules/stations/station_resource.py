@@ -1,6 +1,6 @@
 import json
 import itertools
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
@@ -209,34 +209,56 @@ class StationsResource(DynamicObjectCollectionResource):
         return self.getForm(objectType=1, moduleName='ImportFileForm')
 
     def lastImported(self, obj, params):
+        '''
+            will add all this criteria if this params is apply
+        '''
         user = self.request.authenticated_userid['iss']
+        dateFrom = datetime.today() - timedelta(days=2)
+        dateFrom = dateFrom.replace(
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0
+            )
         obj['Operator'] = '='
         obj['Value'] = True
-        criteria = [{'Column': 'creator',
-                     'Operator': '=',
-                     'Value': user
-                     },
-                    {'Column': 'FK_StationType',
-                     'Operator': '=',
-                     'Value': 4  # => TypeID of GPX station
-                     }]
+        criteria = [
+            {
+                'Column': 'creator',
+                'Operator': '=',
+                'Value': user
+            },
+            {
+                'Column': 'FK_StationType',
+                'Operator': '=',
+                'Value': 4  # => TypeID of GPX station
+            },
+            {
+                "Column": "creationDate",
+                "Operator": ">=",
+                "Value": dateFrom.strftime("%Y-%m-%dT%H:%M:%SZ")
+            }
+            ]
         params['criteria'].extend(criteria)
 
     def handleCriteria(self, params):
         if 'criteria' in params:
             lastImported = False
             for obj in params['criteria']:
-                    if obj['Column'] == 'LastImported':
-                        self.lastImported(obj, params)
-                        lastImported = True
+                if obj['Column'] == 'LastImported':
+                    self.lastImported(obj, params)
+                    lastImported = True
 
         if not lastImported:
             map(lambda x: obj['Column'] != 'FK_StationType', params['criteria'])
 
-        removePending = [{'Column': 'FK_StationType',
+        removePending = [
+            {
+                'Column': 'FK_StationType',
                 'Operator': 'Is not',
                 'Value': 6  # => TypeID of pending stations
-                }]
+            }
+            ]
         params['criteria'].extend(removePending)
 
         if 'geo' in self.request.params.mixed():
@@ -328,17 +350,29 @@ class StationsResource(DynamicObjectCollectionResource):
         #           #'limit':params.get('per_page')#,
         #           #'order_by':params.get('order_by')
         #         }
-        params = {'selectable': ['ID'],
-                  'filters':params.get('criteria', [])
-                }
 
-        queryCTE = self.collection.build_query(**params).cte()
-        joinFW = join(Station_FieldWorker, User,
-                      Station_FieldWorker.FK_FieldWorker == User.id)
-        joinTable = join(queryCTE, joinFW, queryCTE.c[
-                            'ID'] == Station_FieldWorker.FK_Station)
-        query = select([Station_FieldWorker.FK_Station,
-                        User.Login]).select_from(joinTable)
+        params = {
+            'selectable': [a.get('Column') for a in params.get('criteria')],
+            'filters': params.get('criteria', [])
+            }
+        queryTmp = self.collection.build_query(**params)
+        queryTmp = queryTmp.with_only_columns([getattr(self.model, 'ID')])
+        queryCTE = queryTmp.cte()
+        # queryCTE = self.collection.build_query(**params).cte()
+        joinFW = join(
+            Station_FieldWorker,
+            User,
+            Station_FieldWorker.FK_FieldWorker == User.id
+            )
+        joinTable = join(
+            queryCTE,
+            joinFW,
+            queryCTE.c['ID'] == Station_FieldWorker.FK_Station
+            )
+        query = select([
+            Station_FieldWorker.FK_Station,
+            User.Login
+            ]).select_from(joinTable)
         FieldWorkers = self.session.execute(query).fetchall()
         list_ = {}
         for x, y in FieldWorkers:

@@ -1,0 +1,142 @@
+CREATE PROCEDURE [dbo].[sp_PullFieldActivity_ProtocoleType]
+	@Debug INT = 0,
+	@RollbackForced INT = 0
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+
+        IF @Debug = 1
+            BEGIN
+                PRINT('sp_PullFieldActivity_ProtocoleType Start')
+            END
+
+        IF OBJECT_ID('tempdb..#FieldActivity_ProtocoleTypeTMP') IS NOT NULL
+            BEGIN
+                DROP TABLE #FieldActivity_ProtocoleTypeTMP
+            END
+
+        CREATE TABLE #FieldActivity_ProtocoleTypeTMP (
+            [FK_fieldActivity] INT NOT NULL,
+            [FK_ProtocoleType] INT NOT NULL,
+            [Order] INT NOT NULL
+            )
+
+        INSERT INTO #FieldActivity_ProtocoleTypeTMP([FK_fieldActivity],[FK_ProtocoleType],[Order])
+		SELECT
+		[FK_fieldActivity],
+		[FK_ProtocoleType],
+		[Order]
+		FROM [syn_Referentiel.FieldActivity_ProtocoleType]
+
+
+        ---- MERGE TABLE ---
+        IF OBJECT_ID('tempdb..#tempMergeFieldActivity_ProtocoleType') IS NOT NULL
+            BEGIN
+                DROP TABLE #tempMergeFieldActivity_ProtocoleType
+            END
+
+        CREATE TABLE #tempMergeFieldActivity_ProtocoleType(
+            [action] VARCHAR(MAX),
+            [SourceFK_fieldActivity] INT,
+            [SourceFK_ProtocoleType] INT,
+            [SourceOrder] INT,
+            [TargetFK_fieldActivity] INT,
+            [TargetFK_ProtocoleType] INT,
+            [TargetOrder] INT
+        );
+
+        IF @debug = 1
+            BEGIN
+                SELECT 'DATA TO MERGE'
+                SELECT
+                *
+                FROM #FieldActivity_ProtocoleTypeTMP
+
+                SELECT 'WILL BE MERGED WITH TARGET'
+                SELECT
+                [FK_fieldActivity],
+                [FK_ProtocoleType],
+                [Order]
+                FROM [FieldActivity_ProtocoleType]
+            END
+
+		PRINT('MERGE TABLE');
+		WITH ProtocoleTypeFiltered AS
+		(
+            SELECT
+            [FK_fieldActivity],
+            [FK_ProtocoleType],
+            [Order]
+            FROM [FieldActivity_ProtocoleType]
+		)
+		MERGE ProtocoleTypeFiltered AS [TARGET]
+		USING #FieldActivity_ProtocoleTypeTMP AS [SOURCE]
+		ON ( TARGET.[FK_fieldActivity] = SOURCE.[FK_fieldActivity] AND TARGET.[FK_ProtocoleType] = SOURCE.[FK_ProtocoleType] )
+		WHEN MATCHED AND TARGET.[Order] <> SOURCE.[Order] THEN
+            UPDATE SET
+            TARGET.[Order] = SOURCE.[Order]
+		WHEN NOT MATCHED BY TARGET THEN
+            INSERT ([FK_fieldActivity], [FK_ProtocoleType], [Order])
+            VALUES ([FK_fieldActivity], [FK_ProtocoleType], [Order])
+		WHEN NOT MATCHED BY SOURCE THEN
+            DELETE
+
+        OUTPUT $action AS [action],
+        INSERTED.[FK_fieldActivity] AS [SourceFK_fieldActivity],
+        INSERTED.[FK_ProtocoleType] AS [SourceFK_ProtocoleType],
+        INSERTED.[Order]  AS [SourceOrder],
+        DELETED.[FK_fieldActivity] AS [TargetFK_fieldActivity],
+        DELETED.[FK_ProtocoleType] AS [TargetFK_ProtocoleType],
+        DELETED.[Order]  AS [TargetOrder]
+        INTO #tempMergeFieldActivity_ProtocoleType([action],[SourceFK_fieldActivity],[SourceFK_ProtocoleType],[SourceOrder],[TargetFK_fieldActivity],[TargetFK_ProtocoleType],[TargetOrder]);
+
+        IF @Debug = 1
+            BEGIN
+                SELECT 'RESULT MERGE'
+
+                SELECT * FROM #tempMergeFieldActivity_ProtocoleType
+            END
+
+	IF @@TRANCOUNT > 0
+		BEGIN
+			IF @RollbackForced = 1
+				BEGIN
+					PRINT('ROLLBACK TRAN')
+					ROLLBACK TRAN
+				END
+			ELSE
+				BEGIN
+					COMMIT TRAN
+				END
+		END
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('230_CREATE_sp_PullFieldActivity_ProtocoleType',GETDATE(),(SELECT db_name()))
+
+
+GO

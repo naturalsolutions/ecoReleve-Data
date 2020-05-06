@@ -28,12 +28,22 @@ class FieldActivityResource(CustomResource):
                 }
 
     def getProtocoleTypes(self):
-        join_table = join(ProtocoleType, FieldActivity_ProtocoleType,
-                            ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType)
-        query = select([ProtocoleType.ID, ProtocoleType.Name, ProtocoleType.OriginalId]
-                        ).where(and_(ProtocoleType.Status.in_([4, 8, 10]),
-                                    FieldActivity_ProtocoleType.FK_fieldActivity == self.objectDB.ID)
-                                ).select_from(join_table)
+        join_table = join(
+            ProtocoleType,
+            FieldActivity_ProtocoleType,
+            ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType
+            )
+        query = select([
+            ProtocoleType.ID,
+            ProtocoleType.Name,
+            ProtocoleType.OriginalId
+            ])
+        query = query.where(
+            and_(
+                ProtocoleType.Status.in_([4, 8, 10]),
+                FieldActivity_ProtocoleType.FK_fieldActivity == self.objectDB.ID)
+                )
+        query = query.select_from(join_table)
 
         query = query.where(ProtocoleType.obsolete == False)
         result = self.session.execute(query).fetchall()

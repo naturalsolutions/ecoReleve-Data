@@ -1,0 +1,154 @@
+CREATE PROCEDURE [dbo].[sp_PullObservationDynProp]
+	@IdProtocoleType INT,
+	@Debug INT = 0,
+	@RollbackForced INT = 0
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	IF @Debug = 1
+	BEGIN
+		PRINT(CONCAT('sp_PullObservationDynProp Start for protocoleType : ',@IdProtocoleType))
+	END
+
+	IF OBJECT_ID('tempdb..#ObservationDynPropTMP') IS NOT NULL
+	DROP TABLE #ObservationDynPropTMP
+
+	CREATE TABLE #ObservationDynPropTMP (
+		[ID] INT NULL,
+		[Name] NVARCHAR(250) NULL,
+		[TypeProp] NVARCHAR(250) NULL
+		)
+
+	INSERT INTO #ObservationDynPropTMP([ID],[Name],[TypeProp])
+	SELECT
+	ODP.[ID],
+	ODP.[Name],
+	ODP.[TypeProp]
+	FROM [syn_Referentiel.ObservationDynProp] AS ODP
+	WHERE [ID] IN  (
+					SELECT
+					PT_ODP.[FK_ObservationDynProp]
+					FROM [syn_Referentiel.ProtocoleType_ObservationDynProp] AS PT_ODP
+					WHERE
+					PT_ODP.[FK_ProtocoleType] = @IdProtocoleType
+					)
+
+
+
+	---- MERGE TABLE ---
+	IF OBJECT_ID('tempdb..#tempMergeObservationDynProp') IS NOT NULL
+		DROP TABLE #tempMergeObservationDynProp
+
+	CREATE TABLE #tempMergeObservationDynProp(
+	[action] VARCHAR(MAX),
+	[SourceId] INT,
+	[sourceName] VARCHAR(MAX),
+	[sourceTypeProp] VARCHAR(MAX),
+	[TargetId] INT,
+	[TargetName] VARCHAR(MAX),
+	[TargetTypeProp] VARCHAR(MAX)
+	);
+
+	IF @debug = 1
+	BEGIN
+		SELECT 'DATA TO MERGE'
+		SELECT
+		*
+		FROM #ObservationDynPropTMP
+
+		SELECT 'WILL BE MERGED WITH TARGET'
+		SELECT
+		[ID],
+		[Name],
+		[TypeProp]
+		FROM [ObservationDynProp]
+	END
+
+
+	SET IDENTITY_INSERT [ObservationDynProp] ON;
+	PRINT('SET IDENTITY_INSERT ON FOR [ObservationDynProp]');
+
+	WITH ObservationDynPropFiltered AS (
+		SELECT
+		[ID],
+		[Name],
+		[TypeProp]
+		FROM [ObservationDynProp]
+	)
+	MERGE ObservationDynPropFiltered AS [TARGET]
+	USING #ObservationDynPropTMP AS [SOURCE]
+	ON ( [TARGET].[ID] = [SOURCE].[ID])
+
+	WHEN MATCHED THEN
+		UPDATE SET
+		TARGET.[Name] = SOURCE.[Name],
+		TARGET.[TypeProp] = SOURCE.[TypeProp]
+
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT ([ID],[Name],[TypeProp])
+		VALUES ([ID],[Name],[TypeProp])
+
+	--WHEN NOT MATCHED BY SOURCE THEN
+	-- DELETE
+
+	OUTPUT $action AS [action],
+	INSERTED.[ID] AS [SourceId],
+	INSERTED.[name] AS [sourceName],
+	INSERTED.[TypeProp] AS [sourceTypeProp],
+	DELETED.[ID] AS [TargetId],
+	DELETED.[name] AS [TargetName],
+	DELETED.[TypeProp] AS [TargetTypeProp]
+	INTO #tempMergeObservationDynProp([action],[SourceId],[sourceName],[sourceTypeProp],[TargetId],[TargetName],[TargetTypeProp]);
+
+	SET IDENTITY_INSERT [ObservationDynProp] OFF;
+	PRINT('SET IDENTITY_INSERT OFF FOR [ObservationDynProp]');
+
+	IF @Debug = 1
+	BEGIN
+		SELECT 'RESULT MERGE'
+
+		SELECT * FROM #tempMergeObservationDynProp
+	END
+
+	IF @@TRANCOUNT > 0
+		BEGIN
+			IF @RollbackForced = 1
+				BEGIN
+					PRINT('ROLLBACK TRAN')
+					ROLLBACK TRAN
+				END
+			ELSE
+				BEGIN
+					COMMIT TRAN
+				END
+		END
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  
+			ROLLBACK TRAN;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('226_CREATE_sp_PullObservationDynProp',GETDATE(),(SELECT db_name()))
+
+
+GO

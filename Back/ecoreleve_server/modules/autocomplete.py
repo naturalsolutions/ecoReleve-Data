@@ -39,12 +39,22 @@ def autocomplete(request):
 
     if isinstance(prop, int):
         table = Base.metadata.tables[objName + 'DynPropValuesNow']
-        query = select([table.c['ValueString'].label('label'),
-                        table.c['ValueString'].label('value')]
-                       ).distinct(table.c['ValueString']
-                                  ).where(table.c['FK_' + objName + 'DynProp'] == prop)
-        query = query.where(table.c['ValueString'].like('%' + criteria + '%')
-                            ).order_by(asc(table.c['ValueString']))
+        query = select([
+            table.c['ValueString'].label('label'),
+            table.c['ValueString'].label('value')]
+            )
+        query = query.distinct(
+            table.c['ValueString']
+            )
+        query = query.where(
+            table.c['FK_' + objName + 'DynProp'] == prop
+            )
+        query = query.where(
+            table.c['ValueString'].like('%' + criteria + '%')
+            )
+        query = query.order_by(
+            asc(table.c['ValueString'])
+            )
     else:
         if NameValReturn is None:
             NameValReturn = prop
@@ -52,6 +62,8 @@ def autocomplete(request):
         query = select([table.c[NameValReturn].label('value'),
                         table.c[prop].label('label')]
                        ).distinct(table.c[prop])
+        if objName.lower() == 'fieldworkarea':
+            query = query.where(table.c['Status'] == 'current')
         query = query.where(table.c[prop].like(
             '%' + criteria + '%')).order_by(asc(table.c[prop]))
 

@@ -22,26 +22,26 @@ class IntegerDateTime(types.TypeDecorator):
 class GeoWKT(GenericFunction):
     type = String
     package = "geo"
-    name = "STAsText"
-    identifier = "wkt"
+    name = "STAsBinary "
+    identifier = "wkb"
 
 
 @compiles(GeoWKT, 'mssql')
 def compile(element, compiler, **kw):
-    return "%s.STAsText()" % compiler.process(element.clauses)
+    return "%s.STAsBinary ()" % compiler.process(element.clauses)
 
 
 class WKTSpatialElement(GenericFunction):
     # def __init__(self,geoType = 'POLYGON',srid = 4326)
     type = String
     package = "geo"
-    name = "geometry::STGeomFromText"
-    identifier = "wkt_from_text"
+    name = "geometry::STGeomFromWKB"
+    identifier = "wkb_from_text"
 
 
 @compiles(WKTSpatialElement, 'mssql')
 def compile(element, compiler, **kw):
-    return "geometry::STGeomFromText(%s)" % compiler.process(element.clauses)
+    return "geometry::STGeomFromWKB(%s)" % compiler.process(element.clauses)
 
 
 class Geometry(UserDefinedType):
@@ -49,7 +49,7 @@ class Geometry(UserDefinedType):
         return "GEOMETRY"
 
     def bind_expression(self, bindvalue):
-        return func.geo.wkt_from_text(bindvalue, type_=self)
+        return func.geo.wkb_from_text(bindvalue, type_=self)
 
     def column_expression(self, col):
-        return func.geo.wkt(col, type_=self)
+        return func.geo.wkb(col, type_=self)

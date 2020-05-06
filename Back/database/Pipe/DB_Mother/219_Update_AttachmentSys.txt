@@ -1,0 +1,18 @@
+ UPDATE [dbo].[SensorDynProp]
+   SET [Name] = 'Attachment_system'
+ WHERE Name = 'Attachment system'
+ 
+ UPDATE [dbo].[ModuleGrids]
+   SET [Name] = 'Attachment_system'
+ WHERE Module_ID = 14 and Name = 'Attachment system'
+
+ UPDATE [dbo].[ModuleForms]
+   SET [Label] = 'Attachment_system',
+             [Name] = 'Attachment_system'
+ WHERE Module_ID = 16 and Name = 'Attachment system'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('219_Update_AttachmentSys',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -12,6 +12,7 @@ from sqlalchemy import select, and_, join
 from traceback import print_exc
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView
+from ecoreleve_server.core.init_db import dbConfig
 
 
 class ObservationView(DynamicObjectView):
@@ -67,7 +68,7 @@ class ObservationView(DynamicObjectView):
                 # mediaItem = self.session.query(MediasFiles).filter(MediasFiles.FK_Station == self.objectDB.FK_Station).one()
                 mediaItem = self.session.query(MediasFiles).filter(and_( MediasFiles.FK_Station == self.objectDB.FK_Station,MediasFiles.Name == self.objectDB.ObservationDynPropValues[0].ValueString.split('/')[-1] )).first()
                 if mediaItem :
-                    delSubReq = Request.blank('/ecoReleve-Core/mediasfiles/'+str(mediaItem.Id) )
+                    delSubReq = Request.blank('/' + dbConfig.get('prefixapi') + '/mediasfiles/'+str(mediaItem.Id) )
                     delSubReq.method = 'DELETE'
                     delSubReq.cookies = self.request.cookies
                     delSubResp = self.request.invoke_subrequest(delSubReq)

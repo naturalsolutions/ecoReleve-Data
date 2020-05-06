@@ -36,6 +36,9 @@ def load_db_config(settings):
     dbConfig['cn.dialect'] = settings['cn.dialect']
     dbConfig['dbLog.url'] = settings['dbLog.url']
     dbConfig['dbLog.schema'] = settings['dbLog.schema']
+    if settings.get('prefixapi') is None:
+        raise Exception('You mus\'t have this key (prefixapi) defined in your *.ini file')
+    dbConfig['prefixapi'] = settings['prefixapi']
 
 def initialize_session_export(settings):
     engineExport = None

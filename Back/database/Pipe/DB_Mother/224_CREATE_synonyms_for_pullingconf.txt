@@ -1,0 +1,36 @@
+IF EXISTS (SELECT * FROM sys.synonyms WHERE [name] = 'syn_Referentiel.ProtocoleType' AND OBJECT_ID('[AEcoReleve_ECWP].[dbo].[ProtocoleType]') IS NOT NULL)
+	BEGIN
+        DROP SYNONYM [dbo].[syn_Referentiel.ProtocoleType]
+	END
+CREATE SYNONYM [dbo].[syn_Referentiel.ProtocoleType] FOR [AEcoReleve_ECWP].[dbo].[ProtocoleType]
+GO
+IF EXISTS (SELECT * FROM sys.synonyms WHERE [name] = 'syn_Referentiel.ObservationDynProp' AND OBJECT_ID('[AEcoReleve_ECWP].[dbo].[ObservationDynProp]') IS NOT NULL)
+	BEGIN
+        DROP SYNONYM [dbo].[syn_Referentiel.ObservationDynProp]
+	END
+CREATE SYNONYM [dbo].[syn_Referentiel.ObservationDynProp] FOR [AEcoReleve_ECWP].[dbo].[ObservationDynProp]
+GO
+IF EXISTS (SELECT * FROM sys.synonyms WHERE [name] = 'syn_Referentiel.ProtocoleType_ObservationDynProp' AND OBJECT_ID('[AEcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp]') IS NOT NULL)
+	BEGIN
+        DROP SYNONYM [dbo].[syn_Referentiel.ProtocoleType_ObservationDynProp]
+	END
+CREATE SYNONYM [dbo].[syn_Referentiel.ProtocoleType_ObservationDynProp] FOR [AEcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp]
+GO
+IF EXISTS (SELECT * FROM sys.synonyms WHERE [name] = 'syn_Referentiel.ModuleForms' AND OBJECT_ID('[AEcoReleve_ECWP].[dbo].[ModuleForms]') IS NOT NULL)
+	BEGIN
+        DROP SYNONYM [dbo].[syn_Referentiel.ModuleForms]
+	END
+CREATE SYNONYM [dbo].[syn_Referentiel.ModuleForms] FOR [AEcoReleve_ECWP].[dbo].[ModuleForms]
+GO
+IF EXISTS (SELECT * FROM sys.synonyms WHERE [name] = 'syn_Referentiel.FieldActivity_ProtocoleType' AND OBJECT_ID('[AEcoReleve_ECWP].[dbo].[FieldActivity_ProtocoleType]') IS NOT NULL)
+	BEGIN
+        DROP SYNONYM [dbo].[syn_Referentiel.FieldActivity_ProtocoleType]
+	END
+CREATE SYNONYM [dbo].[syn_Referentiel.FieldActivity_ProtocoleType] FOR [AEcoReleve_ECWP].[dbo].[FieldActivity_ProtocoleType]
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('224_CREATE_synonyms_for_pullingconf',GETDATE(),(SELECT db_name()))
+
+
+GO

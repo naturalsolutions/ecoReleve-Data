@@ -1,55 +1,57 @@
+from ecoreleve_server.core.init_db import dbConfig
+
 def add_routes(config):
     
-    config.add_route('weekData', 'ecoReleve-Core/weekData')
+    config.add_route('weekData', dbConfig.get('prefixapi')+'/weekData')
     config.add_route('location_graph',
-                     'ecoReleve-Core/individuals/location/graph')
-    config.add_route('station_graph', 'ecoReleve-Core/stations/graph')
+                     dbConfig.get('prefixapi') + '/individuals/location/graph')
+    config.add_route('station_graph', dbConfig.get('prefixapi') + '/stations/graph')
     config.add_route('individual_graph',
-                     'ecoReleve-Core/stats/individuals/graph')
+                     dbConfig.get('prefixapi') + '/stats/individuals/graph')
     config.add_route('individual_monitored',
-                     'ecoReleve-Core/stats/individuals/monitored/graph')
+                     dbConfig.get('prefixapi') + '/stats/individuals/monitored/graph')
     config.add_route('uncheckedDatas_graph',
-                     'ecoReleve-Core/sensor/uncheckedDatas/graph')
+                     dbConfig.get('prefixapi') + '/sensor/uncheckedDatas/graph')
 
-    config.add_route('jsLog', 'ecoReleve-Core/log/error')
+    config.add_route('jsLog', dbConfig.get('prefixapi') + '/log/error')
 
     # Security routes
-    config.add_route('security/login', 'ecoReleve-Core/security/login')
-    config.add_route('security/logout', 'ecoReleve-Core/security/logout')
+    config.add_route('security/login', dbConfig.get('prefixapi') + '/security/login')
+    config.add_route('security/logout', dbConfig.get('prefixapi') + '/security/logout')
     config.add_route('security/has_access',
-                     'ecoReleve-Core/security/has_access')
+                     dbConfig.get('prefixapi') + '/security/has_access')
 
     # User
-    config.add_route('users/id', 'ecoReleve-Core/users/{id}')
-    config.add_route('core/user', 'ecoReleve-Core/user')
-    config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
+    config.add_route('users/id', dbConfig.get('prefixapi') + '/users/{id}')
+    config.add_route('core/user', dbConfig.get('prefixapi') + '/user')
+    config.add_route('core/currentUser', dbConfig.get('prefixapi') + '/currentUser')
     config.add_route('autocomplete/onLoad',
-                     'ecoReleve-Core/autocomplete/{obj}/{prop}/onLoad')
+                     dbConfig.get('prefixapi') + '/autocomplete/{obj}/{prop}/onLoad')
     config.add_route(
-        'autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
+        'autocomplete', dbConfig.get('prefixapi') + '/autocomplete/{obj}/{prop}')
     config.add_route('autocomplete/ID',
-                     'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
+                     dbConfig.get('prefixapi') + '/autocomplete/{obj}/{prop}/{valReturn}')
 
     # Sensors datas (Argos + GSM + RFID)
-    config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
+    config.add_route('sensors/datas', dbConfig.get('prefixapi') + '/sensors/{type}/datas')
     config.add_route('sensors/uncheckedDatas',
-                     'ecoReleve-Core/sensors/{type}/uncheckedDatas')
+                     dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
-                     'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+                     dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
 
  # config.add_route('sensors/camtrap/uncheckedDatas',
-    #                   'ecoReleve-Core/sensors/camtrap/uncheckedDatas')
+    #                   dbConfig.get('prefixapi') + '/sensors/camtrap/uncheckedDatas')
     # config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
-    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    #                  dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
     # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip',
-    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    #                  dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
     # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id',
-    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
-    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
-    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
-    # config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , 'ecoReleve-Core/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
+    #                  dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', dbConfig.get('prefixapi') + '/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , dbConfig.get('prefixapi') + '/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
 
-    config.add_route('sensors/statut', 'ecoReleve-Core/sensors/{type}/statut')
+    config.add_route('sensors/statut', dbConfig.get('prefixapi') + '/sensors/{type}/statut')
 
-    config.add_route('cameratrap', 'ecoReleve-Core/photos/')
-    config.add_route('getSessionZip', 'ecoReleve-Core/photos/export/')
+    config.add_route('cameratrap', dbConfig.get('prefixapi') + '/photos/')
+    config.add_route('getSessionZip', dbConfig.get('prefixapi') + '/photos/export/')

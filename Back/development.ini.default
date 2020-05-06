@@ -84,6 +84,8 @@ init_exiftool = True
 #Path access for storing and retrieve cameratrap image and mediafiles
 camTrap.path = C:\Data\CameraTrap
 mediasFiles.path = C:\Data\mediasFiles
+##For config server (renecore) prefixapi = ecoReleve-Core-Referentiel
+prefixapi = ecoReleve-Core
 
 #                           ENDING APP CONF                                                                                  #
 #                                                                                                                            #

@@ -21,6 +21,7 @@ from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 
+
 # mySubExif = exiftool.ExifTool()
 # mySubExif.start()
 
@@ -97,6 +98,13 @@ def main(global_config, **settings):
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
     initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
+
+    # yeah that's dirty but need dbconfig loaded
+    from .formbuilder.formbuilder_view import FormBuilderView
+
+    config.add_route('myFormbuilder', dbConfig.get('prefixapi') + '/formbuilder*traverse',
+                    factory = 'ecoreleve_server.formbuilder.root_factory_formbuilder' )
+    config.add_view( FormBuilderView , route_name='myFormbuilder')
     add_routes(config)
     config.scan()
 

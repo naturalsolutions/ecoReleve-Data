@@ -68,7 +68,7 @@ context_permissions = {
         (Allow, 'group:user', ('create', 'read', 'update'))
     ],
     'sensors': [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:admin', ('create', 'read', 'update')),
         (Allow, 'group:superUser', ('create', 'read', 'update')),
         (Allow, 'group:user', 'read')
     ],
@@ -112,7 +112,12 @@ context_permissions = {
         (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUsers', ('create', 'update', 'read')),
         (Allow, 'group:users', 'read')
-    ]
+    ],
+    'formbuilder' : [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ('create', 'update', 'read')),
+        (Allow, 'group:users', 'read')
+    ],
 }
 
 
@@ -133,7 +138,7 @@ routes_permission = {
         'GET': 'all',
         'POST': 'admin',
         'PUT': 'admin',
-        'DELETE': 'admin'
+        'DELETE': 'noONe'
     },
     'individuals': {
         'GET': 'all',
@@ -184,6 +189,12 @@ routes_permission = {
         'DELETE': 'superUser'
     },
     'mediasfiles': {
+        'GET': 'all',
+        'POST': 'admin',
+        'PUT': 'admin',
+        'DELETE': 'admin'
+    },
+    'formbuilder': {
         'GET': 'all',
         'POST': 'admin',
         'PUT': 'admin',

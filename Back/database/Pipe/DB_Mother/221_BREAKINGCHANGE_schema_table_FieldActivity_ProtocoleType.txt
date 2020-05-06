@@ -1,0 +1,82 @@
+BEGIN
+	BEGIN TRY
+		BEGIN TRAN
+
+		/*
+			Process for changing schema or FieldActivity_ProtocoleType
+			1)Rename table FieldActivity_ProtocoleType To FieldActivity_ProtocoleType_old
+			2)Create table FieldActivity_ProtocoleType with new schema 
+			3)Insert Data from FieldActivity_ProtocoleType_old to FieldActivity_ProtocoleType
+			4)Drop old table FieldActivity_ProtocoleType_old
+		*/
+		PRINT('1)Rename table FieldActivity_ProtocoleType To FieldActivity_ProtocoleType_old')
+
+		EXEC sp_rename @objname =N'FieldActivity_ProtocoleType',
+						@newname=N'FieldActivity_ProtocoleType_old';
+
+		PRINT('2)Create table FieldActivity_ProtocoleType with new schema')
+
+		CREATE TABLE [FieldActivity_ProtocoleType](
+			[FK_fieldActivity] [int] NOT NULL,
+			[FK_ProtocoleType] [int] NOT NULL,
+			[Order] [int] NOT NULL,
+		PRIMARY KEY CLUSTERED
+		(
+			[FK_fieldActivity] ASC,
+			[FK_ProtocoleType] ASC
+		)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+		) ON [PRIMARY]
+
+		ALTER TABLE [dbo].[FieldActivity_ProtocoleType] ADD  DEFAULT ((1)) FOR [Order]
+
+		ALTER TABLE [dbo].[FieldActivity_ProtocoleType]  WITH CHECK ADD FOREIGN KEY([FK_fieldActivity])
+		REFERENCES [dbo].[fieldActivity] ([ID])
+
+		ALTER TABLE [dbo].[FieldActivity_ProtocoleType]  WITH CHECK ADD FOREIGN KEY([FK_ProtocoleType])
+		REFERENCES [dbo].[ProtocoleType] ([ID])
+
+		PRINT('3)Insert Data from FieldActivity_ProtocoleType_old to FieldActivity_ProtocoleType')
+
+		INSERT INTO [FieldActivity_ProtocoleType]
+		SELECT
+		[FK_fieldActivity] AS [FK_fieldActivity],
+		[FK_ProtocoleType] AS [FK_ProtocoleType],
+		ROW_NUMBER() OVER(PARTITION BY [FK_fieldActivity] ORDER BY [FK_ProtocoleType] ASC) AS [Order]
+		FROM [FieldActivity_ProtocoleType_old]
+		ORDER BY [FK_fieldActivity]
+
+		PRINT('4)Drop old table FieldActivity_ProtocoleType_old')
+
+		DROP TABLE [FieldActivity_ProtocoleType_old]
+
+		IF @@TRANCOUNT > 0
+			COMMIT TRAN
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('221_BREAKINGCHANGE_schema_table_FieldActivity_ProtocoleType',GETDATE(),(SELECT db_name()))
+
+
+GO

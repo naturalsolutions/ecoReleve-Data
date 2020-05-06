@@ -42,6 +42,7 @@ define([
         modelurl: 'sensors',
         displayMode: 'display',
         reloadAfterSave: true,
+        displayDelete: false,
       },
 
       uiGridConfs: [
