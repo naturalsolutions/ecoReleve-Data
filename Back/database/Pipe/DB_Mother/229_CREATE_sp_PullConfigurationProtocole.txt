@@ -1,0 +1,58 @@
+CREATE PROCEDURE [dbo].[sp_PullConfigurationProtocole]
+	@IdProtocoleType INT,
+	@Debug INT = 0,
+	@RollbackForced INT = 0
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	EXEC [dbo].[sp_PullProtocoleType] @IdProtocoleType, @Debug, 0
+
+	EXEC [dbo].[sp_PullObservationDynProp]  @IdProtocoleType, @Debug, 0
+
+	EXEC [dbo].[sp_PullProtocoleType_ObservationDynProp]  @IdProtocoleType, @Debug, 0
+
+	EXEC [dbo].[sp_PullModuleForms] @IdProtocoleType, @Debug, 0
+
+
+	IF @@TRANCOUNT > 0
+		BEGIN
+			IF @RollbackForced = 1
+				BEGIN
+					PRINT('ROLLBACK TRAN')
+					ROLLBACK TRAN
+				END
+			ELSE
+				BEGIN
+					COMMIT TRAN
+				END
+		END
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('229_CREATE_sp_PullConfigurationProtocole',GETDATE(),(SELECT db_name()))
+
+
+GO

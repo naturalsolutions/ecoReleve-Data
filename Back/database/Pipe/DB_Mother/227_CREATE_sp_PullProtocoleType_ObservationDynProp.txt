@@ -1,0 +1,213 @@
+CREATE PROCEDURE [dbo].[sp_PullProtocoleType_ObservationDynProp]
+	@IdProtocoleType INT,
+	@Debug INT = 0,
+	@RollbackForced INT = 0
+AS
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN
+
+	IF @Debug = 1
+	BEGIN
+		PRINT(CONCAT('sp_PullProtocoleType_ObservationDynProp Start for ProtocoleType : ',@IdProtocoleType))
+	END
+
+	IF OBJECT_ID('tempdb..#ProtocoleType_ObservationDynPropTMP') IS NOT NULL
+		DROP TABLE #ProtocoleType_ObservationDynPropTMP
+
+	CREATE TABLE #ProtocoleType_ObservationDynPropTMP (
+			[ID] INT  NOT NULL,
+			[Required] INT NOT NULL,
+			[FK_ProtocoleType] INT NULL,
+			[FK_ObservationDynProp] INT NULL,
+			[Locked] BIT NULL,
+			[LinkedTable] VARCHAR(255) NULL,
+			[LinkedField] VARCHAR(255) NULL,
+			[LinkedID] VARCHAR(255) NULL,
+			[LinkSourceID] VARCHAR(255) NULL
+		)
+
+	INSERT INTO #ProtocoleType_ObservationDynPropTMP([ID],[Required],[FK_ProtocoleType],[FK_ObservationDynProp],[Locked],[LinkedTable],[LinkedField],[LinkedID],[LinkSourceID])
+	SELECT
+	PT_ODP.[ID],
+	PT_ODP.[Required],
+	PT_ODP.[FK_ProtocoleType],
+	PT_ODP.[FK_ObservationDynProp],
+	PT_ODP.[Locked],
+	PT_ODP.[LinkedTable],
+	PT_ODP.[LinkedField],
+	PT_ODP.[LinkedID],
+	PT_ODP.[LinkSourceID]
+	FROM [syn_Referentiel.ProtocoleType_ObservationDynProp] AS PT_ODP
+	WHERE
+	PT_ODP.[FK_ProtocoleType] = @IdProtocoleType
+
+	IF OBJECT_ID('tempdb..#tempMergeProtocoleType_ObservationDynProp') IS NOT NULL
+		DROP TABLE #tempMergeProtocoleType_ObservationDynProp
+
+
+	CREATE TABLE #tempMergeProtocoleType_ObservationDynProp(
+			[action] VARCHAR(MAX),
+			[SourceID] INT ,
+			[SourceRequired] INT,
+			[SourceFK_ProtocoleType] INT,
+			[SourceFK_ObservationDynProp] INT,
+			[SourceLocked] BIT,
+			[SourceLinkedTable] VARCHAR(255),
+			[SourceLinkedField] VARCHAR(255),
+			[SourceLinkedID] VARCHAR(255),
+			[SourceLinkSourceID] VARCHAR(255),
+			[TargetID] INT ,
+			[TargetRequired] INT,
+			[TargetFK_ProtocoleType] INT,
+			[TargetFK_ObservationDynProp] INT,
+			[TargetLocked] BIT,
+			[TargetLinkedTable] VARCHAR(255),
+			[TargetLinkedField] VARCHAR(255),
+			[TargetLinkedID] VARCHAR(255),
+			[TargetLinkSourceID] VARCHAR(255)
+		);
+
+	IF @debug = 1
+		BEGIN
+			SELECT 'DATA TO MERGE'
+			SELECT
+			PT_ODP.[ID],
+			PT_ODP.[Required],
+			PT_ODP.[FK_ProtocoleType],
+			PT_ODP.[FK_ObservationDynProp],
+			PT_ODP.[Locked],
+			PT_ODP.[LinkedTable],
+			PT_ODP.[LinkedField],
+			PT_ODP.[LinkedID],
+			PT_ODP.[LinkSourceID]
+			FROM #ProtocoleType_ObservationDynPropTMP AS PT_ODP
+			WHERE
+			PT_ODP.[FK_ProtocoleType] = @IdProtocoleType
+
+			SELECT 'WILL BE MERGED WITH TARGET'
+			SELECT
+			PT_ODP.[ID],
+			PT_ODP.[Required],
+			PT_ODP.[FK_ProtocoleType],
+			PT_ODP.[FK_ObservationDynProp],
+			PT_ODP.[Locked],
+			PT_ODP.[LinkedTable],
+			PT_ODP.[LinkedField],
+			PT_ODP.[LinkedID],
+			PT_ODP.[LinkSourceID]
+			FROM [ProtocoleType_ObservationDynProp] AS PT_ODP
+			WHERE
+			PT_ODP.[FK_ProtocoleType] = @IdProtocoleType
+		END
+
+	SET IDENTITY_INSERT [ProtocoleType_ObservationDynProp] ON;
+	PRINT('SET IDENTITY_INSERT ON FOR [ProtocoleType_ObservationDynProp]');
+
+	WITH ProtocoleType_ObservationDynPropFiltered AS (
+		SELECT
+		PT_ODP.[ID],
+		PT_ODP.[Required],
+		PT_ODP.[FK_ProtocoleType],
+		PT_ODP.[FK_ObservationDynProp],
+		PT_ODP.[Locked],
+		PT_ODP.[LinkedTable],
+		PT_ODP.[LinkedField],
+		PT_ODP.[LinkedID],
+		PT_ODP.[LinkSourceID]
+		FROM [ProtocoleType_ObservationDynProp] AS PT_ODP
+		WHERE
+		PT_ODP.[FK_ProtocoleType] = @IdProtocoleType
+	)
+	MERGE ProtocoleType_ObservationDynPropFiltered AS [TARGET]
+	USING #ProtocoleType_ObservationDynPropTMP AS [SOURCE]
+	ON ( [TARGET].[ID] = [SOURCE].[ID] )
+
+	WHEN MATCHED THEN
+		UPDATE SET
+		TARGET.[Required] = SOURCE.[Required],
+		TARGET.[FK_ObservationDynProp] = SOURCE.[FK_ObservationDynProp],
+		TARGET.[Locked] = SOURCE.[Locked],
+		TARGET.[LinkedTable] = SOURCE.[LinkedTable],
+		TARGET.[LinkedField] = SOURCE.[LinkedField],
+		TARGET.[LinkedID] = SOURCE.[LinkedID],
+		TARGET.[LinkSourceID] = SOURCE.[LinkSourceID]
+
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT ([ID],[Required],[FK_ProtocoleType],[FK_ObservationDynProp],[Locked],[LinkedTable],[LinkedField],[LinkedID],[LinkSourceID]) 
+		VALUES ([ID],[Required],[FK_ProtocoleType],[FK_ObservationDynProp],[Locked],[LinkedTable],[LinkedField],[LinkedID],[LinkSourceID])
+
+	WHEN NOT MATCHED BY SOURCE THEN
+		DELETE
+
+	OUTPUT $action AS [action],
+	INSERTED.[ID] AS [SourceID],
+	INSERTED.[Required] AS [SourceRequired],
+	INSERTED.[FK_ProtocoleType] AS [SourceFK_ProtocoleType],
+	INSERTED.[FK_ObservationDynProp] AS [SourceFK_ObservationDynProp],
+	INSERTED.[Locked] AS [SourceLocked],
+	INSERTED.[LinkedTable] AS [SourceLinkedTable],
+	INSERTED.[LinkedField] AS [SourceLinkedField],
+	INSERTED.[LinkedID] AS [SourceLinkedID],
+	INSERTED.[LinkSourceID] AS [SourceLinkSourceID],
+	DELETED.[ID] AS [TargetID],
+	DELETED.[Required] AS [TargetRequired],
+	DELETED.[FK_ProtocoleType] AS [TargetFK_ProtocoleType],
+	DELETED.[FK_ObservationDynProp] AS [TargetFK_ObservationDynProp],
+	DELETED.[Locked] AS [TargetLocked],
+	DELETED.[LinkedTable] AS [TargetLinkedTable],
+	DELETED.[LinkedField] AS [TargetLinkedField],
+	DELETED.[LinkedID] AS [TargetLinkedID],
+	DELETED.[LinkSourceID] AS [TargetLinkSourceID]
+	INTO #tempMergeProtocoleType_ObservationDynProp([action],[SourceID],[SourceRequired],[SourceFK_ProtocoleType],[SourceFK_ObservationDynProp],[SourceLocked],[SourceLinkedTable],[SourceLinkedField],[SourceLinkedID],[SourceLinkSourceID],[TargetID],[TargetRequired],[TargetFK_ProtocoleType],[TargetFK_ObservationDynProp],[TargetLocked],[TargetLinkedTable],[TargetLinkedField],[TargetLinkedID],[TargetLinkSourceID]);
+
+	SET IDENTITY_INSERT [ProtocoleType_ObservationDynProp] OFF;
+	PRINT('SET IDENTITY_INSERT OFF FOR [ProtocoleType_ObservationDynProp]');
+
+	IF @Debug = 1
+		BEGIN
+			SELECT 'RESULT MERGE'
+
+			SELECT * FROM #tempMergeProtocoleType_ObservationDynProp
+		END
+
+	IF @@TRANCOUNT > 0
+		BEGIN
+			IF @RollbackForced = 1
+				BEGIN
+					PRINT('ROLLBACK TRAN')
+					ROLLBACK TRAN
+				END
+			ELSE
+				BEGIN
+					COMMIT TRAN
+				END
+		END
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  
+			ROLLBACK TRAN;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('227_CREATE_sp_PullProtocoleType_ObservationDynProp',GETDATE(),(SELECT db_name()))
+
+
+GO
