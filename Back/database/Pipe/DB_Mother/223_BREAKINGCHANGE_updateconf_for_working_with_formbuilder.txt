@@ -1,0 +1,167 @@
+BEGIN
+	BEGIN TRY
+		BEGIN TRAN
+	-- Remove solo-input8 in displayClass and editClass for input survey_type
+	-- replace by property begining of line ( +32 ) encoded in FormRender
+	UPDATE [ModuleForms]
+	SET
+	[FormOrder] = 8,
+	[FormRender] = [FormRender] + 32,
+	[displayClass] = NULL,
+	[editClass] = NULL
+	WHERE
+	[module_id] = 1
+	AND
+	[TypeObj] in (218,229)
+	AND
+	[Name] = 'Survey_type'
+
+
+  -- changement de l'input type pour l'input nb_individuals du protocole 216 Release_Group
+  UPDATE [ModuleForms]
+  SET [InputType] = 'Number'
+  WHERE 
+  [Name] = 'nb_individuals'
+  AND 
+  [module_id] = 1
+  AND
+  [TypeObj] = 216
+
+  -- changement du type de l'observation dynprop nb_individuals en integer vu que ces des entiers qu'on stocke
+  UPDATE [ObservationDynProp]
+  SET [TypeProp] = 'Integer'
+  WHERE [Name] = 'nb_individuals'
+
+  -- curration de données on transforme les valueString en valueInt
+  -- si c'est possible sinon on laisse la valeur dans value string (il y a une ligne qui contient 1-9 comme valeur)
+  UPDATE [ObservationDynPropValue]
+  SET 
+  [ValueString] = ( CASE WHEN TRY_CONVERT(INT,[ValueString]) IS NULL THEN [ValueString] ELSE NULL END),
+  [ValueInt] = TRY_CONVERT(INT,[ValueString])
+  WHERE [FK_ObservationDynProp] = (SELECT [ID] FROM [ObservationDynProp] WHERE [Name] = 'nb_individuals')
+
+
+  -- On remplace l'ensemble des inputType pour le champs Comments qui est une propriété statique
+  -- le formbuilder empêche d'avoir deux type d'input pour un même nom
+  UPDATE [ModuleForms]
+  SET 
+  [InputType] = 'TextArea',
+  [Validators] = '[{"type":"maxLength"}]'
+  WHERE 
+  [Name] = 'Comments'
+  AND 
+  [module_id] = 1
+
+
+  -- changements du nom des dynprop pour le protocole 213 station_description 
+  -- ils sont en collisions avec le protocole 209 simplified habitat et ils n'ont pas la bonne forme
+  UPDATE [ObservationDynProp]
+  SET [Name] = 'Flora_main_species_1_text'
+  WHERE [Name] = 'flora_main_species 1'
+
+  UPDATE [ObservationDynProp]
+  SET [Name] = 'Flora_main_species_2_text'
+  WHERE [Name] = 'flora_main_species 2'
+
+  UPDATE [ObservationDynProp]
+  SET [Name] = 'Flora_main_species_3_text'
+  WHERE [Name] = 'flora_main_species 3'
+  
+  UPDATE [ModuleForms]
+  SET [Name] = 'Flora_main_species_1_text'
+  WHERE
+  [module_id] = 1
+  AND 
+  [Name] = 'flora_main_species 1'
+  
+
+  UPDATE [ModuleForms]
+  SET [Name] = 'Flora_main_species_2_text'
+  WHERE
+  [module_id] = 1
+  AND 
+  [Name] = 'flora_main_species 2'
+
+
+  UPDATE [ModuleForms]
+  SET [Name] = 'Flora_main_species_3_text'
+  WHERE
+  [module_id] = 1
+  AND 
+  [Name] = 'flora_main_species 3'
+
+  --Remove space for  Name = 'Breeding ring kept after release' for proto 217 Release_Individual
+
+  UPDATE [ObservationDynProp]
+  SET [Name] = 'Breeding_ring_kept_after_release'
+  WHERE [Name] = 'Breeding ring kept after release'
+
+
+  UPDATE [ModuleForms]
+  SET [Name] =  'Breeding_ring_kept_after_release'
+  WHERE
+  [module_id] = 1
+  AND
+  [Name] = 'Breeding ring kept after release'
+
+
+  --changement de configuration pour l'input topography du protocole 213 station_description
+  --en copiant la config de l'input topography du protocole 213 Phytosociolohy_habitat
+  UPDATE [ModuleForms]
+  SET 
+  [InputType] = 'AutocompTreeEditor',
+  [Options] = '1204428'
+  WHERE
+  [module_id] = 1
+  AND
+  [Name] = 'topography'
+  AND 
+  [TypeObj] = 213
+
+  --typo fix all dynprops name 
+  UPDATE [ObservationDynProp]
+  SET [Name] = UPPER(LEFT([Name],1))+SUBSTRING([Name],2,LEN([Name]))
+
+  -- apply new typo to input name in moduleforms
+  UPDATE MF 
+  SET MF.[Name] = ODP.[Name]
+  FROM [ModuleForms] AS MF
+  JOIN [ObservationDynProp] AS ODP ON MF.[Name] = ODP.[Name] --sqlserver not case sensitive
+  WHERE 
+  MF.[module_id] = 1
+
+
+  UPDATE [ProtocoleType]
+  SET [Name] = 'Media_files'
+  WHERE [Name] = 'Media files'
+
+  		IF @@TRANCOUNT > 0
+			COMMIT TRAN
+	END TRY
+    BEGIN CATCH
+		PRINT('ERROR CATCHED')
+
+        IF @@TRANCOUNT > 0  ROLLBACK TRAN;
+
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT
+                @ErrorMessage = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, -- Message text.
+                            @ErrorSeverity, -- Severity.
+                            @ErrorState -- State.
+                            );
+    END CATCH
+END
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('223_BREAKINGCHANGE_updateconf_for_working_with_formbuilder',GETDATE(),(SELECT db_name()))
+
+
+GO
