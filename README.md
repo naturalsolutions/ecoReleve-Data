@@ -142,3 +142,7 @@ We have programs for companies that require additional level of assistance throu
 
 Copyright (c) 2015 Natural Solutions
 Licensed under the MIT license.
+
+## Information 
+- https://natural-solutions-world
+- https://www.natural-solutions.eu
