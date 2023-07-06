@@ -26,7 +26,7 @@ requires = [
     'pyramid_tm==2.2.1',
     'pytesseract==0.2.0',
     'reportlab==3.4.0',
-    'scipy==1.2.1',
+    'scipy==1.10.0',
     # 'shapely',
     'SQLAlchemy==1.3.3',
     'SQLAlchemy-Utils==0.33.1',
