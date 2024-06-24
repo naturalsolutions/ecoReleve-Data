@@ -1,0 +1,139 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[pr_DeleteAllDataFromIdIndividual]
+@IndividualsTable IndividualsBridgeType READONLY
+
+AS
+BEGIN
+
+		-- élimination des données concernées
+		BEGIN TRAN
+		BEGIN TRY
+				
+				DELETE
+				FROM [dbo].[Individual_Location]
+				WHERE FK_Individual IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				--print 'ok Individual_Location'
+
+				DELETE 
+				FROM [dbo].[IndividualDynPropValue]
+				WHERE FK_Individual IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				--print 'ok IndividualDynPropValue'
+
+				DELETE 
+				FROM [dbo].[Equipment]
+				WHERE FK_Individual IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				--print 'ok Equipment'
+				
+				----- replace loop of the previous PR version -----
+				DELETE odpsv
+				FROM [dbo].[ObservationDynPropSubValue] odpsv
+				LEFT JOIN [dbo].[Observation] o ON odpsv.FK_Observation = o.id
+				WHERE o.FK_Individual IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+
+				DELETE odpv
+				FROM [dbo].[ObservationDynPropValue] odpv
+				LEFT JOIN [dbo].[Observation] o ON odpv.FK_Observation = o.id
+				WHERE o.FK_Individual IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				----------------------------------------------------
+
+				DELETE 
+				FROM [dbo].[Observation]
+				WHERE FK_Individual IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				--print 'ok Observation'
+
+				DELETE 
+				FROM [dbo].[Individual]
+				WHERE ID IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				--print 'ok Individual'
+
+				----- set to NULL the TMessageReceived.importDate value for individuals involved in this PR -----
+				UPDATE [dbo].[TMessageReceived]
+				SET ImportDate = NULL
+				WHERE ObjectId  IN
+					(
+					SELECT ID_Individual
+					FROM @IndividualsTable
+					)
+				-------------------------------------------------------------------------------------------------
+
+				
+
+			COMMIT TRAN
+			END TRY
+
+			BEGIN CATCH
+				ROLLBACK TRAN
+
+				DECLARE @ErrorMessage NVARCHAR(4000)
+				DECLARE @ErrorSeverity INT;
+				DECLARE @ErrorState INT;
+
+				SELECT @ErrorMessage = ERROR_MESSAGE(),
+					   @ErrorSeverity = ERROR_SEVERITY(),
+					   @ErrorState = ERROR_STATE();
+
+				----- add error  in NSLOG.TLOG_MESSAGES ----
+				INSERT INTO [NSLOG].[dbo].[TLOG_MESSAGES]
+				VALUES(
+					GETDATE(),
+					@ErrorSeverity,
+					'EcoReleve',
+					'SP : sp_DeleteAllDataFromIdIndividual',
+					SUser_SName(),
+					2,
+					@ErrorState,
+					@ErrorMessage,
+					null
+					)
+				--------------------------------------------
+
+				RAISERROR (@ErrorMessage, -- Message text.
+						   @ErrorSeverity, -- Severity.
+						   @ErrorState -- State.
+						   );
+			END CATCH
+	
+END
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('212_ALTER_PR_deleteAllDataFromIdIndividual',GETDATE(),(SELECT db_name()))
+
+
+GO

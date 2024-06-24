@@ -1,0 +1,74 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[pr_DeleteIndividualsBridgeFailed]
+	--@DateBridgeFailed varchar(max)
+
+AS
+BEGIN
+	BEGIN TRAN
+	BEGIN TRY
+
+
+		IF type_id('[dbo].[IndividualsBridgeType]') IS NOT NULL
+				DROP TYPE [dbo].[IndividualsBridgeType]
+
+		CREATE TYPE [dbo].[IndividualsBridgeType] AS TABLE
+			(
+				ID_Individual int
+			)
+		
+		DECLARE @Individuals AS IndividualsBridgeType
+
+		INSERT INTO @Individuals
+		SELECT ID 
+		FROM [dbo].[Individual]
+		WHERE creationDate < (GETDATE() - 5) AND Original_ID like '%TRACK%'
+
+		EXEC [dbo].[pr_DeleteAllDataFromIdIndividual] @Individuals
+
+	COMMIT TRAN
+	END TRY	
+
+	BEGIN CATCH
+		ROLLBACK TRAN
+
+		DECLARE @ErrorMessage NVARCHAR(4000)
+		DECLARE @ErrorSeverity INT;
+		DECLARE @ErrorState INT;
+
+		SELECT @ErrorMessage = ERROR_MESSAGE(),
+			   @ErrorSeverity = ERROR_SEVERITY(),
+			   @ErrorState = ERROR_STATE();
+
+		INSERT INTO [NSLOG].[dbo].TLOG_MESSAGES
+		VALUES(
+			GETDATE(),
+			@ErrorSeverity,
+			'EcoReleve',
+			'SP : sp_DeleteIndividualsBridgeFailed',
+			SUser_SName(),
+			2,
+			@ErrorState,
+			@ErrorMessage,
+			null
+			)
+	
+		RAISERROR (@ErrorMessage, -- Message text.
+				   @ErrorSeverity, -- Severity.
+				   @ErrorState -- State.
+				   );
+	END CATCH
+	 
+	
+END
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('211_ALTER_PR_deleteIndividualsBridgeFailed',GETDATE(),(SELECT db_name()))
+
+
+GO
