@@ -17,7 +17,7 @@ requires = [
     # 'opencv-python',
     'openpyxl==2.4.8',
     'pandas==0.24.2',
-    'psutil==5.6.2',
+    'psutil==5.6.6',
     # 'pyexiftool==0.2.0',
     'pyodbc==4.0.26',
     # 'pypiwin32==223',
